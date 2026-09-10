@@ -114,6 +114,52 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     min-width: 200px;
 }
 
+/* =============================================================
+   BCTC FINANCIAL STATEMENTS TABLE STYLING
+   Solid sticky headers and columns (Fix overlapping text & opacity bug)
+   ============================================================= */
+#bctc-table-element {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+#bctc-table-element th, #bctc-table-element td {
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+/* Sticky Left Column */
+#bctc-table-element th:first-child,
+#bctc-table-element td:first-child,
+#bctc-table-element .bctc-sticky-col {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 20 !important;
+    min-width: 260px !important;
+    max-width: 340px !important;
+    background-color: #0c1017 !important;
+    border-right: 2px solid #1f293d !important;
+    box-shadow: 3px 0 6px rgba(0, 0, 0, 0.45);
+}
+/* Sticky Header */
+#bctc-table-element thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    background-color: #121824 !important;
+    border-bottom: 2px solid #0284c7 !important;
+}
+/* Top-Left Corner Header (Sticky Top & Left) */
+#bctc-table-element thead th:first-child {
+    z-index: 40 !important;
+    background-color: #0c1017 !important;
+    border-right: 2px solid #1f293d !important;
+}
+#bctc-table-element tr:hover td {
+    background-color: #161e2e !important;
+}
+#bctc-table-element tr:hover td:first-child {
+    background-color: #121824 !important;
+}
+
 /* Recommendation Badge Colors */
 .rec-buy {
     background-color: rgba(0, 192, 96, 0.15);
@@ -196,130 +242,415 @@ html:not(.dark) header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* Base Dark Element Neutralization for Light Mode */
+html:not(.dark) .bg-black,
 html:not(.dark) .bg-black\/90,
-html:not(.dark) .bg-black\/80 {
-    background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
-    color: #334155 !important;
-}
-
-html:not(.dark) .bg-slate-900\/90,
-html:not(.dark) .bg-slate-900,
+html:not(.dark) .bg-black\/80,
 html:not(.dark) .bg-slate-950,
-html:not(.dark) .bg-slate-950\/40,
-html:not(.dark) .bg-slate-950\/60,
+html:not(.dark) .bg-slate-950\/95,
+html:not(.dark) .bg-slate-950\/90,
+html:not(.dark) .bg-slate-950\/80,
 html:not(.dark) .bg-slate-950\/70,
-html:not(.dark) .bg-slate-950\/90 {
+html:not(.dark) .bg-slate-950\/60,
+html:not(.dark) .bg-slate-950\/40,
+html:not(.dark) .bg-slate-900,
+html:not(.dark) .bg-slate-900\/90,
+html:not(.dark) .bg-slate-900\/80,
+html:not(.dark) .bg-slate-900\/70,
+html:not(.dark) .bg-slate-900\/60,
+html:not(.dark) .bg-slate-900\/50,
+html:not(.dark) .bg-slate-900\/40,
+html:not(.dark) .bg-slate-900\/30,
+html:not(.dark) .bg-slate-800,
+html:not(.dark) .bg-slate-800\/90,
+html:not(.dark) .bg-slate-800\/80,
+html:not(.dark) .bg-slate-800\/70,
+html:not(.dark) .bg-slate-800\/50,
+html:not(.dark) .bg-slate-800\/40,
+html:not(.dark) .bg-slate-800\/30 {
     background-color: #ffffff !important;
     border-color: #e2e8f0 !important;
     color: #0f172a !important;
 }
 
-html:not(.dark) .card-terminal {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-html:not(.dark) .border-slate-800,
-html:not(.dark) .border-slate-800\/80,
-html:not(.dark) .border-slate-800\/60,
-html:not(.dark) .border-slate-700 {
+/* Gradients Neutralization */
+html:not(.dark) .bg-gradient-to-r,
+html:not(.dark) .bg-gradient-to-br,
+html:not(.dark) .bg-gradient-to-l,
+html:not(.dark) .bg-gradient-to-t,
+html:not(.dark) .bg-gradient-to-b {
+    background-image: none !important;
+    background-color: #ffffff !important;
     border-color: #e2e8f0 !important;
 }
 
+/* Preserve Primary Action Gradients */
+html:not(.dark) button.bg-gradient-to-r,
+html:not(.dark) a.bg-gradient-to-r,
+html:not(.dark) #stat-progress-bar {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops)) !important;
+}
+
+html:not(.dark) .card-terminal {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ---- Borders & Dividers ---- */
+html:not(.dark) .border-slate-800,
+html:not(.dark) .border-slate-800\/90,
+html:not(.dark) .border-slate-800\/80,
+html:not(.dark) .border-slate-800\/60,
+html:not(.dark) .border-slate-800\/40,
+html:not(.dark) .border-slate-700,
+html:not(.dark) .border-slate-700\/80,
+html:not(.dark) .border-slate-700\/50,
+html:not(.dark) .border-slate-700\/60 {
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) .divide-slate-800 > * + *,
+html:not(.dark) .divide-slate-800\/90 > * + *,
+html:not(.dark) .divide-slate-800\/80 > * + *,
+html:not(.dark) .divide-slate-800\/60 > * + *,
+html:not(.dark) .divide-slate-800\/40 > * + *,
+html:not(.dark) .divide-slate-700 > * + * {
+    border-color: #e2e8f0 !important;
+}
+
+/* ---- High-Contrast Text Colors ---- */
 html:not(.dark) .text-white {
     color: #0f172a !important;
 }
-
+html:not(.dark) .text-slate-100 {
+    color: #0f172a !important;
+}
 html:not(.dark) .text-slate-200,
 html:not(.dark) .text-slate-300 {
     color: #1e293b !important;
 }
-
 html:not(.dark) .text-slate-400 {
     color: #475569 !important;
 }
-
 html:not(.dark) .text-slate-500 {
     color: #64748b !important;
 }
 
-/* VCBS Light Mode Market Text Colors */
+/* ---- Market Colors (VCBS Standard Light Palette) ---- */
 html:not(.dark) .text-emerald-400,
 html:not(.dark) .text-emerald-300,
 html:not(.dark) .text-emerald-500,
 html:not(.dark) .text-green-400,
 html:not(.dark) .text-green-500 {
-    color: #15803d !important; /* Rich VCBS forest green */
+    color: #15803d !important; /* Rich VCBS Green */
 }
-
 html:not(.dark) .text-rose-400,
 html:not(.dark) .text-rose-300,
 html:not(.dark) .text-rose-500,
 html:not(.dark) .text-red-400,
 html:not(.dark) .text-red-500 {
-    color: #dc2626 !important; /* Sharp VCBS crimson red */
+    color: #dc2626 !important; /* Sharp VCBS Red */
 }
-
 html:not(.dark) .text-amber-400,
 html:not(.dark) .text-amber-300,
 html:not(.dark) .text-yellow-400 {
-    color: #d97706 !important; /* Deep VCBS amber yellow */
+    color: #b45309 !important; /* Deep VCBS Amber */
 }
-
 html:not(.dark) .text-cyan-400,
 html:not(.dark) .text-sky-400 {
-    color: #0284c7 !important;
+    color: #0284c7 !important; /* Crisp Sky/Cyan */
 }
-
+html:not(.dark) .text-cyan-300,
+html:not(.dark) .text-cyan-200 {
+    color: #0369a1 !important;
+}
 html:not(.dark) .text-purple-400,
 html:not(.dark) .text-purple-300 {
-    color: #7e22ce !important;
+    color: #7e22ce !important; /* Ceiling Purple */
+}
+html:not(.dark) .text-indigo-400,
+html:not(.dark) .text-indigo-300 {
+    color: #4338ca !important;
 }
 
-/* VCBS Light Mode Badges & Backgrounds */
+/* ---- Top Ticker Tape ---- */
+html:not(.dark) #live-ticker-tape {
+    color: #334155 !important;
+}
+
+/* ---- Quick Chip Buttons (Top Navigation) ---- */
+html:not(.dark) .chip-btn {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+html:not(.dark) .chip-btn:hover {
+    border-color: #0284c7 !important;
+    color: #0f172a !important;
+    background-color: #f0f9ff !important;
+}
+html:not(.dark) .chip-btn.active {
+    background-color: #e0f2fe !important;
+    color: #0369a1 !important;
+    border-color: #7dd3fc !important;
+}
+
+/* ---- Action Buttons (Export, Copy, Print, etc.) ---- */
+html:not(.dark) .bg-slate-800:not(button.bg-gradient-to-r),
+html:not(.dark) .hover\:bg-slate-700:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+/* ---- Search Input & Controls ---- */
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+html:not(.dark) input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* ---- 6 Master Tabs Navigation ---- */
+html:not(.dark) .tab-btn {
+    color: #475569 !important;
+    background-color: #ffffff !important;
+    border-color: transparent !important;
+}
+html:not(.dark) .tab-btn:hover {
+    color: #0f172a !important;
+    background-color: #f8fafc !important;
+}
+html:not(.dark) .tab-btn.active {
+    color: #0284c7 !important;
+    border-bottom-color: #0284c7 !important;
+    background-color: #ffffff !important;
+}
+
+/* ---- Tables (Matrix, Peers, BCTC, etc.) ---- */
+html:not(.dark) table {
+    background-color: #ffffff !important;
+}
+html:not(.dark) th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) td {
+    border-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+html:not(.dark) tr:hover td {
+    background-color: #f8fafc !important;
+}
+
+/* Matrix Table Sticky Columns */
+html:not(.dark) #matrix-table-element td:first-child,
+html:not(.dark) #matrix-table-element th:first-child {
+    background-color: #ffffff !important;
+    border-right-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+html:not(.dark) #matrix-table-element td:last-child,
+html:not(.dark) #matrix-table-element th:last-child {
+    background-color: #f8fafc !important;
+    border-left-color: #e2e8f0 !important;
+}
+html:not(.dark) #matrix-table-element tr:hover td {
+    background-color: #f1f5f9 !important;
+}
+
+/* Peer Comparison Table */
+html:not(.dark) #peer-table-head th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+html:not(.dark) #peer-table-body td {
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+html:not(.dark) #peer-table-body td:first-child {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-right-color: #e2e8f0 !important;
+}
+html:not(.dark) #peer-table-body tr.group:hover td {
+    background-color: #f8fafc !important;
+}
+html:not(.dark) #peer-table-body tr.group.bg-cyan-950\/40 td {
+    background-color: #f0f9ff !important;
+}
+html:not(.dark) #peer-table-body tr.group.bg-cyan-950\/40 td:first-child {
+    background-color: #e0f2fe !important;
+}
+
+/* BCTC Table in Light Mode (100% Solid Non-Transparent Sticky Columns) */
+html:not(.dark) #bctc-table-element {
+    background-color: #ffffff !important;
+}
+html:not(.dark) #bctc-table-element th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) #bctc-table-element td {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-color: #f1f5f9 !important;
+}
+html:not(.dark) #bctc-table-element th:first-child,
+html:not(.dark) #bctc-table-element td:first-child,
+html:not(.dark) #bctc-table-element .bctc-sticky-col {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-right: 2px solid #e2e8f0 !important;
+    box-shadow: 3px 0 6px rgba(0, 0, 0, 0.06) !important;
+}
+html:not(.dark) #bctc-table-element thead th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-bottom: 2px solid #0284c7 !important;
+}
+html:not(.dark) #bctc-table-element thead th:first-child {
+    background-color: #f8fafc !important;
+    color: #0284c7 !important;
+    border-right: 2px solid #e2e8f0 !important;
+}
+html:not(.dark) #bctc-table-element tr:hover td {
+    background-color: #f8fafc !important;
+}
+html:not(.dark) #bctc-table-element tr:hover td:first-child,
+html:not(.dark) #bctc-table-element tr:hover .bctc-sticky-col {
+    background-color: #f1f5f9 !important;
+}
+
+/* BCTC Table Scrollbar */
+html:not(.dark) #bctc-table-container {
+    scrollbar-color: #94a3b8 #f1f5f9;
+}
+html:not(.dark) #bctc-table-container::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+}
+html:not(.dark) #bctc-table-container::-webkit-scrollbar-thumb {
+    background: #94a3b8 !important;
+    border-color: #f1f5f9 !important;
+}
+html:not(.dark) #bctc-table-container::-webkit-scrollbar-thumb:hover {
+    background: #64748b !important;
+}
+html:not(.dark) #bctc-table-container::-webkit-scrollbar-corner {
+    background: #f1f5f9 !important;
+}
+
+/* ---- Badge Pill Styles in Light Mode ---- */
 html:not(.dark) .bg-emerald-950,
+html:not(.dark) .bg-emerald-950\/90,
+html:not(.dark) .bg-emerald-950\/80,
 html:not(.dark) .bg-emerald-950\/70,
-html:not(.dark) .bg-emerald-950\/80 {
+html:not(.dark) .bg-emerald-950\/40 {
     background-color: #dcfce7 !important;
     border-color: #86efac !important;
     color: #15803d !important;
 }
-
 html:not(.dark) .bg-rose-950,
+html:not(.dark) .bg-rose-950\/90,
+html:not(.dark) .bg-rose-950\/80,
 html:not(.dark) .bg-rose-950\/70,
-html:not(.dark) .bg-rose-950\/80 {
+html:not(.dark) .bg-rose-950\/40 {
     background-color: #fee2e2 !important;
     border-color: #fca5a5 !important;
     color: #dc2626 !important;
 }
-
 html:not(.dark) .bg-amber-950,
+html:not(.dark) .bg-amber-950\/90,
+html:not(.dark) .bg-amber-950\/80,
 html:not(.dark) .bg-amber-950\/70,
-html:not(.dark) .bg-amber-950\/80 {
+html:not(.dark) .bg-amber-950\/40 {
     background-color: #fef3c7 !important;
     border-color: #fde68a !important;
     color: #b45309 !important;
 }
-
 html:not(.dark) .bg-cyan-950,
-html:not(.dark) .bg-cyan-950\/70,
+html:not(.dark) .bg-cyan-950\/90,
 html:not(.dark) .bg-cyan-950\/80,
+html:not(.dark) .bg-cyan-950\/70,
+html:not(.dark) .bg-cyan-950\/40,
 html:not(.dark) .bg-sky-950,
-html:not(.dark) .bg-sky-950\/70 {
+html:not(.dark) .bg-sky-950\/90,
+html:not(.dark) .bg-sky-950\/80,
+html:not(.dark) .bg-sky-950\/70,
+html:not(.dark) .bg-sky-950\/40 {
     background-color: #e0f2fe !important;
-    border-color: #bae6fd !important;
+    border-color: #7dd3fc !important;
     color: #0284c7 !important;
 }
-
 html:not(.dark) .bg-purple-950,
-html:not(.dark) .bg-purple-950\/70 {
+html:not(.dark) .bg-purple-950\/90,
+html:not(.dark) .bg-purple-950\/80,
+html:not(.dark) .bg-purple-950\/70,
+html:not(.dark) .bg-purple-950\/40 {
     background-color: #f3e8ff !important;
     border-color: #d8b4fe !important;
     color: #7e22ce !important;
 }
+html:not(.dark) .bg-indigo-950,
+html:not(.dark) .bg-indigo-950\/90,
+html:not(.dark) .bg-indigo-950\/80,
+html:not(.dark) .bg-indigo-950\/70 {
+    background-color: #eef2ff !important;
+    border-color: #c7d2fe !important;
+    color: #4338ca !important;
+}
 
+/* Badge Border Colors */
+html:not(.dark) .border-emerald-800,
+html:not(.dark) .border-emerald-800\/80,
+html:not(.dark) .border-emerald-800\/60,
+html:not(.dark) .border-emerald-700 {
+    border-color: #86efac !important;
+}
+html:not(.dark) .border-rose-800,
+html:not(.dark) .border-rose-800\/80,
+html:not(.dark) .border-rose-800\/60,
+html:not(.dark) .border-rose-700 {
+    border-color: #fca5a5 !important;
+}
+html:not(.dark) .border-amber-800,
+html:not(.dark) .border-amber-800\/60,
+html:not(.dark) .border-amber-700 {
+    border-color: #fde68a !important;
+}
+html:not(.dark) .border-cyan-800,
+html:not(.dark) .border-cyan-800\/80,
+html:not(.dark) .border-cyan-800\/60,
+html:not(.dark) .border-cyan-700,
+html:not(.dark) .border-cyan-700\/80,
+html:not(.dark) .border-cyan-700\/90 {
+    border-color: #7dd3fc !important;
+}
+html:not(.dark) .border-indigo-800,
+html:not(.dark) .border-indigo-800\/60,
+html:not(.dark) .border-indigo-700 {
+    border-color: #c7d2fe !important;
+}
+html:not(.dark) .border-sky-800,
+html:not(.dark) .border-sky-800\/60,
+html:not(.dark) .border-sky-700 {
+    border-color: #7dd3fc !important;
+}
+html:not(.dark) .border-purple-800,
+html:not(.dark) .border-purple-800\/60,
+html:not(.dark) .border-purple-700 {
+    border-color: #d8b4fe !important;
+}
+
+/* ---- Recommendation Badges ---- */
 html:not(.dark) .rec-buy {
     background-color: #dcfce7 !important;
     color: #15803d !important;
@@ -341,89 +672,28 @@ html:not(.dark) .rec-outperform {
     border-color: #bae6fd !important;
 }
 
-/* Light Mode Input & Controls */
-html:not(.dark) input,
-html:not(.dark) select,
-html:not(.dark) textarea {
-    background-color: #ffffff !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
-}
-html:not(.dark) input::placeholder {
-    color: #94a3b8 !important;
-}
-
-/* Light Mode Tables */
-html:not(.dark) th {
-    background-color: #f8fafc !important;
-    color: #334155 !important;
-    border-color: #e2e8f0 !important;
-}
-html:not(.dark) td {
-    border-color: #f1f5f9 !important;
-}
-html:not(.dark) tr:hover td {
-    background-color: #f8fafc !important;
-}
-
-html:not(.dark) #matrix-table-element td:first-child,
-html:not(.dark) #matrix-table-element th:first-child {
-    background-color: #ffffff !important;
-    border-right-color: #e2e8f0 !important;
-    color: #0f172a !important;
-}
-html:not(.dark) #matrix-table-element td:last-child,
-html:not(.dark) #matrix-table-element th:last-child {
-    background-color: #f8fafc !important;
-    border-left-color: #e2e8f0 !important;
-}
-html:not(.dark) #matrix-table-element tr:hover td {
-    background-color: #f1f5f9 !important;
-}
-
-/* Peer Comparison Table in Light Mode */
-html:not(.dark) #peer-table-head th {
-    background-color: #f8fafc !important;
-    color: #334155 !important;
-    border-color: #e2e8f0 !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-html:not(.dark) #peer-table-body td {
-    border-color: #e2e8f0 !important;
-    color: #0f172a !important;
-}
-html:not(.dark) #peer-table-body td:first-child {
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-    border-right-color: #e2e8f0 !important;
-}
-html:not(.dark) #peer-table-body tr.group:hover td {
-    background-color: #f8fafc !important;
-}
-html:not(.dark) #peer-table-body tr.group.bg-cyan-950\/40 td {
-    background-color: #f0f9ff !important;
-}
-html:not(.dark) #peer-table-body tr.group.bg-cyan-950\/40 td:first-child {
-    background-color: #e0f2fe !important;
-}
-
-/* Footer & Ticker Tape in Light Mode */
-html:not(.dark) footer {
-    background-color: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    color: #64748b !important;
-}
-
-/* Modal styling in Light Mode */
+/* ---- Modals & Dialogs ---- */
 html:not(.dark) #ssi-export-modal > div > div,
 html:not(.dark) #peer-export-modal > div > div,
 html:not(.dark) #ingestion-modal > div > div,
 html:not(.dark) #ssi-api-modal > div > div,
-html:not(.dark) #markdown-modal > div > div {
+html:not(.dark) #markdown-modal > div > div,
+html:not(.dark) #price-compare-modal > div > div,
+html:not(.dark) #ctck-reports-modal > div > div {
     background-color: #ffffff !important;
     border-color: #cbd5e1 !important;
     color: #0f172a !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+}
+html:not(.dark) label {
+    color: #334155 !important;
+}
+
+/* ---- Footer ---- */
+html:not(.dark) footer {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #64748b !important;
 }
 
 /* Printing styles */

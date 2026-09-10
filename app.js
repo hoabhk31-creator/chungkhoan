@@ -1957,9 +1957,9 @@ function renderBctcTable(stm, subtab) {
     const activeStm = sliceStatements(stm, currentPeriodCount);
     if (!activeStm || !activeStm.periods) return;
 
-    let headers = `<tr class="sticky top-0 z-30 bg-slate-950 shadow-md"><th class="p-2.5 bg-slate-950 text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[260px] shadow-sm">CHỈ TIÊU (TỶ VND)</th>`;
+    let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[260px] shadow-sm">CHỈ TIÊU (TỶ VND)</th>`;
     activeStm.periods.forEach(p => {
-        headers += `<th class="p-2.5 bg-slate-950 text-right text-white border-b-2 border-cyan-800/80 whitespace-nowrap min-w-[110px] sticky top-0 z-30">${p}</th>`;
+        headers += `<th class="p-2.5 text-right border-b-2 border-cyan-800/80 whitespace-nowrap min-w-[110px] sticky top-0 z-30">${p}</th>`;
     });
     headers += `</tr>`;
 
@@ -1986,31 +1986,31 @@ function renderBctcTable(stm, subtab) {
             trimmed.includes("Lưu chuyển tiền thuần trong kỳ") ||
             trimmed.includes("Lưu chuyển tiền thuần từ hoạt động");
 
-        let rowClass = "border-b border-slate-800/60 hover:bg-slate-800/40 transition-colors";
-        let titleClass = "p-2 font-mono text-xs sticky left-0 z-10 whitespace-nowrap ";
+        let rowClass = "border-b border-slate-800/60 transition-colors";
+        let titleClass = "p-2 font-mono text-xs bctc-sticky-col sticky left-0 z-10 whitespace-nowrap ";
         let cellClass = "p-2 text-right font-mono text-xs border-b border-slate-800/60 whitespace-nowrap ";
 
         if (isLevel0) {
-            rowClass = "bg-slate-950 font-bold border-b-2 border-cyan-800/80";
-            titleClass += "bg-slate-950 font-bold text-cyan-300 uppercase tracking-wider pl-2.5";
-            cellClass += "font-bold text-cyan-300 bg-slate-950";
+            rowClass = "font-bold border-b-2 border-cyan-800/80";
+            titleClass += "font-bold text-cyan-300 uppercase tracking-wider pl-2.5";
+            cellClass += "font-bold text-cyan-300";
         } else if (isLevel1) {
-            rowClass = "bg-slate-900/90 font-bold border-b border-slate-700/80";
-            titleClass += "bg-slate-900 font-bold text-cyan-200 pl-4";
-            cellClass += "font-bold text-cyan-200 bg-slate-900/50";
+            rowClass = "font-bold border-b border-slate-700/80";
+            titleClass += "font-bold text-cyan-400 pl-4";
+            cellClass += "font-bold text-cyan-400";
         } else if (isLevel2) {
-            rowClass = "bg-slate-900/50 font-semibold border-b border-slate-800/80";
-            titleClass += "bg-slate-900 font-semibold text-slate-100 pl-6";
-            cellClass += "font-semibold text-slate-100";
+            rowClass = "font-semibold border-b border-slate-800/80";
+            titleClass += "font-semibold text-slate-200 pl-6";
+            cellClass += "font-semibold text-slate-200";
         } else if (isSubItem) {
-            titleClass += "bg-slate-900/95 text-slate-400 italic pl-10";
+            titleClass += "text-slate-400 italic pl-10";
             cellClass += "text-slate-400";
         } else {
             if (isKeyMetric) {
-                titleClass += "bg-slate-900/95 font-bold text-white pl-8";
+                titleClass += "font-bold text-white pl-8";
                 cellClass += "font-bold text-white";
             } else {
-                titleClass += "bg-slate-900/95 text-slate-300 pl-8";
+                titleClass += "text-slate-300 pl-8";
                 cellClass += "text-slate-300";
             }
         }
@@ -2040,7 +2040,7 @@ function renderBctcTable(stm, subtab) {
 
     const renderRowFallback = (label, dataList, isBold = false, isHighlight = false) => {
         let r = `<tr class="${isHighlight ? 'bg-cyan-950/20' : ''}">
-            <td class="p-2.5 sticky left-0 z-10 bg-slate-900 ${isBold ? 'font-bold text-white' : 'text-slate-300'} border-b border-slate-800/80 whitespace-nowrap">${label}</td>`;
+            <td class="p-2.5 bctc-sticky-col sticky left-0 z-10 ${isBold ? 'font-bold text-white' : 'text-slate-300'} border-b border-slate-800/80 whitespace-nowrap">${label}</td>`;
         (dataList || []).forEach(v => {
             const num = Number(v);
             const valStr = num < 0 ? `(${Math.abs(num).toLocaleString("vi-VN")})` : num.toLocaleString("vi-VN");
