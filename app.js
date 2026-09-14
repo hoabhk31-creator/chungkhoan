@@ -6986,6 +6986,83 @@ async function refreshLivePrice(isManual = false) {
             }
         }
 
+        // 6. Cập nhật Tab Tổng Quan (Overview): Giá Live, Biến động, Thống kê khớp lệnh & Mini Chart
+        let ovChg = 0;
+        let ovChgPct = 0;
+        let s0 = null;
+        if (priceInfo.sources_comparison && priceInfo.sources_comparison.length > 0) {
+            s0 = priceInfo.sources_comparison[0];
+            ovChg = s0.change !== undefined ? Number(s0.change) : (newPrice - (s0.ref_price || newPrice));
+            ovChgPct = s0.change_percent !== undefined ? Number(s0.change_percent) : (s0.ref_price ? ((newPrice - s0.ref_price) / s0.ref_price) * 100 : 0);
+        } else {
+            const refP = Number(priceInfo.ref_price || (newPrice * 0.995));
+            ovChg = newPrice - refP;
+            ovChgPct = refP > 0 ? (ovChg / refP) * 100 : 0;
+        }
+
+        const ovBadge = document.getElementById("overview-mini-badge-symbol");
+        if (ovBadge) ovBadge.textContent = ticker;
+
+        const ovPrice = document.getElementById("overview-mini-price");
+        if (ovPrice) ovPrice.textContent = Number(newPrice).toLocaleString("vi-VN");
+
+        const ovChgWrap = document.getElementById("overview-mini-change-wrapper");
+        if (ovChgWrap) {
+            const isUp = ovChg > 0;
+            const isDown = ovChg < 0;
+            if (isUp) {
+                ovChgWrap.className = "flex items-center gap-1 font-mono text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800";
+                ovChgWrap.innerHTML = `<i data-lucide="trending-up" class="w-3.5 h-3.5"></i> <span id="overview-mini-change">+${ovChg.toLocaleString("vi-VN")} (+${ovChgPct.toFixed(2)}%)</span>`;
+            } else if (isDown) {
+                ovChgWrap.className = "flex items-center gap-1 font-mono text-xs font-bold text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-800";
+                ovChgWrap.innerHTML = `<i data-lucide="trending-down" class="w-3.5 h-3.5"></i> <span id="overview-mini-change">${ovChg.toLocaleString("vi-VN")} (${ovChgPct.toFixed(2)}%)</span>`;
+            } else {
+                ovChgWrap.className = "flex items-center gap-1 font-mono text-xs font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800";
+                ovChgWrap.innerHTML = `<i data-lucide="minus" class="w-3.5 h-3.5"></i> <span id="overview-mini-change">0 (0.00%)</span>`;
+            }
+        }
+
+        // Cập nhật thống kê thị trường realtime trong Tab Tổng Quan
+        if (s0) {
+            if (s0.open) {
+                const elOpen = document.getElementById("stat-ov-open");
+                if (elOpen) elOpen.textContent = Number(s0.open).toLocaleString("vi-VN");
+            }
+            if (s0.high) {
+                const elHigh = document.getElementById("stat-ov-high");
+                if (elHigh) elHigh.textContent = Number(s0.high).toLocaleString("vi-VN");
+            }
+            if (s0.low) {
+                const elLow = document.getElementById("stat-ov-low");
+                if (elLow) elLow.textContent = Number(s0.low).toLocaleString("vi-VN");
+            }
+            if (s0.volume) {
+                const elVol = document.getElementById("stat-ov-vol");
+                if (elVol) elVol.textContent = Number(s0.volume).toLocaleString("vi-VN");
+            }
+            if (s0.foreign_buy !== undefined) {
+                const elFb = document.getElementById("stat-ov-foreign-buy");
+                if (elFb) elFb.textContent = `${s0.foreign_buy >= 0 ? '+' : ''}${Number(s0.foreign_buy).toLocaleString("vi-VN")}`;
+            }
+            if (s0.bid_vol !== undefined) {
+                const elBid = document.getElementById("stat-ov-bid");
+                if (elBid) elBid.textContent = Number(s0.bid_vol).toLocaleString("vi-VN");
+            }
+            if (s0.ask_vol !== undefined) {
+                const elAsk = document.getElementById("stat-ov-ask");
+                if (elAsk) elAsk.textContent = Number(s0.ask_vol).toLocaleString("vi-VN");
+            }
+        }
+
+        // Cập nhật điểm giá realtime trên Mini Chart Tab Tổng Quan (nếu đang ở 1D)
+        if (chartOverviewMiniPrice && currentOverviewTimeframe === '1D' && chartOverviewMiniPrice.data && chartOverviewMiniPrice.data.datasets && chartOverviewMiniPrice.data.datasets.length > 0) {
+            const dataArr = chartOverviewMiniPrice.data.datasets[0].data;
+            if (dataArr && dataArr.length > 0) {
+                dataArr[dataArr.length - 1] = newPrice;
+                chartOverviewMiniPrice.update('none');
+            }
+        }
+
         if (isManual) {
             showToast(`Đã đồng bộ giá ${newPrice.toLocaleString("vi-VN")} VND từ ${priceInfo.selected_source}!`);
         }

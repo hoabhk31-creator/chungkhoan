@@ -6,6 +6,7 @@ import io
 import os
 import csv
 import httpx
+import asyncio
 import unicodedata
 import urllib.parse
 from typing import List, Dict, Any, Optional
@@ -117,6 +118,17 @@ async def add_no_cache_headers(request, call_next):
     return response
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Tự động làm nóng bộ nhớ đệm bảng giá SSI toàn thị trường ngay khi server khởi động."""
+    try:
+        from crawler import fetch_ssi_live_stock_quote
+        asyncio.create_task(fetch_ssi_live_stock_quote("HPG"))
+    except Exception as e:
+        print(f"SSI startup pre-warm exception: {e}")
+
 
 
 class CrawlRequest(BaseModel):
