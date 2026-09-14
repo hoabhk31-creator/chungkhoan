@@ -1,0 +1,30 @@
+{
+  "/Home/Source_GetAll": {
+    "status": 200,
+    "snippet": "{\"Data\":[{\"SourceID\":165,\"Name\":\"CTCP Chứng khoán Agribank\",\"SortName\":\"AGRISECO - CTCP Chứng khoán Agribank\",\"CreateDate\":\"21/10/2019\",\"LastUpdate\":\"21/10/2019\",\"StatusID\":0,\"OrderID\":0,\"Type\":null},{\"SourceID\":9,\"Name\":\"CTCP Chứng khoán Châu Á Thái Bình Dương\",\"SortName\":\"APEC - CTCP Chứng khoán C"
+  },
+  "/Home/Report_GetTopDownload_Paging?xml=&pageIndex=1&pageSize=13&type=": {
+    "status": 200,
+    "snippet": "{\"Data\":[{\"ReportID\":22011,\"StockCode\":\"Báo cáo \",\"Title\":\"Báo cáo ngành Phân bón: Giá urê giảm do nguồn cung từ Trung Quốc tăng\",\"SourceID\":8,\"SourceName\":\"Vietcap\",\"ReportTypeID\":57,\"ReportTypeName\":\"Phân tích Ngành\",\"Content\":\"Giá urê FOB đạt đỉnh 908 USD/tấn vào nửa cuối tháng 4 mức cao nh"
+  },
+  "/Home/DownloadReportPost?filename=": {
+    "status": 404,
+    "snippet": "<!DOCTYPE html>\r\n<html>\r\n    <head>\r\n        <title>The resource cannot be found.</title>\r\n        <meta name=\"viewport\" content=\"width=device-width\" />\r\n        <style>\r\n         body {font-family:\"Verdana\";font-weight:normal;font-size: .7em;color:black;} \r\n         p {font-family:\"Verdana\";font-we"
+  },
+  "/Home/Report_UpdateDownloadHit?ReportID=": {
+    "status": 500,
+    "snippet": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta name=\"viewport\" content=\"width=device-width\" />\r\n    <title>Error</title>\r\n</head>\r\n<body>\r\n    <h2>\r\n        Sorry, an error occurred while processing your request.\r\n    </h2>\r\n</body>\r\n</html>"
+  },
+  "/Home/ReportType_GetAll": {
+    "status": 200,
+    "snippet": "{\"Data\":[{\"ReportTypeID\":49,\"Name\":\"Vietstock: Nghiên cứu - Phân tích\",\"NameEN\":\"Vietstock: Research - Analysis\",\"CreateDate\":\"02/03/2015\",\"LastUpdate\":\"02/03/2015\",\"TextID\":\"vietstock-nghien-cuu-phan-tich\",\"StatusID\":0,\"OrderID\":1,\"Type\":null},{\"ReportTypeID\":51,\"Name\":\"Vĩ mô - Chiến lược thị trườn"
+  },
+  "/Home/Report_GetAllByStockCode_Paging?xml=": {
+    "status": 200,
+    "snippet": "{\"Data\":[],\"Rows\":16396}"
+  },
+  "/Home/Report_ReportAll_Paging?xml=": {
+    "status": 200,
+    "snippet": "{\"Data\":[],\"Rows\":17272}"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "edocs": {
+    "status": 200,
+    "title": [],
+    "apis": [],
+    "scripts": [
+      "/Scripts/jquery-1.7.1.min.js",
+      "/Scripts/jquery-ui.min.js",
+      "/Scripts/jquery.carouFredSel-6.1.0.js",
+      "/Scripts/knockout-2.2.1.js",
+      "/Scripts/Jquery.fileDownload.js"
+    ],
+    "forms": [],
+    "sample_links": [
+      "/Content/style_blue.css",
+      "/Content/themes/base/jquery.ui.all.css",
+      "/",
+      "http://ox1.vietstock.vn/www/delivery/ck.php?n=ac3dcbf3&amp;cb=INSERT_RANDOM_NUMBER_HERE"
+    ]
+  },
+  "vcbs": {
+    "status": 200,
+    "title": [
+      "Vietcombank Securities"
+    ],
+    "apis": [],
+    "scripts": [
+      "/vcbs_prod.js",
+      "/static/js/11.46412763.chunk.js",
+      "/static/js/main.60f0b82e.chunk.js"
+    ],
+    "forms": [],
+    "sample_links": [
+      "/apple-touch-icon.png?v=20240701",
+      "/favicon-32x32.png?v=20240701",
+      "/favicon-16x16.png?v=20240701",
+      "/site.webmanifest?v=20240701",
+      "/safari-pinned-tab.svg?v=20240701",
+      "/favicon.ico?v=20240701",
+      "/static/css/11.48548373.chunk.css",
+      "/static/css/main.6b9c4438.chunk.css"
+    ]
+  },
+  "alphastock": {
+    "status": 200,
+    "title": [
+      "Tổng hợp báo cáo phân tích cổ phiếu và ngành | AI.AlphaStock"
+    ],
+    "apis": [],
+    "scripts": [
+      "/assets/index-G53QQ7kk.js"
+    ],
+    "forms": [],
+    "sample_links": [
+      "/favicon.ico",
+      "/favicon-32x32.png",
+      "/favicon-16x16.png",
+      "/apple-touch-icon.png",
+      "/site.webmanifest",
+      "/assets/vendor-radix-DZj84Snk.js",
+      "/assets/vendor-icons-CDo5xiZx.js",
+      "/assets/ai-screener-actions-BO2BeV8d.js",
+      "/assets/ai-screener-chat-z4Q4XXbM.js",
+      "/assets/index-DeMiXKGR.css",
+      "https://ai.alphastock.vn/tong-hop-bao-cao-phan-tich",
+      "/",
+      "/bctc/FPT",
+      "/bo-loc",
+      "/tin-tuc"
+    ]
+  }
+}
