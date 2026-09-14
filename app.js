@@ -2724,7 +2724,7 @@ function renderBctcTable(stm, subtab) {
     const activeStm = sliceStatements(stm, currentPeriodCount);
     if (!activeStm || !activeStm.periods) return;
 
-    let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[260px] shadow-sm">CHỈ TIÊU (TỶ VND)</th>`;
+    let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[280px] max-w-[380px] shadow-sm whitespace-normal">CHỈ TIÊU (TỶ VND)</th>`;
     activeStm.periods.forEach(p => {
         headers += `<th class="p-2.5 text-right border-b-2 border-cyan-800/80 whitespace-nowrap min-w-[110px] sticky top-0 z-30">${p}</th>`;
     });
@@ -2754,7 +2754,7 @@ function renderBctcTable(stm, subtab) {
             trimmed.includes("Lưu chuyển tiền thuần từ hoạt động");
 
         let rowClass = "border-b border-slate-800/60 transition-colors";
-        let titleClass = "p-2 font-mono text-xs bctc-sticky-col sticky left-0 z-10 whitespace-nowrap ";
+        let titleClass = "p-2.5 font-mono text-xs bctc-sticky-col sticky left-0 z-10 whitespace-normal break-words leading-relaxed ";
         let cellClass = "p-2 text-right font-mono text-xs border-b border-slate-800/60 whitespace-nowrap ";
 
         if (isLevel0) {
@@ -2807,7 +2807,7 @@ function renderBctcTable(stm, subtab) {
 
     const renderRowFallback = (label, dataList, isBold = false, isHighlight = false) => {
         let r = `<tr class="${isHighlight ? 'bg-cyan-950/20' : ''}">
-            <td class="p-2.5 bctc-sticky-col sticky left-0 z-10 ${isBold ? 'font-bold text-white' : 'text-slate-300'} border-b border-slate-800/80 whitespace-nowrap">${label}</td>`;
+            <td class="p-2.5 bctc-sticky-col sticky left-0 z-10 ${isBold ? 'font-bold text-white' : 'text-slate-300'} border-b border-slate-800/80 whitespace-normal break-words leading-relaxed">${label}</td>`;
         (dataList || []).forEach(v => {
             const num = Number(v);
             const valStr = num < 0 ? `(${Math.abs(num).toLocaleString("vi-VN")})` : num.toLocaleString("vi-VN");

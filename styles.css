@@ -133,8 +133,13 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
     position: sticky !important;
     left: 0 !important;
     z-index: 20 !important;
-    min-width: 260px !important;
-    max-width: 340px !important;
+    min-width: 280px !important;
+    width: 320px !important;
+    max-width: 380px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.45 !important;
     background-color: #0c1017 !important;
     border-right: 2px solid #1f293d !important;
     box-shadow: 3px 0 6px rgba(0, 0, 0, 0.45);
@@ -507,6 +512,13 @@ html:not(.dark) #bctc-table-element td {
 html:not(.dark) #bctc-table-element th:first-child,
 html:not(.dark) #bctc-table-element td:first-child,
 html:not(.dark) #bctc-table-element .bctc-sticky-col {
+    min-width: 280px !important;
+    width: 320px !important;
+    max-width: 380px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.45 !important;
     background-color: #ffffff !important;
     color: #0f172a !important;
     border-right: 2px solid #e2e8f0 !important;
