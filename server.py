@@ -8,7 +8,7 @@ import csv
 import httpx
 import unicodedata
 import urllib.parse
-from typing import List, Optional
+from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -57,7 +57,15 @@ from crawler import (
     fetch_industry_reports,
     get_ssi_fastconnect_status
 )
-from financial_data import get_financial_data_bundle, calculate_dcf_model, VIETNAM_STOCK_DIRECTORY
+from financial_data import (
+    get_financial_data_bundle,
+    calculate_dcf_model,
+    calculate_multi_model_valuation,
+    VIETNAM_STOCK_DIRECTORY,
+    get_company_news_and_events,
+    get_mini_chart_series,
+    get_company_catalysts_and_projects
+)
 from company_database import (
     COMPANY_DATABASE,
     SECTOR_DATABASE,
@@ -384,6 +392,19 @@ class DcfCustomRequest(BaseModel):
     current_market_price: Optional[float] = None
 
 
+class MultiModelValuationRequest(BaseModel):
+    ticker: str
+    wacc: float = 11.5
+    terminal_g: float = 2.5
+    growth_rate: float = 12.0
+    risk_free_rate: float = 4.8
+    industry_pe: Optional[float] = None
+    industry_pb: Optional[float] = None
+    weights: Optional[Dict[str, float]] = None
+    current_market_price: Optional[float] = None
+
+
+
 @app.get("/api/financial-overview/{ticker}")
 async def get_financial_overview(ticker: str):
     """
@@ -432,6 +453,35 @@ async def get_peers_comparison(ticker: str):
     return data["peers_data"]
 
 
+@app.get("/api/company-news-events/{ticker}")
+async def get_news_and_events(ticker: str):
+    """
+    Truy xuất danh sách tin tức và sự kiện doanh nghiệp cập nhật.
+    """
+    clean_ticker = ticker.upper().strip()
+    return get_company_news_and_events(clean_ticker)
+
+
+@app.get("/api/mini-chart-series/{ticker}")
+async def get_overview_mini_chart_series(ticker: str):
+    """
+    Truy xuất chuỗi dữ liệu nến/giá/khối lượng cho biểu đồ kỹ thuật mini (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, ALL)
+    kèm bảng thống kê thị trường chi tiết.
+    """
+    clean_ticker = ticker.upper().strip()
+    return get_mini_chart_series(clean_ticker)
+
+
+@app.get("/api/company-catalysts-insights/{ticker}")
+async def get_catalysts_and_insights(ticker: str):
+    """
+    Truy xuất thông tin catalysts động lực tăng trưởng, dự án trọng yếu (quy mô, vốn, tiến độ/lấp đầy)
+    và phân tích AI chuyên sâu.
+    """
+    clean_ticker = ticker.upper().strip()
+    return get_company_catalysts_and_projects(clean_ticker)
+
+
 @app.post("/api/valuation/dcf")
 async def post_dcf_valuation(req: DcfCustomRequest):
     """
@@ -464,6 +514,79 @@ async def post_dcf_valuation(req: DcfCustomRequest):
         "dcf_fair_value": dcf_res["fair_value_per_share"],
         "margin_of_safety_percent": round(mos, 2),
         "dcf_details": dcf_res
+    }
+
+
+@app.post("/api/valuation/multi-model")
+async def post_multi_model_valuation(req: MultiModelValuationRequest):
+    """
+    Tính toán lại 6 mô hình định giá lượng hóa tổng hợp (DCF, Graham 1-2-3, P/E, P/B)
+    với các tham số và trọng số tùy chỉnh thời gian thực.
+    """
+    clean_ticker = req.ticker.upper().strip()
+    bundle = get_financial_data_bundle(clean_ticker)
+    stm = bundle["statements_annual"]
+    prof = bundle["company_profile"]
+    peers = bundle.get("peers_data", {})
+    
+    idx = -1
+    base_fcf = stm["cfo"][idx] * 0.65 if "cfo" in stm and len(stm["cfo"]) > 0 else 1000.0
+    net_debt = (stm["short_term_debt"][idx] + stm["long_term_debt"][idx]) - stm["cash_and_equivalents"][idx]
+    
+    shares = prof.get("shares_outstanding_mil") or 100.0
+    eps = (stm["net_profit"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 2500.0
+    bvps = (stm["owner_equity"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 18000.0
+    
+    ind_pe = req.industry_pe or (peers.get("industry_average", {}).get("pe") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pe", 13.0)) or 13.0
+    ind_pb = req.industry_pb or (peers.get("industry_average", {}).get("pb") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pb", 1.6)) or 1.6
+    
+    ref_price = req.current_market_price or prof.get("current_market_price") or 25000.0
+
+    res = calculate_multi_model_valuation(
+        ticker=clean_ticker,
+        current_market_price=ref_price,
+        eps=eps,
+        bvps=bvps,
+        base_fcf=base_fcf,
+        shares_outstanding_mil=shares,
+        net_debt=max(0, net_debt),
+        industry_pe=ind_pe,
+        industry_pb=ind_pb,
+        growth_rate=req.growth_rate or 12.0,
+        wacc=req.wacc or 11.5,
+        terminal_g=req.terminal_g or 2.5,
+        risk_free_rate=req.risk_free_rate or 4.8,
+        custom_weights=req.weights
+    )
+    return res
+
+
+@app.get("/api/valuation/bands/{ticker}")
+async def get_valuation_bands(ticker: str, timeframe: Optional[str] = "5Y"):
+    """
+    Trả về bộ dữ liệu dải định giá lịch sử P/E Band và P/B Band theo các khung thời gian (3M, 6M, 1Y, 5Y, ALL).
+    """
+    clean_ticker = ticker.upper().strip()
+    bundle = get_financial_data_bundle(clean_ticker)
+    prof = bundle.get("company_profile", {})
+    peers = bundle.get("peers_data", {})
+    
+    ind_pe = (peers.get("industry_average", {}).get("pe") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pe", 13.0)) or 13.0
+    ind_pb = (peers.get("industry_average", {}).get("pb") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pb", 1.6)) or 1.6
+    
+    from financial_data import generate_valuation_bands_dataset
+    bands_data = generate_valuation_bands_dataset(clean_ticker, ind_pe, ind_pb)
+    
+    tf = timeframe.upper().strip() if timeframe else "5Y"
+    if tf not in bands_data:
+        tf = "5Y"
+        
+    return {
+        "ticker": clean_ticker,
+        "timeframe": tf,
+        "timeframes_available": ["3M", "6M", "1Y", "5Y", "ALL"],
+        "selected_data": bands_data.get(tf),
+        "all_timeframes": bands_data
     }
 
 

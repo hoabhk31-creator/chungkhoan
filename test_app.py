@@ -718,8 +718,123 @@ class TestIERM(unittest.TestCase):
         self.assertEqual(data_all["sector_name"], "Tất cả các ngành")
         self.assertGreaterEqual(len(data_all["reports"]), 10)
 
+    def test_overview_redesign_endpoints(self):
+        """Kiểm tra các endpoint phục vụ thiết kế 5 phân tầng của Tab Tổng quan (Hình 1, 2, 3, 4)"""
+        # 1. Mini Chart Series & Market Stats (Hình 1)
+        resp_mini = self.client.get("/api/mini-chart-series/HPG")
+        self.assertEqual(resp_mini.status_code, 200)
+        mini_data = resp_mini.json()
+        self.assertEqual(mini_data["ticker"], "HPG")
+        self.assertIn("series", mini_data)
+        self.assertIn("1D", mini_data["series"])
+        self.assertIn("timeframe_percents", mini_data)
+        self.assertIn("1D", mini_data["timeframe_percents"])
+        self.assertIn("ALL", mini_data["timeframe_percents"])
+        self.assertGreater(mini_data["market_cap_bil"], 0)
+        self.assertGreater(mini_data["volume"], 0)
+
+        # 2. Company News & Corporate Events (Hình 2)
+        resp_news = self.client.get("/api/company-news-events/HPG")
+        self.assertEqual(resp_news.status_code, 200)
+        news_data = resp_news.json()
+        self.assertEqual(news_data["ticker"], "HPG")
+        self.assertIn("news", news_data)
+        self.assertIn("events", news_data)
+        self.assertGreater(len(news_data["news"]), 0)
+        self.assertGreater(len(news_data["events"]), 0)
+
+        # 3. Company Catalysts, Key Projects & AI Insights (Phân tầng 4)
+        resp_cat = self.client.get("/api/company-catalysts-insights/HPG")
+        self.assertEqual(resp_cat.status_code, 200)
+        cat_data = resp_cat.json()
+        self.assertEqual(cat_data["ticker"], "HPG")
+        self.assertIn("catalysts", cat_data)
+        self.assertIn("projects", cat_data)
+        self.assertIn("ai_insights", cat_data)
+        self.assertGreater(len(cat_data["projects"]), 0)
+        self.assertIn("scale", cat_data["projects"][0])
+        self.assertIn("progress_pct", cat_data["projects"][0])
+        self.assertIn("commercial_date", cat_data["projects"][0])
+
+    def test_multi_model_valuation_endpoint(self):
+        """Kiểm tra ma trận định giá đa mô hình (DCF, Graham 1-2-3, P/E, P/B) và tính năng tùy biến trọng số"""
+        # 1. Check multi-model valuation in financial overview bundle
+        resp_bundle = self.client.get("/api/financial-overview/HPG")
+        self.assertEqual(resp_bundle.status_code, 200)
+        bundle_data = resp_bundle.json()
+        self.assertIn("valuation", bundle_data)
+        val = bundle_data["valuation"]
+        self.assertIn("models", val)
+        self.assertEqual(len(val["models"]), 6)
+        self.assertGreater(val["blended_fair_value"], 0)
+        self.assertGreater(val["blended_fair_value_k"], 0)
+        
+        # Verify all 6 models are present
+        model_ids = [m["id"] for m in val["models"]]
+        self.assertIn("dcf", model_ids)
+        self.assertIn("graham_1", model_ids)
+        self.assertIn("graham_2", model_ids)
+        self.assertIn("graham_3", model_ids)
+        self.assertIn("pe", model_ids)
+        self.assertIn("pb", model_ids)
+
+        # 2. Test POST /api/valuation/multi-model with custom weights
+        custom_weights = {
+            "dcf": 20.0,
+            "graham_1": 10.0,
+            "graham_2": 20.0,
+            "graham_3": 10.0,
+            "pe": 30.0,
+            "pb": 10.0
+        }
+        resp_custom = self.client.post("/api/valuation/multi-model", json={
+            "ticker": "HPG",
+            "custom_weights": custom_weights
+        })
+        self.assertEqual(resp_custom.status_code, 200)
+        custom_val = resp_custom.json()
+        self.assertEqual(len(custom_val["models"]), 6)
+        self.assertGreater(custom_val["blended_fair_value"], 0)
+        self.assertAlmostEqual(sum(m["weight_percent"] for m in custom_val["models"]), 100.0, places=1)
+
+    def test_valuation_bands_endpoint(self):
+        """Kiểm tra biểu đồ định giá PE Band và PB Band theo các khung thời gian 3M, 6M, 1Y, 5Y, ALL"""
+        # 1. Test GET /api/valuation/bands/HPG
+        resp = self.client.get("/api/valuation/bands/HPG?timeframe=5Y")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["ticker"], "HPG")
+        self.assertEqual(data["timeframe"], "5Y")
+        self.assertIn("selected_data", data)
+        self.assertIn("pe", data["selected_data"])
+        self.assertIn("pb", data["selected_data"])
+        
+        # Verify PE & PB band metrics
+        pe = data["selected_data"]["pe"]
+        pb = data["selected_data"]["pb"]
+        self.assertGreater(pe["mean"], 0)
+        self.assertGreater(pe["upper_2sd"], pe["mean"])
+        self.assertLess(pe["lower_2sd"], pe["mean"])
+        self.assertGreater(len(pe["actual"]), 0)
+        self.assertIn("zone", pe)
+        
+        self.assertGreater(pb["mean"], 0)
+        self.assertGreater(pb["upper_2sd"], pb["mean"])
+        self.assertLess(pb["lower_2sd"], pb["mean"])
+        self.assertGreater(len(pb["actual"]), 0)
+        self.assertIn("zone", pb)
+
+        # 2. Check all timeframes available
+        self.assertEqual(len(data["timeframes_available"]), 5)
+        for tf in ["3M", "6M", "1Y", "5Y", "ALL"]:
+            self.assertIn(tf, data["all_timeframes"])
+            self.assertIn("pe", data["all_timeframes"][tf])
+            self.assertIn("pb", data["all_timeframes"][tf])
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
 
 
