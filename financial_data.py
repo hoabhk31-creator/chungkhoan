@@ -1723,9 +1723,45 @@ SECTOR_PEER_GROUPS: Dict[str, Dict[str, Any]] = {
             "new_entrants_threat":{"score": 1, "desc": "Vị trí địa lý luồng hàng hải tự nhiên và quy hoạch cảng biển quốc gia là rào cản độc quyền."}
         }
     },
-    "dau_khi_nang_luong": {
-        "sector_name": "Dầu khí, Hóa chất & Năng lượng",
-        "keywords": ["dầu khí", "năng lượng", "hóa chất", "phân bón", "khí", "điện", "gas", "pvd", "pvs", "bsr", "plx", "dcm", "dpm", "dgc", "pow", "ree", "pln", "ppc", "oil", "pdc", "plc"],
+    "thiet_bi_dien": {
+        "sector_name": "Thiết bị điện & Hạ tầng Kỹ thuật",
+        "keywords": ["thiết bị điện", "điện tử", "dây cáp", "cáp điện", "khí cụ điện", "gex", "gee", "cav", "pac", "tya", "phn", "vtb", "dqc", "ral", "tbd", "dhp", "bth", "tsb", "sam", "vte"],
+        "sector_kpi_columns": [
+            {"field": "order_backlog_bil", "label": "Backlog (tỷ VND)",  "unit": "tỷ VND", "color": "amber"},
+            {"field": "net_margin",        "label": "Biên ròng (%)",      "unit": "%",      "color": "emerald"},
+            {"field": "export_ratio_percent","label": "Tỷ lệ XK (%)",     "unit": "%",      "color": "sky"},
+        ],
+        "peers": [
+            {"ticker": "GEX",  "name": "Tập đoàn GELEX",                    "market_cap_bil": 18200.0, "pe": 13.5, "pb": 1.25, "roe": 12.8, "roa": 5.2, "net_margin":  8.5, "debt_to_equity": 0.95, "revenue_growth_yoy": 15.2, "order_backlog_bil": 12500.0, "export_ratio_percent": 22.0},
+            {"ticker": "GEE",  "name": "CTCP Điện lực Gelex (Gelex Electric)","market_cap_bil": 12400.0, "pe": 12.8, "pb": 1.65, "roe": 18.5, "roa": 7.8, "net_margin":  9.2, "debt_to_equity": 0.65, "revenue_growth_yoy": 16.5, "order_backlog_bil":  8500.0, "export_ratio_percent": 28.0},
+            {"ticker": "REE",  "name": "CTCP Cơ Điện Lạnh REE",             "market_cap_bil": 22500.0, "pe": 12.5, "pb": 1.45, "roe": 14.2, "roa": 7.5, "net_margin": 22.5, "debt_to_equity": 0.45, "revenue_growth_yoy":  8.2, "order_backlog_bil":  6800.0, "export_ratio_percent": 12.0},
+            {"ticker": "PC1",  "name": "CTCP Tập đoàn PC1",                 "market_cap_bil":  9800.0, "pe": 16.8, "pb": 1.25, "roe":  8.2, "roa": 3.1, "net_margin":  6.2, "debt_to_equity": 1.45, "revenue_growth_yoy": 15.5, "order_backlog_bil": 28000.0, "export_ratio_percent":  8.0},
+            {"ticker": "RAL",  "name": "CTCP Bóng đèn Phích nước Rạng Đông","market_cap_bil":  3100.0, "pe":  8.5, "pb": 1.45, "roe": 22.5, "roa": 11.2, "net_margin":  9.8, "debt_to_equity": 0.85, "revenue_growth_yoy": 12.0, "order_backlog_bil":  1500.0, "export_ratio_percent": 18.5},
+            {"ticker": "PAC",  "name": "CTCP Pin Ắc quy Miền Nam (PINACO)",  "market_cap_bil":  1450.0, "pe":  9.8, "pb": 1.35, "roe": 16.2, "roa":  8.5, "net_margin":  5.8, "debt_to_equity": 0.35, "revenue_growth_yoy": 10.5, "order_backlog_bil":   850.0, "export_ratio_percent": 24.0},
+            {"ticker": "TYA",  "name": "CTCP Dây và Cáp điện TAYA Việt Nam","market_cap_bil":  1200.0, "pe": 11.2, "pb": 1.15, "roe": 12.5, "roa":  6.2, "net_margin":  4.5, "debt_to_equity": 0.42, "revenue_growth_yoy":  9.8, "order_backlog_bil":   620.0, "export_ratio_percent": 15.0},
+            {"ticker": "DQC",  "name": "CTCP Điện Quang",                  "market_cap_bil":   850.0, "pe": 14.5, "pb": 0.95, "roe":  7.2, "roa":  3.5, "net_margin":  3.8, "debt_to_equity": 0.55, "revenue_growth_yoy":  8.2, "order_backlog_bil":   450.0, "export_ratio_percent": 12.5},
+            {"ticker": "PHN",  "name": "CTCP Pin Hà Nội (Habaco)",          "market_cap_bil":   680.0, "pe":  9.2, "pb": 1.85, "roe": 24.5, "roa": 14.5, "net_margin": 10.2, "debt_to_equity": 0.15, "revenue_growth_yoy": 11.5, "order_backlog_bil":   320.0, "export_ratio_percent": 35.0},
+            {"ticker": "SAM",  "name": "CTCP SAM Holdings",                 "market_cap_bil":  2600.0, "pe": 18.5, "pb": 0.75, "roe":  4.5, "roa":  2.1, "net_margin":  3.2, "debt_to_equity": 0.65, "revenue_growth_yoy":  7.5, "order_backlog_bil":  1200.0, "export_ratio_percent":  5.0},
+            {"ticker": "VTB",  "name": "CTCP Điện tử Tân Bình",             "market_cap_bil":   450.0, "pe": 12.2, "pb": 0.85, "roe":  8.5, "roa":  4.2, "net_margin":  4.8, "debt_to_equity": 0.28, "revenue_growth_yoy":  6.5, "order_backlog_bil":   180.0, "export_ratio_percent":  8.0},
+            {"ticker": "TSB",  "name": "CTCP Ắc quy Tia Sáng",              "market_cap_bil":   380.0, "pe": 11.5, "pb": 1.25, "roe": 12.8, "roa":  6.5, "net_margin":  5.5, "debt_to_equity": 0.32, "revenue_growth_yoy":  8.5, "order_backlog_bil":   120.0, "export_ratio_percent": 14.0},
+        ],
+        "cycle": "Triển khai Quy hoạch Điện VIII & Nhu cầu Hạ tầng Lưới điện Phục vụ Công nghiệp Hóa",
+        "catalysts": [
+            "Các dự án đại truyền tải 500kV mạch 3 và hiện đại hóa lưới điện quốc gia giải ngân quy mô lớn, gia tăng mạnh mẽ đơn hàng cáp điện, máy biến áp và thiết bị đóng ngắt.",
+            "Làn sóng mở rộng nhà xưởng FDI công nghệ cao và khu đô thị gia tăng tiêu thụ dây cáp điện chất lượng cao và thiết bị chiếu sáng thông minh.",
+            "Tối ưu chi phí chuỗi cung ứng đồng, nhôm nguyên liệu và đẩy mạnh xuất khẩu thiết bị điện sang thị trường Bắc Mỹ, EU và Đông Nam Á."
+        ],
+        "forces": {
+            "rivalry":            {"score": 3, "desc": "Cạnh tranh thị phần thương hiệu dây cáp điện và thiết bị chiếu sáng; các doanh nghiệp đầu ngành (Gelex, CADIVI, Rạng Đông) nắm ưu thế vượt trội."},
+            "supplier_power":     {"score": 3, "desc": "Giá kim loại đồng, nhôm và hạt nhựa trên sàn LME biến động theo chu kỳ hàng hóa thế giới."},
+            "buyer_power":        {"score": 3, "desc": "Các tập đoàn điện lực EVN, nhà thầu xây lắp công nghiệp và đại lý phân phối có quyền đàm phán tiến độ thanh toán."},
+            "substitution_threat":{"score": 1, "desc": "Dây cáp điện và thiết bị khí cụ điện là vật tư hạ tầng thiết yếu không thể thay thế trong mọi công trình."},
+            "new_entrants_threat":{"score": 2, "desc": "Rào cản về hệ thống chứng nhận tiêu chuẩn kỹ thuật quốc tế (IEC, ASTM, JIS) và mạng lưới phân phối đại lý sâu rộng."}
+        }
+    },
+    "dau_khi": {
+        "sector_name": "Dầu khí & Dịch vụ Khai thác Dầu khí",
+        "keywords": ["dầu khí", "xăng dầu", "khai thác dầu", "lọc dầu", "dầu mỏ", "khí đốt", "gas", "plx", "bsr", "pvs", "pvd", "pvt", "oil", "pgs", "pvb", "pvc", "pgd", "cng", "psh", "tdg"],
         "sector_kpi_columns": [
             {"field": "ebitda_margin",    "label": "EBITDA (%)",      "unit": "%",      "color": "emerald"},
             {"field": "capex_rev_ratio",  "label": "Capex/DT (%)",    "unit": "%",      "color": "amber"},
@@ -1735,26 +1771,94 @@ SECTOR_PEER_GROUPS: Dict[str, Dict[str, Any]] = {
             {"ticker": "GAS",  "name": "Tổng Công ty Khí Việt Nam (PV GAS)", "market_cap_bil": 165000.0, "pe": 15.2, "pb": 2.65, "roe": 18.5, "roa": 12.2, "net_margin": 14.5, "debt_to_equity": 0.15, "revenue_growth_yoy": 10.5, "ebitda_margin": 22.5, "capex_rev_ratio":  8.5, "output_volume": 9.8},
             {"ticker": "PLX",  "name": "Tập đoàn Xăng dầu Việt Nam (Petrolimex)", "market_cap_bil": 68500.0, "pe": 18.5, "pb": 2.10, "roe": 12.5, "roa": 5.2, "net_margin":  2.8, "debt_to_equity": 0.85, "revenue_growth_yoy":  8.5, "ebitda_margin":  5.8, "capex_rev_ratio":  3.5, "output_volume": 0.0},
             {"ticker": "BSR",  "name": "CTCP Lọc hóa dầu Bình Sơn",     "market_cap_bil":  68000.0, "pe":  9.2, "pb": 1.10, "roe": 14.8, "roa": 8.5, "net_margin":  6.2, "debt_to_equity": 0.22, "revenue_growth_yoy":  8.2, "ebitda_margin": 10.5, "capex_rev_ratio":  5.2, "output_volume": 0.0},
-            {"ticker": "DGC",  "name": "Hóa chất Đức Giang",             "market_cap_bil":  42500.0, "pe": 12.8, "pb": 3.10, "roe": 26.5, "roa": 19.5, "net_margin": 31.5, "debt_to_equity": 0.08, "revenue_growth_yoy": 14.2, "ebitda_margin": 38.5, "capex_rev_ratio": 12.5, "output_volume": 0.15},
-            {"ticker": "POW",  "name": "Tổng Công ty Điện lực Dầu khí",  "market_cap_bil":  28500.0, "pe": 12.5, "pb": 0.95, "roe":  8.5, "roa": 3.5, "net_margin": 12.5, "debt_to_equity": 0.85, "revenue_growth_yoy":  9.0, "ebitda_margin": 22.0, "capex_rev_ratio": 18.5, "output_volume": 12.5},
-            {"ticker": "DCM",  "name": "Phân bón Cà Mau",                "market_cap_bil":  21500.0, "pe": 11.5, "pb": 1.75, "roe": 17.5, "roa": 11.2, "net_margin": 12.8, "debt_to_equity": 0.12, "revenue_growth_yoy":  9.5, "ebitda_margin": 18.5, "capex_rev_ratio":  6.5, "output_volume": 0.85},
-            {"ticker": "DPM",  "name": "Phân bón Dầu khí Cà Mau (PVFCCo)","market_cap_bil": 18500.0, "pe": 10.8, "pb": 1.65, "roe": 16.2, "roa": 10.5, "net_margin": 11.5, "debt_to_equity": 0.08, "revenue_growth_yoy":  8.8, "ebitda_margin": 17.0, "capex_rev_ratio":  5.8, "output_volume": 0.95},
-            {"ticker": "PVS",  "name": "Tổng CTCP Kỹ thuật Dầu khí",    "market_cap_bil":  19500.0, "pe": 18.5, "pb": 1.45, "roe": 10.2, "roa": 4.5, "net_margin":  5.8, "debt_to_equity": 0.28, "revenue_growth_yoy": 18.0, "ebitda_margin": 12.5, "capex_rev_ratio":  4.5, "output_volume": 0.0},
-            {"ticker": "PVD",  "name": "Tổng CTCP Khoan Dầu khí",        "market_cap_bil":  15800.0, "pe": 24.5, "pb": 1.20, "roe":  7.5, "roa": 3.8, "net_margin":  8.5, "debt_to_equity": 0.45, "revenue_growth_yoy": 16.5, "ebitda_margin": 35.0, "capex_rev_ratio": 22.0, "output_volume": 0.0},
-            {"ticker": "REE",  "name": "CTCP Cơ Điện Lạnh REE",          "market_cap_bil":  22500.0, "pe": 12.5, "pb": 1.45, "roe": 14.2, "roa": 7.5, "net_margin": 22.5, "debt_to_equity": 0.45, "revenue_growth_yoy":  8.2, "ebitda_margin": 35.5, "capex_rev_ratio": 15.0, "output_volume": 0.0},
+            {"ticker": "PVS",  "name": "Tổng CTCP Kỹ thuật Dầu khí (PTSC)", "market_cap_bil": 19500.0, "pe": 18.5, "pb": 1.45, "roe": 10.2, "roa": 4.5, "net_margin":  5.8, "debt_to_equity": 0.28, "revenue_growth_yoy": 18.0, "ebitda_margin": 12.5, "capex_rev_ratio":  4.5, "output_volume": 0.0},
+            {"ticker": "PVD",  "name": "Tổng CTCP Khoan Dầu khí (PV Drilling)", "market_cap_bil": 15800.0, "pe": 24.5, "pb": 1.20, "roe":  7.5, "roa": 3.8, "net_margin":  8.5, "debt_to_equity": 0.45, "revenue_growth_yoy": 16.5, "ebitda_margin": 35.0, "capex_rev_ratio": 22.0, "output_volume": 0.0},
+            {"ticker": "PVT",  "name": "Tổng CTCP Vận tải Dầu khí (PV Trans)", "market_cap_bil": 10500.0, "pe":  8.2, "pb": 1.15, "roe": 16.5, "roa": 7.8, "net_margin": 12.8, "debt_to_equity": 0.58, "revenue_growth_yoy": 12.5, "ebitda_margin": 24.5, "capex_rev_ratio": 14.5, "output_volume": 0.0},
+            {"ticker": "OIL",  "name": "Tổng CTCP Dầu Việt Nam (PVOIL)",   "market_cap_bil": 12500.0, "pe": 16.2, "pb": 1.15, "roe":  8.5, "roa": 2.8, "net_margin":  1.2, "debt_to_equity": 0.92, "revenue_growth_yoy": 11.5, "ebitda_margin":  3.5, "capex_rev_ratio":  2.8, "output_volume": 0.0},
+            {"ticker": "PGS",  "name": "CTCP Kinh doanh Khí Miền Nam",     "market_cap_bil":  1850.0, "pe": 10.5, "pb": 1.25, "roe": 14.2, "roa": 6.5, "net_margin":  4.5, "debt_to_equity": 0.35, "revenue_growth_yoy":  8.5, "ebitda_margin":  9.2, "capex_rev_ratio":  3.2, "output_volume": 0.35},
+            {"ticker": "PVB",  "name": "CTCP Bọc ống Dầu khí Việt Nam",    "market_cap_bil":   950.0, "pe": 14.2, "pb": 1.35, "roe": 11.5, "roa": 5.8, "net_margin":  8.2, "debt_to_equity": 0.18, "revenue_growth_yoy": 25.0, "ebitda_margin": 16.5, "capex_rev_ratio":  4.0, "output_volume": 0.0},
+            {"ticker": "PVC",  "name": "Tổng CTCP Hóa chất & Dịch vụ Dầu khí", "market_cap_bil": 820.0, "pe": 15.5, "pb": 0.85, "roe":  6.5, "roa": 2.5, "net_margin":  3.2, "debt_to_equity": 0.48, "revenue_growth_yoy":  9.5, "ebitda_margin":  7.5, "capex_rev_ratio":  2.5, "output_volume": 0.0},
+            {"ticker": "CNG",  "name": "CTCP CNG Việt Nam",                "market_cap_bil":  1100.0, "pe":  9.5, "pb": 1.45, "roe": 18.5, "roa": 9.5, "net_margin":  6.5, "debt_to_equity": 0.12, "revenue_growth_yoy": 12.0, "ebitda_margin": 14.0, "capex_rev_ratio":  4.5, "output_volume": 0.28},
         ],
-        "cycle": "Chu kỳ Đầu tư mới thượng nguồn dầu khí & Chuyển dịch năng lượng",
+        "cycle": "Chu kỳ Đầu tư Mới Thượng nguồn Dầu khí & Triển khai Siêu Dự án Lô B Ô Môn",
         "catalysts": [
-            "Đại dự án khí - điện Lô B Ô Môn và mỏ Lạc Đà Vàng đem lại nguồn công việc E&C khổng lồ.",
-            "Giá thuê giàn khoan tự nâng (jack-up) duy trì ở mức cao trên 110,000 USD/ngày.",
-            "Nhu cầu phốt pho vàng và hóa chất công nghiệp cho chuỗi sản xuất chip bán dẫn và pin xe điện."
+            "Đại dự án chuỗi khí - điện Lô B Ô Môn và mỏ Lạc Đà Vàng đem lại nguồn công việc E&C xây lắp và bọc ống khổng lồ trong nhiều năm.",
+            "Giá thuê ngày giàn khoan tự nâng (jack-up) duy trì ở mức cao trên 110,000 USD/ngày với công suất hoạt động 100%.",
+            "Nhu cầu tiêu thụ khí tự nhiên hóa lỏng (LNG) và nhiên liệu xăng dầu cho sản xuất công nghiệp và giao thông tăng trưởng ổn định."
         ],
         "forces": {
-            "rivalry":            {"score": 2, "desc": "Hệ sinh thái dịch vụ dầu khí kỹ thuật cao tại Việt Nam có tính tập trung cao vào các đơn vị chủ chốt của PVN."},
-            "supplier_power":     {"score": 3, "desc": "Phụ thuộc vào các nhà thầu thiết bị cơ khí chuyên dụng và nhà máy đóng tàu chuyên ngành."},
-            "buyer_power":        {"score": 3, "desc": "Các nhà điều hành dầu khí quốc tế (IOCs) có quy trình đấu thầu nghiêm ngặt về an toàn kỹ thuật."},
-            "substitution_threat":{"score": 2, "desc": "Năng lượng tái tạo đang phát triển nhưng khí tự nhiên vẫn là nhiên liệu chuyển tiếp tối quan trọng."},
-            "new_entrants_threat":{"score": 1, "desc": "Yêu cầu kinh nghiệm vận hành ngoài khơi (offshore), chứng chỉ an toàn mỏ và đội tàu giàn khoan đồ sộ."}
+            "rivalry":            {"score": 2, "desc": "Hệ sinh thái dịch vụ kỹ thuật dầu khí ngoài khơi Việt Nam có tính tập trung cao vào các đơn vị chủ chốt của Petrovietnam."},
+            "supplier_power":     {"score": 3, "desc": "Phụ thuộc vào các nhà sản xuất giàn khoan, máy móc chuyên dụng và biến động giá dầu thô thế giới."},
+            "buyer_power":        {"score": 3, "desc": "Các nhà điều hành dầu khí quốc tế (IOCs) và Petrovietnam có quy chuẩn thẩm định an toàn kỹ thuật khắt khe."},
+            "substitution_threat":{"score": 2, "desc": "Năng lượng tái tạo đang phát triển nhưng khí và xăng dầu vẫn là nguồn năng lượng nền tảng không thể thay thế."},
+            "new_entrants_threat":{"score": 1, "desc": "Yêu cầu kinh nghiệm thi công ngoài khơi (offshore), chứng chỉ an toàn mỏ quốc tế và đội tàu giàn khoan đồ sộ."}
+        }
+    },
+    "hoa_chat_phan_bon": {
+        "sector_name": "Hóa chất & Phân bón Nông nghiệp",
+        "keywords": ["hóa chất", "phân bón", "phốt pho", "đạm", "urê", "npk", "dgc", "dcm", "dpm", "bfc", "las", "csv", "hvt", "ddv", "sfg", "vaf", "tsc"],
+        "sector_kpi_columns": [
+            {"field": "net_margin",            "label": "Biên ròng (%)",   "unit": "%",      "color": "emerald"},
+            {"field": "ebitda_margin",         "label": "EBITDA (%)",      "unit": "%",      "color": "sky"},
+            {"field": "export_ratio_percent",  "label": "Tỷ lệ XK (%)",    "unit": "%",      "color": "amber"},
+        ],
+        "peers": [
+            {"ticker": "DGC",  "name": "CTCP Tập đoàn Hóa chất Đức Giang", "market_cap_bil": 42500.0, "pe": 12.8, "pb": 3.10, "roe": 26.5, "roa": 19.5, "net_margin": 31.5, "debt_to_equity": 0.08, "revenue_growth_yoy": 14.2, "ebitda_margin": 38.5, "export_ratio_percent": 68.0},
+            {"ticker": "DCM",  "name": "CTCP Phân bón Dầu khí Cà Mau",     "market_cap_bil": 21500.0, "pe": 11.5, "pb": 1.75, "roe": 17.5, "roa": 11.2, "net_margin": 12.8, "debt_to_equity": 0.12, "revenue_growth_yoy":  9.5, "ebitda_margin": 18.5, "export_ratio_percent": 32.0},
+            {"ticker": "DPM",  "name": "Tổng Công ty Phân bón và Hóa chất Dầu khí (PVFCCo)", "market_cap_bil": 18500.0, "pe": 10.8, "pb": 1.65, "roe": 16.2, "roa": 10.5, "net_margin": 11.5, "debt_to_equity": 0.08, "revenue_growth_yoy":  8.8, "ebitda_margin": 17.0, "export_ratio_percent": 25.0},
+            {"ticker": "CSV",  "name": "CTCP Hóa chất Cơ bản Miền Nam",     "market_cap_bil":  4800.0, "pe": 11.8, "pb": 2.25, "roe": 22.5, "roa": 16.8, "net_margin": 18.5, "debt_to_equity": 0.05, "revenue_growth_yoy": 12.5, "ebitda_margin": 26.5, "export_ratio_percent": 15.0},
+            {"ticker": "BFC",  "name": "CTCP Phân bón Bình Điền",          "market_cap_bil":  3200.0, "pe":  9.5, "pb": 1.45, "roe": 18.2, "roa":  7.5, "net_margin":  4.8, "debt_to_equity": 0.85, "revenue_growth_yoy": 14.5, "ebitda_margin":  8.5, "export_ratio_percent": 18.0},
+            {"ticker": "LAS",  "name": "CTCP Supe Phốt phát & Hóa chất Lâm Thao", "market_cap_bil": 2600.0, "pe": 10.2, "pb": 1.55, "roe": 16.8, "roa": 10.2, "net_margin":  7.5, "debt_to_equity": 0.25, "revenue_growth_yoy": 11.8, "ebitda_margin": 12.2, "export_ratio_percent":  8.0},
+            {"ticker": "DDV",  "name": "CTCP DAP - Vinachem",              "market_cap_bil":  2800.0, "pe": 12.0, "pb": 1.35, "roe": 13.5, "roa":  8.5, "net_margin":  8.2, "debt_to_equity": 0.15, "revenue_growth_yoy": 16.0, "ebitda_margin": 14.5, "export_ratio_percent": 22.0},
+            {"ticker": "HVT",  "name": "CTCP Hóa chất Việt Trì",           "market_cap_bil":  1450.0, "pe":  8.8, "pb": 1.85, "roe": 24.0, "roa": 15.5, "net_margin": 14.5, "debt_to_equity": 0.18, "revenue_growth_yoy": 10.5, "ebitda_margin": 21.0, "export_ratio_percent":  5.0},
+            {"ticker": "SFG",  "name": "CTCP Phân bón Miền Nam",           "market_cap_bil":   850.0, "pe": 11.5, "pb": 0.95, "roe":  9.5, "roa":  4.5, "net_margin":  3.5, "debt_to_equity": 0.45, "revenue_growth_yoy":  8.5, "ebitda_margin":  6.5, "export_ratio_percent":  6.0},
+        ],
+        "cycle": "Phục hồi Nhu cầu Phốt pho vàng Bán dẫn & Giá Phân bón Thế giới",
+        "catalysts": [
+            "Nhu cầu phốt pho vàng (P4) phục vụ chuỗi sản xuất chip bán dẫn, vi mạch AI và pin xe điện LFP tăng trưởng phi mã.",
+            "Giá phân bón Urê, NPK thế giới và nội địa duy trì mặt bằng thuận lợi nhờ giá khí tự nhiên và hạn ngạch xuất khẩu của các nước lớn.",
+            "Tỷ lệ tiền mặt dồi dào, hầu như không có nợ vay tài chính và duy trì tỷ suất cổ tức tiền mặt rất cao."
+        ],
+        "forces": {
+            "rivalry":            {"score": 3, "desc": "Cạnh tranh thị phần phân bón nội địa với các dòng sản phẩm nhập khẩu; mảng phốt pho vàng có tính độc quyền tập trung cao."},
+            "supplier_power":     {"score": 3, "desc": "Phụ thuộc vào nguồn cung quặng apatit trong nước và giá khí đầu vào từ PVN."},
+            "buyer_power":        {"score": 3, "desc": "Bà con nông dân và các tập đoàn nông nghiệp nhạy cảm với biến động giá vật tư nông nghiệp theo mùa vụ."},
+            "substitution_threat":{"score": 1, "desc": "Phân bón vô cơ và hóa chất cơ bản xút, axit là nguyên liệu thiết yếu cho nông nghiệp và công nghiệp."},
+            "new_entrants_threat":{"score": 1, "desc": "Quy hoạch bảo vệ môi trường, rào cản công nghệ hóa chất xử lý độc hại và giấy phép khai thác mỏ apatit."}
+        }
+    },
+    "tien_ich_dien_nuoc": {
+        "sector_name": "Năng lượng & Tiện ích Điện - Nước",
+        "keywords": ["phát điện", "thủy điện", "nhiệt điện", "năng lượng tái tạo", "điện mặt trời", "điện gió", "cấp nước", "nước sạch", "pow", "pgv", "hdg", "geg", "ppc", "hnd", "vsh", "nt2", "tta", "sjd", "bwe", "tdm", "tbc", "sba", "gmp"],
+        "sector_kpi_columns": [
+            {"field": "net_margin",            "label": "Biên ròng (%)",       "unit": "%",      "color": "emerald"},
+            {"field": "debt_to_equity",        "label": "Đòn bẩy D/E",        "unit": "x",      "color": "rose"},
+            {"field": "output_volume",         "label": "Sản lượng (tr.kWh/m³)","unit": "tr.đv", "color": "sky"},
+        ],
+        "peers": [
+            {"ticker": "POW",  "name": "Tổng Công ty Điện lực Dầu khí Việt Nam (PV Power)", "market_cap_bil": 28500.0, "pe": 12.5, "pb": 0.95, "roe":  8.5, "roa": 3.5, "net_margin": 12.5, "debt_to_equity": 0.85, "revenue_growth_yoy":  9.0, "output_volume": 14500.0},
+            {"ticker": "PGV",  "name": "Tổng Công ty Phát điện 3 (EVNGENCO3)", "market_cap_bil": 25800.0, "pe": 10.5, "pb": 1.25, "roe": 13.5, "roa": 4.8, "net_margin":  8.2, "debt_to_equity": 1.85, "revenue_growth_yoy":  8.5, "output_volume": 28500.0},
+            {"ticker": "BWE",  "name": "CTCP Nước - Môi trường Bình Dương (Biwase)", "market_cap_bil": 10500.0, "pe": 13.8, "pb": 1.65, "roe": 15.2, "roa": 7.2, "net_margin": 22.5, "debt_to_equity": 0.85, "revenue_growth_yoy": 14.5, "output_volume":   280.0},
+            {"ticker": "HDG",  "name": "CTCP Tập đoàn Hà Đô",               "market_cap_bil": 12500.0, "pe": 14.5, "pb": 1.25, "roe":  9.5, "roa": 3.8, "net_margin": 18.5, "debt_to_equity": 0.85, "revenue_growth_yoy": 18.5, "output_volume":  1200.0},
+            {"ticker": "VSH",  "name": "CTCP Thủy điện Vĩnh Sơn - Sông Hinh","market_cap_bil": 14200.0, "pe":  9.8, "pb": 1.95, "roe": 22.5, "roa": 10.5, "net_margin": 38.5, "debt_to_equity": 0.95, "revenue_growth_yoy": 12.5, "output_volume":  2400.0},
+            {"ticker": "PPC",  "name": "CTCP Nhiệt điện Phả Lại",           "market_cap_bil":  4800.0, "pe": 11.2, "pb": 0.95, "roe":  9.2, "roa": 6.8, "net_margin":  9.5, "debt_to_equity": 0.15, "revenue_growth_yoy":  7.5, "output_volume":  4200.0},
+            {"ticker": "HND",  "name": "CTCP Nhiệt điện Hải Phòng",         "market_cap_bil":  6800.0, "pe": 10.5, "pb": 1.15, "roe": 12.5, "roa": 8.2, "net_margin":  8.8, "debt_to_equity": 0.22, "revenue_growth_yoy":  8.0, "output_volume":  7500.0},
+            {"ticker": "NT2",  "name": "CTCP Điện lực Dầu khí Nhơn Trạch 2","market_cap_bil":  6200.0, "pe": 14.2, "pb": 1.35, "roe": 11.5, "roa": 6.5, "net_margin":  7.8, "debt_to_equity": 0.28, "revenue_growth_yoy":  9.2, "output_volume":  3800.0},
+            {"ticker": "GEG",  "name": "CTCP Điện Gia Lai",                 "market_cap_bil":  4200.0, "pe": 18.5, "pb": 1.05, "roe":  6.5, "roa": 2.2, "net_margin": 14.2, "debt_to_equity": 1.95, "revenue_growth_yoy": 15.0, "output_volume":   950.0},
+            {"ticker": "TDM",  "name": "CTCP Nước Thủ Dầu Một",             "market_cap_bil":  4500.0, "pe": 12.5, "pb": 1.75, "roe": 16.5, "roa": 11.5, "net_margin": 45.0, "debt_to_equity": 0.18, "revenue_growth_yoy": 10.5, "output_volume":    85.0},
+        ],
+        "cycle": "Triển khai Quy hoạch Điện VIII & Nhu cầu Phụ tải Công nghiệp Tăng trưởng Cao",
+        "catalysts": [
+            "Nhu cầu tiêu thụ điện và nước sinh hoạt/công nghiệp toàn quốc duy trì tăng trưởng 8-10%/năm song hành cùng dòng vốn FDI sản xuất công nghiệp.",
+            "Cơ chế mua bán điện trực tiếp (DPPA) và biểu giá phát điện mới cho các dự án chuyển dịch năng lượng tái tạo.",
+            "Dòng tiền kinh doanh dồi dào, ổn định từ hợp đồng mua bán điện/nước dài hạn và tỷ suất chi trả cổ tức tiền mặt hấp dẫn."
+        ],
+        "forces": {
+            "rivalry":            {"score": 2, "desc": "Sản lượng điện huy động theo hợp đồng PPA dài hạn và điều độ lưới điện quốc gia A0; cấp nước có tính độc quyền địa bàn tuyệt đối."},
+            "supplier_power":     {"score": 3, "desc": "Giá than, khí đầu vào và biến động thủy văn mùa mưa/khô tác động trực tiếp tới biên lợi nhuận phát điện."},
+            "buyer_power":        {"score": 4, "desc": "EVN là khách hàng mua điện độc quyền duy nhất; giá nước sạch chịu sự quản lý theo khung giá của UBND tỉnh."},
+            "substitution_threat":{"score": 1, "desc": "Năng lượng điện và nước sạch là huyết mạch cơ sở hạ tầng thiết yếu không thể thay thế."},
+            "new_entrants_threat":{"score": 1, "desc": "Chi phí đầu tư Capex nhà máy phát điện và mạng lưới đường ống cấp nước khổng lồ là rào cản độc quyền tự nhiên."}
         }
     },
     "nong_nghiep_thuy_san": {
@@ -1912,8 +2016,9 @@ def build_sector_peers_data(
     # Khớp theo từ khóa ngành
     if not selected_group:
         priority_order = [
+            "thiet_bi_dien", "dau_khi", "hoa_chat_phan_bon", "tien_ich_dien_nuoc",
             "bds_kcn", "chung_khoan", "ngan_hang", "thep", "cong_nghe", 
-            "cang_bien", "ban_le", "dau_khi_nang_luong", "nong_nghiep_thuy_san", 
+            "cang_bien", "ban_le", "nong_nghiep_thuy_san", 
             "xay_dung_ha_tang", "bds_dan_dung"
         ]
         for key in priority_order:
@@ -2155,9 +2260,21 @@ def build_sector_peers_data(
         ))
 
     # Bổ sung các mã trong template nhóm tĩnh chưa có trong CSDL (nếu có)
+    # Chỉ bổ sung nếu mã đối thủ không xung đột ngành lớn với doanh nghiệp mục tiêu
     for p in selected_group.get("peers", []):
         t_code = p["ticker"].upper().strip()
         if t_code not in seen_tickers:
+            # Kiểm tra xem mã tĩnh có xung đột ngành hoàn toàn không
+            p_comp = get_company(t_code)
+            if p_comp and target_db:
+                p_fiin = (p_comp.get("fiintrade_sector") or "").strip().lower()
+                t_fiin = (target_db.get("fiintrade_sector") or "").strip().lower()
+                p_icb2 = (p_comp.get("icb2") or "").strip().lower()
+                t_icb2 = (target_db.get("icb2") or "").strip().lower()
+                # Nếu cả hai đều có ngành FiinTrade và khác nhau rõ rệt, kiểm tra ICB2
+                if t_fiin and p_fiin and t_fiin != p_fiin:
+                    if t_icb2 and p_icb2 and t_icb2 != p_icb2:
+                        continue
             seen_tickers.add(t_code)
             other_peers.append(PeerCompany(**p))
 
@@ -2752,17 +2869,33 @@ def get_company_news_and_events(ticker: str) -> Dict[str, Any]:
     }
 
 
-def get_mini_chart_series(ticker: str) -> Dict[str, Any]:
+def get_mini_chart_series(
+    ticker: str,
+    live_price: Optional[float] = None,
+    live_ref: Optional[float] = None,
+    live_open: Optional[float] = None,
+    live_high: Optional[float] = None,
+    live_low: Optional[float] = None,
+    live_vol: Optional[float] = None,
+    live_change: Optional[float] = None,
+    live_pct: Optional[float] = None,
+    live_foreign_buy: Optional[float] = None,
+    live_bid_vol: Optional[float] = None,
+    live_ask_vol: Optional[float] = None
+) -> Dict[str, Any]:
     """
     Tạo chuỗi dữ liệu giá & khối lượng biểu đồ kỹ thuật mini theo các khung thời gian:
-    1D, 5D, 1M, 6M, YTD, 1Y, 5Y, ALL kèm tính toán % tăng giảm và bảng thống kê chi tiết.
+    1D, 5D, 1M, 6M, YTD, 1Y, 5Y, ALL kèm tính toán % tăng giảm và bảng thống kê chi tiết theo giá thị trường thời gian thực.
     """
     clean_ticker = ticker.upper().strip()
     from company_database import get_company
     db = get_company(clean_ticker) or {}
     
-    # Giá tham chiếu cơ sở
-    base_price = float(db.get("close_price") or db.get("price") or 21000)
+    # Giá tham chiếu cơ sở từ live_price nếu có, ngược lại lấy từ database
+    if live_price is not None and float(live_price) > 0:
+        base_price = float(live_price)
+    else:
+        base_price = float(db.get("close_price") or db.get("price") or 21000)
     if base_price < 1000:
         base_price = base_price * 1000.0 if base_price > 0 else 21000.0
         
@@ -2773,25 +2906,32 @@ def get_mini_chart_series(ticker: str) -> Dict[str, Any]:
     eps = round((base_price / pe), 0) if pe > 0 else 2166.0
     bvps = round((base_price / pb), 0) if pb > 0 else 16348.0
 
-    # 1D series (Intraday points)
-    p_ref = round(base_price * 0.995, -1)
-    p_open = round(base_price * 0.993, -1)
-    p_high = round(base_price * 1.010, -1)
-    p_low = round(base_price * 0.986, -1)
+    # 1D series (Intraday points) & Realtime prices
+    p_ref = float(live_ref) if live_ref and live_ref > 0 else round(base_price * 0.995, -1)
+    p_open = float(live_open) if live_open and live_open > 0 else round(base_price * 0.993, -1)
+    p_high = float(live_high) if live_high and live_high > 0 else max(base_price, round(base_price * 1.010, -1))
+    p_low = float(live_low) if live_low and live_low > 0 else min(base_price, round(base_price * 0.986, -1))
     p_curr = base_price
 
+    p_change = float(live_change) if live_change is not None else round(p_curr - p_ref, -1)
+    p_pct = float(live_pct) if live_pct is not None else (round(((p_curr - p_ref) / p_ref) * 100, 2) if p_ref > 0 else 0.0)
+    total_vol = int(live_vol) if live_vol and live_vol > 0 else 12807500
+    bid_v = int(live_bid_vol) if live_bid_vol is not None else 1466200
+    ask_v = int(live_ask_vol) if live_ask_vol is not None else 625400
+    f_buy = float(live_foreign_buy) if live_foreign_buy is not None else 307600
+
     points_1d = [
-        {"time": "09:00", "price": p_open, "vol": 350000},
-        {"time": "09:30", "price": round(p_open * 1.005, -1), "vol": 620000},
-        {"time": "10:00", "price": round(p_open * 1.002, -1), "vol": 480000},
-        {"time": "10:30", "price": p_low, "vol": 890000},
-        {"time": "11:00", "price": round(p_low * 1.003, -1), "vol": 510000},
-        {"time": "11:30", "price": round(p_low * 1.008, -1), "vol": 420000},
-        {"time": "13:00", "price": round(p_low * 1.006, -1), "vol": 380000},
-        {"time": "13:30", "price": round(p_high * 0.995, -1), "vol": 1200000},
-        {"time": "14:00", "price": p_high, "vol": 1450000},
-        {"time": "14:30", "price": round(p_curr * 1.002, -1), "vol": 980000},
-        {"time": "14:45", "price": p_curr, "vol": 1100000}
+        {"time": "09:00", "price": p_open, "vol": int(total_vol * 0.03)},
+        {"time": "09:30", "price": round(p_open * 1.005, -1), "vol": int(total_vol * 0.06)},
+        {"time": "10:00", "price": round(p_open * 1.002, -1), "vol": int(total_vol * 0.05)},
+        {"time": "10:30", "price": p_low, "vol": int(total_vol * 0.08)},
+        {"time": "11:00", "price": round(p_low * 1.003, -1), "vol": int(total_vol * 0.06)},
+        {"time": "11:30", "price": round(p_low * 1.008, -1), "vol": int(total_vol * 0.05)},
+        {"time": "13:00", "price": round(p_low * 1.006, -1), "vol": int(total_vol * 0.04)},
+        {"time": "13:30", "price": round(p_high * 0.995, -1), "vol": int(total_vol * 0.12)},
+        {"time": "14:00", "price": p_high, "vol": int(total_vol * 0.15)},
+        {"time": "14:30", "price": round(p_curr * 1.002, -1), "vol": int(total_vol * 0.11)},
+        {"time": "14:45", "price": p_curr, "vol": int(total_vol * 0.14)}
     ]
 
     # Return percentages by timeframe
@@ -2822,16 +2962,16 @@ def get_mini_chart_series(ticker: str) -> Dict[str, Any]:
         "open_price": p_open,
         "high_price": p_high,
         "low_price": p_low,
-        "change": round(p_curr - p_ref, -1),
-        "change_pct": round(((p_curr - p_ref) / p_ref) * 100, 2) if p_ref > 0 else 0.0,
-        "volume": 12807500,
+        "change": p_change,
+        "change_pct": p_pct,
+        "volume": total_vol,
         "high_52w": round(base_price * 1.44, -1),
         "low_52w": round(base_price * 0.84, -1),
         "avg_vol_52w": 27652219,
-        "foreign_buy": 307600,
+        "foreign_buy": f_buy,
         "foreign_ownership_pct": float(db.get("foreign_room_pct") or 30.03),
-        "bid_vol": 1466200,
-        "ask_vol": 625400,
+        "bid_vol": bid_v,
+        "ask_vol": ask_v,
         "cash_dividend": 2000,
         "dividend_yield": 0.10,
         "eps": eps,

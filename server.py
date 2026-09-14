@@ -466,10 +466,53 @@ async def get_news_and_events(ticker: str):
 async def get_overview_mini_chart_series(ticker: str):
     """
     Truy xuất chuỗi dữ liệu nến/giá/khối lượng cho biểu đồ kỹ thuật mini (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, ALL)
-    kèm bảng thống kê thị trường chi tiết.
+    kèm bảng thống kê thị trường chi tiết theo giá thời gian thực.
     """
     clean_ticker = ticker.upper().strip()
-    return get_mini_chart_series(clean_ticker)
+    live_price = None
+    live_ref = None
+    live_open = None
+    live_high = None
+    live_low = None
+    live_vol = None
+    live_change = None
+    live_pct = None
+    live_f_buy = None
+    live_bid = None
+    live_ask = None
+    try:
+        live_info = await fetch_reconciled_live_price(clean_ticker)
+        if live_info and "latest_close" in live_info:
+            live_price = float(live_info["latest_close"])
+            if live_info.get("sources_comparison") and len(live_info["sources_comparison"]) > 0:
+                s0 = live_info["sources_comparison"][0]
+                live_ref = s0.get("ref_price")
+                live_open = s0.get("open")
+                live_high = s0.get("high")
+                live_low = s0.get("low")
+                live_vol = s0.get("volume")
+                live_change = s0.get("change")
+                live_pct = s0.get("change_percent")
+                live_f_buy = s0.get("foreign_buy")
+                live_bid = s0.get("bid_vol")
+                live_ask = s0.get("ask_vol")
+    except Exception as e:
+        print(f"Fetch live price for mini-chart-series failed ({clean_ticker}): {e}")
+
+    return get_mini_chart_series(
+        clean_ticker,
+        live_price=live_price,
+        live_ref=live_ref,
+        live_open=live_open,
+        live_high=live_high,
+        live_low=live_low,
+        live_vol=live_vol,
+        live_change=live_change,
+        live_pct=live_pct,
+        live_foreign_buy=live_f_buy,
+        live_bid_vol=live_bid,
+        live_ask_vol=live_ask
+    )
 
 
 @app.get("/api/company-catalysts-insights/{ticker}")
