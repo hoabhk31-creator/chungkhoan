@@ -1,0 +1,371 @@
+[
+  {
+    "id": "tpl-thep-vat-lieu",
+    "name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "sector": "Thép & Vật liệu xây dựng",
+    "is_system": true,
+    "keywords": [
+      "thép",
+      "hrc",
+      "quặng sắt",
+      "than cốc",
+      "dung quất",
+      "lò cao",
+      "tôn mạ",
+      "chống bán phá giá",
+      "xây dựng",
+      "hpg",
+      "nkg",
+      "hsg"
+    ],
+    "catalyst_rules": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc",
+      "Chính sách bảo hộ, thuế tự vệ chống bán phá giá thép cán nóng nhập khẩu từ Trung Quốc/Ấn Độ",
+      "Sự phục hồi nhu cầu đầu tư công và thị trường bất động sản xây dựng dân dụng",
+      "Gia tăng sản lượng xuất khẩu sang thị trường EU, Bắc Mỹ và ASEAN"
+    ],
+    "thesis_rules": [
+      "Lợi thế quy mô dẫn đầu với giá thành sản xuất cạnh tranh nhất khu vực Đông Nam Á",
+      "Chuỗi giá trị khép kín từ thượng nguồn phôi thép đến hạ nguồn thép chế tạo chất lượng cao",
+      "Dòng tiền tự do dồi dào, tỷ lệ đòn bẩy tài chính duy trì ở mức an toàn"
+    ],
+    "risk_rules": [
+      "Biến động giá nguyên vật liệu đầu vào (quặng sắt, than mỡ) tăng đột biến",
+      "Thị trường bất động sản nội địa hồi phục chậm hơn kỳ vọng",
+      "Rủi ro áp thuế phòng vệ thương mại từ các thị trường xuất khẩu lớn"
+    ],
+    "sample_text": "HPG chuẩn bị đưa phân kỳ 1 dự án Dung Quất 2 vào vận hành từ cuối 2024 - đầu 2025, nâng tổng công suất thép thô lên 14 triệu tấn/năm. Động lực chính đến từ sản phẩm HRC chất lượng cao cung cấp cho các nhà sản xuất tôn mạ và ống thép trong nước. Lợi nhuận kỳ vọng phục hồi mạnh nhờ biên gộp nới rộng khi giá than cốc hạ nhiệt.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Dung Quất 2 vận hành phân kỳ 1, nâng công suất thép thô thêm 5.6 triệu tấn HRC/năm."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Nới rộng biên lãi gộp nhờ giá than cốc và quặng sắt nguyên liệu duy trì vùng đáy chu kỳ."
+        },
+        {
+          "category": "Vĩ mô & Chính sách",
+          "text": "Đề xuất điều tra và áp thuế chống bán phá giá HRC nhập khẩu tạo lợi thế sân nhà."
+        }
+      ],
+      "theses": [
+        "Doanh nghiệp dẫn đầu tuyệt đối thị phần thép xây dựng và HRC với chuỗi sản xuất khép kín."
+      ],
+      "risks": [
+        "Sức cầu thị trường BĐS phục hồi chậm ảnh hưởng sản lượng tiêu thụ thép xây dựng."
+      ]
+    }
+  },
+  {
+    "id": "tpl-ban-le-tieu-dung",
+    "name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "sector": "Bán lẻ & Tiêu dùng",
+    "is_system": true,
+    "keywords": [
+      "bán lẻ",
+      "chuỗi",
+      "bách hóa xanh",
+      "long châu",
+      "ict",
+      "điện thoại",
+      "vàng bạc",
+      "doanh thu/cửa hàng",
+      "ebitda",
+      "mwg",
+      "frt",
+      "pnj"
+    ],
+    "catalyst_rules": [
+      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu",
+      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng",
+      "Tối ưu hóa chi phí vận hành, đóng bớt các điểm bán không hiệu quả và tái cấu trúc mạng lưới",
+      "Phục hồi nhu cầu tiêu dùng các mặt hàng giá trị cao (ICT, Điện máy, Vàng trang sức)",
+      "Kế hoạch huy động vốn cổ phần hoặc IPO/bán vốn chuỗi con cho đối tác chiến lược"
+    ],
+    "thesis_rules": [
+      "Hưởng lợi dài hạn từ xu hướng chuyển dịch tiêu dùng từ chợ truyền thống sang kênh hiện đại",
+      "Hệ thống logistics và kho bãi quy mô lớn tạo rào cản gia nhập ngành vững chắc",
+      "Năng lực quản trị tồn kho và số hóa chuỗi cung ứng vượt trội so với đối thủ"
+    ],
+    "risk_rules": [
+      "Sức mua tiêu dùng phục hồi chậm trong bối cảnh thu nhập người dân chưa bứt phá",
+      "Cạnh tranh gay gắt về giá từ các kênh thương mại điện tử (Shopee, TikTok Shop)",
+      "Áp lực chi phí thuê mặt bằng và chi phí nhân sự gia tăng"
+    ],
+    "sample_text": "MWG ghi nhận chuỗi Bách Hóa Xanh đạt điểm hòa vốn sau thuế và bắt đầu đóng góp lợi nhuận tích cực. Mảng ICT Thế Giới Di Động & Điện Máy Xanh tăng trưởng ổn định sau chiến dịch tái cơ cấu giảm số lượng cửa hàng kém hiệu quả. Kế hoạch mở rộng mới thận trọng tập trung nâng cao doanh thu trên từng mét vuông sàn.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Chuỗi Bách Hóa Xanh đạt mốc hòa vốn sau thuế toàn chuỗi và mở rộng thận trọng miền Trung."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Tối ưu hóa biên lãi gộp mảng ICT thông qua đàm phán hợp đồng độc quyền với các hãng công nghệ."
+        },
+        {
+          "category": "Xúc tác sự kiện",
+          "text": "Kế hoạch phát hành riêng lẻ cổ phần chuỗi Bách Hóa Xanh củng cố nguồn vốn dài hạn."
+        }
+      ],
+      "theses": [
+        "Thị phần bán lẻ hàng tiêu dùng thiết yếu tiếp tục mở rộng vững chắc sang kênh hiện đại."
+      ],
+      "risks": [
+        "Sức mua các sản phẩm điện thoại - điện máy hồi phục chậm hơn dự báo."
+      ]
+    }
+  },
+  {
+    "id": "tpl-chung-khoan-tai-chinh",
+    "name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "sector": "Chứng khoán & Tài chính",
+    "is_system": true,
+    "keywords": [
+      "chứng khoán",
+      "krx",
+      "nâng hạng",
+      "ftse",
+      "msci",
+      "margin",
+      "môi giới",
+      "thanh khoản",
+      "tự doanh",
+      "tăng vốn",
+      "ssi",
+      "hcm",
+      "vnd",
+      "vci"
+    ],
+    "catalyst_rules": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống",
+      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI)",
+      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ",
+      "Quy mô dư nợ cho vay ký quỹ (Margin) lập đỉnh mới và biên lãi suất cho vay ổn định",
+      "Kế hoạch tăng vốn điều lệ thông qua phát hành quyền mua hoặc trả cổ tức bằng cổ phiếu"
+    ],
+    "thesis_rules": [
+      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững",
+      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn",
+      "Danh mục tự doanh nắm giữ các cổ phiếu cơ bản đầu ngành có định giá hấp dẫn"
+    ],
+    "risk_rules": [
+      "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin",
+      "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
+      "Cạnh tranh chính sách Zero-fee (miễn phí giao dịch) làm xói mòn biên lợi nhuận mảng môi giới"
+    ],
+    "sample_text": "SSI được kỳ vọng hưởng lợi trực tiếp khi hệ thống KRX vận hành và giải pháp giải quyết ký quỹ trước giao dịch (Non-prefunding) cho nhà đầu tư ngoại được phê duyệt, mở đường nâng hạng thị trường FTSE. Hoạt động tăng vốn điều lệ lên gần 19,600 tỷ đồng giúp nới rộng room cấp margin trong bối cảnh thanh khoản thị trường đạt 20,000-25,000 tỷ/phiên.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Vĩ mô & Chính sách",
+          "text": "Triển khai Non-prefunding cho khối ngoại và vận hành KRX thúc đẩy nâng hạng FTSE Emerging."
+        },
+        {
+          "category": "Dự án & Capex",
+          "text": "Hoàn tất tăng vốn điều lệ giúp mở rộng hạn mức cho vay margin lên mức kỷ lục."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Thanh khoản thị trường duy trì ở mức cao trên 20,000 tỷ đồng/phiên kích thích doanh thu phí."
+        }
+      ],
+      "theses": [
+        "Vị thế CTCK đầu ngành thu hút dòng vốn ngoại và nhà đầu tư tổ chức tham gia thị trường."
+      ],
+      "risks": [
+        "Cạnh tranh hạ phí giao dịch từ các CTCK ngoại làm giảm biên lợi nhuận mảng môi giới."
+      ]
+    }
+  },
+  {
+    "id": "tpl-cong-nghe-thong-tin",
+    "name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "sector": "Công nghệ thông tin",
+    "is_system": true,
+    "keywords": [
+      "công nghệ",
+      "fpt",
+      "cmg",
+      "chuyển đổi số",
+      "dx",
+      "ai",
+      "trí tuệ nhân tạo",
+      "phần mềm",
+      "nhật bản",
+      "mỹ",
+      "hợp đồng",
+      "doanh số ký mới",
+      "giáo dục"
+    ],
+    "catalyst_rules": [
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu",
+      "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ",
+      "Khối giáo dục FPT Education duy trì tỷ lệ tuyển sinh mới tăng trưởng 2 con số",
+      "Dịch vụ chuyển đổi số (Cloud, Big Data, GenAI) chiếm tỷ trọng doanh thu ngày càng lớn với biên gộp cao"
+    ],
+    "thesis_rules": [
+      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu",
+      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500",
+      "Mô hình kinh doanh phòng thủ vững chắc, dòng tiền kinh doanh đều đặn và nợ vay rất thấp"
+    ],
+    "risk_rules": [
+      "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND",
+      "Tình trạng thiếu hụt nhân sự cấp cao trong lĩnh vực bán dẫn và trí tuệ nhân tạo chuyên sâu",
+      "Kinh tế toàn cầu giảm tốc khiến các doanh nghiệp lớn trì hoãn ngân sách đầu tư cho CNTT"
+    ],
+    "sample_text": "FPT ký mới các hợp đồng chuyển đổi số quy mô hàng trăm triệu USD tại thị trường Bắc Mỹ và Châu Á. Dự án hợp tác cùng Nvidia xây dựng AI Factory tại Việt Nam mở ra hướng phát triển công nghệ cao mới. Mảng giáo dục đào tạo mở rộng phân hiệu tại nhiều tỉnh thành giúp củng cố nguồn nhân lực đầu vào cho các chi nhánh toàn cầu.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Hợp tác Nvidia triển khai nhà máy AI Factory cung cấp hạ tầng tính toán đám mây thế hệ mới."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Nhu cầu chuyển đổi số toàn cầu bùng nổ giúp doanh số ký mới CNTT duy trì tăng trưởng trên 25% YoY."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Khối giáo dục FPT Education duy trì biên EBITDA trên 30% và cung ứng kỹ sư IT nội bộ."
+        }
+      ],
+      "theses": [
+        "Khả năng mở rộng quy mô toàn cầu và cung ứng dịch vụ phần mềm trọn gói chất lượng cao."
+      ],
+      "risks": [
+        "Biến động tỷ giá JPY/VND ảnh hưởng tốc độ tăng trưởng doanh thu từ thị trường Nhật Bản."
+      ]
+    }
+  },
+  {
+    "id": "tpl-bat-dong-san-kcn",
+    "name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "sector": "Bất động sản & KCN",
+    "is_system": true,
+    "keywords": [
+      "bất động sản",
+      "bđs",
+      "kcn",
+      "khu công nghiệp",
+      "pháp lý",
+      "luật đất đai",
+      "mở bán",
+      "trái phiếu",
+      "quỹ đất",
+      "fdi",
+      "thuê đất",
+      "pdr",
+      "tch",
+      "kbc",
+      "lhg"
+    ],
+    "catalyst_rules": [
+      "Hoàn tất thủ tục pháp lý, phê duyệt quy hoạch 1/500 và cấp giấy phép xây dựng cho các dự án trọng điểm",
+      "Các luật mới (Luật Đất đai, Nhà ở, Kinh doanh BĐS) có hiệu lực giúp tháo gỡ điểm nghẽn nguồn cung",
+      "Mở bán đợt mới các phân khu và tỷ lệ hấp thụ đạt mức cao (tiền người mua trả trước tăng mạnh)",
+      "Dòng vốn đầu tư trực tiếp nước ngoài (FDI) đổ mạnh vào các khu kinh tế, nhu cầu thuê đất KCN tăng cao",
+      "Tái cơ cấu thành công nợ vay và xóa bỏ hoàn toàn áp lực đáo hạn trái phiếu doanh nghiệp"
+    ],
+    "thesis_rules": [
+      "Sở hữu quỹ đất sạch quy mô lớn tại các vị trí kết nối hạ tầng giao thông chiến lược",
+      "Chi phí giải phóng mặt bằng thấp tạo biên lợi nhuận gộp vượt trội khi mở bán dự án",
+      "Cơ cấu tài chính sạch, đòn bẩy an toàn sau giai đoạn chủ động thanh toán trái phiếu trước hạn"
+    ],
+    "risk_rules": [
+      "Thời gian hoàn thiện thủ tục pháp lý và tính tiền sử dụng đất kéo dài hơn kế hoạch",
+      "Lãi suất cho vay mua nhà tăng ảnh hưởng tâm lý và khả năng tiếp cận vốn của khách hàng",
+      "Cạnh tranh thu hút FDI công nghiệp từ các quốc gia trong khu vực như Indonesia, Ấn Độ"
+    ],
+    "sample_text": "PDR đã sạch nợ trái phiếu và tập trung đẩy nhanh tiến độ pháp lý tại các dự án trọng điểm như Bắc Hà Thanh (Bình Định) và Thuận An 1 & 2 (Bình Dương). Dự kiến các dự án này sẽ đủ điều kiện mở bán trong năm 2025, mang lại dòng tiền mặt dồi dào ước tính hàng nghìn tỷ đồng. Luật Đất đai sửa đổi hỗ trợ rút ngắn thời gian phê duyệt định giá đất.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Mở bán dự án trọng điểm Bắc Hà Thanh và cụm căn hộ Thuận An 1&2 khi hoàn thành pháp lý."
+        },
+        {
+          "category": "Vĩ mô & Chính sách",
+          "text": "Luật Đất đai và Luật Kinh doanh BĐS mới tháo gỡ điểm nghẽn thẩm định tiền sử dụng đất."
+        },
+        {
+          "category": "Cơ cấu tài chính",
+          "text": "Đưa dư nợ trái phiếu về 0, giải tỏa hoàn toàn áp lực thanh khoản và tái cơ cấu nợ."
+        }
+      ],
+      "theses": [
+        "Quỹ đất sạch ven biển và vùng ven các đô thị vệ tinh đón đầu chu kỳ hồi phục nguồn cung."
+      ],
+      "risks": [
+        "Tiến độ cấp phép xây dựng thực tế phụ thuộc vào tốc độ giải quyết thủ tục của địa phương."
+      ]
+    }
+  },
+  {
+    "id": "tpl-ngan-hang-tai-chinh",
+    "name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "sector": "Ngân hàng",
+    "is_system": true,
+    "keywords": [
+      "ngân hàng",
+      "bank",
+      "vcb",
+      "mbb",
+      "tcb",
+      "ctg",
+      "acb",
+      "vpb",
+      "tín dụng",
+      "nim",
+      "casa",
+      "nợ xấu",
+      "dự phòng",
+      "llr",
+      "bảo phủ nợ xấu"
+    ],
+    "catalyst_rules": [
+      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành",
+      "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp",
+      "Tỷ lệ tiền gửi không kỳ hạn (CASA) dẫn đầu giúp duy trì lợi thế nguồn vốn giá rẻ",
+      "Áp lực trích lập dự phòng rủi ro tín dụng giảm dần khi nợ xấu được kiểm soát và xử lý",
+      "Tỷ lệ bao phủ nợ xấu (LLR) cao tạo bộ đệm an toàn vững chắc trước các rủi ro vĩ mô"
+    ],
+    "thesis_rules": [
+      "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu dưới 1.5%",
+      "Hệ sinh thái dịch vụ tài chính đa dạng (bảo hiểm, chứng khoán, quản lý quỹ) mang lại thu nhập ngoài lãi cao",
+      "Nền tảng ngân hàng số hiện đại thu hút hàng triệu khách hàng cá nhân và doanh nghiệp trẻ"
+    ],
+    "risk_rules": [
+      "Nợ xấu tiềm ẩn từ nhóm khách hàng bất động sản và trái phiếu doanh nghiệp phát sinh",
+      "Cạnh tranh gay gắt về lãi suất cho vay đầu ra làm thu hẹp biên lãi ròng NIM",
+      "Thu nhập từ phí bảo hiểm qua ngân hàng (Bancassurance) phục hồi chậm sau giai đoạn thanh kiểm tra"
+    ],
+    "sample_text": "MBB duy trì mức tăng trưởng tín dụng ấn tượng trên 15% nhờ dòng vốn giải ngân vào phân khúc sản xuất kinh doanh và doanh nghiệp vừa và nhỏ. Tỷ lệ CASA duy trì trong Top 1 hệ thống ngân hàng (khoảng 38-40%) giúp kiểm soát chi phí vốn tối ưu. Tỷ lệ bao phủ nợ xấu đạt trên 115% tạo bộ đệm vững vàng cho ngân hàng trong năm nay.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Hạn mức tăng trưởng tín dụng được giao ở mức cao nhờ tham gia hỗ trợ tái cơ cấu hệ thống."
+        },
+        {
+          "category": "Lợi thế chi phí",
+          "text": "Tỷ lệ CASA dẫn đầu toàn ngành trên 38% giúp giảm mạnh chi phí huy động vốn và mở rộng NIM."
+        },
+        {
+          "category": "Chất lượng tài sản",
+          "text": "Tỷ lệ trích lập dự phòng bao phủ nợ xấu (LLR) vững chắc trên 115% bảo toàn lợi nhuận."
+        }
+      ],
+      "theses": [
+        "Ngân hàng số toàn diện thu hút quy mô tệp khách hàng cá nhân năng động lớn nhất."
+      ],
+      "risks": [
+        "Rủi ro nợ xấu phát sinh từ phân khúc khách hàng cá nhân vay tiêu dùng."
+      ]
+    }
+  }
+]

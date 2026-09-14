@@ -320,23 +320,96 @@ class SSIFastConnectClient:
 # DUAL-ENGINE: BỘ LẤY NẾN HYBRID (VIETSTOCK CHART, VNDIRECT & SSI FASTCONNECT)
 # =========================================================================
 
+def aggregate_daily_to_period(daily_candles: List[Dict[str, Any]], target_res: str) -> List[Dict[str, Any]]:
+    """
+    Tổng hợp chuỗi nến ngày (D) thành chuỗi nến Tuần (W) hoặc Tháng (M) chuẩn xác:
+    - Nến Tuần: Nhóm theo tuần ISO (Thứ 2 đến Thứ 6), Open ngày đầu tuần, High/Low cực trị trong tuần, Close ngày cuối tuần, Volume tổng.
+    - Nến Tháng: Nhóm theo tháng YYYY-MM, Open ngày đầu tháng, High/Low cực trị trong tháng, Close ngày cuối tháng, Volume tổng.
+    """
+    if not daily_candles or target_res not in ["W", "M"]:
+        return daily_candles
+
+    groups = {}
+    for c in daily_candles:
+        t_val = c.get("time")
+        dt = None
+        if isinstance(t_val, (int, float)) and t_val > 0:
+            dt = datetime.fromtimestamp(t_val)
+        elif c.get("time_str"):
+            try:
+                dt = datetime.strptime(str(c["time_str"])[:10], "%Y-%m-%d")
+            except Exception:
+                pass
+        if not dt:
+            continue
+
+        if target_res == "W":
+            iso = dt.isocalendar()
+            key = f"{iso[0]}-W{iso[1]:02d}"
+        else:
+            key = dt.strftime("%Y-%m")
+
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(c)
+
+    aggregated = []
+    for key, c_list in groups.items():
+        if not c_list:
+            continue
+        first = c_list[0]
+        last = c_list[-1]
+        agg_open = float(first.get("open", 0))
+        agg_close = float(last.get("close", 0))
+        agg_high = max(float(x.get("high", 0)) for x in c_list)
+        agg_low = min(float(x.get("low", 0)) for x in c_list)
+        agg_vol = sum(float(x.get("volume", 0)) for x in c_list)
+
+        agg_time = first.get("time")
+        agg_time_str = first.get("time_str")
+        agg_date = first.get("date")
+
+        aggregated.append({
+            "time": agg_time,
+            "time_str": agg_time_str,
+            "date": agg_date,
+            "open": agg_open,
+            "high": agg_high,
+            "low": agg_low,
+            "close": agg_close,
+            "volume": agg_vol
+        })
+    return aggregated
+
+
 async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int = 120) -> List[Dict[str, Any]]:
     """
     Lấy chuỗi nến lịch sử OHLCV thực tế từ VNDirect DChart, Vietstock và DNSE Entrade API.
     Hỗ trợ đa khung thời gian: 1m, 5m, 15m, 1h, 1D, 1W, 1M.
     """
     clean = symbol.upper().strip()
-    norm_res = str(resolution).upper().replace("M", "m").replace("1D", "D").replace("1W", "W").replace("1m", "M")
-    if norm_res in ["1", "5", "15", "30", "60"]:
-        req_res = norm_res
-    elif norm_res in ["1H", "H"]:
+    raw_res = str(resolution).strip()
+    
+    if raw_res in ["1", "1m", "1M"]:
+        req_res = "1"
+    elif raw_res in ["5", "5m"]:
+        req_res = "5"
+    elif raw_res in ["15", "15m"]:
+        req_res = "15"
+    elif raw_res in ["30", "30m"]:
+        req_res = "30"
+    elif raw_res in ["60", "1h", "1H"]:
         req_res = "60"
-    elif norm_res in ["W", "1W"]:
+    elif raw_res.upper() in ["W", "1W", "WEEK"]:
         req_res = "W"
-    elif norm_res in ["M", "1M"]:
+    elif raw_res.upper() in ["M", "1M", "MONTH"]:
         req_res = "M"
     else:
         req_res = "D"
+
+    # Đối với W và M, lấy nến ngày từ VNDirect rồi tổng hợp (vì VNDirect DChart chỉ hỗ trợ nến ngày D & phút)
+    is_period_agg = req_res in ["W", "M"]
+    query_res = "D" if is_period_agg else req_res
 
     res_seconds = {
         "1": 60,
@@ -349,9 +422,9 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         "M": 86400 * 30
     }
     sec_unit = res_seconds.get(req_res, 86400)
-    multiplier = 4 if sec_unit < 86400 else 2
+    multiplier = 6 if req_res == "W" else (28 if req_res == "M" else (4 if sec_unit < 86400 else 2))
     now_ts = int(time.time())
-    from_ts = now_ts - max(count * sec_unit * multiplier, 86400 * 3)
+    from_ts = now_ts - max(count * sec_unit * multiplier, 86400 * 30)
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -374,7 +447,9 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
 
         mult = 1000.0 if closes[-1] < 1000.0 else 1.0
         n = len(closes)
-        for i in range(max(0, n - count), n):
+        limit = len(closes) if is_period_agg else min(count, n)
+        start_idx = 0 if is_period_agg else max(0, n - count)
+        for i in range(start_idx, n):
             ts = times[i] if i < len(times) else (now_ts - (n - i) * sec_unit)
             dt = datetime.fromtimestamp(ts)
             c_val = round(float(closes[i]) * mult, 0)
@@ -394,10 +469,12 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
                 "close": c_val,
                 "volume": v_val
             })
+        if is_period_agg:
+            return aggregate_daily_to_period(result, req_res)[-count:]
         return result
 
     # 1. Thử VNDirect DChart API
-    dchart_url = f"{VIETNAM_DCHART_API}?symbol={clean}&resolution={req_res}&from={from_ts}&to={now_ts}"
+    dchart_url = f"{VIETNAM_DCHART_API}?symbol={clean}&resolution={query_res}&from={from_ts}&to={now_ts}"
     try:
         async with httpx.AsyncClient(timeout=5.0, headers=headers) as client:
             res = await client.get(dchart_url)
@@ -409,7 +486,7 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         pass
 
     # 2. Thử Vietstock Chart API
-    vs_url = f"{VIETSTOCK_CHART_API}?symbol={clean}&resolution={req_res}&from={from_ts}&to={now_ts}"
+    vs_url = f"{VIETSTOCK_CHART_API}?symbol={clean}&resolution={query_res}&from={from_ts}&to={now_ts}"
     try:
         async with httpx.AsyncClient(timeout=5.0, headers=headers) as client:
             res = await client.get(vs_url)
@@ -421,7 +498,7 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         pass
 
     # 3. Thử DNSE Entrade API (dành cho nến phút/giờ/ngày)
-    dnse_res = req_res if req_res in ["1", "5", "15"] else ("1H" if req_res == "60" else "1D")
+    dnse_res = query_res if query_res in ["1", "5", "15"] else ("1H" if query_res == "60" else "1D")
     dnse_url = f"https://services.entrade.com.vn/chart-api/v2/ohlcs/stock?from={from_ts}&to={now_ts}&symbol={clean}&resolution={dnse_res}"
     try:
         async with httpx.AsyncClient(timeout=5.0, headers={"User-Agent": "Mozilla/5.0"}) as client:
@@ -461,10 +538,30 @@ async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int
 
             if ssi_candles and len(ssi_candles) >= 5:
                 parsed = []
-                for item in ssi_candles[-count:]:
+                total_items = len(ssi_candles)
+                for idx, item in enumerate(ssi_candles[-count:]):
                     dt_str = item.get("TradingDate") or item.get("DateTime", "")
+                    ts = 0
+                    try:
+                        if "/" in dt_str:
+                            parts = dt_str.split(" ")
+                            d_parts = parts[0].split("/")
+                            if len(parts) > 1 and ":" in parts[1]:
+                                t_parts = parts[1].split(":")
+                                dt_obj = datetime(int(d_parts[2]), int(d_parts[1]), int(d_parts[0]), int(t_parts[0]), int(t_parts[1]))
+                            else:
+                                dt_obj = datetime(int(d_parts[2]), int(d_parts[1]), int(d_parts[0]))
+                            ts = int(dt_obj.timestamp())
+                        elif "-" in dt_str:
+                            dt_obj = datetime.fromisoformat(dt_str.replace("Z", ""))
+                            ts = int(dt_obj.timestamp())
+                    except Exception:
+                        pass
+                    if ts <= 0:
+                        ts = int(time.time()) - (total_items - idx) * (900 if is_intraday else 86400)
+
                     parsed.append({
-                        "time": int(time.time()),
+                        "time": ts,
                         "time_str": dt_str,
                         "date": dt_str,
                         "open": float(item.get("Open", 0)),
@@ -474,6 +571,8 @@ async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int
                         "volume": float(item.get("Volume", 0))
                     })
                 if len(parsed) >= 5:
+                    if norm_res in ["W", "M"]:
+                        return aggregate_daily_to_period(parsed, norm_res)[-count:]
                     return parsed
         except Exception as e:
             print(f"SSI Candle parse error: {e}")
@@ -491,7 +590,7 @@ async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int
     now_ts = int(time.time())
     synth_candles = []
     curr = base_price * 0.90
-    step_sec = 60 if norm_res == "1" else (900 if norm_res == "15" else (3600 if norm_res == "60" else 86400))
+    step_sec = 60 if norm_res == "1" else (300 if norm_res == "5" else (900 if norm_res == "15" else (3600 if norm_res == "60" else (86400 * 7 if norm_res == "W" else (86400 * 30 if norm_res == "M" else 86400)))))
     for i in range(count, 0, -1):
         ts = now_ts - i * step_sec
         dt = datetime.fromtimestamp(ts)

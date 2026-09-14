@@ -831,9 +831,160 @@ class TestIERM(unittest.TestCase):
             self.assertIn("pe", data["all_timeframes"][tf])
             self.assertIn("pb", data["all_timeframes"][tf])
 
+    def test_company_news_and_events_interactive(self):
+        """Kiểm tra API /api/company-news-events/{ticker} trả về đầy đủ tin tức, sự kiện, tóm tắt, điểm nhấn và link web"""
+        for ticker in ["SSI", "HPG", "VNM", "FPT", "VIC"]:
+            resp = self.client.get(f"/api/company-news-events/{ticker}")
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertEqual(data["ticker"], ticker)
+            self.assertIn("news", data)
+            self.assertIn("events", data)
+            self.assertIn("cafef_url", data)
+            self.assertIn("vietstock_url", data)
+            self.assertGreater(len(data["news"]), 0)
+            self.assertGreater(len(data["events"]), 0)
+
+            # Test first news item structure
+            n0 = data["news"][0]
+            self.assertIn("title", n0)
+            self.assertIn("source", n0)
+            self.assertIn("date", n0)
+            self.assertIn("url", n0)
+            self.assertIn("summary", n0)
+            self.assertIn("key_takeaways", n0)
+
+            # Test first event item structure
+            e0 = data["events"][0]
+            self.assertIn("title", e0)
+            self.assertIn("event_type", e0)
+            self.assertIn("details", e0)
+            self.assertIn("url", e0)
+
+    def test_ai_learning_templates_crud(self):
+        """Kiểm tra quản lý Mẫu học (Few-Shot Templates) hệ thống và CRUD mẫu người dùng"""
+        # 1. Danh sách mẫu mặc định
+        resp = self.client.get("/api/ai-learning/templates")
+        self.assertEqual(resp.status_code, 200)
+        tpls = resp.json()
+        self.assertGreaterEqual(len(tpls), 6)
+
+        # Kiểm tra mẫu Thép & Vật liệu xây dựng
+        thep_tpl = next((t for t in tpls if "thep" in t["id"].lower()), None)
+        self.assertIsNotNone(thep_tpl)
+        self.assertTrue(thep_tpl["is_system"])
+        self.assertGreater(len(thep_tpl["catalyst_rules"]), 0)
+        self.assertGreater(len(thep_tpl["thesis_rules"]), 0)
+
+        # 2. Thêm mẫu học mới từ người dùng
+        custom_payload = {
+            "name": "Hóa chất & Phân bón (DGC, DCM)",
+            "sector": "Hóa chất & Phân bón",
+            "keywords": ["dgc", "dcm", "phốt pho vàng", "apatit", "urê", "hóa chất"],
+            "catalyst_rules": [
+                "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
+                "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+            ],
+            "thesis_rules": [
+                "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+            ],
+            "risk_rules": [
+                "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+            ]
+        }
+        resp_add = self.client.post("/api/ai-learning/templates", json=custom_payload)
+        self.assertEqual(resp_add.status_code, 200)
+        add_data = resp_add.json()
+        self.assertEqual(add_data["status"], "SUCCESS")
+        new_tpl_id = add_data["template"]["id"]
+        self.assertFalse(add_data["template"]["is_system"])
+
+        # 3. Kiểm tra mẫu mới đã có trong danh sách
+        resp_after = self.client.get("/api/ai-learning/templates")
+        tpl_ids = [t["id"] for t in resp_after.json()]
+        self.assertIn(new_tpl_id, tpl_ids)
+
+        # 4. Xóa mẫu người dùng tự tạo
+        resp_del = self.client.delete(f"/api/ai-learning/templates/{new_tpl_id}")
+        self.assertEqual(resp_del.status_code, 200)
+
+        # 5. Kiểm tra không được xóa mẫu hệ thống
+        resp_del_sys = self.client.delete("/api/ai-learning/templates/tpl-thep-vat-lieu")
+        self.assertEqual(resp_del_sys.status_code, 400)
+
+    def test_ai_learning_advanced_extraction(self):
+        """Kiểm tra bộ trích xuất Few-Shot Extractor nhận diện sâu sắc Catalysts và Luận điểm"""
+        from ai_learning_engine import extract_advanced_knowledge
+
+        # Test case 1: Thép HPG
+        text_hpg = "HPG chuẩn bị đưa phân kỳ 1 dự án Dung Quất 2 vào vận hành từ cuối năm. Động lực chính đến từ HRC xuất khẩu và tiêu thụ nội địa. Doanh thu dự phóng đạt 155,000 tỷ. Lợi nhuận sau thuế dự phóng đạt 16,500 tỷ."
+        res_hpg = extract_advanced_knowledge(text_hpg, ticker="HPG")
+        self.assertGreaterEqual(res_hpg["confidence_score"], 0.85)
+        self.assertGreaterEqual(len(res_hpg["key_catalysts"]), 3)
+        self.assertIn("Dự án & Capex", res_hpg["categorized_catalysts"])
+        self.assertTrue(any("Dung Quất 2" in c for c in res_hpg["key_catalysts"]))
+
+        # Test case 2: Bán lẻ MWG thông qua engine.extract_financial_data_from_text
+        text_mwg = "MWG ghi nhận chuỗi Bách Hóa Xanh đạt điểm hòa vốn sau thuế và bắt đầu có lãi. Mảng ICT phục hồi doanh thu trên từng cửa hàng."
+        rep_mwg = extract_financial_data_from_text(text_mwg, ticker="MWG")
+        self.assertGreaterEqual(len(rep_mwg.key_catalysts), 3)
+        self.assertTrue(any("Bách Hóa Xanh" in c for c in rep_mwg.key_catalysts))
+
+    def test_ai_learning_config_and_scheduler(self):
+        """Kiểm tra API cấu hình tần suất lập lịch tự động quét và học online"""
+        # 1. Lấy cấu hình
+        resp = self.client.get("/api/ai-learning/config")
+        self.assertEqual(resp.status_code, 200)
+        cfg = resp.json()
+        self.assertIn("interval_hours", cfg)
+        self.assertIn("watchlist", cfg)
+
+        # 2. Cập nhật tần suất và watchlist
+        update_payload = {
+            "interval_hours": 3,
+            "watchlist": ["HPG", "SSI", "FPT", "MWG", "TCH"],
+            "enabled": True
+        }
+        resp_up = self.client.post("/api/ai-learning/config", json=update_payload)
+        self.assertEqual(resp_up.status_code, 200)
+        up_cfg = resp_up.json()
+        self.assertEqual(up_cfg["interval_hours"], 3)
+        self.assertIn("TCH", up_cfg["watchlist"])
+        self.assertIn(":", up_cfg["next_run"])
+
+        # 3. Phục hồi cấu hình chuẩn 6h
+        self.client.post("/api/ai-learning/config", json={"interval_hours": 6})
+
+    def test_ai_learning_trigger_and_history(self):
+        """Kiểm tra kích hoạt chu kỳ tự học online và xem nhật ký & thống kê tri thức"""
+        # 1. Trigger học ngay cho 2 mã
+        resp_trig = self.client.post("/api/ai-learning/trigger-learn", json={"tickers": ["HPG", "SSI"]})
+        self.assertEqual(resp_trig.status_code, 200)
+        data = resp_trig.json()
+        self.assertEqual(data["status"], "SUCCESS")
+        self.assertGreater(data["reports_learned"], 0)
+        self.assertGreater(data["catalysts_extracted"], 0)
+
+        # 2. Kiểm tra nhật ký học
+        resp_hist = self.client.get("/api/ai-learning/history")
+        self.assertEqual(resp_hist.status_code, 200)
+        hist = resp_hist.json()
+        self.assertGreater(len(hist), 0)
+        self.assertIn("ticker", hist[0])
+        self.assertIn("confidence", hist[0])
+
+        # 3. Kiểm tra thống kê tổng quan
+        resp_stats = self.client.get("/api/ai-learning/stats")
+        self.assertEqual(resp_stats.status_code, 200)
+        stats = resp_stats.json()
+        self.assertGreater(stats["total_reports_learned"], 0)
+        self.assertGreater(stats["total_catalysts_accumulated"], 0)
+        self.assertGreater(stats["average_confidence"], 0.8)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 

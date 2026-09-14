@@ -1749,16 +1749,36 @@ def extract_financial_data_from_text(
     else:
         npat_forecast = "Dự phóng tăng trưởng 25.5% YoY"
 
-    # 6. Luận điểm tăng trưởng (Catalysts)
+    # 6. Luận điểm tăng trưởng (Catalysts) & Rủi ro (Tích hợp AI Knowledge Engine)
     catalysts = []
-    cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
-    if cat_blocks:
-        catalysts = [c.strip("-•* 12345.") for c in cat_blocks[:3] if len(c.strip()) > 10]
+    risks = []
+    try:
+        from ai_learning_engine import extract_advanced_knowledge
+        adv = extract_advanced_knowledge(
+            raw_text=text,
+            ticker=ticker,
+            current_market_price=ref_market_price
+        )
+        if adv.get("key_catalysts"):
+            catalysts = adv["key_catalysts"]
+        if adv.get("key_risks"):
+            risks = adv["key_risks"]
+        if rev_forecast == "Dự phóng tăng trưởng 18.0% YoY" and adv.get("revenue_forecast"):
+            rev_forecast = adv["revenue_forecast"]
+        if npat_forecast == "Dự phóng tăng trưởng 25.5% YoY" and adv.get("npat_forecast"):
+            npat_forecast = adv["npat_forecast"]
+    except Exception as e:
+        pass
+
     if len(catalysts) < 3:
-        bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,150})", text)
-        for b in bullets:
-            if b not in catalysts and len(catalysts) < 3:
-                catalysts.append(b.strip())
+        cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
+        if cat_blocks:
+            catalysts = [c.strip("-•* 12345.") for c in cat_blocks[:3] if len(c.strip()) > 10]
+        if len(catalysts) < 3:
+            bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,150})", text)
+            for b in bullets:
+                if b not in catalysts and len(catalysts) < 3:
+                    catalysts.append(b.strip())
 
     if len(catalysts) < 3:
         clean_tick_str = ticker or "doanh nghiệp"
@@ -1770,10 +1790,10 @@ def extract_financial_data_from_text(
         catalysts.extend(defaults[len(catalysts):3])
 
     # 7. Rủi ro
-    risks = []
-    risk_blocks = re.findall(r"(?:rủi ro|downside risk)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
-    if risk_blocks:
-        risks = [r.strip("-•* 12345.") for r in risk_blocks[:2] if len(r.strip()) > 10]
+    if not risks:
+        risk_blocks = re.findall(r"(?:rủi ro|downside risk)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
+        if risk_blocks:
+            risks = [r.strip("-•* 12345.") for r in risk_blocks[:2] if len(r.strip()) > 10]
     if not risks:
         risks = [
             "Biến động giá nguyên liệu đầu vào và rủi ro tỷ giá hối đoái.",

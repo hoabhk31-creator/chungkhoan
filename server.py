@@ -85,6 +85,11 @@ from ssi_fastconnect import (
     get_stock_depth_metrics,
     get_market_overview
 )
+from ai_learning_engine import (
+    ai_scheduler,
+    template_store,
+    extract_advanced_knowledge
+)
 
 app = FastAPI(
     title="Institutional Equity Research Matrix (IERM)",
@@ -122,12 +127,17 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.on_event("startup")
 async def startup_event():
-    """Tự động làm nóng bộ nhớ đệm bảng giá SSI toàn thị trường ngay khi server khởi động."""
+    """Tự động làm nóng bộ nhớ đệm bảng giá SSI toàn thị trường và khởi động AI Learning Scheduler ngầm."""
     try:
         from crawler import fetch_ssi_live_stock_quote
         asyncio.create_task(fetch_ssi_live_stock_quote("HPG"))
     except Exception as e:
         print(f"SSI startup pre-warm exception: {e}")
+
+    try:
+        asyncio.create_task(ai_scheduler.start_background_loop())
+    except Exception as e:
+        print(f"AI Learning Scheduler startup exception: {e}")
 
 
 
@@ -154,6 +164,29 @@ class ReconcileRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     report_data: FullMatrixReport
+
+
+class TemplateCreateUpdateRequest(BaseModel):
+    id: Optional[str] = None
+    name: str
+    sector: str
+    keywords: List[str] = []
+    catalyst_rules: List[str] = []
+    thesis_rules: List[str] = []
+    risk_rules: List[str] = []
+    sample_text: Optional[str] = ""
+
+
+class LearningConfigRequest(BaseModel):
+    enabled: Optional[bool] = None
+    interval_hours: Optional[int] = None
+    watchlist: Optional[List[str]] = None
+    auto_ingest_matrix: Optional[bool] = None
+
+
+class TriggerLearnRequest(BaseModel):
+    tickers: Optional[List[str]] = None
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -785,7 +818,7 @@ async def get_ssi_market_overview():
 
 
 @app.get("/api/technical/{ticker}")
-async def get_technical_signals(ticker: str, resolution: str = "D", count: int = 120):
+async def get_technical_signals(ticker: str, resolution: str = "D", count: int = 350):
     """
     Truy xuất dữ liệu nến kỹ thuật thực tế và tính toán đầy đủ các chỉ báo kỹ thuật:
     MA20, MA50, MA200, EMA20, RSI(14), MACD(12,26,9), Bollinger Bands, Pivot Points (S1-S3, R1-R3).
@@ -963,6 +996,81 @@ async def api_analyze_raw(req: RawTextAnalysisRequest):
         current_market_price=market_p
     )
     return report
+
+
+# -------------------------------------------------------------
+# AI SELF-LEARNING & AUTONOMOUS CRAWLER ENDPOINTS
+# -------------------------------------------------------------
+
+@app.get("/api/ai-learning/config")
+async def api_get_ai_learning_config():
+    """Lấy cấu hình tự học: tần suất quét, watchlist, trạng thái."""
+    return ai_scheduler.get_config()
+
+
+@app.post("/api/ai-learning/config")
+async def api_save_ai_learning_config(req: LearningConfigRequest):
+    """Cập nhật cấu hình tự động quét và tần suất học online."""
+    updates = {}
+    if req.enabled is not None:
+        updates["enabled"] = req.enabled
+    if req.interval_hours is not None:
+        updates["interval_hours"] = req.interval_hours
+    if req.watchlist is not None:
+        updates["watchlist"] = req.watchlist
+    if req.auto_ingest_matrix is not None:
+        updates["auto_ingest_matrix"] = req.auto_ingest_matrix
+    return ai_scheduler.update_config(updates)
+
+
+@app.get("/api/ai-learning/templates")
+async def api_list_ai_templates():
+    """Liệt kê toàn bộ các Mẫu học (Few-Shot Templates) hệ thống và tùy biến của người dùng."""
+    return template_store.list_all()
+
+
+@app.post("/api/ai-learning/templates")
+async def api_save_ai_template(req: TemplateCreateUpdateRequest):
+    """Thêm mới hoặc cập nhật một Mẫu học trích xuất Catalysts/Luận điểm."""
+    data = req.model_dump() if hasattr(req, "model_dump") else req.dict()
+    saved = template_store.add_or_update(data)
+    return {"status": "SUCCESS", "template": saved}
+
+
+@app.delete("/api/ai-learning/templates/{template_id}")
+async def api_delete_ai_template(template_id: str):
+    """Xóa mẫu học do người dùng tự tạo."""
+    success = template_store.delete(template_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Không thể xóa mẫu hệ thống hoặc mẫu không tồn tại")
+    return {"status": "SUCCESS", "message": f"Đã xóa thành công mẫu {template_id}"}
+
+
+@app.post("/api/ai-learning/templates/reset")
+async def api_reset_ai_templates():
+    """Khôi phục danh sách mẫu học về mặc định ban đầu của hệ thống."""
+    tpls = template_store.reset_to_defaults()
+    return {"status": "SUCCESS", "templates_count": len(tpls)}
+
+
+@app.post("/api/ai-learning/trigger-learn")
+async def api_trigger_ai_learn(req: Optional[TriggerLearnRequest] = None):
+    """Kích hoạt tiến trình quét và học online ngay lập tức."""
+    target_tickers = req.tickers if req else None
+    res = await ai_scheduler.run_learning_cycle(target_tickers=target_tickers)
+    return res
+
+
+@app.get("/api/ai-learning/history")
+async def api_get_ai_learning_history(limit: int = 30):
+    """Xem nhật ký các tài liệu báo cáo phân tích mà AI đã quét và tự học."""
+    return ai_scheduler.get_history(limit=limit)
+
+
+@app.get("/api/ai-learning/stats")
+async def api_get_ai_learning_stats():
+    """Thống kê tổng quan năng lực tự học: tổng mẫu, số catalysts tích lũy, độ tin cậy."""
+    return ai_scheduler.get_stats()
 
 
 @app.post("/api/reconcile")
