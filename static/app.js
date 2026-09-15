@@ -26,6 +26,7 @@ let chartTechnicalVolume = null;
 
 // Overview Tab (Tab 1) Chart instances & state tracker
 let chartOverviewTv = null;
+let chartOverviewVolTv = null; // Chart instance riêng cho Volume sub-chart
 let chartOverviewCandleSeries = null;
 let chartOverviewVolumeSeries = null;
 let chartOverviewMa20Series = null;
@@ -261,6 +262,12 @@ function switchTab(tabId) {
             if (box && box.clientWidth > 0 && box.clientHeight > 0) {
                 chartOverviewTv.resize(box.clientWidth, box.clientHeight);
                 chartOverviewTv.timeScale().fitContent();
+            }
+        }
+        if (chartOverviewVolTv) {
+            const volBox = document.getElementById("overview-volume-chart-box");
+            if (volBox && volBox.clientWidth > 0 && volBox.clientHeight > 0) {
+                chartOverviewVolTv.resize(volBox.clientWidth, volBox.clientHeight);
             }
         }
         if (chartOverviewMiniPrice) chartOverviewMiniPrice.resize();
@@ -1875,9 +1882,21 @@ function renderOverviewHeaderAndStats(data) {
     if (!data) return;
     const isDark = document.documentElement.classList.contains("dark");
     
-    // Ticker badge
+    // Ticker badge — màu theo tăng/giảm/tham chiếu
     const badgeSym = document.getElementById("overview-mini-badge-symbol");
-    if (badgeSym) badgeSym.textContent = data.ticker || "SSI";
+    if (badgeSym) {
+        badgeSym.textContent = data.ticker || "SSI";
+        const curP = Number(data.current_price || 0);
+        const refP = Number(data.ref_price || 0);
+        const chgInit = Number(data.change || 0) || (refP > 0 ? curP - refP : 0);
+        if (chgInit > 0) {
+            badgeSym.className = "px-2.5 py-1 rounded bg-emerald-600 text-white font-mono font-bold text-xs transition-colors duration-300";
+        } else if (chgInit < 0) {
+            badgeSym.className = "px-2.5 py-1 rounded bg-rose-600 text-white font-mono font-bold text-xs transition-colors duration-300";
+        } else {
+            badgeSym.className = "px-2.5 py-1 rounded bg-amber-500 text-white font-mono font-bold text-xs transition-colors duration-300";
+        }
+    }
     
     // Price
     const priceEl = document.getElementById("overview-mini-price");
@@ -1886,8 +1905,15 @@ function renderOverviewHeaderAndStats(data) {
     // Price Change
     const changeWrap = document.getElementById("overview-mini-change-wrapper");
     const changeEl = document.getElementById("overview-mini-change");
-    const chg = Number(data.change || 0);
-    const chgPct = Number(data.change_pct || 0);
+    let chg = Number(data.change || 0);
+    let chgPct = Number(data.change_pct || 0);
+    // Nếu API trả về change = 0 nhưng có ref_price → tính lại từ giá thực
+    const curP = Number(data.current_price || 0);
+    const refP = Number(data.ref_price || 0);
+    if (chg === 0 && curP > 0 && refP > 0) {
+        chg = curP - refP;
+        chgPct = (chg / refP) * 100;
+    }
     const isUp = chg > 0;
     const isDown = chg < 0;
     
@@ -1955,7 +1981,10 @@ function renderOverviewHeaderAndStats(data) {
     setVal("stat-ov-foreign-buy", `${data.foreign_buy >= 0 ? '+' : ''}${Number(data.foreign_buy || 0).toLocaleString("vi-VN")}`);
     setVal("stat-ov-foreign-room", data.foreign_ownership_pct ? `${Number(data.foreign_ownership_pct).toFixed(2)}%` : "N/A");
     setVal("stat-ov-eps", data.eps ? `${Number(data.eps).toLocaleString("vi-VN")} đ` : "N/A");
-    setVal("stat-ov-fpe", data.forward_pe ? Number(data.forward_pe).toFixed(2) : "N/A");
+    // P/E (TTM) grid — đồng nhất với top card stat-ov-pe
+    setVal("stat-ov-fpe", data.pe ? Number(data.pe).toFixed(2) : "N/A");
+    // P/B (TTM) grid — đồng nhất với top card stat-ov-pb
+    setVal("stat-ov-pbgrid", data.pb ? Number(data.pb).toFixed(2) : "N/A");
     setVal("stat-ov-bvps", data.bvps ? `${Number(data.bvps).toLocaleString("vi-VN")} đ` : "N/A");
 }
 
@@ -2097,15 +2126,102 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
         }
         chartOverviewCandleSeries = mainSeries;
 
-        // 2. Volume Histogram Series (Hiển thị cột khối lượng ở đáy biểu đồ)
-        chartOverviewVolumeSeries = createSeries("HistogramSeries", {
-            priceFormat: { type: "volume" },
-            priceScaleId: "",
-            scaleMargins: {
-                top: 0.82,
-                bottom: 0,
+        // 2. Volume — Chart Instance Riêng (tách khỏi price chart để không trồng chéo)
+        chartOverviewVolumeSeries = null; // reset trước
+        const volBox = document.getElementById("overview-volume-chart-box");
+        if (volBox) {
+            volBox.innerHTML = "";
+            // Destroy cũ nếu có
+            if (chartOverviewVolTv) {
+                try { chartOverviewVolTv.remove(); } catch (e) {}
+                chartOverviewVolTv = null;
             }
-        });
+            const volBoxW = volBox.clientWidth || 700;
+            const volBoxH = volBox.clientHeight || 80;
+            const volChart = LightweightCharts.createChart(volBox, {
+                width: volBoxW,
+                height: volBoxH,
+                layout: {
+                    background: { color: bgColor },
+                    textColor: textColor,
+                    fontFamily: fontFam,
+                    fontSize: 10
+                },
+                grid: {
+                    vertLines: { color: "transparent" },
+                    horzLines: { color: gridColor }
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode ? LightweightCharts.CrosshairMode.Normal : 0,
+                    vertLine: {
+                        color: isDark ? "#0284c7" : "#0284c7",
+                        width: 1,
+                        style: LightweightCharts.LineStyle ? LightweightCharts.LineStyle.Dashed : 2,
+                        labelBackgroundColor: isDark ? "#082f49" : "#0284c7"
+                    },
+                    horzLine: { visible: false }
+                },
+                rightPriceScale: {
+                    borderColor: gridColor,
+                    scaleMargins: { top: 0.05, bottom: 0.02 }
+                },
+                timeScale: {
+                    borderColor: gridColor,
+                    timeVisible: resolution !== "D" && resolution !== "W" && resolution !== "M",
+                    secondsVisible: false,
+                    visible: false  // ẩn thanh thời gian trên volume chart (hiển thị ở price chart)
+                },
+                handleScroll: {
+                    mouseWheel: true,
+                    pressedMouseMove: true,
+                    horzTouchDrag: true
+                },
+                handleScale: {
+                    axisPressedMouseMove: true,
+                    mouseWheel: true,
+                    pinch: true
+                }
+            });
+            chartOverviewVolTv = volChart;
+
+            // Tạo HistogramSeries trên chart volume riêng
+            let volSeries = null;
+            try {
+                if (typeof volChart.addHistogramSeries === "function") {
+                    volSeries = volChart.addHistogramSeries({ priceFormat: { type: "volume" } });
+                } else if (typeof volChart.addSeries === "function" && LightweightCharts["HistogramSeries"]) {
+                    volSeries = volChart.addSeries(LightweightCharts["HistogramSeries"], { priceFormat: { type: "volume" } });
+                }
+            } catch (ve) { console.warn("createVolumeSeries error:", ve); }
+            chartOverviewVolumeSeries = volSeries;
+
+            // Đồng bộ timescale giữa price chart và volume chart
+            chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (range && chartOverviewVolTv) {
+                    try { chartOverviewVolTv.timeScale().setVisibleLogicalRange(range); } catch (e) {}
+                }
+            });
+            volChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (range && chartOverviewTv) {
+                    try { chartOverviewTv.timeScale().setVisibleLogicalRange(range); } catch (e) {}
+                }
+            });
+
+            // ResizeObserver cho volume chart
+            if (window.ResizeObserver && !volBox.dataset.resizeObserved) {
+                volBox.dataset.resizeObserved = "true";
+                const roVol = new ResizeObserver(entries => {
+                    if (!chartOverviewVolTv) return;
+                    for (let entry of entries) {
+                        const cr = entry.contentRect;
+                        if (cr.width > 50 && cr.height > 10) {
+                            chartOverviewVolTv.resize(cr.width, cr.height);
+                        }
+                    }
+                });
+                roVol.observe(volBox);
+            }
+        }
 
         // 3. MA Indicators
         chartOverviewMa20Series = createSeries("LineSeries", {
@@ -7740,7 +7856,18 @@ function openIngestionModal() {
     const rawTicker = document.getElementById("raw-ticker-input");
     const pdfInst = document.getElementById("pdf-inst-input");
 
-    if (crawlInput) crawlInput.value = currentTicker;
+    if (crawlInput) {
+        crawlInput.value = currentTicker;
+        if (!crawlInput.dataset.enterBound) {
+            crawlInput.dataset.enterBound = "true";
+            crawlInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+        }
+    }
     if (urlTicker) urlTicker.value = currentTicker;
     if (pdfTicker) pdfTicker.value = currentTicker;
     if (rawTicker) rawTicker.value = currentTicker;
@@ -7801,7 +7928,7 @@ function switchIngestMode(modeId) {
 // Mode 1: Search & Crawl (Mục đánh dấu khung đỏ)
 async function performSearch() {
     const input = document.getElementById("crawl-ticker-input");
-    const ticker = (input.value || (currentReport ? currentReport.ticker : "HPG")).trim().toUpperCase();
+    const ticker = (input?.value || (currentReport ? currentReport.ticker : "HPG")).trim().toUpperCase();
     if (!ticker) {
         showToast("Vui lòng nhập mã cổ phiếu để quét báo cáo!", true);
         return;
@@ -7810,51 +7937,77 @@ async function performSearch() {
     const btn = document.getElementById("btn-perform-search");
     if (btn) {
         btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang Quét...</span>`;
+        btn.disabled = true;
         if (window.lucide) lucide.createIcons();
     }
 
     const box = document.getElementById("search-results-box");
-    box.innerHTML = `<div class="text-cyan-400 flex items-center justify-center gap-2 p-4 bg-slate-950/60 rounded-lg border border-slate-800">
-        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-        <span>Đang quét kho dữ liệu Vietstock eDocs, CafeF, SSI, HSC, Vietcap cho mã ${ticker}...</span>
-    </div>`;
-    if (window.lucide) lucide.createIcons();
+    if (box) {
+        box.innerHTML = `<div class="text-cyan-400 flex items-center justify-center gap-2 p-4 bg-slate-950/60 rounded-lg border border-slate-800">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+            <span>Đang quét kho dữ liệu Vietstock eDocs, CafeF, SSI, HSC, Vietcap cho mã ${ticker}...</span>
+        </div>`;
+        if (window.lucide) lucide.createIcons();
+    }
 
     try {
-        const resp = await fetch(`/api/search?ticker=${ticker}`);
+        const resp = await fetch(`/api/search?ticker=${encodeURIComponent(ticker)}`);
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({ detail: "Lỗi kết nối máy chủ" }));
+            throw new Error(errData.detail || "Không thể tìm kiếm báo cáo");
+        }
         const data = await resp.json();
         
-        if (!data.results || data.results.length === 0) {
-            box.innerHTML = `<div class="p-4 text-center bg-slate-950/40 rounded border border-slate-800">
-                <p class="text-amber-400">Không tìm thấy báo cáo tự động cho mã ${ticker}.</p>
-                <p class="text-slate-400 text-[11px] mt-1">Hãy chuyển sang tab "Nhập URL Trực Tiếp", "Tải File PDF", hoặc "Dán Text Thô" để nạp dữ liệu.</p>
-            </div>`;
+        if (!data || !data.results || data.results.length === 0) {
+            if (box) {
+                box.innerHTML = `<div class="p-4 text-center bg-slate-950/40 rounded border border-slate-800">
+                    <p class="text-amber-400">Không tìm thấy báo cáo tự động cho mã ${ticker}.</p>
+                    <p class="text-slate-400 text-[11px] mt-1">Hãy chuyển sang tab "Nhập URL Trực Tiếp", "Tải File PDF", hoặc "Dán Text Thô" để nạp dữ liệu.</p>
+                </div>`;
+            }
             return;
         }
 
         let html = `<div class="space-y-2.5">`;
         data.results.forEach((item, idx) => {
-            const encodedUrl = encodeURIComponent(item.url);
-            const encodedTitle = encodeURIComponent(item.title);
+            const rawInst = item.institution || "CTCK";
+            const rawUrl = item.url || "";
+            const rawTitle = item.title || `Báo cáo ${ticker}`;
+            const encodedInst = encodeURIComponent(rawInst);
+            const encodedUrl = encodeURIComponent(rawUrl);
+            const encodedTitle = encodeURIComponent(rawTitle);
+            const encodedTicker = encodeURIComponent(ticker);
             const btnId = `btn-extract-${idx}`;
 
-            // Check if already in current matrix
-            const alreadyAdded = currentReport && currentReport.matrix_table.some(r => r.institution.toLowerCase().includes(item.institution.toLowerCase().split(' ')[0]));
+            // Safe check if already in current matrix
+            let alreadyAdded = false;
+            try {
+                if (currentReport && Array.isArray(currentReport.matrix_table)) {
+                    const instKeyword = rawInst.toLowerCase().split(' ')[0];
+                    alreadyAdded = currentReport.matrix_table.some(r => 
+                        r && r.institution && typeof r.institution === "string" && 
+                        r.institution.toLowerCase().includes(instKeyword)
+                    );
+                }
+            } catch (e) {
+                alreadyAdded = false;
+            }
 
             html += `<div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:border-slate-700 transition-colors">
                 <div class="space-y-1">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-white font-bold text-xs font-mono">${item.institution}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">(${item.date})</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">${item.source}</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">${item.type}</span>
+                        <span class="text-white font-bold text-xs font-mono">${item.institution || "CTCK"}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">(${item.date || ""})</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">${item.source || "eDocs"}</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">${item.type || "Research"}</span>
                     </div>
-                    <div class="text-[11px] text-slate-300 font-sans line-clamp-1">${item.title}</div>
+                    <div class="text-[11px] text-slate-300 font-sans line-clamp-1">${item.title || ""}</div>
                     <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                        <span class="truncate max-w-xs">${item.url}</span>
+                        <span class="truncate max-w-xs">${item.url || ""}</span>
+                        ${item.url ? `
                         <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline flex items-center gap-0.5">
                             <span>Mở link</span><i data-lucide="external-link" class="w-2.5 h-2.5"></i>
-                        </a>
+                        </a>` : ''}
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
@@ -7864,7 +8017,7 @@ async function performSearch() {
                             <span>Đã Trong Ma Trận</span>
                         </button>
                     ` : `
-                        <button id="${btnId}" onclick="addDiscoveredReport('${item.institution}', '${ticker}', '${encodedUrl}', '${encodedTitle}', '${btnId}')" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
+                        <button id="${btnId}" onclick="addDiscoveredReport('${encodedInst}', '${encodedTicker}', '${encodedUrl}', '${encodedTitle}', '${btnId}')" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
                             <i data-lucide="download" class="w-3.5 h-3.5"></i>
                             <span>+ Bóc Tách</span>
                         </button>
@@ -7873,22 +8026,28 @@ async function performSearch() {
             </div>`;
         });
         html += `</div>`;
-        box.innerHTML = html;
+        if (box) box.innerHTML = html;
         if (window.lucide) lucide.createIcons();
     } catch (err) {
-        box.innerHTML = `<div class="p-3 bg-rose-950/40 border border-rose-800 text-rose-300 rounded text-xs font-mono">Lỗi tìm kiếm: ${err.message}</div>`;
+        if (box) box.innerHTML = `<div class="p-3 bg-rose-950/40 border border-rose-800 text-rose-300 rounded text-xs font-mono">Lỗi tìm kiếm: ${err.message}</div>`;
     } finally {
         if (btn) {
+            btn.disabled = false;
             btn.innerHTML = `<i data-lucide="search" class="w-3.5 h-3.5"></i><span>Quét Báo Cáo</span>`;
             if (window.lucide) lucide.createIcons();
         }
     }
 }
 
-async function addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle, btnId) {
+async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encodedTitle, btnId) {
+    const institution = decodeURIComponent(encodedInst);
+    const ticker = decodeURIComponent(encodedTicker);
+    const rawUrl = decodeURIComponent(encodedUrl);
+    const title = decodeURIComponent(encodedTitle);
+
     if (!isAdminAuthenticated()) {
         openAdminAuthModal(() => {
-            addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle, btnId);
+            addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encodedTitle, btnId);
         });
         return;
     }
@@ -7902,8 +8061,6 @@ async function addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle
         if (window.lucide) lucide.createIcons();
     }
 
-    const rawUrl = decodeURIComponent(encodedUrl);
-    const title = decodeURIComponent(encodedTitle);
     showToast(`Đang tải file/link và bóc tách định lượng từ ${institution}...`);
 
     try {
@@ -8505,18 +8662,195 @@ async function triggerAiLearningNow() {
     }
 }
 
+// -------------------------------------------------------------
+// AI TEMPLATES & MULTIMODAL IMAGE LEARNING HANDLERS (ADMIN ONLY)
+// -------------------------------------------------------------
+let selectedTemplateImageFile = null;
+
+function handleTemplateImageSelect(event) {
+    const file = event.target.files && event.target.files[0];
+    if (file) {
+        previewTemplateImage(file);
+    }
+}
+
+function handleTemplateImageDrop(event) {
+    event.preventDefault();
+    const dropzone = document.getElementById("tpl-image-dropzone");
+    if (dropzone) dropzone.classList.remove("border-cyan-400", "bg-cyan-950/30");
+    const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+    if (file) {
+        previewTemplateImage(file);
+    }
+}
+
+function previewTemplateImage(file) {
+    selectedTemplateImageFile = file;
+    const placeholder = document.getElementById("tpl-image-placeholder");
+    const previewBox = document.getElementById("tpl-image-preview-box");
+    const nameEl = document.getElementById("tpl-image-name");
+    const sizeEl = document.getElementById("tpl-image-size");
+    const imgEl = document.getElementById("tpl-image-preview-img");
+
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) sizeEl.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+
+    if (imgEl && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imgEl.src = e.target.result;
+            imgEl.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    if (placeholder) placeholder.classList.add("hidden");
+    if (previewBox) previewBox.classList.remove("hidden");
+    if (window.lucide) lucide.createIcons();
+
+    showToast(`Đã chọn ảnh [${file.name}]. Bấm "⚡ AI Đọc & Trích Xuất" để bóc tách tri thức.`);
+}
+
+function removeTemplateImage() {
+    selectedTemplateImageFile = null;
+    const fileInput = document.getElementById("tpl-image-file-input");
+    if (fileInput) fileInput.value = "";
+
+    const placeholder = document.getElementById("tpl-image-placeholder");
+    const previewBox = document.getElementById("tpl-image-preview-box");
+    const statusBox = document.getElementById("tpl-image-ai-status");
+
+    if (placeholder) placeholder.classList.remove("hidden");
+    if (previewBox) previewBox.classList.add("hidden");
+    if (statusBox) statusBox.classList.add("hidden");
+    if (window.lucide) lucide.createIcons();
+}
+
+async function analyzeTemplateImage() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            analyzeTemplateImage();
+        });
+        return;
+    }
+
+    if (!selectedTemplateImageFile) {
+        showToast("Vui lòng chọn hoặc kéo thả một hình ảnh trước!", true);
+        return;
+    }
+
+    const btn = document.getElementById("btn-ai-analyze-image");
+    const statusBox = document.getElementById("tpl-image-ai-status");
+    const statusText = document.getElementById("tpl-image-ai-status-text");
+
+    let origBtnHtml = "";
+    if (btn) {
+        origBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang phân tích...</span>`;
+    }
+
+    if (statusBox) {
+        statusBox.classList.remove("hidden");
+        if (statusText) statusText.textContent = "AI đang đọc biểu đồ / bảng số liệu và trích xuất ngữ nghĩa tài chính...";
+    }
+    if (window.lucide) lucide.createIcons();
+
+    try {
+        const formData = new FormData();
+        formData.append("file", selectedTemplateImageFile);
+        const currentTicker = (currentReport ? currentReport.ticker : "HPG").toUpperCase();
+        formData.append("ticker", currentTicker);
+
+        const resp = await fetch("/api/ai-learning/analyze-template-image", {
+            method: "POST",
+            headers: {
+                ...getAdminAuthHeaders()
+            },
+            body: formData
+        });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({ detail: "Lỗi AI phân tích hình ảnh" }));
+            throw new Error(errData.detail || "Không thể phân tích ảnh");
+        }
+
+        const data = await resp.json();
+
+        // Tự động điền dữ liệu vào form
+        const nameInput = document.getElementById("tpl-input-name");
+        const sectorInput = document.getElementById("tpl-input-sector");
+        const kwInput = document.getElementById("tpl-input-keywords");
+        const catInput = document.getElementById("tpl-input-catalysts");
+        const thesisInput = document.getElementById("tpl-input-theses");
+        const riskInput = document.getElementById("tpl-input-risks");
+
+        if (nameInput && data.name) nameInput.value = data.name;
+        if (sectorInput && data.sector) sectorInput.value = data.sector;
+        if (kwInput && data.keywords && Array.isArray(data.keywords)) kwInput.value = data.keywords.join(", ");
+        if (catInput && data.catalyst_rules && Array.isArray(data.catalyst_rules)) catInput.value = data.catalyst_rules.join("\n");
+        if (thesisInput && data.thesis_rules && Array.isArray(data.thesis_rules)) thesisInput.value = data.thesis_rules.join("\n");
+        if (riskInput && data.risk_rules && Array.isArray(data.risk_rules)) riskInput.value = data.risk_rules.join("\n");
+
+        if (statusBox) {
+            statusBox.className = "text-[11px] p-2 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-300 flex items-center gap-2";
+            if (statusText) statusText.innerHTML = `✓ <strong>Đã phân tích & ghi nhớ thành công!</strong> Đã tự động điền các trường bóc tách theo ngành <strong>${data.sector || ''}</strong>.`;
+        }
+
+        showToast(`AI đã trích xuất thành công tri thức từ ảnh [${selectedTemplateImageFile.name}]!`);
+    } catch (err) {
+        console.error("analyzeTemplateImage error:", err);
+        if (statusBox) {
+            statusBox.className = "text-[11px] p-2 rounded bg-rose-950/80 border border-rose-800 text-rose-300 flex items-center gap-2";
+            if (statusText) statusText.textContent = `Lỗi: ${err.message}`;
+        }
+        showToast(`Lỗi phân tích hình ảnh: ${err.message}`, true);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origBtnHtml || `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i><span>⚡ AI Đọc & Trích Xuất</span>`;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
 function openAddTemplateModal() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            openAddTemplateModal();
+        });
+        return;
+    }
     const m = document.getElementById("add-template-modal");
-    if (m) m.classList.remove("hidden");
+    if (m) {
+        m.classList.remove("hidden");
+        // Reset image dropzone state
+        removeTemplateImage();
+    }
     if (window.lucide) lucide.createIcons();
 }
 
 function closeAddTemplateModal() {
     const m = document.getElementById("add-template-modal");
     if (m) m.classList.add("hidden");
+    removeTemplateImage();
 }
 
 async function saveCustomTemplate() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            saveCustomTemplate();
+        });
+        return;
+    }
+
     const name = (document.getElementById("tpl-input-name")?.value || "").trim();
     const sector = (document.getElementById("tpl-input-sector")?.value || "").trim();
     const rawKw = (document.getElementById("tpl-input-keywords")?.value || "").trim();
@@ -8537,7 +8871,10 @@ async function saveCustomTemplate() {
     try {
         const resp = await fetch("/api/ai-learning/templates", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
             body: JSON.stringify({
                 name: name,
                 sector: sector,
@@ -8547,9 +8884,17 @@ async function saveCustomTemplate() {
                 risk_rules: riskRules
             })
         });
-        if (!resp.ok) throw new Error("Lỗi khi thêm mẫu học");
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
+        if (!resp.ok) throw new Error("Lỗi khi lưu mẫu huấn luyện");
         closeAddTemplateModal();
-        showToast("Đã thêm Mẫu huấn luyện AI mới thành công!");
+        showToast("Đã thêm Mẫu huấn luyện AI & lưu vào bộ nhớ thành công!");
         loadAiLearningDashboard();
     } catch (e) {
         showToast(`Lỗi: ${e.message}`, true);
@@ -8557,11 +8902,29 @@ async function saveCustomTemplate() {
 }
 
 async function deleteCustomTemplate(templateId) {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            deleteCustomTemplate(templateId);
+        });
+        return;
+    }
+
     if (!confirm("Bạn có chắc chắn muốn xóa mẫu huấn luyện này?")) return;
     try {
         const resp = await fetch(`/api/ai-learning/templates/${encodeURIComponent(templateId)}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                ...getAdminAuthHeaders()
+            }
         });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
         if (!resp.ok) throw new Error("Không thể xóa mẫu");
         showToast("Đã xóa mẫu huấn luyện!");
         loadAiLearningDashboard();
@@ -8571,9 +8934,29 @@ async function deleteCustomTemplate(templateId) {
 }
 
 async function resetTemplatesToDefaults() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            resetTemplatesToDefaults();
+        });
+        return;
+    }
+
     if (!confirm("Khôi phục toàn bộ các mẫu huấn luyện về mặc định ban đầu của hệ thống?")) return;
     try {
-        const resp = await fetch("/api/ai-learning/templates/reset", { method: "POST" });
+        const resp = await fetch("/api/ai-learning/templates/reset", {
+            method: "POST",
+            headers: {
+                ...getAdminAuthHeaders()
+            }
+        });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
         if (!resp.ok) throw new Error("Lỗi khôi phục mẫu");
         showToast("Đã khôi phục các mẫu huấn luyện mặc định!");
         loadAiLearningDashboard();
@@ -8807,16 +9190,40 @@ async function refreshLivePrice(isManual = false) {
         let s0 = null;
         if (priceInfo.sources_comparison && priceInfo.sources_comparison.length > 0) {
             s0 = priceInfo.sources_comparison[0];
-            ovChg = s0.change !== undefined ? Number(s0.change) : (newPrice - (s0.ref_price || newPrice));
-            ovChgPct = s0.change_percent !== undefined ? Number(s0.change_percent) : (s0.ref_price ? ((newPrice - s0.ref_price) / s0.ref_price) * 100 : 0);
+            const rawChg = s0.change !== undefined ? Number(s0.change) : null;
+            const rawPct = s0.change_percent !== undefined ? Number(s0.change_percent) : null;
+            const refP = Number(s0.ref_price || 0);
+            // Nếu change = 0 nhưng có ref_price → tính lại từ giá thực tế
+            if (rawChg !== null && rawChg !== 0) {
+                ovChg = rawChg;
+            } else if (refP > 0) {
+                ovChg = newPrice - refP;
+            }
+            if (rawPct !== null && rawPct !== 0) {
+                ovChgPct = rawPct;
+            } else if (refP > 0) {
+                ovChgPct = (ovChg / refP) * 100;
+            }
         } else {
-            const refP = Number(priceInfo.ref_price || (newPrice * 0.995));
-            ovChg = newPrice - refP;
-            ovChgPct = refP > 0 ? (ovChg / refP) * 100 : 0;
+            const refP = Number(priceInfo.ref_price || 0);
+            if (refP > 0) {
+                ovChg = newPrice - refP;
+                ovChgPct = (ovChg / refP) * 100;
+            }
         }
 
         const ovBadge = document.getElementById("overview-mini-badge-symbol");
-        if (ovBadge) ovBadge.textContent = ticker;
+        if (ovBadge) {
+            ovBadge.textContent = ticker;
+            // Màu badge theo tăng/giảm/tham chiếu (realtime)
+            if (ovChg > 0) {
+                ovBadge.className = "px-2.5 py-1 rounded bg-emerald-600 text-white font-mono font-bold text-xs transition-colors duration-300";
+            } else if (ovChg < 0) {
+                ovBadge.className = "px-2.5 py-1 rounded bg-rose-600 text-white font-mono font-bold text-xs transition-colors duration-300";
+            } else {
+                ovBadge.className = "px-2.5 py-1 rounded bg-amber-500 text-white font-mono font-bold text-xs transition-colors duration-300";
+            }
+        }
 
         const ovPrice = document.getElementById("overview-mini-price");
         if (ovPrice) ovPrice.textContent = Number(newPrice).toLocaleString("vi-VN");

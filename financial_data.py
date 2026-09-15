@@ -3359,7 +3359,7 @@ def get_mini_chart_series(
     p_low = float(live_low) if live_low and live_low > 0 else min(base_price, round(base_price * 0.986, -1))
     p_curr = base_price
 
-    p_change = float(live_change) if live_change is not None else round(p_curr - p_ref, -1)
+    p_change = float(live_change) if live_change is not None else round(p_curr - p_ref, 0)
     p_pct = float(live_pct) if live_pct is not None else (round(((p_curr - p_ref) / p_ref) * 100, 2) if p_ref > 0 else 0.0)
     total_vol = int(live_vol) if live_vol and live_vol > 0 else 12807500
     bid_v = int(live_bid_vol) if live_bid_vol is not None else 1466200

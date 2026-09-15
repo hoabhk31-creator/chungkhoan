@@ -96,7 +96,8 @@ from ssi_fastconnect import (
 from ai_learning_engine import (
     ai_scheduler,
     template_store,
-    extract_advanced_knowledge
+    extract_advanced_knowledge,
+    analyze_template_image_ai
 )
 
 app = FastAPI(
@@ -131,6 +132,9 @@ async def add_no_cache_headers(request, call_next):
     return response
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+DATA_STORAGE_DIR = os.path.join(ROOT_DIR, "data")
+os.makedirs(DATA_STORAGE_DIR, exist_ok=True)
+app.mount("/data", StaticFiles(directory=DATA_STORAGE_DIR), name="data")
 
 
 @app.on_event("startup")
@@ -1064,7 +1068,11 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
 async def search_reports(ticker: str, sector: Optional[str] = ""):
     if not ticker:
         raise HTTPException(status_code=400, detail="Mã cổ phiếu không được để trống")
-    results = await search_institutional_reports(ticker, sector or "")
+    try:
+        results = await search_institutional_reports(ticker.strip().upper(), sector or "")
+    except Exception as e:
+        print(f"Error searching institutional reports for {ticker}: {e}")
+        results = []
     return {
         "ticker": ticker.upper(),
         "total_found": len(results),
@@ -1325,16 +1333,36 @@ async def api_list_ai_templates():
 
 
 @app.post("/api/ai-learning/templates")
-async def api_save_ai_template(req: TemplateCreateUpdateRequest):
-    """Thêm mới hoặc cập nhật một Mẫu học trích xuất Catalysts/Luận điểm."""
+async def api_save_ai_template(
+    req: TemplateCreateUpdateRequest,
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    """Thêm mới hoặc cập nhật một Mẫu học trích xuất Catalysts/Luận điểm (yêu cầu quyền Admin)."""
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization
+    )
     data = req.model_dump() if hasattr(req, "model_dump") else req.dict()
     saved = template_store.add_or_update(data)
     return {"status": "SUCCESS", "template": saved}
 
 
 @app.delete("/api/ai-learning/templates/{template_id}")
-async def api_delete_ai_template(template_id: str):
-    """Xóa mẫu học do người dùng tự tạo."""
+async def api_delete_ai_template(
+    template_id: str,
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    """Xóa mẫu học do người dùng tự tạo (yêu cầu quyền Admin)."""
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization
+    )
     success = template_store.delete(template_id)
     if not success:
         raise HTTPException(status_code=400, detail="Không thể xóa mẫu hệ thống hoặc mẫu không tồn tại")
@@ -1342,10 +1370,53 @@ async def api_delete_ai_template(template_id: str):
 
 
 @app.post("/api/ai-learning/templates/reset")
-async def api_reset_ai_templates():
-    """Khôi phục danh sách mẫu học về mặc định ban đầu của hệ thống."""
+async def api_reset_ai_templates(
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    """Khôi phục danh sách mẫu học về mặc định ban đầu của hệ thống (yêu cầu quyền Admin)."""
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization
+    )
     tpls = template_store.reset_to_defaults()
     return {"status": "SUCCESS", "templates_count": len(tpls)}
+
+
+@app.post("/api/ai-learning/analyze-template-image")
+async def api_analyze_template_image(
+    file: UploadFile = File(...),
+    ticker: Optional[str] = Form(None),
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    """
+    Tải lên hình ảnh báo cáo / bảng số liệu / biểu đồ để AI tự đọc, ghi nhớ
+    và bóc tách thành Mẫu huấn luyện (tên, ngành, từ khóa, catalysts, luận điểm, rủi ro).
+    Yêu cầu quyền Quản trị viên (Admin: 325396).
+    """
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization
+    )
+    try:
+        content = await file.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="Tệp tin hình ảnh rỗng")
+        res = await analyze_template_image_ai(
+            image_bytes=content,
+            filename=file.filename or "image.png",
+            ticker_hint=ticker
+        )
+        return res
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi AI phân tích hình ảnh: {str(e)}")
 
 
 @app.post("/api/ai-learning/trigger-learn")

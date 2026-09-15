@@ -867,8 +867,10 @@ class TestIERM(unittest.TestCase):
             self.assertIn("url", e0)
 
     def test_ai_learning_templates_crud(self):
-        """Kiểm tra quản lý Mẫu học (Few-Shot Templates) hệ thống và CRUD mẫu người dùng"""
-        # 1. Danh sách mẫu mặc định
+        """Kiểm tra quản lý Mẫu học (Few-Shot Templates) hệ thống và CRUD mẫu người dùng (kèm xác thực Admin)"""
+        admin_headers = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
+
+        # 1. Danh sách mẫu mặc định (GET công khai)
         resp = self.client.get("/api/ai-learning/templates")
         self.assertEqual(resp.status_code, 200)
         tpls = resp.json()
@@ -881,7 +883,7 @@ class TestIERM(unittest.TestCase):
         self.assertGreater(len(thep_tpl["catalyst_rules"]), 0)
         self.assertGreater(len(thep_tpl["thesis_rules"]), 0)
 
-        # 2. Thêm mẫu học mới từ người dùng
+        # 2. Thêm mẫu học mới khi không có quyền Admin -> Phải trả về 403 Forbidden
         custom_payload = {
             "name": "Hóa chất & Phân bón (DGC, DCM)",
             "sector": "Hóa chất & Phân bón",
@@ -897,25 +899,39 @@ class TestIERM(unittest.TestCase):
                 "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
             ]
         }
-        resp_add = self.client.post("/api/ai-learning/templates", json=custom_payload)
+        resp_unauth = self.client.post("/api/ai-learning/templates", json=custom_payload)
+        self.assertEqual(resp_unauth.status_code, 403)
+
+        # 3. Thêm mẫu học mới với quyền Admin hợp lệ -> Thành công 200
+        resp_add = self.client.post("/api/ai-learning/templates", json=custom_payload, headers=admin_headers)
         self.assertEqual(resp_add.status_code, 200)
         add_data = resp_add.json()
         self.assertEqual(add_data["status"], "SUCCESS")
         new_tpl_id = add_data["template"]["id"]
         self.assertFalse(add_data["template"]["is_system"])
 
-        # 3. Kiểm tra mẫu mới đã có trong danh sách
+        # 4. Kiểm tra mẫu mới đã có trong danh sách
         resp_after = self.client.get("/api/ai-learning/templates")
         tpl_ids = [t["id"] for t in resp_after.json()]
         self.assertIn(new_tpl_id, tpl_ids)
 
-        # 4. Xóa mẫu người dùng tự tạo
-        resp_del = self.client.delete(f"/api/ai-learning/templates/{new_tpl_id}")
+        # 5. Xóa mẫu người dùng tự tạo (yêu cầu Admin)
+        resp_del = self.client.delete(f"/api/ai-learning/templates/{new_tpl_id}", headers=admin_headers)
         self.assertEqual(resp_del.status_code, 200)
 
-        # 5. Kiểm tra không được xóa mẫu hệ thống
-        resp_del_sys = self.client.delete("/api/ai-learning/templates/tpl-thep-vat-lieu")
+        # 6. Kiểm tra không được xóa mẫu hệ thống
+        resp_del_sys = self.client.delete("/api/ai-learning/templates/tpl-thep-vat-lieu", headers=admin_headers)
         self.assertEqual(resp_del_sys.status_code, 400)
+
+        # 7. Kiểm tra API đọc & phân tích hình ảnh AI
+        fake_img_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc`\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82"
+        files = {"file": ("hpg_report_chart.png", fake_img_bytes, "image/png")}
+        resp_img = self.client.post("/api/ai-learning/analyze-template-image", files=files, data={"ticker": "HPG"}, headers=admin_headers)
+        self.assertEqual(resp_img.status_code, 200)
+        img_data = resp_img.json()
+        self.assertIn("catalyst_rules", img_data)
+        self.assertIn("keywords", img_data)
+        self.assertIn("sector", img_data)
 
     def test_ai_learning_advanced_extraction(self):
         """Kiểm tra bộ trích xuất Few-Shot Extractor nhận diện sâu sắc Catalysts và Luận điểm"""
