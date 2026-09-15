@@ -385,61 +385,114 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
                     <!-- Left: Mini Price Chart & Company Profile (7 cols) -->
-                    <div class="lg:col-span-7 space-y-4">
+                    <div class="lg:col-span-7 space-y-3">
                         <!-- Ticker & Live Price Bar -->
                         <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-800">
-                            <div class="flex items-center space-x-3">
-                                <span class="px-2.5 py-1 rounded bg-rose-600 text-white font-mono font-bold text-xs" id="overview-mini-badge-symbol">SSI</span>
-                                <span class="font-mono text-2xl font-bold text-white tracking-wider" id="overview-mini-price">21,000</span>
+                            <div class="flex items-center space-x-2.5">
+                                <span class="px-2.5 py-1 rounded bg-rose-600 text-white font-mono font-bold text-xs" id="overview-mini-badge-symbol">HPG</span>
+                                <span class="font-mono text-2xl font-bold text-white tracking-wider" id="overview-mini-price">21,700</span>
                                 <span class="flex items-center gap-1 font-mono text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800" id="overview-mini-change-wrapper">
                                     <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                                    <span id="overview-mini-change">+100 (+0.48%)</span>
+                                    <span id="overview-mini-change">+100 (+0.46%)</span>
                                 </span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span id="overview-exchange-tag" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">HOSE</span>
-                                <span id="overview-sector-tag" class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-medium">Chứng khoán</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span id="overview-exchange-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">HOSE</span>
+                                <span id="overview-sector-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-medium">Thép & Vật liệu</span>
+                                <button onclick="switchTab('tab-technical')" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 flex items-center gap-1 transition-all" title="Mở biểu đồ kỹ thuật chuyên sâu">
+                                    <span>Tab Kỹ thuật</span>
+                                    <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Mini Technical Chart Canvas with Reference Line -->
-                        <div class="min-h-[220px] h-56 w-full relative">
-                            <canvas id="chart-overview-mini-price"></canvas>
+                        <!-- TradingView Interactive Chart Controls Bar (OHLC Legend + Type + Resolution + Indicators) -->
+                        <div class="flex items-center justify-between flex-wrap gap-2 px-3 py-1.5 bg-slate-950/90 rounded-t-lg border border-slate-800 text-xs font-mono select-none">
+                            <!-- Realtime OHLC Legend -->
+                            <div class="flex items-center gap-2 text-[11px] text-slate-300 flex-wrap" id="overview-ohlc-legend">
+                                <span class="text-slate-500">O: <strong id="ov-leg-open" class="text-slate-200">21,300</strong></span>
+                                <span class="text-slate-500">H: <strong id="ov-leg-high" class="text-emerald-400">21,400</strong></span>
+                                <span class="text-slate-500">L: <strong id="ov-leg-low" class="text-rose-400">21,150</strong></span>
+                                <span class="text-slate-500">C: <strong id="ov-leg-close" class="text-slate-200">21,200</strong></span>
+                                <span class="text-slate-500">Vol: <strong id="ov-leg-vol" class="text-cyan-300">8.46M</strong></span>
+                            </div>
+
+                            <!-- Right Controls: Resolution, Chart Type, Indicator Toggles -->
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <!-- Resolution Dropdown/Buttons -->
+                                <div class="inline-flex rounded bg-slate-900 border border-slate-800 p-0.5 text-[10px]">
+                                    <button onclick="setOverviewResolution('15')" id="btn-ov-res-15" class="ov-res-btn px-1.5 py-0.5 rounded text-slate-400 hover:text-white font-bold transition-all">15P</button>
+                                    <button onclick="setOverviewResolution('60')" id="btn-ov-res-60" class="ov-res-btn px-1.5 py-0.5 rounded text-slate-400 hover:text-white font-bold transition-all">1H</button>
+                                    <button onclick="setOverviewResolution('D')" id="btn-ov-res-D" class="ov-res-btn active px-1.5 py-0.5 rounded bg-cyan-600 text-white font-bold transition-all">1D</button>
+                                    <button onclick="setOverviewResolution('W')" id="btn-ov-res-W" class="ov-res-btn px-1.5 py-0.5 rounded text-slate-400 hover:text-white font-bold transition-all">1W</button>
+                                </div>
+
+                                <!-- Candle / Line / Area Type -->
+                                <div class="inline-flex rounded bg-slate-900 border border-slate-800 p-0.5 text-[10px]">
+                                    <button onclick="setOverviewChartType('candlestick')" id="btn-ov-type-candle" class="ov-type-btn active px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold transition-all" title="Nến Nhật">🕯️ Nến</button>
+                                    <button onclick="setOverviewChartType('line')" id="btn-ov-type-line" class="ov-type-btn px-2 py-0.5 rounded text-slate-400 hover:text-white font-bold transition-all" title="Đường">📈 Line</button>
+                                    <button onclick="setOverviewChartType('area')" id="btn-ov-type-area" class="ov-type-btn px-2 py-0.5 rounded text-slate-400 hover:text-white font-bold transition-all" title="Vùng">🏔️ Area</button>
+                                </div>
+
+                                <!-- Indicators Toggle -->
+                                <button onclick="toggleOverviewIndicator('ma')" id="btn-ov-toggle-ma" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/60 text-amber-300 border border-amber-800 hover:bg-amber-900/80 transition-all" title="Bật/Tắt đường trung bình MA20/MA50">
+                                    MA
+                                </button>
+                                <button onclick="toggleOverviewIndicator('bb')" id="btn-ov-toggle-bb" class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-950/60 text-indigo-300 border border-indigo-800 hover:bg-indigo-900/80 transition-all" title="Bật/Tắt dải Bollinger Bands">
+                                    BB
+                                </button>
+                                <button onclick="toggleOverviewIndicator('vol')" id="btn-ov-toggle-vol" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-800 hover:bg-emerald-900/80 transition-all" title="Bật/Tắt biểu đồ cột khối lượng Volume">
+                                    VOL
+                                </button>
+                                <button onclick="switchTab('tab-technical')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950/70 text-cyan-300 border border-cyan-800 hover:bg-cyan-900/80 flex items-center gap-1 transition-all" title="Mở Studio vẽ kỹ thuật chuyên sâu (Đường xu hướng, Fibonacci, Thước đo, Kênh giá)">
+                                    <i data-lucide="edit-3" class="w-3 h-3 text-cyan-400"></i>
+                                    <span>Vẽ & Chỉ báo</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Timeframe Selection Bar (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, ALL) with Percent Badges -->
-                        <div class="grid grid-cols-8 gap-1.5 font-mono text-center pt-1" id="overview-timeframe-group">
-                            <button onclick="changeOverviewTimeframe('1D')" id="btn-tf-1D" class="overview-tf-btn active p-1.5 rounded bg-slate-950 border border-cyan-700 text-cyan-300 font-bold transition-all shadow-sm">
+                        <!-- TradingView Interactive Chart Canvas / Box (Hỗ trợ lăn chuột zoom, kéo rê, vẽ, crosshair) -->
+                        <div id="overview-tv-chart-box" class="w-full h-[280px] sm:h-[320px] relative bg-[#090d16] rounded-b-lg border-x border-b border-slate-800 overflow-hidden shadow-inner">
+                            <!-- Injected by LightweightCharts -->
+                        </div>
+
+                        <!-- Timeframe Selection Bar (1D, 5D, 1M, 3M, 6M, YTD, 1Y, 5Y, ALL) with Percent Badges -->
+                        <div class="grid grid-cols-9 gap-1 font-mono text-center pt-1" id="overview-timeframe-group">
+                            <button onclick="changeOverviewTimeframe('1D')" id="btn-tf-1D" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">1D</span>
-                                <span class="block text-[10px] text-emerald-400 mt-0.5" id="tf-pct-1D">+0.48%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-1D">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('5D')" id="btn-tf-5D" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">5D</span>
-                                <span class="block text-[10px] text-rose-400 mt-0.5" id="tf-pct-5D">-0.24%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-5D">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('1M')" id="btn-tf-1M" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">1M</span>
-                                <span class="block text-[10px] text-emerald-400 mt-0.5" id="tf-pct-1M">+4.58%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-1M">0.00%</span>
                             </button>
-                            <button onclick="changeOverviewTimeframe('6M')" id="btn-tf-6M" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
+                            <button onclick="changeOverviewTimeframe('3M')" id="btn-tf-3M" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
+                                <span class="block text-xs font-bold">3M</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-3M">0.00%</span>
+                            </button>
+                            <button onclick="changeOverviewTimeframe('6M')" id="btn-tf-6M" class="overview-tf-btn active p-1.5 rounded bg-slate-950 border border-cyan-700 text-cyan-300 font-bold transition-all shadow-sm">
                                 <span class="block text-xs font-bold">6M</span>
-                                <span class="block text-[10px] text-rose-400 mt-0.5" id="tf-pct-6M">-10.41%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-6M">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('YTD')" id="btn-tf-YTD" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">YTD</span>
-                                <span class="block text-[10px] text-rose-400 mt-0.5" id="tf-pct-YTD">-13.22%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-YTD">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('1Y')" id="btn-tf-1Y" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">1Y</span>
-                                <span class="block text-[10px] text-rose-400 mt-0.5" id="tf-pct-1Y">-29.69%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-1Y">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('5Y')" id="btn-tf-5Y" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">5Y</span>
-                                <span class="block text-[10px] text-rose-400 mt-0.5" id="tf-pct-5Y">-1.16%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-5Y">0.00%</span>
                             </button>
                             <button onclick="changeOverviewTimeframe('ALL')" id="btn-tf-ALL" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">ALL</span>
-                                <span class="block text-[10px] text-emerald-400 mt-0.5" id="tf-pct-ALL">+323.0%</span>
+                                <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-ALL">0.00%</span>
                             </button>
                         </div>
 
@@ -595,40 +648,60 @@
             <!-- ============================================================= -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Tin Tức -->
-                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <h3 class="font-mono font-bold text-sm text-cyan-400 flex items-center gap-2 cursor-pointer hover:underline" onclick="switchTab('tab-matrix')">
-                            <i data-lucide="newspaper" class="w-4 h-4"></i>
-                            <span>Tin tức &gt;</span>
-                        </h3>
-                        <span class="text-[10px] font-mono text-slate-500">Cập nhật 24/7</span>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-cyan-400 flex items-center gap-2 cursor-pointer hover:underline group" onclick="openExternalNewsHub()" title="Nhấp để mở cổng tin tức đầy đủ">
+                                <i data-lucide="newspaper" class="w-4 h-4 text-cyan-400"></i>
+                                <span>Tin tức &gt;</span>
+                                <i data-lucide="external-link" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800">Cập nhật 24/7</span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-slate-800/60 transition-all duration-300" id="overview-news-container">
+                            <!-- Dynamically Injected -->
+                        </div>
                     </div>
-                    <div class="divide-y divide-slate-800/60" id="overview-news-container">
-                        <!-- Dynamically Injected -->
-                    </div>
-                    <div class="text-center pt-2">
-                        <button onclick="switchTab('tab-matrix')" class="px-4 py-1 rounded-full bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-400 hover:text-white font-mono text-xs transition-all inline-flex items-center gap-1">
-                            <span>&or; Xem thêm</span>
+                    <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 flex-wrap">
+                        <button id="btn-toggle-more-news" onclick="toggleMoreNews()" class="px-3.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-300 hover:text-white font-mono text-xs transition-all inline-flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-cyan-400" id="icon-toggle-more-news"></i>
+                            <span id="text-toggle-more-news">Xem thêm tin tức</span>
                         </button>
+                        <a id="link-external-news-hub" href="#" target="_blank" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center gap-1">
+                            <span>CafeF / Vietstock</span>
+                            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Sự Kiện Doanh Nghiệp -->
-                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <h3 class="font-mono font-bold text-sm text-emerald-400 flex items-center gap-2 cursor-pointer hover:underline">
-                            <i data-lucide="calendar" class="w-4 h-4"></i>
-                            <span>Sự kiện &gt;</span>
-                        </h3>
-                        <span class="text-[10px] font-mono text-slate-500">Lịch cổ tức & Quyền</span>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-emerald-400 flex items-center gap-2 cursor-pointer hover:underline group" onclick="openExternalEventsHub()" title="Nhấp để mở lịch sự kiện chi tiết">
+                                <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Sự kiện &gt;</span>
+                                <i data-lucide="external-link" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">Lịch cổ tức & Quyền</span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-slate-800/60 transition-all duration-300" id="overview-events-container">
+                            <!-- Dynamically Injected -->
+                        </div>
                     </div>
-                    <div class="divide-y divide-slate-800/60" id="overview-events-container">
-                        <!-- Dynamically Injected -->
-                    </div>
-                    <div class="text-center pt-2">
-                        <button onclick="switchTab('tab-matrix')" class="px-4 py-1 rounded-full bg-slate-950 border border-slate-800 hover:border-emerald-500 text-slate-400 hover:text-white font-mono text-xs transition-all inline-flex items-center gap-1">
-                            <span>&or; Xem thêm</span>
+                    <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 flex-wrap">
+                        <button id="btn-toggle-more-events" onclick="toggleMoreEvents()" class="px-3.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white font-mono text-xs transition-all inline-flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-emerald-400" id="icon-toggle-more-events"></i>
+                            <span id="text-toggle-more-events">Xem thêm sự kiện</span>
                         </button>
+                        <a id="link-external-events-hub" href="#" target="_blank" class="text-xs font-mono text-emerald-400 hover:text-emerald-300 hover:underline inline-flex items-center gap-1">
+                            <span>Lịch sự kiện Vietstock</span>
+                            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1772,8 +1845,8 @@
                             <i data-lucide="lock" class="w-4 h-4" id="icon-lock"></i>
                         </button>
 
-                        <!-- 9. Clear All Drawings (Thùng rác) -->
-                        <button onclick="clearAllDrawings()" class="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-all" title="Xóa tất cả các đường đã vẽ">
+                        <!-- 9. Clear / Delete Selected Drawing (Thùng rác) -->
+                        <button onclick="clearOrDeleteDrawing()" id="tool-btn-trash" class="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-all" title="Xóa đường vẽ đang chọn (hoặc nhấn Delete / Backspace), hoặc xóa tất cả đường vẽ">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -2236,7 +2309,7 @@
 
     <!-- INGESTION & DATA CRAWLER MODAL -->
     <div id="ingestion-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-3xl w-full p-6 space-y-5 shadow-2xl relative">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-4xl max-h-[92vh] overflow-y-auto w-full p-6 space-y-5 shadow-2xl relative">
             <button onclick="closeIngestionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -2244,9 +2317,9 @@
             <div>
                 <h3 class="font-mono font-bold text-base text-white flex items-center gap-2">
                     <i data-lucide="cloud-download" class="w-5 h-5 text-cyan-400"></i>
-                    THU THẬP & BÓC TÁCH BÁO CÁO PHÂN TÍCH
+                    THU THẬP, BÓC TÁCH & AI TỰ HỌC BÁO CÁO PHÂN TÍCH
                 </h3>
-                <p class="text-xs text-slate-400 mt-1 font-mono">Tự động tải đọc file/link URL, đọc PDF bằng PyPDF hoặc dán text để trích xuất định lượng & tổng hợp vào hệ thống</p>
+                <p class="text-xs text-slate-400 mt-1 font-mono">Tự động tải đọc file/link URL, đọc PDF, cào web online định kỳ và bóc tách sâu Catalysts/Luận điểm theo các mẫu đã huấn luyện</p>
             </div>
 
             <!-- Ingestion Source Tabs -->
@@ -2266,6 +2339,10 @@
                 <button onclick="switchIngestMode('mode-raw')" id="btn-mode-raw" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5">
                     <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
                     <span>4. Dán Text Thô</span>
+                </button>
+                <button onclick="switchIngestMode('mode-ai-learning')" id="btn-mode-ai-learning" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5">
+                    <i data-lucide="brain-circuit" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span class="text-amber-300 font-bold">5. AI Tự Học & Quét Online ⚡</span>
                 </button>
             </div>
 
@@ -2362,6 +2439,179 @@
                     <span>Bóc Tách Bằng AI & Tổng Hợp Vào Hệ Thống</span>
                 </button>
             </div>
+
+            <!-- Mode 5: AI Self-Learning & Online Autonomous Learning -->
+            <div id="mode-ai-learning" class="ingest-panel hidden space-y-4">
+                <!-- Banner Thống kê năng lực tri thức -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                    <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex flex-col">
+                        <span class="text-slate-400 text-[10px]">MẪU HỌC NGÀNH</span>
+                        <span id="ai-stat-templates" class="text-amber-400 font-bold text-base mt-0.5">6 Mẫu</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex flex-col">
+                        <span class="text-slate-400 text-[10px]">BÁO CÁO ĐÃ HỌC</span>
+                        <span id="ai-stat-reports" class="text-cyan-400 font-bold text-base mt-0.5">0 Báo cáo</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex flex-col">
+                        <span class="text-slate-400 text-[10px]">CATALYSTS TÍCH LŨY</span>
+                        <span id="ai-stat-catalysts" class="text-emerald-400 font-bold text-base mt-0.5">0 Động lực</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex flex-col">
+                        <span class="text-slate-400 text-[10px]">ĐỘ TIN CẬY TRÍCH XUẤT</span>
+                        <span id="ai-stat-confidence" class="text-purple-400 font-bold text-base mt-0.5">94%</span>
+                    </div>
+                </div>
+
+                <!-- Bảng Điều Khiển Tần Suất Quét & Tự Học Online -->
+                <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-cyan-400"></i>
+                            <span class="font-bold text-white text-xs">LẬP LỊCH TỰ ĐỘNG TÌM KIẾM & HỌC ONLINE KHI CÓ BÁO CÁO MỚI</span>
+                        </div>
+                        <span id="ai-scheduler-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">ĐANG CHỜ</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Tần Suất Quét & Tự Học:</label>
+                            <select id="ai-interval-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 focus:border-cyan-500 focus:outline-none">
+                                <option value="0">0 - Thủ công (Tắt định kỳ)</option>
+                                <option value="1">Mỗi 1 giờ (Quét liên tục)</option>
+                                <option value="3">Mỗi 3 giờ</option>
+                                <option value="6" selected>Mỗi 6 giờ (Khuyến nghị)</option>
+                                <option value="12">Mỗi 12 giờ</option>
+                                <option value="24">Mỗi 24 giờ (1 lần/ngày)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-slate-400 text-[11px] mb-1">Danh Sách Mã Quan Sát Ưu Tiên (Watchlist):</label>
+                            <input type="text" id="ai-watchlist-input" placeholder="HPG, SSI, FPT, MWG, TCH, PDR, VCB, MBB, DGC..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white uppercase focus:border-cyan-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/60 text-[11px]">
+                        <div class="flex items-center gap-3 text-slate-400">
+                            <span>Quét gần nhất: <strong id="ai-last-run" class="text-slate-200">Chưa chạy</strong></span>
+                            <span>•</span>
+                            <span>Kế tiếp: <strong id="ai-next-run" class="text-cyan-300">Theo lịch</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="saveAiLearningConfig()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1">
+                                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                                <span>Lưu Tần Suất</span>
+                            </button>
+                            <button onclick="triggerAiLearningNow()" id="btn-trigger-learn" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-lg shadow-md shadow-amber-950 flex items-center gap-1.5 transition-all">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span>Quét & Huấn Luyện Học Ngay</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh Sách Mẫu Huấn Luyện (Few-Shot Templates) -->
+                <div class="space-y-2 font-mono text-xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+                            <span class="font-bold text-white text-xs">MẪU HUẤN LUYỆN BÓC TÁCH CATALYSTS & LUẬN ĐIỂM THEO NGÀNH (FEW-SHOT)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetTemplatesToDefaults()" class="text-[10px] text-slate-400 hover:text-slate-200 underline">Khôi phục mặc định</button>
+                            <button onclick="openAddTemplateModal()" class="px-2.5 py-1 bg-cyan-700/80 hover:bg-cyan-600 text-cyan-100 rounded text-[11px] font-bold flex items-center gap-1 border border-cyan-600/60">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                <span>+ Thêm Mẫu Mới</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="ai-templates-list" class="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                        <!-- Render dynamic template cards -->
+                        <div class="text-slate-500 italic p-3 text-center">Đang tải danh sách mẫu huấn luyện...</div>
+                    </div>
+                </div>
+
+                <!-- Nhật Ký Báo Cáo AI Đã Tự Học Gần Nhất -->
+                <div class="space-y-2 font-mono text-xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+                            <span class="font-bold text-white text-xs">NHẬT KÝ BÁO CÁO PHÂN TÍCH VỪA ĐƯỢC TỰ HỌC & BÓC TÁCH ONLINE</span>
+                        </div>
+                        <button onclick="refreshAiLearningHistory()" class="text-[10px] text-cyan-400 hover:underline flex items-center gap-1">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                            <span>Làm mới</span>
+                        </button>
+                    </div>
+
+                    <div id="ai-history-list" class="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                        <!-- Render dynamic history items -->
+                        <div class="text-slate-500 italic p-3 text-center">Đang tải nhật ký tự học...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL THÊM MẪU HỌC TÙY BIẾN CHO NGƯỜI DÙNG -->
+    <div id="add-template-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden font-mono">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-xl w-full p-5 space-y-4 shadow-2xl relative">
+            <button onclick="closeAddTemplateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                <i data-lucide="file-plus-2" class="w-5 h-5 text-cyan-400"></i>
+                <div>
+                    <h4 class="font-bold text-sm text-white">THÊM MẪU HUẤN LUYỆN BÓC TÁCH CATALYSTS MỚI</h4>
+                    <p class="text-[11px] text-slate-400">Dạy AI nhận diện các động lực tăng trưởng, luận điểm & rủi ro đặc thù theo ngành</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">Tên Mẫu Huấn Luyện *:</label>
+                        <input type="text" id="tpl-input-name" placeholder="VD: Hóa chất & Phân bón (DGC, DCM)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">Nhóm Ngành *:</label>
+                        <input type="text" id="tpl-input-sector" placeholder="VD: Hóa chất & Phân bón" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 text-[11px] mb-1">Từ Khóa Nhận Diện Ngành (cách nhau bởi dấu phẩy) *:</label>
+                    <input type="text" id="tpl-input-keywords" placeholder="dgc, dcm, dpm, phốt pho vàng, phân bón, urê, baf..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Nhận Diện Catalysts / Động Lực (Mỗi dòng 1 tiêu chí) *:</label>
+                    <textarea id="tpl-input-catalysts" rows="3" placeholder="Tiến độ dự án tổ hợp Nghi Sơn / nhà máy mới&#10;Chênh lệch giá xuất khẩu phốt pho vàng & giá nguyên liệu apatit&#10;Nhu cầu chất bán dẫn và chip điện tử toàn cầu phục hồi..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Luận Điểm Đầu Tư (Mỗi dòng 1 ý):</label>
+                        <textarea id="tpl-input-theses" rows="2" placeholder="Tự chủ nguồn nguyên liệu quặng apatit...&#10;Dòng tiền mặt ròng dồi dào, tỷ lệ trả cổ tức cao..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Rủi Ro Cốt Lõi (Mỗi dòng 1 ý):</label>
+                        <textarea id="tpl-input-risks" rows="2" placeholder="Giá phân bón thế giới giảm do nguồn cung Trung Quốc...&#10;Rủi ro thiếu hụt nguồn quặng hoặc giá điện tăng..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="closeAddTemplateModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs">Hủy</button>
+                <button onclick="saveCustomTemplate()" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-xs shadow flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Lưu Mẫu Huấn Luyện</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
         </div>
     </div>
 
@@ -3262,6 +3512,61 @@
         </div>
     </div>
 
+    <!-- ============================================================= -->
+    <!-- MODAL ĐỌC BÀI BÁO / TIN TỨC & CHI TIẾT SỰ KIỆN DOANH NGHIỆP -->
+    <!-- ============================================================= -->
+    <div id="news-reader-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 sm:p-6" onclick="handleNewsModalBackdrop(event)">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-950/95 flex items-start justify-between gap-4">
+                <div class="space-y-2 min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap" id="modal-news-badges">
+                        <span id="modal-news-tag" class="px-2.5 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan-950 text-cyan-300 border border-cyan-800">
+                            TIN TỨC DOANH NGHIỆP
+                        </span>
+                        <span id="modal-news-ticker" class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-800 text-slate-200 border border-slate-700">
+                            SSI
+                        </span>
+                        <span id="modal-news-source" class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-950 text-indigo-300 border border-indigo-800">
+                            CafeF
+                        </span>
+                        <span id="modal-news-date" class="text-slate-400 text-xs font-mono ml-auto">
+                            08/09/2026 14:00
+                        </span>
+                    </div>
+                    <h3 id="modal-news-title" class="text-base sm:text-lg font-bold text-white leading-snug">
+                        Tiêu đề tin tức
+                    </h3>
+                </div>
+                <button onclick="closeNewsReaderModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 shrink-0 transition-colors" title="Đóng (ESC)">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div id="modal-news-body" class="flex-1 overflow-y-auto p-6 space-y-5 text-sm text-slate-300 leading-relaxed font-sans divide-y divide-slate-800/60">
+                <!-- Dynamically Injected -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <a id="modal-news-external-link" href="#" target="_blank" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition-all shadow-md inline-flex items-center gap-1.5 group">
+                        <span>Đọc bài gốc trên Web</span>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                    </a>
+                    <button onclick="copyNewsModalLink()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-mono font-medium transition-all inline-flex items-center gap-1.5">
+                        <i data-lucide="copy" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span>Copy Link</span>
+                    </button>
+                </div>
+                <button onclick="closeNewsReaderModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition-all">
+                    Đóng cửa sổ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 border border-cyan-500/50 text-slate-100 px-4 py-2.5 rounded-lg shadow-xl font-mono text-xs flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
         <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
@@ -3276,6 +3581,6 @@
         </div>
     </footer>
 
-    <script src="/static/app.js?v=10.6-ssi-live-priority"></script>
+    <script src="/static/app.js?v=10.12-tech-drawings-delete-and-timeframes"></script>
 </body>
 </html>

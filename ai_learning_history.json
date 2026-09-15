@@ -1,5 +1,481 @@
 [
   {
+    "id": "log-51819e55",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:19",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-59ae12d8",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:19",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-a6240f57",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:19",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-10e7af23",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:19",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-fa87006b",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:18",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-2fbe6bf8",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:18",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-aef4aa63",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:18",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-d6737d06",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:18",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-433856e1",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:17",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-7fe84097",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:17",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-9dbbcceb",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:17",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-23bcf7d9",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:17",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-d9762d6f",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-90153c68",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-ec9086f2",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-31b062fc",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-c74489e9",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-6d49e62e",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-27683040",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-d7584151",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:06",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-1881a309",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 11:03",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-bcc73be0",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 11:03",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-72c8d597",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 11:03",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-ecb821c9",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 11:03",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-28155d33",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "15/09/2026 10:52",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-25784fe4",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "15/09/2026 10:52",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-e58326cb",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "15/09/2026 10:52",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-a8638f9b",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "15/09/2026 10:52",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock / CTCK Hub",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
     "id": "log-11e3be6b",
     "ticker": "SSI",
     "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
