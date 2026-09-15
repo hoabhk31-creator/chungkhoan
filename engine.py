@@ -162,12 +162,12 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="SSI Research",
-                report_date="18/08/2026",
+                institution="KBSV",
+                report_date="19/08/2026",
                 recommendation="MUA",
-                target_price=37500,
+                target_price=35900,
                 current_price_at_report=21700,
-                upside_percent=72.81,
+                upside_percent=65.44,
                 pe_forward=11.2,
                 pb_forward=1.65,
                 revenue_forecast="168,450 tỷ VND (+21.5% YoY)",
@@ -185,11 +185,11 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro biến động tỷ giá USD/VND tác động đến chi phí nhập khẩu nguyên liệu và dư nợ ngoại tệ tài trợ dự án."
                 ],
                 valuation_method="FCFF (50%) & P/E mục tiêu 12.0x (50%)",
-                source_url="https://finance.vietstock.vn/HPG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22020/KBSV_HPG_Baocaocapnhat_260819.pdf"
             ),
             ReportItem(
-                institution="HSC Research",
-                report_date="12/08/2026",
+                institution="DSC Research",
+                report_date="27/08/2026",
                 recommendation="MUA",
                 target_price=36000,
                 current_price_at_report=21700,
@@ -211,7 +211,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Áp lực lạm phát chi phí vận chuyển đường biển và giá cước logistics container toàn cầu."
                 ],
                 valuation_method="DCF 10 năm (WACC 11.5%) & P/B forward 1.7x",
-                source_url="https://finance.vietstock.vn/HPG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21884/BC_HPG_Q2_2026_20260827_1733_41d98f945f.pdf"
             ),
             ReportItem(
                 institution="Vietcap (VCSC)",
@@ -237,15 +237,15 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro chính sách tín dụng bất động sản thắt chặt cục bộ làm chậm tiến độ thi công của các nhà thầu xây dựng."
                 ],
                 valuation_method="P/E mục tiêu 13.0x & DCF (tỷ trọng 50:50)",
-                source_url="https://finance.vietstock.vn/HPG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22083/HPG_20260818_MUA.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
-                report_date="05/08/2026",
-                recommendation="KHẢ QUAN",
-                target_price=34000,
+                institution="VietinBank Securities (CTS)",
+                report_date="23/07/2026",
+                recommendation="MUA",
+                target_price=25000,
                 current_price_at_report=21700,
-                upside_percent=56.68,
+                upside_percent=15.21,
                 pe_forward=12.4,
                 pb_forward=1.75,
                 revenue_forecast="158,900 tỷ VND (+14.6% YoY)",
@@ -263,7 +263,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Nguy cơ cạnh tranh nguồn cung HRC từ các dự án mở rộng lò cao của Formosa Hà Tĩnh."
                 ],
                 valuation_method="P/E forward 12.5x & P/B chu kỳ 1.7x",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/HPG"
+                source_url="http://static1.vietstock.vn/edocs/21863/VietinBank_Securities_HPG.pdf"
             ),
             ReportItem(
                 institution="Mirae Asset (MAS)",
@@ -289,15 +289,15 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Chính sách kiểm soát khí thải nhà kính và chi phí đầu tư nâng cấp công nghệ xanh trong trung hạn."
                 ],
                 valuation_method="P/E lịch sử 5 năm & P/B trung bình ngành",
-                source_url="https://finance.vietstock.vn/HPG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21558/1786521684972_260812_HPGVN.pdf"
             ),
             ReportItem(
-                institution="VCBS Research",
-                report_date="28/07/2026",
-                recommendation="NẮM GIỮ / TRUNG LẬP",
-                target_price=31500,
+                institution="Shinhan Securities (SSV)",
+                report_date="21/08/2026",
+                recommendation="MUA",
+                target_price=35900,
                 current_price_at_report=21700,
-                upside_percent=45.16,
+                upside_percent=65.44,
                 pe_forward=13.9,
                 pb_forward=1.91,
                 revenue_forecast="151,200 tỷ VND (+9.1% YoY)",
@@ -315,7 +315,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro lãi suất duy trì ở mức cao trên thị trường tài chính quốc tế ảnh hưởng đến các khoản tài trợ thương mại xuất nhập khẩu."
                 ],
                 valuation_method="P/E thận trọng 12.0x & Định giá lại tài sản ròng RNAV",
-                source_url="https://finance.vietstock.vn/HPG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21784/SSV_Bao_cao_update_Q22026.pdf"
             )
         ],
         causality_analysis=[
@@ -388,7 +388,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="Vietcap (VCSC)",
+                institution="Bảo Việt (BVSC)",
                 report_date="15/08/2026",
                 recommendation="MUA",
                 target_price=112000,
@@ -409,7 +409,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Cạnh tranh gay gắt từ các công ty IT Ấn Độ tại thị trường Mỹ."
                 ],
                 valuation_method="SOTP & DCF WACC 10.2%",
-                source_url="https://finance.vietstock.vn/FPT/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22017/bvsc_bao_cao_cap_nhat_fpt_82026.pdf"
             ),
             ReportItem(
                 institution="SSI Research",
@@ -433,10 +433,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Áp lực suy thoái kinh tế tại Châu Âu khiến khách hàng trì hoãn chi tiêu."
                 ],
                 valuation_method="P/E mục tiêu 23x cho Công nghệ & 15x Viễn thông",
-                source_url="https://finance.vietstock.vn/FPT/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21525/FPT_2026.pdf"
             ),
             ReportItem(
-                institution="HSC Research",
+                institution="Tiên Phong (TPS)",
                 report_date="05/08/2026",
                 recommendation="MUA",
                 target_price=96000,
@@ -457,7 +457,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Thời gian thu hồi vốn đầu tư chip GPU có thể kéo dài nếu tỷ lệ thuê bao thấp."
                 ],
                 valuation_method="DCF 10 năm & Forward P/E 22.0x",
-                source_url="https://finance.vietstock.vn/FPT/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21981/TPS_FPT_Bao_cao_phan_tich_doanh_nghiep_03.pdf"
             ),
             ReportItem(
                 institution="MBS Research",
@@ -481,7 +481,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Tiến độ chuyển đổi công nghệ AI có thể làm thu hẹp mảng gia công cấp thấp."
                 ],
                 valuation_method="P/E mục tiêu 21.0x",
-                source_url="https://finance.vietstock.vn/FPT/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21330/FPT_CapnhatAM_20260731.pdf"
             )
         ],
         causality_analysis=[
@@ -542,7 +542,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="HSC Research",
+                institution="Bảo Việt (BVSC)",
                 report_date="19/08/2026",
                 recommendation="MUA",
                 target_price=92000,
@@ -563,7 +563,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Chi phí logistics khi BHX mở rộng ra miền Trung."
                 ],
                 valuation_method="SOTP: P/E 16x TGDĐ/ĐMX và P/S 1.2x BHX",
-                source_url="https://finance.vietstock.vn/MWG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22084/bvsc_bao_cao_cap_nhat_mwg_82026.pdf"
             ),
             ReportItem(
                 institution="SSI Research",
@@ -587,7 +587,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Chi phí thuê mặt bằng tăng trở lại."
                 ],
                 valuation_method="P/E forward 18.0x",
-                source_url="https://finance.vietstock.vn/MWG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21811/MWG_2026.pdf"
             ),
             ReportItem(
                 institution="Vietcap (VCSC)",
@@ -611,10 +611,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Chi phí hao hụt hàng tươi sống."
                 ],
                 valuation_method="DCF WACC 11.0%",
-                source_url="https://finance.vietstock.vn/MWG/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21708/MWG_20260814_MUA.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
+                institution="Mirae Asset (MAS)",
                 report_date="01/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=78000,
@@ -635,7 +635,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro chuỗi cung ứng hàng nhập khẩu."
                 ],
                 valuation_method="P/E mục tiêu 19x",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/MWG"
+                source_url="http://static1.vietstock.vn/edocs/21976/1788431437096_260828_MWG_updateVN.pdf"
             )
         ],
         causality_analysis=[
@@ -690,7 +690,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="Vietcap (VCSC)",
+                institution="VPX Securities",
                 report_date="15/08/2026",
                 recommendation="MUA",
                 target_price=48500,
@@ -710,10 +710,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Cạnh tranh phí giao dịch từ các CTCK zero-fee."
                 ],
                 valuation_method="P/B mục tiêu 2.3x & P/E 17.5x",
-                source_url="https://finance.vietstock.vn/SSI/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22075/SSI_BCPT_Earning_Q2.pdf"
             ),
             ReportItem(
-                institution="HSC Research",
+                institution="Beta Securities",
                 report_date="10/08/2026",
                 recommendation="MUA",
                 target_price=45000,
@@ -733,10 +733,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro thị trường trái phiếu doanh nghiệp."
                 ],
                 valuation_method="P/B chu kỳ 2.0x",
-                source_url="https://finance.vietstock.vn/SSI/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21789/ssi_cap_nhat_kqkd_q22026_cho_vay_margin_tiep_tuc_la_dong_luc_tang_truong_1787307716.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
+                institution="TCBS Research",
                 report_date="05/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=41000,
@@ -755,7 +755,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Thị phần môi giới cá nhân bị chia sẻ bởi các nền tảng số công nghệ fintech."
                 ],
                 valuation_method="P/E forward 15x",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/SSI"
+                source_url="http://static1.vietstock.vn/edocs/21434/20260805_SSI_Bao_cao_cap_nhat_KQKD_Q2_2026.pdf"
             )
         ],
         causality_analysis=[
@@ -830,10 +830,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Áp lực cạnh tranh từ các dòng sữa tươi nhập khẩu."
                 ],
                 valuation_method="DCF WACC 9.8% & P/E mục tiêu 18x",
-                source_url="https://finance.vietstock.vn/VNM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21745/VNM_2026.pdf"
             ),
             ReportItem(
-                institution="HSC Research",
+                institution="VPX Securities",
                 report_date="11/08/2026",
                 recommendation="MUA",
                 target_price=82000,
@@ -852,10 +852,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Sức mua hàng tiêu dùng nội địa phục hồi chậm hơn kỳ vọng."
                 ],
                 valuation_method="DCF 10 năm & P/E mục tiêu 17x",
-                source_url="https://finance.vietstock.vn/VNM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21914/VNM_KQKD_Q22026_VN_Final.pdf"
             ),
             ReportItem(
-                institution="Vietcap (VCSC)",
+                institution="VCBS Research",
                 report_date="04/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=76000,
@@ -873,7 +873,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Quy mô thị trường sữa Việt Nam đã bão hòa ở mức tăng trưởng một con số (3-5%/năm)."
                 ],
                 valuation_method="P/E lịch sử 5 năm",
-                source_url="https://finance.vietstock.vn/VNM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/20913/bao_cao_ptkt_vnm.pdf"
             )
         ],
         causality_analysis=[
@@ -928,7 +928,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="SSI Research",
+                institution="Beta Securities",
                 report_date="20/08/2026",
                 recommendation="MUA",
                 target_price=34500,
@@ -949,10 +949,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Cuộc đua zero-fee từ các công ty chứng khoán ngoại gây sức ép biên môi giới."
                 ],
                 valuation_method="P/B mục tiêu 1.8x & P/E forward 14.5x",
-                source_url="https://finance.vietstock.vn/HCM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21859/hcm_cap_nhat_kqkd_q22026_1787739365.pdf"
             ),
             ReportItem(
-                institution="Vietcap (VCSC)",
+                institution="DSC Research",
                 report_date="15/08/2026",
                 recommendation="MUA",
                 target_price=36000,
@@ -973,10 +973,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Tiến độ giải ngân dòng vốn ngoại chậm hơn dự báo."
                 ],
                 valuation_method="P/B chu kỳ 1.9x & Định giá định lượng Dupont",
-                source_url="https://finance.vietstock.vn/HCM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21852/BC_HCM_Q2_2026_20260826_1517_bae42f171d.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
+                institution="Bảo Minh (BMSC)",
                 report_date="10/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=33500,
@@ -997,10 +997,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Cạnh tranh thị phần môi giới bán lẻ gay gắt."
                 ],
                 valuation_method="P/E trung vị ngành chứng khoán 14.0x",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/HCM"
+                source_url="http://static1.vietstock.vn/edocs/20319/Bao_cao_cap_nhat_HCM_T42026.pdf"
             ),
             ReportItem(
-                institution="Mirae Asset (MAS)",
+                institution="CSI Securities",
                 report_date="05/08/2026",
                 recommendation="TÍCH LŨY",
                 target_price=31500,
@@ -1021,7 +1021,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Thị trường tài chính toàn cầu có các biến động khó lường."
                 ],
                 valuation_method="P/B forward 1.7x & P/E lịch sử",
-                source_url="https://finance.vietstock.vn/HCM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/20078/bao_cao_nhanh_hcm_24_4_26.pdf"
             ),
             ReportItem(
                 institution="VCBS Research",
@@ -1045,7 +1045,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Tiến độ triển khai KRX có thể tiếp tục bị kéo dài."
                 ],
                 valuation_method="P/E mục tiêu 14.0x & DCF dòng tiền tự do",
-                source_url="https://finance.vietstock.vn/HCM/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21288/bao_cao_ptkt_hcm.pdf"
             )
         ],
         causality_analysis=[
@@ -1132,7 +1132,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Chi phí lãi vay nợ tài chính."
                 ],
                 valuation_method="SOTP & P/E Forward",
-                source_url="https://finance.vietstock.vn/GEX/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/20776/GEX_2026.pdf"
             ),
             ReportItem(
                 institution="Vietcap (VCSC)",
@@ -1153,10 +1153,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Rủi ro pha loãng cổ phiếu khi phát hành thêm vốn."
                 ],
                 valuation_method="SOTP từng mảng kinh doanh",
-                source_url="https://finance.vietstock.vn/GEX/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21121/GEX_20260706_MUA.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
+                institution="TCBS Research",
                 report_date="08/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=29500,
@@ -1174,7 +1174,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Tiến độ giải ngân đầu tư các KCN mới bị chậm lại."
                 ],
                 valuation_method="P/E Forward 12.5x",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/GEX"
+                source_url="http://static1.vietstock.vn/edocs/21572/20260812_GEX_Bao_cao_cap_nhat_KQKD_Q2_2026.pdf"
             )
         ],
         causality_analysis=[
@@ -1229,7 +1229,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
-                institution="SSI Research",
+                institution="VFS Securities",
                 report_date="16/08/2026",
                 recommendation="MUA",
                 target_price=17000,
@@ -1247,10 +1247,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Thị trường BĐS các tỉnh miền Trung hồi phục chậm hơn kỳ vọng."
                 ],
                 valuation_method="RNAV tài sản ròng từng dự án",
-                source_url="https://finance.vietstock.vn/PDR/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/22074/VFS_Bao_cao_ngan_doanh_nghiep_PDR_10092026_j6an.pdf"
             ),
             ReportItem(
-                institution="Vietcap (VCSC)",
+                institution="Yuanta (YSVN)",
                 report_date="11/08/2026",
                 recommendation="MUA",
                 target_price=19000,
@@ -1268,10 +1268,10 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Tiến độ cấp phép xây dựng thực tế."
                 ],
                 valuation_method="RNAV & DCF",
-                source_url="https://finance.vietstock.vn/PDR/bao-cao-phan-tich.htm"
+                source_url="http://static1.vietstock.vn/edocs/21844/PDR_Express_note_2Q26_VN.pdf"
             ),
             ReportItem(
-                institution="VNDirect",
+                institution="Nam Hae (NHSV)",
                 report_date="03/08/2026",
                 recommendation="KHẢ QUAN",
                 target_price=15000,
@@ -1289,7 +1289,7 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                     "Sức mua phân khúc căn hộ tầm trung."
                 ],
                 valuation_method="P/B chu kỳ & RNAV chiết khấu 20%",
-                source_url="https://dstock.vndirect.com.vn/tong-quan/PDR"
+                source_url="http://static1.vietstock.vn/edocs/21782/PDR_2026Q2_VN.pdf"
             )
         ],
         causality_analysis=[

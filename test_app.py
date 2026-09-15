@@ -222,7 +222,7 @@ class TestIERM(unittest.TestCase):
         resp_csv = self.client.post("/api/export-csv", json={"report_data": hpg})
         self.assertEqual(resp_csv.status_code, 200)
         self.assertIn("text/csv", resp_csv.headers["content-type"])
-        self.assertIn("SSI Research", resp_csv.text)
+        self.assertIn("Vietcap (VCSC)", resp_csv.text)
 
     def test_api_live_price(self):
         """Kiểm tra API lấy giá đóng cửa từ Vietstock Chart và CTCKs"""
@@ -980,6 +980,47 @@ class TestIERM(unittest.TestCase):
         self.assertGreater(stats["total_reports_learned"], 0)
         self.assertGreater(stats["total_catalysts_accumulated"], 0)
         self.assertGreater(stats["average_confidence"], 0.8)
+
+    def test_real_ctck_pdf_direct_reading(self):
+        """
+        Kiểm tra tính năng đọc trực tiếp báo cáo phân tích thực tế của các CTCK:
+        1. Trả về đúng HTTP 200 và media_type application/pdf.
+        2. File là PDF thực tế (> 100KB, header %PDF), không phải file mẫu 1 trang.
+        3. Header Content-Disposition là inline cho phép xem trực tiếp trên browser / iframe.
+        """
+        # 1. Test HPG - Vietcap
+        resp_hpg = self.client.get("/api/reports/pdf/HPG/Vietcap.pdf")
+        self.assertEqual(resp_hpg.status_code, 200)
+        self.assertIn("application/pdf", resp_hpg.headers["content-type"])
+        self.assertTrue(resp_hpg.content.startswith(b"%PDF"))
+        self.assertGreater(len(resp_hpg.content), 100000, "File PDF phải là bản gốc nhiều trang thực tế (>100KB)")
+        self.assertIn("inline", resp_hpg.headers.get("content-disposition", ""))
+        self.assertIn("HPG", resp_hpg.headers.get("content-disposition", ""))
+
+        # 2. Test FPT - SSI Research
+        resp_fpt = self.client.get("/api/reports/pdf/FPT/SSI%20Research.pdf")
+        self.assertEqual(resp_fpt.status_code, 200)
+        self.assertIn("application/pdf", resp_fpt.headers["content-type"])
+        self.assertTrue(resp_fpt.content.startswith(b"%PDF"))
+        self.assertGreater(len(resp_fpt.content), 100000)
+
+        # 3. Test HPG - VietinBank Securities (CTS)
+        import io
+        from pypdf import PdfReader
+        resp_cts = self.client.get("/api/reports/pdf/HPG/VietinBank%20Securities.pdf")
+        self.assertEqual(resp_cts.status_code, 200)
+        self.assertTrue(resp_cts.content.startswith(b"%PDF"))
+        reader_cts = PdfReader(io.BytesIO(resp_cts.content))
+        text_cts = " ".join([p.extract_text() for p in reader_cts.pages]).lower()
+        self.assertIn("vietinbank", text_cts)
+
+        # 4. Test HPG - Shinhan Securities (SSV)
+        resp_ssv = self.client.get("/api/reports/pdf/HPG/Shinhan%20Securities.pdf")
+        self.assertEqual(resp_ssv.status_code, 200)
+        self.assertTrue(resp_ssv.content.startswith(b"%PDF"))
+        reader_ssv = PdfReader(io.BytesIO(resp_ssv.content))
+        text_ssv = " ".join([p.extract_text() for p in reader_ssv.pages]).lower()
+        self.assertIn("shinhan", text_ssv)
 
 
 if __name__ == "__main__":

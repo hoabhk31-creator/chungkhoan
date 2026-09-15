@@ -4,8 +4,10 @@ Institutional Equity Research Matrix (IERM) - FastAPI Server
 
 import io
 import os
+import re
 import csv
 import httpx
+import hashlib
 import asyncio
 import unicodedata
 import urllib.parse
@@ -1222,10 +1224,148 @@ async def api_export_markdown(req: ExportRequest):
     return {"markdown": markdown_content}
 
 
+PDF_CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache", "edocs_pdfs")
+os.makedirs(PDF_CACHE_DIR, exist_ok=True)
+
+
+def match_ctck_institution(target_inst: str, candidate_name: str) -> bool:
+    """
+    So khớp tên Công ty Chứng khoán thông minh dựa trên tên viết tắt, mã thương hiệu và biệt danh phổ biến.
+    Đảm bảo tính toàn vẹn thương hiệu (Brand Integrity) tuyệt đối, không nhầm lẫn giữa các CTCK khác nhau.
+    """
+    if not target_inst or not candidate_name:
+        return False
+    t_clean = re.sub(r'[^a-z0-9]', '', target_inst.lower())
+    c_clean = re.sub(r'[^a-z0-9]', '', candidate_name.lower())
+    if not t_clean or not c_clean:
+        return False
+    if t_clean == c_clean:
+        return True
+
+    aliases = {
+        'vietcap': ['vcsc', 'vietcap', 'banviet', 'vcap'],
+        'ssi': ['ssi', 'ssiresearch'],
+        'hsc': ['hsc'],
+        'vndirect': ['vnd', 'vndirect', 'dstock'],
+        'kbsv': ['kbsv', 'kb', 'kbsec'],
+        'vcbs': ['vcbs', 'vietcombank'],
+        'dsc': ['dsc'],
+        'mas': ['mas', 'mirae', 'miraeasset'],
+        'bvs': ['bvs', 'bvsc', 'baoviet'],
+        'tcbs': ['tcbs', 'techcom'],
+        'tps': ['tps', 'tienphong'],
+        'vds': ['vds', 'vdsc', 'rongviet'],
+        'kafi': ['kafi'],
+        'vpx': ['vpx', 'vpbs', 'vps'],
+        'ssv': ['ssv', 'shinhan'],
+        'bsc': ['bsc', 'bidv'],
+        'vietinbank': ['cts', 'vietin', 'vietinbank', 'vbse'],
+        'nhsv': ['nhsv', 'namhae'],
+        'ysvn': ['ysvn', 'yuanta'],
+        'vfs': ['vfs', 'nhatviet'],
+        'beta': ['beta'],
+        'bmsc': ['bmsc', 'baominh'],
+        'csi': ['csi', 'kienthiet'],
+        'acbs': ['acbs', 'acb']
+    }
+
+    # Kiểm tra theo alias groups
+    for key, group in aliases.items():
+        t_has = any(w == t_clean or (len(w) >= 4 and w in t_clean) for w in group)
+        c_has = any(w == c_clean or (len(w) >= 4 and w in c_clean) for w in group)
+        if t_has and c_has:
+            return True
+
+    # Nếu cả 2 đều đủ dài và chứa nhau
+    if len(t_clean) >= 4 and len(c_clean) >= 4:
+        if t_clean in c_clean or c_clean in t_clean:
+            return True
+
+    return False
+
+
+async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferred_url: Optional[str] = None) -> Optional[tuple]:
+    """
+    Tải file PDF báo cáo phân tích thực tế trực tiếp từ Vietstock eDocs hoặc nguồn CTCK chính thức.
+    TUÂN THỦ NGUYÊN TẮC BẢO TOÀN THƯƠNG HIỆU (Brand Purity):
+      - Chỉ tải và trả về file PDF nếu ĐÚNG LÀ của CTCK được yêu cầu.
+      - Tuyệt đối KHÔNG gán file PDF của CTCK này cho CTCK khác.
+    Trả về (bytes, filename, actual_url) hoặc None.
+    """
+    candidates = []
+
+    # 1. URL được cung cấp nếu là link .pdf VÀ phải đúng thương hiệu của CTCK đó
+    if preferred_url and preferred_url.startswith("http") and ".pdf" in preferred_url.lower():
+        url_lower = preferred_url.lower()
+        if match_ctck_institution(clean_inst, url_lower):
+            candidates.append((preferred_url, clean_inst))
+
+    # 2. Quét eDocs từ Vietstock eDocs Portal
+    try:
+        edocs_items = await fetch_edocs_reports(clean_ticker, limit=20)
+    except Exception as e:
+        print(f"[PDF Resolver] Lỗi khi quét Vietstock eDocs cho {clean_ticker}: {e}")
+        edocs_items = []
+
+    matched_edocs = []
+    for it in edocs_items:
+        src = it.get("SourceName", "")
+        title = it.get("Title", "")
+        url = it.get("Url", "")
+        if not url or not url.startswith("http") or ".pdf" not in url.lower():
+            continue
+        if match_ctck_institution(clean_inst, src) or match_ctck_institution(clean_inst, title) or match_ctck_institution(clean_inst, url):
+            matched_edocs.append((url, src or clean_inst))
+
+    # Danh sách chỉ bao gồm những file PDF chính xác của CTCK đó (KHÔNG CÓ other_edocs)
+    all_candidates = candidates + matched_edocs
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "application/pdf,*/*"
+    }
+
+    for url, inst_name in all_candidates:
+        url_hash = hashlib.md5(url.encode()).hexdigest()[:10]
+        safe_name = to_ascii_slug(inst_name) or "CTCK"
+        cached_file_path = os.path.join(PDF_CACHE_DIR, f"{clean_ticker}_{safe_name}_{url_hash}.pdf")
+
+        # Kiểm tra file trong cache đĩa (nếu kích thước > 5KB)
+        if os.path.exists(cached_file_path) and os.path.getsize(cached_file_path) > 5000:
+            try:
+                with open(cached_file_path, "rb") as f:
+                    content = f.read()
+                if b"%PDF" in content[:1024] or len(content) > 5000:
+                    filename = f"{clean_ticker}_{safe_name}_Bao_Cao_Phan_Tich.pdf"
+                    return content, filename, url
+            except Exception as read_err:
+                print(f"[PDF Cache] Lỗi đọc file cache {cached_file_path}: {read_err}")
+
+        # Chưa có trong cache -> tải trực tiếp từ nguồn eDocs
+        try:
+            async with httpx.AsyncClient(headers=headers, timeout=12.0, follow_redirects=True) as client:
+                resp = await client.get(url)
+                if resp.status_code == 200 and (b"%PDF" in resp.content[:1024] or len(resp.content) > 5000):
+                    try:
+                        with open(cached_file_path, "wb") as f:
+                            f.write(resp.content)
+                    except Exception as write_err:
+                        print(f"[PDF Cache] Lỗi ghi file cache {cached_file_path}: {write_err}")
+
+                    filename = f"{clean_ticker}_{safe_name}_Bao_Cao_Phan_Tich.pdf"
+                    return resp.content, filename, url
+        except Exception as dl_err:
+            print(f"[PDF Resolver] Tải file PDF thất bại từ {url}: {dl_err}")
+            continue
+
+    return None
+
+
 @app.get("/api/reports/pdf/{ticker}/{institution}")
 async def get_report_pdf(ticker: str, institution: str):
     """
-    Trả về file PDF Báo cáo Phân tích & Định giá chuyên sâu của Công ty Chứng khoán tương ứng.
+    Trả về file PDF Báo cáo Phân tích & Định giá thực tế của Công ty Chứng khoán tương ứng
+    (Tải trực tiếp từ nguồn Vietstock eDocs / CTCK Research Hub, có bộ nhớ đệm cache).
     Cho phép xem trực tiếp trên trình duyệt (inline) hoặc tải về (download).
     """
     clean_ticker = ticker.upper().strip()
@@ -1239,36 +1379,34 @@ async def get_report_pdf(ticker: str, institution: str):
 
     matched_item = None
     for item in full_report.matrix_table:
-        if clean_inst.lower() in item.institution.lower() or item.institution.lower() in clean_inst.lower():
+        if match_ctck_institution(clean_inst, item.institution) or clean_inst.lower() in item.institution.lower() or item.institution.lower() in clean_inst.lower():
             matched_item = item
             break
 
     if not matched_item and full_report.matrix_table:
         matched_item = full_report.matrix_table[0]
 
-    # Nếu báo cáo có link PDF gốc thực tế (từ Vietstock eDocs, etc.), proxy trực tiếp nội dung PDF gốc
-    if matched_item and matched_item.source_url and matched_item.source_url.startswith("http") and ".pdf" in matched_item.source_url.lower():
-        try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Accept": "application/pdf,*/*"
-            }
-            async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
-                remote_resp = await client.get(matched_item.source_url)
-                if remote_resp.status_code == 200 and (b"%PDF" in remote_resp.content[:1024] or len(remote_resp.content) > 1000):
-                    safe_inst_name = (matched_item.institution or "CTCK").replace(" ", "_").replace("/", "_")
-                    filename = f"{clean_ticker}_{safe_inst_name}_Bao_Cao_Phan_Tich.pdf"
-                    return Response(
-                        content=remote_resp.content,
-                        media_type="application/pdf",
-                        headers={
-                            "Content-Disposition": make_content_disposition("inline", filename),
-                            "Cache-Control": "public, max-age=3600"
-                        }
-                    )
-        except Exception as proxy_err:
-            print(f"Proxy real PDF error for {clean_ticker}: {proxy_err}. Fallback to PDF generator.")
+    preferred_url = matched_item.source_url if matched_item else None
 
+    # Tải file PDF báo cáo phân tích thực tế từ Vietstock eDocs / CTCK
+    real_pdf_result = await fetch_real_institution_pdf(clean_ticker, clean_inst, preferred_url)
+
+    if real_pdf_result:
+        pdf_bytes, filename, actual_url = real_pdf_result
+        # Cập nhật lại source_url trong bộ nhớ nếu trước đó chỉ là link HTML tổng quát
+        if matched_item and (not matched_item.source_url or not matched_item.source_url.endswith(".pdf")):
+            matched_item.source_url = actual_url
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": make_content_disposition("inline", filename),
+                "Cache-Control": "public, max-age=86400"
+            }
+        )
+
+    # Fallback chỉ khi hoàn toàn không có kết nối internet và cache trống:
     report_dict = {
         "institution": matched_item.institution if matched_item else clean_inst,
         "target_price": matched_item.target_price if matched_item else full_report.consensus_summary.mean_target_price,
