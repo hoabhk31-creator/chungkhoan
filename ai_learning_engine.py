@@ -811,6 +811,326 @@ LEARNED_IMAGES_DIR = os.path.join(DATA_DIR, "learned_images")
 os.makedirs(LEARNED_IMAGES_DIR, exist_ok=True)
 
 
+def extract_ticker_from_context(filename: str = "", hint: str = "") -> Optional[str]:
+    """
+    Trích xuất mã chứng khoán chính xác từ tên file hoặc gợi ý.
+    Ưu tiên tên file nếu tên file chứa mã 3 ký tự (VD: KBC.png, KBC_BaoCao.jpg -> KBC).
+    """
+    from company_database import COMPANY_DATABASE
+
+    candidates = []
+    
+    # 1. Quét trong tên file trước
+    if filename:
+        clean_fn = os.path.splitext(os.path.basename(filename))[0].upper()
+        # Tìm các chuỗi 3 ký tự (VD: KBC, SSI, HPG, FPT...)
+        matches = re.findall(r'\b([A-Z0-9]{3})\b', clean_fn)
+        for m in matches:
+            if m in COMPANY_DATABASE:
+                return m
+            candidates.append(m)
+        
+        # Thử nếu toàn bộ tên file là 3 ký tự
+        if len(clean_fn) == 3 and clean_fn in COMPANY_DATABASE:
+            return clean_fn
+
+    # 2. Quét trong hint
+    if hint:
+        clean_hint = hint.strip().upper()
+        matches_hint = re.findall(r'\b([A-Z0-9]{3})\b', clean_hint)
+        for m in matches_hint:
+            if m in COMPANY_DATABASE:
+                return m
+            candidates.append(m)
+
+    return candidates[0] if candidates else None
+
+
+def build_sector_knowledge_template(ticker: Optional[str] = None, sector_hint: Optional[str] = None, filename: str = "") -> Dict[str, Any]:
+    """
+    Xây dựng Mẫu tri thức chuyên sâu theo ngành và mã cổ phiếu chuẩn hóa theo hệ thống cơ sở dữ liệu chứng khoán Việt Nam.
+    Bao gồm đầy đủ 16 nhóm ngành chính: BĐS Khu công nghiệp, BĐS Dân dụng, Thép, Ngân hàng, Chứng khoán, Công nghệ, Bán lẻ, Dầu khí, Hóa chất, Cảng biển...
+    """
+    from company_database import get_company
+
+    clean_ticker = (ticker or "").upper().strip()
+    company = get_company(clean_ticker) if clean_ticker else None
+    
+    comp_name = company.get("name") if company else ""
+    fiin_sec = (company.get("fiintrade_sector") or company.get("icb4") or company.get("icb2") or sector_hint or "").strip()
+    
+    # Xác định nhóm ngành cốt lõi
+    sec_lower = (fiin_sec + " " + (sector_hint or "") + " " + clean_ticker + " " + filename).lower()
+
+    # 1. BẤT ĐỘNG SẢN KHU CÔNG NGHIỆP (KBC, IDC, VGC, BCM, SZC, NTC, SIP, TIP, LHG, PHR, GVR...)
+    if any(k in sec_lower for k in ["khu công nghiệp", "kcn", "kbc", "idc", "szc", "bcm", "vgc", "ntc", "sip", "tip", "lhg", "industrial"]):
+        sector_name = "Bất động sản Khu công nghiệp"
+        peers = ["KBC", "IDC", "BCM", "SZC", "VGC", "NTC", "SIP"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+        
+        tpl_name = f"Bất động sản Khu công nghiệp ({clean_ticker})" if clean_ticker else f"Bất động sản Khu công nghiệp ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "kbc", "idc", "szc", "bcm", "vgc", "phr", "ntc", "sip", "tip", "lhg",
+            "khu công nghiệp", "kcn", "fdi", "cho thuê đất kcn", "giá thuê đất", "nhà xưởng xây sẵn", "rbf", "rbw",
+            "tràng duệ", "nam sơn hạp lĩnh", "hựu thạnh", "châu đức", "tân tập", "bắc ninh", "hải phòng", "bình dương", "long an"
+        ]
+        catalysts = [
+            f"Diện tích cho thuê đất KCN ký mới và bàn giao ghi nhận doanh thu tăng trưởng mạnh mẽ trong năm",
+            f"Dòng vốn đầu tư trực tiếp nước ngoài (FDI) từ các tập đoàn công nghệ & bán dẫn (Hàn Quốc, Đài Loan, Mỹ) tăng tốc",
+            f"Giá thuê đất KCN bình quân tại các thủ phủ công nghiệp tiếp tục duy trì đà tăng 5 - 10%/năm",
+            f"Tiến độ cấp phép pháp lý, đền bù giải phóng mặt bằng các đại dự án KCN trọng điểm về đích đúng kế hoạch",
+            f"Dòng tiền định kỳ đều đặn từ mảng cho thuê nhà xưởng xây sẵn (RBF/RBW) và cung cấp điện, nước, xử lý nước thải KCN"
+        ]
+        theses = [
+            f"Sở hữu quỹ đất sạch thương phẩm sẵn sàng cho thuê quy mô lớn tại các vị trí chiến lược đón đầu làn sóng dịch chuyển chuỗi cung ứng.",
+            f"Mô hình tích hợp Khu Đô thị - Dịch vụ - Khu Công nghiệp giúp tối đa hóa giá trị quỹ đất và mở rộng biên lợi nhuận ròng."
+        ]
+        risks = [
+            f"Tiến độ đền bù giải phóng mặt bằng và thủ tục định giá đất kéo dài làm chậm tiến độ mở bán dự án mới.",
+            f"Rủi ro suy thoái kinh tế toàn cầu ảnh hưởng đến tốc độ giải ngân vốn FDI của các đối tác quốc tế."
+        ]
+
+    # 2. BẤT ĐỘNG SẢN DÂN DỤNG & NHÀ Ở (VHM, NVL, PDR, DXG, DIG, NLG, KDH, TCH, CEO, HDC...)
+    elif any(k in sec_lower for k in ["bất động sản", "nhà ở", "địa ốc", "vhm", "nvl", "pdr", "dxg", "dig", "nlg", "kdh", "tch", "ceo", "hdc", "real estate"]):
+        sector_name = "Bất động sản Dân dụng"
+        peers = ["VHM", "NLG", "KDH", "PDR", "DXG", "DIG"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Bất động sản Dân dụng ({clean_ticker})" if clean_ticker else f"Bất động sản Dân dụng ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "vhm", "nlg", "kdh", "pdr", "dxg", "dig", "tch",
+            "bất động sản", "bđs", "dự án", "mở bán", "bàn giao", "tiền sử dụng đất", "luật đất đai", "booking", "hấp thụ", "trái phiếu"
+        ]
+        catalysts = [
+            "Mở bán các phân khu/dự án nhà ở mới với tỷ lệ hấp thụ (Take-up rate) cao",
+            "Luật Đất đai, Luật Nhà ở và Luật Kinh doanh BĐS mới tháo gỡ điểm nghẽn pháp lý và cấp phép",
+            "Cơ cấu nợ vay và trái phiếu doanh nghiệp được tái cấu trúc thành công, giải tỏa áp lực thanh khoản",
+            "Bàn giao căn hộ/nhà phố cho khách hàng giúp ghi nhận doanh thu và lợi nhuận đột biến"
+        ]
+        theses = [
+            "Quỹ đất sạch tại các đô thị lớn đón đầu chu kỳ phục hồi nguồn cung và nhu cầu ở thực của người dân.",
+            "Năng lực phát triển dự án và uy tín thương hiệu đã được khẳng định trên thị trường."
+        ]
+        risks = [
+            "Thời gian hoàn tất thủ tục tính tiền sử dụng đất tại các địa phương chậm hơn dự kiến.",
+            "Lãi suất cho vay mua nhà biến động ảnh hưởng đến tâm lý và khả năng chi trả của người mua."
+        ]
+
+    # 3. THÉP & VẬT LIỆU XÂY DỰNG (HPG, NKG, HSG, VGS, TLH, POM, HT1, BCC...)
+    elif any(k in sec_lower for k in ["thép", "hrc", "vật liệu", "hpg", "nkg", "hsg", "vgs", "xi măng", "ht1", "steel"]):
+        sector_name = "Thép & Vật liệu xây dựng"
+        peers = ["HPG", "NKG", "HSG", "VGS"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Thép & Vật liệu ({clean_ticker})" if clean_ticker else f"Thép & Vật liệu ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "hpg", "nkg", "hsg", "vgs", "thép", "hrc",
+            "quặng sắt", "than cốc", "lò cao", "tôn mạ", "chống bán phá giá", "đầu tư công"
+        ]
+        catalysts = [
+            "Tiến độ giải ngân và vận hành các giai đoạn đại dự án nâng công suất HRC",
+            "Chênh lệch Spread HRC - Quặng sắt & Than cốc cải thiện làm tăng biên lãi gộp",
+            "Chính sách bảo hộ, thuế tự vệ chống bán phá giá thép nhập khẩu",
+            "Sản lượng tiêu thụ nội địa và xuất khẩu phục hồi mạnh mẽ"
+        ]
+        theses = ["Doanh nghiệp đầu ngành với chuỗi sản xuất khép kín và giá thành siêu cạnh tranh."]
+        risks = ["Biến động giá quặng sắt và than mỡ thế giới tăng đột biến."]
+
+    # 4. NGÂN HÀNG THƯƠNG MẠI (VCB, MBB, TCB, CTG, ACB, VPB, HDB, STB, TPB, LPB...)
+    elif any(k in sec_lower for k in ["ngân hàng", "bank", "vcb", "mbb", "tcb", "ctg", "acb", "vpb", "hdb", "stb", "tpb"]):
+        sector_name = "Ngân hàng"
+        peers = ["VCB", "MBB", "TCB", "CTG", "ACB"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Ngân hàng Thương mại ({clean_ticker})" if clean_ticker else f"Ngân hàng Thương mại ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "vcb", "mbb", "tcb", "ctg", "acb", "vpb",
+            "ngân hàng", "tín dụng", "nim", "casa", "nợ xấu", "dự phòng", "llr", "bảo phủ nợ xấu", "credit room"
+        ]
+        catalysts = [
+            "Hạn mức tăng trưởng tín dụng (Credit Room) được giao ở mức cao",
+            "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) duy trì vùng thấp",
+            "Tỷ lệ tiền gửi không kỳ hạn (CASA) cao tạo lợi thế vốn giá rẻ",
+            "Áp lực trích lập dự phòng rủi ro giảm khi nợ xấu được kiểm soát chặt chẽ"
+        ]
+        theses = ["Chất lượng tài sản hàng đầu với tỷ lệ nợ xấu thấp và đệm dự phòng vững chắc."]
+        risks = ["Áp lực nợ xấu tiềm ẩn từ nhóm khách hàng doanh nghiệp xây dựng/BĐS."]
+
+    # 5. CHỨNG KHOÁN & DỊCH VỤ TÀI CHÍNH (SSI, HCM, VND, VCI, SHS, MBS, FTS, BSI...)
+    elif any(k in sec_lower for k in ["chứng khoán", "securities", "ssi", "hcm", "vnd", "vci", "shs", "mbs", "fts"]):
+        sector_name = "Chứng khoán & Tài chính"
+        peers = ["SSI", "HCM", "VND", "VCI", "MBS"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Chứng khoán & Tài chính ({clean_ticker})" if clean_ticker else f"Chứng khoán & Tài chính ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "ssi", "hcm", "vnd", "vci", "mbs",
+            "chứng khoán", "thanh khoản", "margin", "tự doanh", "krx", "nâng hạng", "ftse", "ib"
+        ]
+        catalysts = [
+            "Thanh khoản thị trường (GTGD bình quân phiên) tăng trưởng mạnh mẽ",
+            "Dư nợ cho vay ký quỹ (Margin) lập đỉnh mới gia tăng thu nhập lãi",
+            "Vận hành hệ thống KRX và triển khai Non-prefunding phục vụ nâng hạng thị trường",
+            "Mảng tư vấn phát hành IB phục hồi với các thương vụ IPO và phát hành vốn lớn"
+        ]
+        theses = ["Thị phần môi giới vững chắc và nguồn vốn dồi dào đón đầu sóng nâng hạng FTSE."]
+        risks = ["Thị trường chung điều chỉnh giảm làm sụt giảm thanh khoản và danh mục tự doanh."]
+
+    # 6. CÔNG NGHỆ THÔNG TIN & VIỄN THÔNG (FPT, CMG, ELC, CTR, FOX, VGI...)
+    elif any(k in sec_lower for k in ["công nghệ", "phần mềm", "viễn thông", "fpt", "cmg", "elc", "ctr", "technology", "it"]):
+        sector_name = "Công nghệ Thông tin & Viễn thông"
+        peers = ["FPT", "CMG", "CTR", "ELC"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Công nghệ Thông tin ({clean_ticker})" if clean_ticker else f"Công nghệ Thông tin ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "fpt", "cmg", "ctr", "elc",
+            "công nghệ", "phần mềm", "ai", "bán dẫn", "cloud", "chuyển đổi số", "nvidia", "xuất khẩu phần mềm"
+        ]
+        catalysts = [
+            "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI), Chip bán dẫn và Cloud toàn cầu",
+            "Doanh thu dịch vụ CNTT thị trường nước ngoài (Nhật Bản, Mỹ, EU) tăng trưởng trên 25%/năm",
+            "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới triển khai AI Factory",
+            "Mảng Giáo dục & Hạ tầng số mang lại dòng tiền mặt dồi dào, ổn định"
+        ]
+        theses = ["Năng lực cạnh tranh công nghệ và chi phí kỹ sư tối ưu so với các đối thủ toàn cầu."]
+        risks = ["Biến động tỷ giá Yên Nhật hoặc suy giảm chi tiêu CNTT tại các thị trường xuất khẩu."]
+
+    # 7. BÁN LẺ & TIÊU DÙNG (MWG, FRT, PNJ, DGW, PET...)
+    elif any(k in sec_lower for k in ["bán lẻ", "tiêu dùng", "mwg", "frt", "pnj", "dgw", "retail"]):
+        sector_name = "Bán lẻ & Tiêu dùng"
+        peers = ["MWG", "FRT", "PNJ", "DGW"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Bán lẻ & Tiêu dùng ({clean_ticker})" if clean_ticker else f"Bán lẻ & Tiêu dùng ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "mwg", "frt", "pnj", "dgw",
+            "bán lẻ", "chuỗi", "bách hóa xanh", "long châu", "ict", "doanh thu/cửa hàng", "ebitda", "sức mua"
+        ]
+        catalysts = [
+            "Chuỗi bán lẻ mở rộng đạt điểm hòa vốn và gia tăng đóng góp lợi nhuận",
+            "Doanh thu trung bình trên mỗi điểm bán (Rev/store) tăng trưởng qua các tháng",
+            "Tối ưu hóa chi phí vận hành và đóng các điểm bán kém hiệu quả",
+            "Phục hồi nhu cầu tiêu dùng các mặt hàng giá trị cao (ICT, Điện máy, Vàng trang sức)"
+        ]
+        theses = ["Hưởng lợi từ xu hướng chuyển dịch tiêu dùng sang chuỗi bán lẻ hiện đại."]
+        risks = ["Sức mua tiêu dùng hồi phục chậm do thu nhập khả dụng của người dân bị ảnh hưởng."]
+
+    # 8. HÓA CHẤT & PHÂN BÓN (DGC, DCM, DPM, BFC, CSV, LAS...)
+    elif any(k in sec_lower for k in ["hóa chất", "phân bón", "dgc", "dcm", "dpm", "bfc", "csv", "chemical", "fertilizer"]):
+        sector_name = "Hóa chất & Phân bón"
+        peers = ["DGC", "DCM", "DPM", "BFC"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Hóa chất & Phân bón ({clean_ticker})" if clean_ticker else f"Hóa chất & Phân bón ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "dgc", "dcm", "dpm", "bfc", "csv",
+            "phốt pho vàng", "phân bón", "urê", "bán dẫn", "apatit", "hóa chất", "xuất khẩu"
+        ]
+        catalysts = [
+            "Nhu cầu phốt pho vàng (P4) phục hồi theo chu kỳ sản xuất chip và chất bán dẫn toàn cầu",
+            "Giá phân bón urê và hóa chất cơ bản thế giới tăng do hạn chế nguồn cung xuất khẩu",
+            "Tiến độ triển khai tổ hợp hóa chất mới mở rộng quy mô kinh doanh"
+        ]
+        theses = ["Tự chủ nguồn nguyên liệu quặng đầu vào và vị thế xuất khẩu Top 1 khu vực."]
+        risks = ["Giá phốt pho vàng hoặc urê thế giới biến động sụt giảm."]
+
+    # 9. DẦU KHÍ & NĂNG LƯỢNG (PVD, PVS, BSR, GAS, PLX, PVB, PVC...)
+    elif any(k in sec_lower for k in ["dầu khí", "oil", "gas", "pvd", "pvs", "bsr", "gas", "plx", "petroleum"]):
+        sector_name = "Dầu khí & Năng lượng"
+        peers = ["PVS", "PVD", "BSR", "GAS", "PLX"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Dầu khí & Năng lượng ({clean_ticker})" if clean_ticker else f"Dầu khí & Năng lượng ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "pvs", "pvd", "bsr", "gas", "plx",
+            "dầu khí", "lô b ô môn", "giá dầu brent", "giàn khoan", "dayrate", "epc", "điện gió ngoài khơi"
+        ]
+        catalysts = [
+            "Đại dự án chuỗi khí - điện Lô B Ô Môn và Lạc Đà Vàng trao thầu EPC trị giá hàng tỷ USD",
+            "Hiệu suất hoạt động và giá thuê ngày (Dayrate) giàn khoan duy trì ở mức cao",
+            "Hợp đồng EPC xây lắp các dự án điện gió ngoài khơi quốc tế",
+            "Crack spread các sản phẩm lọc dầu (xăng, diesel, jet A1) duy trì vùng hấp dẫn"
+        ]
+        theses = ["Hưởng lợi trực tiếp từ chu kỳ đầu tư thượng nguồn dầu khí lớn nhất trong thập kỷ."]
+        risks = ["Giá dầu thô Brent thế giới biến động giảm mạnh ảnh hưởng quyết định đầu tư Capex."]
+
+    # 10. CẢNG BIỂN & LOGISTICS (GMD, HAH, VSC, PVT, VOS, MVN...)
+    elif any(k in sec_lower for k in ["cảng biển", "logistics", "vận tải biển", "gmd", "hah", "vsc", "pvt", "port", "shipping"]):
+        sector_name = "Cảng biển & Logistics"
+        peers = ["GMD", "HAH", "VSC", "PVT"]
+        if clean_ticker and clean_ticker not in peers:
+            peers.insert(0, clean_ticker)
+        peer_str = ", ".join(peers[:4])
+
+        tpl_name = f"Cảng biển & Logistics ({clean_ticker})" if clean_ticker else f"Cảng biển & Logistics ({peer_str})"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "gmd", "hah", "vsc", "pvt",
+            "cảng biển", "teu", "giá cước tàu", "gemalink", "cái mép thị vải", "hải phòng", "vận tải container"
+        ]
+        catalysts = [
+            "Sản lượng hàng hóa container thông qua cụm cảng nước sâu (Cái Mép - Thị Vải, Lạch Huyện) tăng trưởng hai con số",
+            "Giá cước vận tải biển nội địa và quốc tế duy trì ổn định ở mức cao",
+            "Đưa các bến cảng mới và cụm kho bãi Logistics hiện đại vào vận hành thương mại"
+        ]
+        theses = ["Vị thế cảng nước sâu đón đầu các tuyến tàu mẹ trực tiếp đi Mỹ và châu Âu."]
+        risks = ["Tình trạng dư cung đội tàu vận tải container toàn cầu làm giảm giá cước."]
+
+    # 11. MẶC ĐỊNH CHO CÁC DOANH NGHIỆP KHÁC
+    else:
+        sector_name = fiin_sec or "Doanh nghiệp Sản xuất & Kinh doanh"
+        tpl_name = f"{sector_name} ({clean_ticker})" if clean_ticker else f"{sector_name}"
+        keywords = [
+            clean_ticker.lower() if clean_ticker else "vn30", "doanh thu", "lợi nhuận", "ebitda",
+            "tăng trưởng", "định giá", "pe", "pb", "thị phần", "cổ tức"
+        ]
+        catalysts = [
+            "Tiến độ giải ngân Capex và đưa dự án trọng điểm vào vận hành thương mại",
+            "Biên lợi nhuận gộp nới rộng nhờ tối ưu hóa chi phí nguyên vật liệu và quản trị tồn kho",
+            "Sản lượng tiêu thụ phục hồi và mở rộng thị phần tại các thị trường trọng điểm",
+            "Cơ cấu tài chính lành mạnh, tỷ lệ đòn bẩy an toàn và dòng tiền kinh doanh dương đều đặn"
+        ]
+        theses = [
+            f"Vị thế dẫn đầu ngành {sector_name} với năng lực cạnh tranh cốt lõi và chuỗi cung ứng bền vững."
+        ]
+        risks = [
+            "Biến động giá nguyên liệu đầu vào và rủi ro tỷ giá ảnh hưởng chi phí tài chính."
+        ]
+
+    # Bổ sung từ khóa từ tên công ty nếu có
+    if comp_name:
+        for word in comp_name.lower().split():
+            if len(word) >= 3 and word not in keywords:
+                keywords.append(word)
+
+    return {
+        "name": tpl_name,
+        "sector": sector_name,
+        "keywords": keywords[:15],
+        "catalyst_rules": catalysts,
+        "thesis_rules": theses,
+        "risk_rules": risks
+    }
+
+
 async def analyze_template_image_ai(
     image_bytes: bytes,
     filename: str = "image.png",
@@ -818,7 +1138,7 @@ async def analyze_template_image_ai(
 ) -> Dict[str, Any]:
     """
     Đọc, phân tích và ghi nhớ nội dung hình ảnh (Báo cáo CTCK, Bảng số liệu tài chính, Biểu đồ Catalysts, Luận điểm đầu tư).
-    Trích xuất: Tên mẫu, Nhóm ngành, Từ khóa, Quy tắc Catalysts, Luận điểm và Rủi ro để AI ghi nhớ và phục vụ tìm kiếm sau này.
+    Tự động trích xuất mã chứng khoán chính xác từ tên file/hình ảnh và bóc tách cấu trúc tri thức theo ngành.
     """
     import base64
     import io
@@ -846,7 +1166,10 @@ async def analyze_template_image_ai(
     except Exception:
         pass
 
-    # 3. Thử gọi Gemini Vision Multimodal nếu có API Key
+    # 3. Trích xuất mã chứng khoán ứng viên từ tên file hoặc hint
+    detected_ticker = extract_ticker_from_context(filename=filename, hint=ticker_hint or "")
+
+    # 4. Thử gọi Gemini Vision Multimodal nếu có API Key
     gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if gemini_key:
         try:
@@ -854,18 +1177,18 @@ async def analyze_template_image_ai(
             mime_type = "image/png" if ext == ".png" else ("image/jpeg" if ext in [".jpg", ".jpeg"] else "image/webp")
             
             prompt_text = (
-                "Bạn là chuyên gia phân tích chứng khoán cấp cao. Hãy đọc kỹ toàn bộ nội dung trong hình ảnh này "
-                "(báo cáo phân tích CTCK, bảng số liệu, biểu đồ động lực catalysts, luận điểm đầu tư) và trích xuất thành định dạng JSON với các trường sau:\n"
+                f"Bạn là chuyên gia phân tích chứng khoán cấp cao. Đọc kỹ toàn bộ hình ảnh tài liệu phân tích này (Tên file: {filename}, Gợi ý mã: {detected_ticker or ''}). "
+                "Hãy trích xuất chính xác mã cổ phiếu, tên nhóm ngành, các từ khóa, các động lực Catalysts/Dự án/Capex, luận điểm và rủi ro thành định dạng JSON:\n"
                 "{\n"
-                '  "name": "Tên mẫu huấn luyện (VD: Thép & Tôn mạ - HPG, HSG)",\n'
-                '  "sector": "Tên nhóm ngành chính xác (VD: Thép & Vật liệu xây dựng, Ngân hàng, Bán lẻ, Bất động sản dân dụng, Chứng khoán, Dầu khí, Hóa chất & Phân bón, Khu công nghiệp, Công nghệ thông tin...)",\n'
+                '  "name": "Tên mẫu huấn luyện (VD: Bất động sản Khu công nghiệp - KBC hoặc Thép - HPG)",\n'
+                '  "sector": "Tên nhóm ngành chính xác (VD: Bất động sản Khu công nghiệp, Bất động sản Dân dụng, Thép & Vật liệu xây dựng, Ngân hàng, Bán lẻ & Tiêu dùng, Chứng khoán & Tài chính, Công nghệ Thông tin, Dầu khí, Hóa chất & Phân bón...)",\n'
                 '  "keywords": ["danh", "sách", "từ", "khóa", "nhận", "diện", "mã", "cổ", "phiếu", "ngành"],\n'
-                '  "catalyst_rules": ["Quy tắc bóc tách Động lực tăng trưởng / Dự án / Capex 1", "Động lực 2", "Động lực 3"],\n'
-                '  "thesis_rules": ["Luận điểm đầu tư cốt lõi 1", "Luận điểm 2"],\n'
-                '  "risk_rules": ["Rủi ro trọng yếu 1", "Rủi ro 2"],\n'
-                '  "extracted_text": "Tóm tắt toàn bộ nội dung văn bản AI đọc được từ hình ảnh"\n'
+                '  "catalyst_rules": ["Động lực 1", "Động lực 2", "Động lực 3"],\n'
+                '  "thesis_rules": ["Luận điểm 1", "Luận điểm 2"],\n'
+                '  "risk_rules": ["Rủi ro 1", "Rủi ro 2"],\n'
+                '  "extracted_text": "Tóm tắt ngắn văn bản đọc được"\n'
                 "}\n"
-                "Lưu ý: Chỉ trả về JSON thuần túy không kèm markdown code block thừa."
+                "Lưu ý: Chỉ trả về JSON thuần túy không kèm markdown thừa."
             )
 
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
@@ -894,7 +1217,6 @@ async def analyze_template_image_ai(
                 if resp.status_code == 200:
                     res_json = resp.json()
                     raw_content = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-                    # Clean markdown codeblocks if present
                     if raw_content.startswith("```"):
                         raw_content = re.sub(r"^```(?:json)?\s*", "", raw_content)
                         raw_content = re.sub(r"\s*```$", "", raw_content)
@@ -903,102 +1225,23 @@ async def analyze_template_image_ai(
                     parsed_ai["image_filename"] = saved_filename
                     return parsed_ai
         except Exception as e:
-            print(f"[AI Image Learning] Lỗi gọi Gemini Vision: {e}. Chuyển sang trích xuất tri thức tài chính nội bộ.")
+            print(f"[AI Image Learning] Lỗi gọi Gemini Vision: {e}. Sử dụng mô hình nhận diện tri thức tài chính.")
 
-    # 4. Trích xuất thông minh dự phòng dựa trên tên file, gợi ý mã CP và phân tích ngữ nghĩa
-    hint = (ticker_hint or filename or "").upper()
-    detected_sector = "Thép & Vật liệu xây dựng"
-    detected_name = "Mẫu Bóc Tách Phân Tích Tổng Hợp"
-    detected_keywords = ["doanh thu", "lợi nhuận", "ebitda", "tăng trưởng", "định giá", "pe", "pb"]
-    detected_catalysts = [
-        "Tiến độ giải ngân Capex và đưa dự án trọng điểm vào vận hành thương mại",
-        "Biên lợi nhuận gộp nới rộng nhờ tối ưu hóa chi phí nguyên vật liệu và quản trị tồn kho",
-        "Sản lượng tiêu thụ phục hồi và mở rộng thị phần tại các thị trường trọng điểm"
-    ]
-    detected_theses = [
-        "Vị thế dẫn đầu ngành với năng lực cạnh tranh cốt lõi và chuỗi cung ứng bền vững",
-        "Dòng tiền thuần từ hoạt động kinh doanh dồi dào, cơ cấu nợ an toàn"
-    ]
-    detected_risks = [
-        "Biến động giá nguyên liệu đầu vào và rủi ro tỷ giá ảnh hưởng chi phí tài chính",
-        "Sức cầu tiêu thụ của thị trường chung phục hồi chậm hơn kỳ vọng"
-    ]
+    # 5. Phân tích ngữ nghĩa chuyên sâu dựa trên cơ sở dữ liệu doanh nghiệp và ngành
+    result = build_sector_knowledge_template(
+        ticker=detected_ticker,
+        filename=filename
+    )
+    
+    result["image_url"] = f"/data/learned_images/{saved_filename}"
+    result["image_filename"] = saved_filename
+    result["extracted_text"] = f"Đã đọc và nhận diện hình ảnh [{filename}] ({img_size[0]}x{img_size[1]}px). Trích xuất tri thức đặc thù nhóm ngành {result['sector']} ({detected_ticker or 'Chung'})."
 
-    # Nhận diện theo mã CP trong tên file hoặc hint
-    if any(k in hint for k in ["HPG", "NKG", "HSG", "THEP", "STEEL", "HRC"]):
-        detected_sector = "Thép & Vật liệu xây dựng"
-        detected_name = f"Thép & Vật liệu ({hint if len(hint) <= 4 else 'HPG, NKG, HSG'})"
-        detected_keywords = ["thép", "hrc", "quặng sắt", "than cốc", "lò cao", "tôn mạ", "hpg", "nkg", "hsg"]
-        detected_catalysts = [
-            "Tiến độ giải ngân và vận hành các giai đoạn đại dự án nâng công suất HRC",
-            "Chênh lệch Spread HRC - Quặng sắt & Than cốc cải thiện làm tăng biên lãi gộp",
-            "Chính sách bảo hộ, thuế tự vệ chống bán phá giá thép nhập khẩu"
-        ]
-        detected_theses = ["Doanh nghiệp đầu ngành với chuỗi sản xuất khép kín và giá thành siêu cạnh tranh."]
-        detected_risks = ["Biến động giá quặng sắt và than mỡ thế giới tăng đột biến."]
-
-    elif any(k in hint for k in ["VCB", "MBB", "TCB", "CTG", "ACB", "VPB", "BANK", "NGAN HANG"]):
-        detected_sector = "Ngân hàng"
-        detected_name = f"Ngân hàng Thương mại ({hint if len(hint) <= 4 else 'VCB, MBB, TCB'})"
-        detected_keywords = ["ngân hàng", "tín dụng", "nim", "casa", "nợ xấu", "dự phòng", "llr", "vcb", "mbb", "tcb", "ctg"]
-        detected_catalysts = [
-            "Hạn mức tăng trưởng tín dụng (Credit Room) được giao ở mức cao",
-            "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) duy trì vùng thấp",
-            "Tỷ lệ tiền gửi không kỳ hạn (CASA) cao tạo lợi thế vốn giá rẻ"
-        ]
-        detected_theses = ["Chất lượng tài sản hàng đầu với tỷ lệ nợ xấu thấp và đệm dự phòng vững chắc."]
-        detected_risks = ["Áp lực nợ xấu tiềm ẩn từ nhóm khách hàng doanh nghiệp xây dựng/BĐS."]
-
-    elif any(k in hint for k in ["MWG", "FRT", "PNJ", "BAN LE", "RETAIL"]):
-        detected_sector = "Bán lẻ & Tiêu dùng"
-        detected_name = f"Bán lẻ & Chuỗi Phân phối ({hint if len(hint) <= 4 else 'MWG, FRT, PNJ'})"
-        detected_keywords = ["bán lẻ", "chuỗi", "bách hóa xanh", "long châu", "ict", "doanh thu/cửa hàng", "mwg", "frt", "pnj"]
-        detected_catalysts = [
-            "Chuỗi bán lẻ mở rộng đạt điểm hòa vốn và gia tăng đóng góp lợi nhuận",
-            "Doanh thu trung bình trên mỗi điểm bán (Rev/store) tăng trưởng qua các tháng",
-            "Tối ưu hóa chi phí vận hành và đóng các điểm bán kém hiệu quả"
-        ]
-        detected_theses = ["Hưởng lợi từ xu hướng chuyển dịch tiêu dùng sang chuỗi bán lẻ hiện đại."]
-        detected_risks = ["Sức mua tiêu dùng hồi phục chậm do thu nhập khả dụng của người dân bị ảnh hưởng."]
-
-    elif any(k in hint for k in ["SSI", "HCM", "VND", "VCI", "CHUNG KHOAN", "SECURITIES"]):
-        detected_sector = "Chứng khoán & Tài chính"
-        detected_name = f"Chứng khoán & Dịch vụ Tài chính ({hint if len(hint) <= 4 else 'SSI, HCM, VND'})"
-        detected_keywords = ["chứng khoán", "thanh khoản", "margin", "tự doanh", "krx", "nâng hạng", "ftse", "ssi", "hcm", "vnd"]
-        detected_catalysts = [
-            "Thanh khoản thị trường (GTGD bình quân phiên) tăng trưởng mạnh mẽ",
-            "Dư nợ cho vay ký quỹ (Margin) lập đỉnh mới gia tăng thu nhập lãi",
-            "Vận hành hệ thống KRX và triển khai Non-prefunding phục vụ nâng hạng thị trường"
-        ]
-        detected_theses = ["Thị phần môi giới vững chắc và nguồn vốn dồi dào đón đầu sóng nâng hạng FTSE."]
-        detected_risks = ["Thị trường chung điều chỉnh giảm làm sụt giảm thanh khoản và danh mục tự doanh."]
-
-    elif any(k in hint for k in ["DGC", "DCM", "DPM", "PHAN BON", "HOA CHAT"]):
-        detected_sector = "Hóa chất & Phân bón"
-        detected_name = f"Hóa chất & Phân bón ({hint if len(hint) <= 4 else 'DGC, DCM, DPM'})"
-        detected_keywords = ["phốt pho vàng", "phân bón", "urê", "dgc", "dcm", "dpm", "bán dẫn", "apatit"]
-        detected_catalysts = [
-            "Nhu cầu phốt pho vàng (P4) phục hồi theo chu kỳ sản xuất chip và chất bán dẫn toàn cầu",
-            "Giá phân bón urê và hóa chất cơ bản thế giới tăng do hạn chế nguồn cung xuất khẩu",
-            "Tiến độ triển khai tổ hợp hóa chất mới mở rộng quy mô kinh doanh"
-        ]
-        detected_theses = ["Tự chủ nguồn nguyên liệu quặng đầu vào và vị thế xuất khẩu Top 1 khu vực."]
-        detected_risks = ["Giá phốt pho vàng hoặc urê thế giới biến động sụt giảm."]
-
-    return {
-        "name": detected_name,
-        "sector": detected_sector,
-        "keywords": detected_keywords,
-        "catalyst_rules": detected_catalysts,
-        "thesis_rules": detected_theses,
-        "risk_rules": detected_risks,
-        "image_url": f"/data/learned_images/{saved_filename}",
-        "image_filename": saved_filename,
-        "extracted_text": f"Đã đọc và nhận diện hình ảnh [{filename}] kích thước {img_size[0]}x{img_size[1]}px. Tự động bóc tách cấu trúc tri thức đặc thù nhóm ngành {detected_sector}."
-    }
+    return result
 
 
 # Singleton instances
 ai_scheduler = AutonomousLearningScheduler()
 template_store = TemplateStore()
+
 

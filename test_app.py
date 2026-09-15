@@ -923,15 +923,23 @@ class TestIERM(unittest.TestCase):
         resp_del_sys = self.client.delete("/api/ai-learning/templates/tpl-thep-vat-lieu", headers=admin_headers)
         self.assertEqual(resp_del_sys.status_code, 400)
 
-        # 7. Kiểm tra API đọc & phân tích hình ảnh AI
+        # 7. Kiểm tra API đọc & phân tích hình ảnh AI (Test cả HPG và KBC - BĐS Khu công nghiệp)
         fake_img_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc`\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82"
-        files = {"file": ("hpg_report_chart.png", fake_img_bytes, "image/png")}
-        resp_img = self.client.post("/api/ai-learning/analyze-template-image", files=files, data={"ticker": "HPG"}, headers=admin_headers)
-        self.assertEqual(resp_img.status_code, 200)
-        img_data = resp_img.json()
-        self.assertIn("catalyst_rules", img_data)
-        self.assertIn("keywords", img_data)
-        self.assertIn("sector", img_data)
+        files_hpg = {"file": ("hpg_report_chart.png", fake_img_bytes, "image/png")}
+        resp_img_hpg = self.client.post("/api/ai-learning/analyze-template-image", files=files_hpg, data={"ticker": "HPG"}, headers=admin_headers)
+        self.assertEqual(resp_img_hpg.status_code, 200)
+        img_data_hpg = resp_img_hpg.json()
+        self.assertIn("Thép", img_data_hpg["sector"])
+
+        # Test upload file KBC.png -> Phải phân loại đúng nhóm ngành Bất động sản Khu công nghiệp
+        files_kbc = {"file": ("KBC.png", fake_img_bytes, "image/png")}
+        resp_img_kbc = self.client.post("/api/ai-learning/analyze-template-image", files=files_kbc, headers=admin_headers)
+        self.assertEqual(resp_img_kbc.status_code, 200)
+        img_data_kbc = resp_img_kbc.json()
+        self.assertEqual(img_data_kbc["sector"], "Bất động sản Khu công nghiệp")
+        self.assertIn("kbc", img_data_kbc["keywords"])
+        self.assertIn("KBC", img_data_kbc["name"])
+        self.assertTrue(any("KCN" in c or "Khu công nghiệp" in c or "FDI" in c for c in img_data_kbc["catalyst_rules"]))
 
     def test_ai_learning_advanced_extraction(self):
         """Kiểm tra bộ trích xuất Few-Shot Extractor nhận diện sâu sắc Catalysts và Luận điểm"""

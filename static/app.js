@@ -8759,8 +8759,26 @@ async function analyzeTemplateImage() {
     try {
         const formData = new FormData();
         formData.append("file", selectedTemplateImageFile);
-        const currentTicker = (currentReport ? currentReport.ticker : "HPG").toUpperCase();
-        formData.append("ticker", currentTicker);
+
+        // Trích xuất mã cổ phiếu từ tên file ảnh (VD: KBC.png -> KBC) hoặc từ ô nhập tên mẫu nếu có
+        let candidateTicker = "";
+        if (selectedTemplateImageFile && selectedTemplateImageFile.name) {
+            const fnMatch = selectedTemplateImageFile.name.match(/\b([A-Za-z0-9]{3})\b/);
+            if (fnMatch) {
+                candidateTicker = fnMatch[1].toUpperCase();
+            }
+        }
+        if (!candidateTicker) {
+            const nameVal = document.getElementById("tpl-input-name")?.value || "";
+            const nameMatch = nameVal.match(/\b([A-Za-z0-9]{3})\b/);
+            if (nameMatch) {
+                candidateTicker = nameMatch[1].toUpperCase();
+            }
+        }
+
+        if (candidateTicker) {
+            formData.append("ticker", candidateTicker);
+        }
 
         const resp = await fetch("/api/ai-learning/analyze-template-image", {
             method: "POST",
