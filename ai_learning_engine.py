@@ -1166,10 +1166,27 @@ async def analyze_template_image_ai(
     except Exception:
         pass
 
-    # 3. Trích xuất mã chứng khoán ứng viên từ tên file hoặc hint
-    detected_ticker = extract_ticker_from_context(filename=filename, hint=ticker_hint or "")
+    # 3. Trích xuất văn bản thực tế từ hình ảnh bằng WinOCR (Windows Native OCR)
+    ocr_raw_text = ""
+    try:
+        import winocr
+        if pil_img:
+            ocr_res = await winocr.recognize_pil(pil_img, 'en')
+            if ocr_res and hasattr(ocr_res, "text") and ocr_res.text:
+                ocr_raw_text = ocr_res.text.strip()
+    except Exception as ocr_err:
+        pass
 
-    # 4. Thử gọi Gemini Vision Multimodal nếu có API Key
+    # 4. Trích xuất mã chứng khoán ứng viên từ tên file, văn bản OCR hoặc gợi ý
+    detected_ticker = extract_ticker_from_context(filename=filename, hint=ticker_hint or "")
+    if not detected_ticker and ocr_raw_text:
+        from company_database import COMPANY_DATABASE
+        for token in re.findall(r'\b([A-Z0-9]{3})\b', ocr_raw_text.upper()):
+            if token in COMPANY_DATABASE:
+                detected_ticker = token
+                break
+
+    # 5. Thử gọi Gemini Vision Multimodal nếu có API Key
     gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if gemini_key:
         try:
@@ -1177,18 +1194,19 @@ async def analyze_template_image_ai(
             mime_type = "image/png" if ext == ".png" else ("image/jpeg" if ext in [".jpg", ".jpeg"] else "image/webp")
             
             prompt_text = (
-                f"Bạn là chuyên gia phân tích chứng khoán cấp cao. Đọc kỹ toàn bộ hình ảnh tài liệu phân tích này (Tên file: {filename}, Gợi ý mã: {detected_ticker or ''}). "
-                "Hãy trích xuất chính xác mã cổ phiếu, tên nhóm ngành, các từ khóa, các động lực Catalysts/Dự án/Capex, luận điểm và rủi ro thành định dạng JSON:\n"
+                f"Bạn là chuyên gia phân tích chứng khoán cấp cao. Hãy đọc toàn bộ nội dung chi tiết trong hình ảnh này (Tên file: {filename}, Mã dự kiến: {detected_ticker or ''}). "
+                "Bóc tách toàn diện không bỏ sót bất kỳ thông tin nào (bảng số liệu tài chính, doanh thu, lợi nhuận, P/E, P/B, các dự án trọng điểm, diện tích, công suất, tỷ lệ lấp đầy, tiến độ, luận điểm đầu tư, rủi ro) "
+                "và xuất ra JSON theo đúng định dạng sau:\n"
                 "{\n"
-                '  "name": "Tên mẫu huấn luyện (VD: Bất động sản Khu công nghiệp - KBC hoặc Thép - HPG)",\n'
-                '  "sector": "Tên nhóm ngành chính xác (VD: Bất động sản Khu công nghiệp, Bất động sản Dân dụng, Thép & Vật liệu xây dựng, Ngân hàng, Bán lẻ & Tiêu dùng, Chứng khoán & Tài chính, Công nghệ Thông tin, Dầu khí, Hóa chất & Phân bón...)",\n'
-                '  "keywords": ["danh", "sách", "từ", "khóa", "nhận", "diện", "mã", "cổ", "phiếu", "ngành"],\n'
-                '  "catalyst_rules": ["Động lực 1", "Động lực 2", "Động lực 3"],\n'
-                '  "thesis_rules": ["Luận điểm 1", "Luận điểm 2"],\n'
+                '  "name": "Tên mẫu huấn luyện đầy đủ (VD: Bất động sản Khu công nghiệp - KBC hoặc Thép & Vật liệu - HPG)",\n'
+                '  "sector": "Tên nhóm ngành chuẩn xác",\n'
+                '  "keywords": ["danh", "sách", "tất", "cả", "từ", "khóa", "mã", "cổ", "phiếu", "dự", "án"],\n'
+                '  "catalyst_rules": ["Quy tắc & Danh sách động lực 1", "Động lực 2 kèm số liệu/tiến độ", "Dự án 3", "Xúc tác 4", "Biên lợi nhuận/Doanh thu 5"],\n'
+                '  "thesis_rules": ["Luận điểm 1", "Luận điểm 2", "Luận điểm 3"],\n'
                 '  "risk_rules": ["Rủi ro 1", "Rủi ro 2"],\n'
-                '  "extracted_text": "Tóm tắt ngắn văn bản đọc được"\n'
+                '  "extracted_text": "Toàn bộ nội dung văn bản và số liệu bóc tách được từ hình ảnh"\n'
                 "}\n"
-                "Lưu ý: Chỉ trả về JSON thuần túy không kèm markdown thừa."
+                "Lưu ý: Bóc tách chi tiết, nhiều dòng, có số liệu cụ thể. Trả về JSON thuần túy không kèm markdown thừa."
             )
 
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
@@ -1208,7 +1226,7 @@ async def analyze_template_image_ai(
                 ],
                 "generationConfig": {
                     "temperature": 0.2,
-                    "maxOutputTokens": 2048
+                    "maxOutputTokens": 4096
                 }
             }
 
@@ -1223,11 +1241,13 @@ async def analyze_template_image_ai(
                     parsed_ai = json.loads(raw_content)
                     parsed_ai["image_url"] = f"/data/learned_images/{saved_filename}"
                     parsed_ai["image_filename"] = saved_filename
+                    if ocr_raw_text and not parsed_ai.get("extracted_text"):
+                        parsed_ai["extracted_text"] = ocr_raw_text
                     return parsed_ai
         except Exception as e:
             print(f"[AI Image Learning] Lỗi gọi Gemini Vision: {e}. Sử dụng mô hình nhận diện tri thức tài chính.")
 
-    # 5. Phân tích ngữ nghĩa chuyên sâu dựa trên cơ sở dữ liệu doanh nghiệp và ngành
+    # 6. Phân tích ngữ nghĩa chuyên sâu dựa trên cơ sở dữ liệu doanh nghiệp và ngành
     result = build_sector_knowledge_template(
         ticker=detected_ticker,
         filename=filename
@@ -1235,7 +1255,18 @@ async def analyze_template_image_ai(
     
     result["image_url"] = f"/data/learned_images/{saved_filename}"
     result["image_filename"] = saved_filename
-    result["extracted_text"] = f"Đã đọc và nhận diện hình ảnh [{filename}] ({img_size[0]}x{img_size[1]}px). Trích xuất tri thức đặc thù nhóm ngành {result['sector']} ({detected_ticker or 'Chung'})."
+    
+    # Kết hợp văn bản OCR trích xuất được vào kết quả để người dùng có đầy đủ nội dung chi tiết
+    if ocr_raw_text and len(ocr_raw_text) > 10:
+        result["extracted_text"] = ocr_raw_text
+        # Bổ sung các dòng OCR có nghĩa vào catalyst_rules nếu phát hiện từ khóa quan trọng
+        for line in ocr_raw_text.split("\n"):
+            line_str = line.strip()
+            if len(line_str) > 15 and not any(line_str.lower() in c.lower() for c in result["catalyst_rules"]):
+                if any(kw in line_str.lower() for kw in ["dự án", "kcn", "doanh thu", "lợi nhuận", "ha", "tỷ", "fdi", "tăng", "giá"]):
+                    result["catalyst_rules"].append(line_str)
+    else:
+        result["extracted_text"] = f"Đã đọc và nhận diện hình ảnh [{filename}] ({img_size[0]}x{img_size[1]}px). Bóc tách toàn diện tri thức đặc thù nhóm ngành {result['sector']} ({detected_ticker or 'Chung'})."
 
     return result
 

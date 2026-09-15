@@ -8816,6 +8816,8 @@ async function analyzeTemplateImage() {
         if (catInput && data.catalyst_rules && Array.isArray(data.catalyst_rules)) catInput.value = data.catalyst_rules.join("\n");
         if (thesisInput && data.thesis_rules && Array.isArray(data.thesis_rules)) thesisInput.value = data.thesis_rules.join("\n");
         if (riskInput && data.risk_rules && Array.isArray(data.risk_rules)) riskInput.value = data.risk_rules.join("\n");
+        const rawTextInput = document.getElementById("tpl-input-raw-text");
+        if (rawTextInput && data.extracted_text) rawTextInput.value = data.extracted_text;
 
         if (statusBox) {
             statusBox.className = "text-[11px] p-2 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-300 flex items-center gap-2";
@@ -8875,6 +8877,7 @@ async function saveCustomTemplate() {
     const rawCats = (document.getElementById("tpl-input-catalysts")?.value || "").trim();
     const rawTheses = (document.getElementById("tpl-input-theses")?.value || "").trim();
     const rawRisks = (document.getElementById("tpl-input-risks")?.value || "").trim();
+    const rawText = (document.getElementById("tpl-input-raw-text")?.value || "").trim();
 
     if (!name || !sector || !rawKw || !rawCats) {
         showToast("Vui lòng điền đầy đủ Tên mẫu, Nhóm ngành, Từ khóa và Tiêu chí Catalysts!", true);
@@ -8899,7 +8902,8 @@ async function saveCustomTemplate() {
                 keywords: keywords,
                 catalyst_rules: catRules,
                 thesis_rules: thesisRules,
-                risk_rules: riskRules
+                risk_rules: riskRules,
+                sample_text: rawText
             })
         });
 

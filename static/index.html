@@ -2564,9 +2564,9 @@
         </div>
     </div>
 
-    <!-- MODAL THÊM MẪU HỌC TÙY BIẾN KÈM TÍNH NĂNG AI ĐỌC HÌNH ẢNH & GHI NHỚ TRI THỨC -->
+    <!-- MODAL THÊM MẪU HỌC TÙY BIẾN KÈM TÍNH NĂNG AI ĐỌC HÌNH ẢNH & GHI NHỚ TRI THỨC TOÀN DIỆN -->
     <div id="add-template-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden font-mono overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full p-5 space-y-4 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-4xl w-full p-5 space-y-4 shadow-2xl relative my-auto max-h-[94vh] flex flex-col">
             <button onclick="closeAddTemplateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -2578,20 +2578,20 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h4 class="font-bold text-sm text-white uppercase">Thêm Mẫu Huấn Luyện Bóc Tách & Ghi Nhớ Tri Thức</h4>
+                        <h4 class="font-bold text-sm text-white uppercase">Thêm Mẫu Huấn Luyện Bóc Tách & Ghi Nhớ Tri Thức Chuyên Sâu</h4>
                         <span class="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-800 text-amber-300 text-[10px] font-bold">Admin Only</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">Dạy AI nhận diện các động lực tăng trưởng, luận điểm & rủi ro đặc thù theo ngành (hỗ trợ đọc trực tiếp từ hình ảnh)</p>
+                    <p class="text-[11px] text-slate-400">AI tự động đọc trọn vẹn văn bản/bảng biểu từ hình ảnh, bóc tách đầy đủ các động lực catalysts, luận điểm & rủi ro chi tiết</p>
                 </div>
             </div>
 
-            <div class="space-y-3.5 text-xs overflow-y-auto pr-1 flex-1">
-                <!-- KHỐI 1: TẢI HÌNH ẢNH ĐỂ AI TỰ ĐỌC VÀ TRÍCH XUẤT (VISION / OCR) -->
+            <div class="space-y-4 text-xs overflow-y-auto pr-1.5 flex-1">
+                <!-- KHỐI 1: TẢI HÌNH ẢNH ĐỂ AI TỰ ĐỌC VÀ TRÍCH XUẤT (VISION / NATIVE OCR) -->
                 <div class="p-3 bg-slate-950/90 rounded-lg border border-cyan-900/60 space-y-2">
                     <div class="flex items-center justify-between">
                         <label class="text-cyan-300 font-bold text-[11px] flex items-center gap-1.5">
                             <i data-lucide="image-plus" class="w-4 h-4 text-cyan-400"></i>
-                            <span>1. NẠP HÌNH ẢNH ĐỂ AI ĐỌC & TỰ ĐỘNG ĐIỀN (TÙY CHỌN):</span>
+                            <span>1. NẠP HÌNH ẢNH ĐỂ AI ĐỌC & TỰ ĐỘNG BÓC TÁCH CHI TIẾT (TÙY CHỌN):</span>
                         </label>
                         <span class="text-[10px] text-slate-400">Hỗ trợ PNG, JPG, WEBP, Ảnh chụp màn hình</span>
                     </div>
@@ -2605,22 +2605,22 @@
                                 <i data-lucide="upload-cloud" class="w-6 h-6 text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
                             </div>
                             <p class="text-slate-300 text-[11px]">Kéo thả hình ảnh báo cáo / biểu đồ hoặc <span class="text-cyan-400 font-bold underline">nhấp vào đây để chọn ảnh</span></p>
-                            <p class="text-slate-500 text-[10px]">AI sẽ tự động đọc bảng số liệu, động lực catalysts, luận điểm đầu tư và lưu vào bộ nhớ tri thức</p>
+                            <p class="text-slate-500 text-[10px]">AI sẽ tự động đọc toàn bộ bảng số liệu, dự án, động lực catalysts, luận điểm đầu tư và lưu vào bộ nhớ tri thức</p>
                         </div>
 
                         <!-- Preview Area -->
-                        <div id="tpl-image-preview-box" class="hidden flex items-center justify-between gap-3 p-2 bg-slate-950 rounded border border-slate-800 text-left">
-                            <div class="flex items-center gap-2.5 overflow-hidden">
-                                <img id="tpl-image-preview-img" src="" alt="Preview" class="w-12 h-12 object-cover rounded border border-slate-700 shrink-0">
+                        <div id="tpl-image-preview-box" class="hidden flex items-center justify-between gap-3 p-2.5 bg-slate-950 rounded border border-slate-800 text-left">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <img id="tpl-image-preview-img" src="" alt="Preview" class="w-14 h-14 object-cover rounded border border-slate-700 shrink-0">
                                 <div class="overflow-hidden text-[11px]">
                                     <span id="tpl-image-name" class="block text-white font-bold truncate">image.png</span>
                                     <span id="tpl-image-size" class="block text-slate-400 text-[10px]">0 KB</span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                                <button type="button" onclick="analyzeTemplateImage()" id="btn-ai-analyze-image" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded text-[11px] flex items-center gap-1 shadow-lg shadow-cyan-950 transition-all">
+                            <div class="flex items-center gap-2 shrink-0" onclick="event.stopPropagation()">
+                                <button type="button" onclick="analyzeTemplateImage()" id="btn-ai-analyze-image" class="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-950 transition-all">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
-                                    <span>⚡ AI Đọc & Trích Xuất</span>
+                                    <span>⚡ AI Đọc & Bóc Tách Chi Tiết</span>
                                 </button>
                                 <button type="button" onclick="removeTemplateImage()" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded transition-colors" title="Gỡ ảnh">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -2630,58 +2630,76 @@
                     </div>
 
                     <!-- AI Status Indicator -->
-                    <div id="tpl-image-ai-status" class="hidden text-[11px] p-2 rounded bg-cyan-950/60 border border-cyan-800 text-cyan-300 flex items-center gap-2">
+                    <div id="tpl-image-ai-status" class="hidden text-[11px] p-2.5 rounded bg-cyan-950/60 border border-cyan-800 text-cyan-300 flex items-center gap-2">
                         <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>
                         <span id="tpl-image-ai-status-text">Đang phân tích hình ảnh...</span>
                     </div>
                 </div>
 
                 <!-- KHỐI 2: THÔNG TIN MẪU HUẤN LUYỆN (AI TỰ ĐIỀN HOẶC CHỈNH SỬA THỦ CÔNG) -->
-                <div class="space-y-3 pt-1">
-                    <div class="text-slate-400 font-bold text-[11px] flex items-center gap-1 border-b border-slate-800 pb-1">
-                        <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>2. NỘI DUNG MẪU HUẤN LUYỆN (KIỂM TRA & TÙY BIẾN):</span>
+                <div class="space-y-3.5 pt-1">
+                    <div class="text-slate-400 font-bold text-[11px] flex items-center justify-between border-b border-slate-800 pb-1">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
+                            <span>2. NỘI DUNG MẪU HUẤN LUYỆN (BÓC TÁCH MỞ RỘNG NHIỀU HÀNG & CHI TIẾT):</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500 italic">Mỗi tiêu chí trên một dòng riêng biệt</span>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-slate-400 text-[11px] mb-1">Tên Mẫu Huấn Luyện *:</label>
-                            <input type="text" id="tpl-input-name" placeholder="VD: Hóa chất & Phân bón (DGC, DCM)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                            <input type="text" id="tpl-input-name" placeholder="VD: Bất động sản Khu công nghiệp (KBC, IDC)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-slate-400 text-[11px] mb-1">Nhóm Ngành *:</label>
-                            <input type="text" id="tpl-input-sector" placeholder="VD: Hóa chất & Phân bón" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                            <input type="text" id="tpl-input-sector" placeholder="VD: Bất động sản Khu công nghiệp" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-slate-400 text-[11px] mb-1">Từ Khóa Nhận Diện Ngành (cách nhau bởi dấu phẩy) *:</label>
-                        <input type="text" id="tpl-input-keywords" placeholder="dgc, dcm, dpm, phốt pho vàng, phân bón, urê, baf..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-cyan-500 focus:outline-none">
+                        <label class="block text-slate-400 text-[11px] mb-1">Từ Khóa & Mã Cổ Phiếu Nhận Diện Ngành (cách nhau bởi dấu phẩy) *:</label>
+                        <input type="text" id="tpl-input-keywords" placeholder="kbc, idc, szc, bcm, vgc, phr, khu công nghiệp, kcn, fdi, cho thuê đất kcn, rbf, tràng duệ..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none">
                     </div>
 
                     <div>
-                        <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Nhận Diện Catalysts / Động Lực (Mỗi dòng 1 tiêu chí) *:</label>
-                        <textarea id="tpl-input-catalysts" rows="3" placeholder="Tiến độ dự án tổ hợp Nghi Sơn / nhà máy mới&#10;Chênh lệch giá xuất khẩu phốt pho vàng & giá nguyên liệu apatit&#10;Nhu cầu chất bán dẫn và chip điện tử toàn cầu phục hồi..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                        <label class="block text-slate-400 text-[11px] mb-1 flex items-center justify-between">
+                            <span>Quy Tắc & Danh Sách Catalysts / Động Lực Tăng Trưởng / Dự Án Chi Tiết (Mỗi dòng 1 tiêu chí) *:</span>
+                            <span class="text-[10px] text-cyan-400/80">Khung mở rộng (nhiều hàng)</span>
+                        </label>
+                        <textarea id="tpl-input-catalysts" rows="6" placeholder="Diện tích cho thuê đất KCN ký mới và bàn giao ghi nhận doanh thu tăng trưởng mạnh mẽ&#10;Dòng vốn đầu tư trực tiếp nước ngoài (FDI) từ các tập đoàn công nghệ & bán dẫn tăng tốc&#10;Giá thuê đất KCN bình quân tại các thủ phủ công nghiệp tiếp tục tăng 5-10%&#10;Tiến độ đại dự án KCN Tràng Duệ 3, Nam Sơn Hạp Lĩnh, Tân Tập về đích đúng kế hoạch&#10;Dòng tiền đều đặn từ mảng cho thuê nhà xưởng xây sẵn (RBF/RBW) và hạ tầng tiện ích KCN..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:border-cyan-500 focus:outline-none leading-relaxed text-xs"></textarea>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Luận Điểm Đầu Tư (Mỗi dòng 1 ý):</label>
-                            <textarea id="tpl-input-theses" rows="2" placeholder="Tự chủ nguồn nguyên liệu quặng apatit...&#10;Dòng tiền mặt ròng dồi dào, tỷ lệ trả cổ tức cao..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                            <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Luận Điểm Đầu Tư & Lợi Thế Chiến Lược (Mỗi dòng 1 ý):</label>
+                            <textarea id="tpl-input-theses" rows="4" placeholder="Sở hữu quỹ đất sạch thương phẩm sẵn sàng cho thuê lớn tại các vị trí chiến lược...&#10;Mô hình tích hợp Khu Đô thị - Dịch vụ - Khu Công nghiệp tối ưu hóa biên lợi nhuận...&#10;Dòng tiền mặt dồi dào, cơ cấu tài chính lành mạnh..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:border-cyan-500 focus:outline-none leading-relaxed text-xs"></textarea>
                         </div>
                         <div>
-                            <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Rủi Ro Cốt Lõi (Mỗi dòng 1 ý):</label>
-                            <textarea id="tpl-input-risks" rows="2" placeholder="Giá phân bón thế giới giảm do nguồn cung Trung Quốc...&#10;Rủi ro thiếu hụt nguồn quặng hoặc giá điện tăng..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                            <label class="block text-slate-400 text-[11px] mb-1">Quy Tắc Rủi Ro Trọng Yếu & Thách Thức (Mỗi dòng 1 ý):</label>
+                            <textarea id="tpl-input-risks" rows="4" placeholder="Tiến độ đền bù giải phóng mặt bằng và thủ tục tính tiền sử dụng đất kéo dài...&#10;Rủi ro biến động kinh tế toàn cầu làm chậm tiến độ giải ngân dòng vốn FDI...&#10;Áp lực cạnh tranh thu hút FDI từ các quốc gia láng giềng..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:border-cyan-500 focus:outline-none leading-relaxed text-xs"></textarea>
                         </div>
                     </div>
+                </div>
+
+                <!-- KHỐI 3: TOÀN BỘ NỘI DUNG VĂN BẢN & SỐ LIỆU ĐỌC TRỰC TIẾP TỪ HÌNH ẢNH (AI VISUAL KNOWLEDGE MEMORY) -->
+                <div class="space-y-2 pt-1 border-t border-slate-800">
+                    <label class="block text-cyan-300 font-bold text-[11px] flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            <span>3. TOÀN BỘ VĂN BẢN & DỮ LIỆU SỐ LIỆU AI ĐỌC ĐƯỢC TỪ HÌNH ẢNH (BỘ NHỚ HỌC TẬP):</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-normal">Lưu giữ làm bối cảnh Few-Shot cho AI tự học online</span>
+                    </label>
+                    <textarea id="tpl-input-raw-text" rows="5" placeholder="Toàn bộ nội dung văn bản, bảng biểu, số liệu tài chính đọc được từ hình ảnh sẽ hiển thị tại đây để bạn kiểm tra hoặc bổ sung thêm..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-cyan-500 focus:outline-none leading-relaxed text-xs font-mono"></textarea>
                 </div>
             </div>
 
             <!-- Footer Buttons -->
             <div class="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-800 shrink-0">
-                <span class="text-[10px] text-slate-500 italic">Mẫu đã lưu sẽ được AI áp dụng ngay trong các phiên quét tự động.</span>
+                <span class="text-[10px] text-slate-500 italic">Mẫu đã lưu sẽ được AI áp dụng ngay trong các phiên quét và tự học online.</span>
                 <div class="flex items-center gap-2">
-                    <button onclick="closeAddTemplateModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs">Hủy</button>
+                    <button onclick="closeAddTemplateModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs">Hủy</button>
                     <button onclick="saveCustomTemplate()" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-xs shadow flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95">
                         <i data-lucide="check" class="w-3.5 h-3.5"></i>
                         <span>Lưu Mẫu Huấn Luyện</span>
@@ -3801,6 +3819,6 @@
         </div>
     </footer>
 
-    <script src="/static/app.js?v=10.18-kbc-industrial-ai-learning-fix"></script>
+    <script src="/static/app.js?v=10.19-expanded-image-ai-learning"></script>
 </body>
 </html>
