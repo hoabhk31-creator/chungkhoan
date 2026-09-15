@@ -196,7 +196,8 @@ class TestIERM(unittest.TestCase):
         - Thị trường bất động sản hồi phục chậm.
         - Biến động tỷ giá USD/VND.
         """
-        resp = self.client.post("/api/analyze-raw", json={"raw_text": raw_text, "institution": "SSI"})
+        admin_hdr = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
+        resp = self.client.post("/api/analyze-raw", json={"raw_text": raw_text, "institution": "SSI"}, headers=admin_hdr)
         self.assertEqual(resp.status_code, 200)
         item = resp.json()
         self.assertEqual(item["institution"], "SSI")
@@ -270,11 +271,12 @@ class TestIERM(unittest.TestCase):
 
     def test_api_crawl_url_and_synthesis(self):
         """Kiểm tra API bóc tách dữ liệu từ link URL (Web/PDF) và cơ chế tổng hợp tự động"""
+        admin_hdr = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
         resp = self.client.post("/api/crawl-url", json={
             "url": "https://finance.vietstock.vn/TCH/bao-cao-phan-tich.htm",
             "ticker": "TCH",
             "institution": "SSI Research"
-        })
+        }, headers=admin_hdr)
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertIn("extracted_report", data)
@@ -297,6 +299,7 @@ class TestIERM(unittest.TestCase):
 
     def test_api_analyze_raw_text(self):
         """Kiểm tra trích xuất chỉ số định lượng từ văn bản thô báo cáo CTCK"""
+        admin_hdr = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
         sample_text = """
         BÁO CÁO PHÂN TÍCH SSI RESEARCH - CỔ PHIẾU HPG
         Khuyến nghị: MUA MẠNH
@@ -314,7 +317,7 @@ class TestIERM(unittest.TestCase):
             "raw_text": sample_text,
             "ticker": "HPG",
             "institution": "SSI Research"
-        })
+        }, headers=admin_hdr)
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(data["institution"], "SSI")
@@ -324,11 +327,13 @@ class TestIERM(unittest.TestCase):
 
     def test_api_upload_pdf(self):
         """Kiểm tra upload file PDF và trích xuất qua PyPDF"""
+        admin_hdr = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
         pdf_content = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 200 >>\nstream\nBT /F1 12 Tf 100 700 Td (BAO CAO SSI: HPG MUA GIA MUC TIEU 38000 VND PE 11.5) Tj ET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000214 00000 n\ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n465\n%%EOF"
         resp = self.client.post(
             "/api/upload-pdf",
             files={"file": ("report.pdf", pdf_content, "application/pdf")},
-            data={"ticker": "HPG", "institution": "SSI"}
+            data={"ticker": "HPG", "institution": "SSI"},
+            headers=admin_hdr
         )
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
@@ -1021,6 +1026,146 @@ class TestIERM(unittest.TestCase):
         reader_ssv = PdfReader(io.BytesIO(resp_ssv.content))
         text_ssv = " ".join([p.extract_text() for p in reader_ssv.pages]).lower()
         self.assertIn("shinhan", text_ssv)
+
+    def test_admin_auth_and_manual_protection(self):
+        """
+        Kiểm tra bảo vệ tính năng cập nhật thủ công (Link, PDF, Text thô):
+        1. /api/auth/admin-verify xác thực đúng user admin và pass 325396.
+        2. Nếu không có pass hoặc pass sai -> Bị chặn 403 Forbidden.
+        3. /api/crawl-url, /api/upload-pdf, /api/analyze-raw:
+           - Không có quyền Admin -> HTTP 403 Forbidden.
+           - Có user admin và pass 325396 -> Vượt qua xác thực quyền thành công.
+        """
+        # 1. Test verify endpoint
+        resp_fail1 = self.client.post("/api/auth/admin-verify", json={"username": "guest", "password": "wrongpassword"})
+        self.assertEqual(resp_fail1.status_code, 403)
+
+        resp_fail2 = self.client.post("/api/auth/admin-verify", json={"username": "admin", "password": "wrongpassword"})
+        self.assertEqual(resp_fail2.status_code, 403)
+
+        resp_ok = self.client.post("/api/auth/admin-verify", json={"username": "admin", "password": "325396"})
+        self.assertEqual(resp_ok.status_code, 200)
+        self.assertTrue(resp_ok.json().get("authenticated"))
+
+        # 2. Test /api/analyze-raw
+        sample_text = "BÁO CÁO PHÂN TÍCH DOANH NGHIỆP CỔ PHIẾU HPG SSI RESEARCH KHUYẾN NGHỊ MUA GIÁ MỤC TIÊU 38,000 ĐỒNG"
+        # No auth -> 403
+        resp_raw_blocked = self.client.post("/api/analyze-raw", json={"raw_text": sample_text, "ticker": "HPG", "institution": "SSI Research"})
+        self.assertEqual(resp_raw_blocked.status_code, 403)
+        self.assertIn("Quản trị viên", resp_raw_blocked.json()["detail"])
+
+        # Auth with headers -> 200
+        headers = {"X-Admin-User": "admin", "X-Admin-Password": "325396"}
+        resp_raw_ok = self.client.post("/api/analyze-raw", json={"raw_text": sample_text, "ticker": "HPG", "institution": "SSI Research"}, headers=headers)
+        self.assertEqual(resp_raw_ok.status_code, 200)
+        self.assertEqual(resp_raw_ok.json()["recommendation"], "MUA")
+
+        # Auth with JSON body fallback -> 200
+        resp_raw_body_ok = self.client.post("/api/analyze-raw", json={
+            "raw_text": sample_text,
+            "ticker": "HPG",
+            "institution": "SSI Research",
+            "admin_user": "admin",
+            "admin_password": "325396"
+        })
+        self.assertEqual(resp_raw_body_ok.status_code, 200)
+
+        # 3. Test /api/crawl-url
+        # No auth -> 403
+        resp_crawl_blocked = self.client.post("/api/crawl-url", json={"url": "https://example.com/report.pdf", "ticker": "HPG", "institution": "CTCK"})
+        self.assertEqual(resp_crawl_blocked.status_code, 403)
+        self.assertIn("Quản trị viên", resp_crawl_blocked.json()["detail"])
+
+        # 4. Test /api/upload-pdf
+        fake_pdf = b"%PDF-1.4 sample content with enough length"
+        # No auth -> 403
+        resp_pdf_blocked = self.client.post(
+            "/api/upload-pdf",
+            files={"file": ("test.pdf", fake_pdf, "application/pdf")},
+            data={"ticker": "HPG", "institution": "SSI Research"}
+        )
+        self.assertEqual(resp_pdf_blocked.status_code, 403)
+
+        # Auth with form fields -> proceeds past auth check (not 403)
+        resp_pdf_auth = self.client.post(
+            "/api/upload-pdf",
+            files={"file": ("test.pdf", fake_pdf, "application/pdf")},
+            data={"ticker": "HPG", "institution": "SSI Research", "admin_user": "admin", "admin_password": "325396"}
+        )
+        self.assertNotEqual(resp_pdf_auth.status_code, 403)
+
+    def test_admin_forgot_password_flow(self):
+        """
+        Kiểm tra toàn diện tính năng khôi phục/đổi mật khẩu Admin qua email hoabhk31@gmail.com:
+        1. Gửi OTP đến email không phải hoabhk31@gmail.com -> Bị chặn 400.
+        2. Gửi OTP đến đúng email hoabhk31@gmail.com -> Thành công 200 và sinh mã OTP.
+        3. Nhập sai OTP hoặc OTP rỗng -> Bị từ chối 400.
+        4. Nhập đúng OTP và mật khẩu mới hợp lệ -> Đổi thành công 200.
+        5. Đăng nhập bằng mật khẩu mới -> Thành công 200.
+        6. Đăng nhập bằng mật khẩu cũ (325396) -> Bị từ chối 403.
+        7. Khôi phục lại mật khẩu mặc định (325396) để các test khác chạy ổn định.
+        """
+        # 1. Thử gửi email lạ
+        resp_bad_email = self.client.post("/api/auth/forgot-password/request-otp", json={"email": "hacker@example.com"})
+        self.assertEqual(resp_bad_email.status_code, 400)
+        self.assertIn("hoabhk31@gmail.com", resp_bad_email.json()["detail"])
+
+        # 2. Gửi đúng email hoabhk31@gmail.com
+        resp_req = self.client.post("/api/auth/forgot-password/request-otp", json={"email": "hoabhk31@gmail.com"})
+        self.assertEqual(resp_req.status_code, 200)
+        self.assertIn("Mã xác thực OTP", resp_req.json()["message"])
+
+        # Lấy OTP từ file admin_auth.json
+        from server import get_admin_auth_data, save_admin_auth_data
+        auth_data = get_admin_auth_data()
+        generated_otp = auth_data.get("active_otp")
+        self.assertIsNotNone(generated_otp)
+        self.assertEqual(len(generated_otp), 6)
+
+        # 3. Thử reset với OTP sai
+        resp_wrong_otp = self.client.post("/api/auth/forgot-password/verify-reset", json={
+            "email": "hoabhk31@gmail.com",
+            "otp": "000000",
+            "new_password": "NewSecretPass2026@"
+        })
+        self.assertEqual(resp_wrong_otp.status_code, 400)
+
+        # 4. Reset với đúng OTP và mật khẩu mới
+        new_test_password = "NewAdminPass2026@"
+        resp_reset = self.client.post("/api/auth/forgot-password/verify-reset", json={
+            "email": "hoabhk31@gmail.com",
+            "otp": generated_otp,
+            "new_password": new_test_password
+        })
+        self.assertEqual(resp_reset.status_code, 200)
+        self.assertIn("thành công", resp_reset.json()["message"].lower())
+
+        # 5. Đăng nhập bằng mật khẩu mới -> 200
+        resp_login_new = self.client.post("/api/auth/admin-verify", json={
+            "username": "admin",
+            "password": new_test_password
+        })
+        self.assertEqual(resp_login_new.status_code, 200)
+
+        # 6. Đăng nhập bằng mật khẩu cũ (khi chưa khôi phục) -> 403
+        resp_login_old = self.client.post("/api/auth/admin-verify", json={
+            "username": "admin",
+            "password": "wrong_old_password"
+        })
+        self.assertEqual(resp_login_old.status_code, 403)
+
+        # 7. Khôi phục mật khẩu mặc định 325396
+        auth_data = get_admin_auth_data()
+        auth_data["password"] = "325396"
+        auth_data["active_otp"] = None
+        save_admin_auth_data(auth_data)
+
+        # Kiểm tra lại mật khẩu 325396 hoạt động bình thường
+        resp_restored = self.client.post("/api/auth/admin-verify", json={
+            "username": "admin",
+            "password": "325396"
+        })
+        self.assertEqual(resp_restored.status_code, 200)
 
 
 if __name__ == "__main__":

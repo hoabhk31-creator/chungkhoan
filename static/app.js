@@ -7332,12 +7332,404 @@ async function saveSsiCredentials() {
 }
 
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// ADMIN AUTHENTICATION & ACCESS CONTROL (User: admin)
+// -------------------------------------------------------------
+function isAdminAuthenticated() {
+    const user = sessionStorage.getItem("ierm_admin_user");
+    const pass = sessionStorage.getItem("ierm_admin_pass");
+    return Boolean(user === "admin" && pass && pass.length >= 4);
+}
+
+function getAdminAuthHeaders() {
+    if (!isAdminAuthenticated()) {
+        return {};
+    }
+    return {
+        "X-Admin-User": sessionStorage.getItem("ierm_admin_user") || "admin",
+        "X-Admin-Password": sessionStorage.getItem("ierm_admin_pass") || ""
+    };
+}
+
+function updateAdminStatusUI() {
+    const isAuthed = isAdminAuthenticated();
+    const statusText = document.getElementById("admin-status-text");
+    const actionBtn = document.getElementById("btn-admin-auth-action");
+    const statusBar = document.getElementById("admin-status-bar");
+
+    if (statusBar) {
+        if (isAuthed) {
+            statusBar.className = "flex items-center justify-between bg-emerald-950/40 border border-emerald-800/60 px-3.5 py-2.5 rounded-lg text-xs font-mono transition-all";
+            if (statusText) {
+                statusText.className = "flex items-center gap-2 text-emerald-400";
+                statusText.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i><span>Quyền Quản trị viên: <b class="text-white font-bold">admin</b> (Đã xác thực bảo mật — Sẵn sàng cập nhật)</span>`;
+            }
+            if (actionBtn) {
+                actionBtn.className = "px-2.5 py-1 bg-slate-800 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-800 rounded font-bold transition-all flex items-center gap-1.5 shrink-0";
+                actionBtn.onclick = logoutAdmin;
+                actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Đăng Xuất</span>`;
+            }
+        } else {
+            statusBar.className = "flex items-center justify-between bg-slate-950/80 border border-amber-900/50 px-3.5 py-2.5 rounded-lg text-xs font-mono transition-all";
+            if (statusText) {
+                statusText.className = "flex items-center gap-2 text-amber-400";
+                statusText.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 shrink-0"></i><span>Chế độ Khách (Chỉ xem) — Cập nhật thủ công (Link, PDF, Text) yêu cầu xác thực Quản trị viên (admin)</span>`;
+            }
+            if (actionBtn) {
+                actionBtn.className = "px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded font-bold transition-all flex items-center gap-1.5 shrink-0";
+                actionBtn.onclick = openAdminAuthModal;
+                actionBtn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i><span>Đăng Nhập Admin</span>`;
+            }
+        }
+    }
+
+    // Toggle lock indicators on tabs
+    document.querySelectorAll(".admin-lock-indicator").forEach(el => {
+        if (isAuthed) {
+            el.classList.add("hidden");
+        } else {
+            el.classList.remove("hidden");
+        }
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+let _adminAuthCallback = null;
+let _adminCancelCallback = null;
+
+function openAdminAuthModal(onSuccessCallback, onCancelCallback) {
+    _adminAuthCallback = onSuccessCallback || null;
+    _adminCancelCallback = onCancelCallback || null;
+
+    const modal = document.getElementById("admin-auth-modal");
+    if (!modal) return;
+    modal.classList.remove("hidden");
+
+    switchToAdminLoginView();
+
+    const errBox = document.getElementById("admin-auth-error");
+    if (errBox) {
+        errBox.classList.add("hidden");
+        errBox.textContent = "";
+    }
+
+    const userInput = document.getElementById("admin-username-input");
+    if (userInput && !userInput.value) userInput.value = "admin";
+
+    const pwdInput = document.getElementById("admin-password-input");
+    if (pwdInput) {
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 100);
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+function closeAdminAuthModal() {
+    const modal = document.getElementById("admin-auth-modal");
+    if (modal) modal.classList.add("hidden");
+    if (typeof _adminCancelCallback === "function") {
+        const cb = _adminCancelCallback;
+        _adminCancelCallback = null;
+        cb();
+    }
+    _adminAuthCallback = null;
+}
+
+function switchToForgotPasswordView() {
+    const loginView = document.getElementById("admin-login-view");
+    const forgotView = document.getElementById("admin-forgot-view");
+    if (loginView) loginView.classList.add("hidden");
+    if (forgotView) forgotView.classList.remove("hidden");
+
+    const errBox = document.getElementById("admin-forgot-error");
+    const succBox = document.getElementById("admin-forgot-success");
+    if (errBox) errBox.classList.add("hidden");
+    if (succBox) succBox.classList.add("hidden");
+
+    const emailInput = document.getElementById("admin-recovery-email-input");
+    if (emailInput) emailInput.value = "hoabhk31@gmail.com";
+
+    const otpInput = document.getElementById("admin-otp-input");
+    if (otpInput) otpInput.value = "";
+
+    const newPwdInput = document.getElementById("admin-new-password-input");
+    if (newPwdInput) newPwdInput.value = "";
+
+    const confirmPwdInput = document.getElementById("admin-confirm-password-input");
+    if (confirmPwdInput) confirmPwdInput.value = "";
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function switchToAdminLoginView() {
+    const loginView = document.getElementById("admin-login-view");
+    const forgotView = document.getElementById("admin-forgot-view");
+    if (forgotView) forgotView.classList.add("hidden");
+    if (loginView) loginView.classList.remove("hidden");
+
+    const errBox = document.getElementById("admin-auth-error");
+    if (errBox) errBox.classList.add("hidden");
+
+    const pwdInput = document.getElementById("admin-password-input");
+    if (pwdInput) {
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 100);
+    }
+
+    if (window.lucide) lucide.createIcons();
+}
+
+async function requestAdminPasswordOtp() {
+    const email = (document.getElementById("admin-recovery-email-input")?.value || "hoabhk31@gmail.com").trim().toLowerCase();
+    const btn = document.getElementById("btn-request-otp");
+    const errBox = document.getElementById("admin-forgot-error");
+    const succBox = document.getElementById("admin-forgot-success");
+
+    if (errBox) errBox.classList.add("hidden");
+    if (succBox) succBox.classList.add("hidden");
+
+    let origBtnHtml = "";
+    if (btn) {
+        origBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang gửi...</span>`;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    try {
+        const resp = await fetch("/api/auth/forgot-password/request-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email })
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+            throw new Error(data.detail || "Không thể gửi mã OTP!");
+        }
+
+        if (succBox) {
+            succBox.innerHTML = `<b>✓ ${data.message}</b><br><span class="text-[10px] text-slate-400">Mã có hiệu lực trong 15 phút. Hãy kiểm tra hòm thư của bạn.</span>`;
+            succBox.classList.remove("hidden");
+        }
+        showToast(`Đã gửi mã OTP đến email ${email}! Vui lòng kiểm tra hộp thư.`);
+
+        const otpInput = document.getElementById("admin-otp-input");
+        if (otpInput) {
+            setTimeout(() => otpInput.focus(), 150);
+        }
+    } catch (err) {
+        if (errBox) {
+            errBox.textContent = `❌ ${err.message}`;
+            errBox.classList.remove("hidden");
+        }
+        showToast(err.message, true);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origBtnHtml;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
+async function confirmResetPasswordWithOtp() {
+    const email = (document.getElementById("admin-recovery-email-input")?.value || "hoabhk31@gmail.com").trim().toLowerCase();
+    const otp = (document.getElementById("admin-otp-input")?.value || "").trim();
+    const newPassword = (document.getElementById("admin-new-password-input")?.value || "").trim();
+    const confirmPassword = (document.getElementById("admin-confirm-password-input")?.value || "").trim();
+
+    const errBox = document.getElementById("admin-forgot-error");
+    const succBox = document.getElementById("admin-forgot-success");
+    const btnSubmit = document.getElementById("btn-confirm-reset-pwd");
+
+    if (errBox) errBox.classList.add("hidden");
+
+    if (!otp || otp.length !== 6) {
+        if (errBox) {
+            errBox.textContent = "Vui lòng nhập đúng 6 chữ số mã OTP nhận được từ email!";
+            errBox.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (!newPassword || newPassword.length < 4) {
+        if (errBox) {
+            errBox.textContent = "Mật khẩu mới phải có ít nhất 4 ký tự!";
+            errBox.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        if (errBox) {
+            errBox.textContent = "Xác nhận mật khẩu không khớp với mật khẩu mới!";
+            errBox.classList.remove("hidden");
+        }
+        return;
+    }
+
+    let origBtnHtml = "";
+    if (btnSubmit) {
+        origBtnHtml = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang cập nhật...</span>`;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    try {
+        const resp = await fetch("/api/auth/forgot-password/verify-reset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: email,
+                otp: otp,
+                new_password: newPassword
+            })
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+            throw new Error(data.detail || "Không thể đặt lại mật khẩu!");
+        }
+
+        // Tự động đăng nhập với mật khẩu mới
+        sessionStorage.setItem("ierm_admin_user", "admin");
+        sessionStorage.setItem("ierm_admin_pass", newPassword);
+
+        updateAdminStatusUI();
+        showToast("Đổi mật khẩu Quản trị viên thành công! Bạn đã được đăng nhập với mật khẩu mới.");
+
+        closeAdminAuthModal();
+
+        if (typeof _adminAuthCallback === "function") {
+            const cb = _adminAuthCallback;
+            _adminAuthCallback = null;
+            cb();
+        }
+    } catch (err) {
+        if (errBox) {
+            errBox.textContent = `❌ ${err.message}`;
+            errBox.classList.remove("hidden");
+        }
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = origBtnHtml;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
+function toggleAdminPasswordVisibility() {
+    const pwdInput = document.getElementById("admin-password-input");
+    const icon = document.getElementById("admin-pwd-toggle-icon");
+    if (!pwdInput) return;
+    if (pwdInput.type === "password") {
+        pwdInput.type = "text";
+        if (icon) icon.setAttribute("data-lucide", "eye-off");
+    } else {
+        pwdInput.type = "password";
+        if (icon) icon.setAttribute("data-lucide", "eye");
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+async function confirmAdminAuth() {
+    const userInput = document.getElementById("admin-username-input");
+    const pwdInput = document.getElementById("admin-password-input");
+    const errBox = document.getElementById("admin-auth-error");
+    const btnSubmit = document.getElementById("btn-admin-auth-submit");
+
+    const user = (userInput ? userInput.value : "").trim() || "admin";
+    const pwd = (pwdInput ? pwdInput.value : "").trim();
+
+    if (!pwd) {
+        if (errBox) {
+            errBox.textContent = "Vui lòng nhập mật khẩu xác nhận quyền Quản trị viên!";
+            errBox.classList.remove("hidden");
+        }
+        return;
+    }
+
+    let origBtnHtml = "";
+    if (btnSubmit) {
+        origBtnHtml = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang xác thực...</span>`;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    try {
+        const resp = await fetch("/api/auth/admin-verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: user, password: pwd })
+        });
+
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({ detail: "Xác thực thất bại" }));
+            throw new Error(errData.detail || "Tên đăng nhập hoặc mật khẩu không đúng!");
+        }
+
+        // Authentication Success
+        sessionStorage.setItem("ierm_admin_user", user);
+        sessionStorage.setItem("ierm_admin_pass", pwd);
+
+        if (errBox) errBox.classList.add("hidden");
+        const modal = document.getElementById("admin-auth-modal");
+        if (modal) modal.classList.add("hidden");
+
+        updateAdminStatusUI();
+        showToast("Đã xác thực quyền Quản trị viên (admin)! Mở khóa quyền cập nhật dữ liệu.");
+
+        if (typeof _adminAuthCallback === "function") {
+            const cb = _adminAuthCallback;
+            _adminAuthCallback = null;
+            cb();
+        }
+    } catch (err) {
+        if (errBox) {
+            errBox.textContent = `❌ ${err.message}`;
+            errBox.classList.remove("hidden");
+        }
+        if (pwdInput) {
+            pwdInput.value = "";
+            pwdInput.focus();
+        }
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = origBtnHtml;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
+function logoutAdmin() {
+    sessionStorage.removeItem("ierm_admin_user");
+    sessionStorage.removeItem("ierm_admin_pass");
+    updateAdminStatusUI();
+
+    // If currently looking at manual ingest panels, switch back to crawl
+    const currentActiveTab = document.querySelector(".ingest-tab.active");
+    if (currentActiveTab && (currentActiveTab.id === "btn-mode-url" || currentActiveTab.id === "btn-mode-pdf" || currentActiveTab.id === "btn-mode-raw")) {
+        switchIngestMode("mode-crawl");
+    }
+
+    showToast("Đã đăng xuất quyền Admin. Hệ thống chuyển về chế độ Khách (Chỉ xem).");
+}
+
+// -------------------------------------------------------------
 // INGESTION MODAL & MULTI-CHANNEL DATA HANDLERS
 // -------------------------------------------------------------
 function openIngestionModal() {
     const modal = document.getElementById("ingestion-modal");
     if (!modal) return;
     modal.classList.remove("hidden");
+
+    updateAdminStatusUI();
 
     const currentTicker = (currentReport ? currentReport.ticker : "HPG").toUpperCase();
     
@@ -7368,6 +7760,26 @@ function closeIngestionModal() {
 }
 
 function switchIngestMode(modeId) {
+    // If switching to manual tabs (url, pdf, raw), check admin permissions first!
+    if (modeId === "mode-url" || modeId === "mode-pdf" || modeId === "mode-raw") {
+        if (!isAdminAuthenticated()) {
+            openAdminAuthModal(
+                () => {
+                    // On success: switch to target mode
+                    switchIngestMode(modeId);
+                },
+                () => {
+                    // On cancel: stay on current tab or fallback to mode-crawl
+                    const activeTab = document.querySelector(".ingest-tab.active");
+                    if (!activeTab || activeTab.id === `btn-${modeId}`) {
+                        switchIngestMode("mode-crawl");
+                    }
+                }
+            );
+            return;
+        }
+    }
+
     document.querySelectorAll(".ingest-panel").forEach(p => p.classList.add("hidden"));
     document.querySelectorAll(".ingest-tab").forEach(t => {
         t.classList.remove("active", "border-cyan-500", "text-cyan-400");
@@ -7474,6 +7886,13 @@ async function performSearch() {
 }
 
 async function addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle, btnId) {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle, btnId);
+        });
+        return;
+    }
+
     const btn = document.getElementById(btnId);
     let originalHtml = "";
     if (btn) {
@@ -7490,13 +7909,23 @@ async function addDiscoveredReport(institution, ticker, encodedUrl, encodedTitle
     try {
         const resp = await fetch("/api/crawl-url", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
             body: JSON.stringify({
                 url: rawUrl,
                 ticker: ticker,
                 institution: institution
             })
         });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
 
         if (!resp.ok) {
             const errData = await resp.json().catch(() => ({ detail: "Lỗi kết nối tải dữ liệu" }));
@@ -7551,6 +7980,13 @@ function quickFillUrl(type) {
 }
 
 async function crawlDirectUrl() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            crawlDirectUrl();
+        });
+        return;
+    }
+
     const url = (document.getElementById("direct-url-input").value || "").trim();
     const inst = (document.getElementById("url-institution-input").value || "CTCK").trim();
     const ticker = (document.getElementById("url-ticker-input").value || (currentReport ? currentReport.ticker : "HPG")).trim().toUpperCase();
@@ -7573,9 +8009,18 @@ async function crawlDirectUrl() {
     try {
         const resp = await fetch("/api/crawl-url", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
             body: JSON.stringify({ url: url, institution: inst, ticker: ticker })
         });
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
         if (!resp.ok) {
             const errData = await resp.json().catch(() => ({ detail: "Lỗi kết nối tải URL" }));
             throw new Error(errData.detail || await resp.text());
@@ -7654,6 +8099,13 @@ async function uploadPdfReport() {
         return;
     }
 
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            uploadPdfReport();
+        });
+        return;
+    }
+
     const ticker = (document.getElementById("pdf-ticker-input") ? document.getElementById("pdf-ticker-input").value : "").trim().toUpperCase() || (currentReport ? currentReport.ticker : "HPG");
     const inst = (document.getElementById("pdf-inst-input") ? document.getElementById("pdf-inst-input").value : "").trim() || "CTCK";
 
@@ -7665,17 +8117,29 @@ async function uploadPdfReport() {
         btn.textContent = "Đang đọc...";
     }
 
+    const authHeaders = getAdminAuthHeaders();
     const formData = new FormData();
     formData.append("file", selectedPdfFile);
     formData.append("ticker", ticker);
     formData.append("institution", inst);
+    formData.append("admin_user", authHeaders["X-Admin-User"] || "admin");
+    formData.append("admin_password", authHeaders["X-Admin-Password"] || "");
 
     showToast("Đang tải lên và trích xuất dữ liệu bằng PyPDF engine...");
     try {
         const resp = await fetch("/api/upload-pdf", {
             method: "POST",
+            headers: {
+                ...authHeaders
+            },
             body: formData
         });
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
         if (!resp.ok) {
             const errData = await resp.json().catch(() => ({ detail: "Lỗi xử lý file PDF" }));
             throw new Error(errData.detail || await resp.text());
@@ -7754,6 +8218,13 @@ async function analyzeRawText() {
         return;
     }
 
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            analyzeRawText();
+        });
+        return;
+    }
+
     const btn = document.getElementById("btn-analyze-raw");
     let origHtml = "";
     if (btn) {
@@ -7767,13 +8238,22 @@ async function analyzeRawText() {
     try {
         const resp = await fetch("/api/analyze-raw", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
             body: JSON.stringify({
                 raw_text: rawText,
                 ticker: ticker,
                 institution: inst
             })
         });
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
         if (!resp.ok) {
             const errData = await resp.json().catch(() => ({ detail: "Lỗi phân tích văn bản" }));
             throw new Error(errData.detail || await resp.text());

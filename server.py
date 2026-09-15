@@ -7,12 +7,18 @@ import os
 import re
 import csv
 import httpx
+import time
+import json
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import hashlib
 import asyncio
 import unicodedata
 import urllib.parse
 from typing import List, Dict, Any, Optional
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Header
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -143,16 +149,172 @@ async def startup_event():
 
 
 
+ADMIN_AUTH_FILE = os.path.join(ROOT_DIR, "data", "admin_auth.json")
+DEFAULT_ADMIN_USER = "admin"
+DEFAULT_ADMIN_PASSWORD = "325396"
+ADMIN_RECOVERY_EMAIL = "hoabhk31@gmail.com"
+
+def get_admin_auth_data() -> dict:
+    os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
+    if os.path.exists(ADMIN_AUTH_FILE):
+        try:
+            with open(ADMIN_AUTH_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict) and "username" in data and "password" in data:
+                    data.setdefault("recovery_email", ADMIN_RECOVERY_EMAIL)
+                    data.setdefault("active_otp", None)
+                    data.setdefault("otp_expires_at", 0)
+                    return data
+        except Exception as e:
+            print(f"Error loading admin_auth.json: {e}")
+    initial_data = {
+        "username": DEFAULT_ADMIN_USER,
+        "password": DEFAULT_ADMIN_PASSWORD,
+        "recovery_email": ADMIN_RECOVERY_EMAIL,
+        "active_otp": None,
+        "otp_expires_at": 0
+    }
+    save_admin_auth_data(initial_data)
+    return initial_data
+
+def save_admin_auth_data(data: dict):
+    os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
+    with open(ADMIN_AUTH_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def send_recovery_otp_email(to_email: str, otp: str) -> dict:
+    """
+    Gửi email mã OTP phục hồi mật khẩu tới hoabhk31@gmail.com qua SMTP.
+    Đồng thời ghi log an toàn vào data/admin_reset_email_log.txt để hỗ trợ khôi phục dự phòng.
+    """
+    os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
+    log_path = os.path.join(ROOT_DIR, "data", "admin_reset_email_log.txt")
+    timestamp_str = time.strftime("%Y-%m-%d %H:%M:%S")
+    log_line = f"[{timestamp_str}] Gửi mã OTP: {otp} tới email: {to_email} (Thời hạn 15 phút)\n"
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(log_line)
+
+    smtp_host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    smtp_port = int(os.environ.get("SMTP_PORT", 587))
+    smtp_user = os.environ.get("SMTP_USER", "")
+    smtp_pass = os.environ.get("SMTP_PASS", "")
+    smtp_from = os.environ.get("SMTP_FROM", smtp_user or "admin@ierm.finance")
+
+    subject = f"[IERM Matrix] Mã xác nhận đổi mật khẩu Quản trị viên (Admin): {otp}"
+    body_html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border: 1px solid #1e293b; border-radius: 12px; padding: 24px;">
+        <h2 style="color: #38bdf8; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 12px;">
+            🛡️ IERM Institutional Matrix - Đặt Lại Mật Khẩu
+        </h2>
+        <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+            Xin chào Quản trị viên, bạn vừa yêu cầu đổi mật khẩu cho tài khoản <b>admin</b> trên hệ thống <b>IERM Financial Intelligence Matrix</b>.
+        </p>
+        <div style="background: #020617; border: 1px dashed #38bdf8; border-radius: 8px; padding: 18px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 6px;">MÃ XÁC THỰC OTP (Hiệu lực trong 15 phút):</span>
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #38bdf8; font-family: monospace;">{otp}</span>
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+            Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email. Mật khẩu hiện tại của bạn vẫn được bảo mật an toàn.
+        </p>
+        <hr style="border: 0; border-top: 1px solid #1e293b; margin: 20px 0;">
+        <p style="font-size: 11px; color: #64748b; text-align: center;">
+            IERM Intelligence Platform © 2026. Email tự động, vui lòng không phản hồi.
+        </p>
+    </div>
+    """
+
+    email_sent = False
+    error_msg = ""
+    if smtp_user and smtp_pass:
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = smtp_from
+            msg["To"] = to_email
+            msg.attach(MIMEText(f"Mã xác nhận OTP đặt lại mật khẩu admin: {otp} (Hiệu lực 15 phút).", "plain", "utf-8"))
+            msg.attach(MIMEText(body_html, "html", "utf-8"))
+
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_from, [to_email], msg.as_string())
+            email_sent = True
+        except Exception as e:
+            error_msg = str(e)
+            print(f"SMTP dispatch notice: {e}")
+
+    return {
+        "sent_via_smtp": email_sent,
+        "smtp_error": error_msg,
+        "recipient": to_email,
+        "logged_locally": True
+    }
+
+
+class AdminAuthRequest(BaseModel):
+    username: str
+    password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class VerifyResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
+
+def is_admin_authorized(
+    user: Optional[str] = None,
+    password: Optional[str] = None,
+    auth_header: Optional[str] = None
+) -> bool:
+    auth_data = get_admin_auth_data()
+    expected_user = auth_data.get("username", DEFAULT_ADMIN_USER)
+    expected_password = auth_data.get("password", DEFAULT_ADMIN_PASSWORD)
+
+    if (user or "").strip() == expected_user and (password or "").strip() == expected_password:
+        return True
+    if auth_header and auth_header.startswith("Basic "):
+        try:
+            import base64
+            decoded = base64.b64decode(auth_header[6:]).decode("utf-8")
+            u, p = decoded.split(":", 1)
+            if u.strip() == expected_user and p.strip() == expected_password:
+                return True
+        except Exception:
+            pass
+    return False
+
+def enforce_admin_permission(
+    x_admin_user: Optional[str] = None,
+    x_admin_password: Optional[str] = None,
+    authorization: Optional[str] = None,
+    fallback_user: Optional[str] = None,
+    fallback_password: Optional[str] = None
+):
+    u = x_admin_user or fallback_user
+    p = x_admin_password or fallback_password
+    if not is_admin_authorized(u, p, authorization):
+        raise HTTPException(
+            status_code=403,
+            detail="Yêu cầu quyền Quản trị viên (Admin) để cập nhật dữ liệu báo cáo thủ công. Vui lòng cung cấp mật khẩu chính xác."
+        )
+
+
 class CrawlRequest(BaseModel):
     url: str
     ticker: Optional[str] = "HPG"
     institution: Optional[str] = "CTCK"
+    admin_user: Optional[str] = None
+    admin_password: Optional[str] = None
 
 
 class RawTextAnalysisRequest(BaseModel):
     raw_text: str
     ticker: Optional[str] = "HPG"
     institution: Optional[str] = "CTCK"
+    admin_user: Optional[str] = None
+    admin_password: Optional[str] = None
 
 
 class ReconcileRequest(BaseModel):
@@ -910,8 +1072,115 @@ async def search_reports(ticker: str, sector: Optional[str] = ""):
     }
 
 
+@app.post("/api/auth/admin-verify")
+async def api_admin_verify(req: AdminAuthRequest):
+    """
+    Xác thực tài khoản và mật khẩu Quản trị viên
+    để mở khóa các tính năng cập nhật thủ công (Link, PDF, Text thô).
+    """
+    if is_admin_authorized(req.username, req.password):
+        auth_data = get_admin_auth_data()
+        return {
+            "status": "ok",
+            "authenticated": True,
+            "username": auth_data.get("username", DEFAULT_ADMIN_USER),
+            "message": "Xác thực tài khoản Quản trị viên thành công!"
+        }
+    raise HTTPException(
+        status_code=403,
+        detail="Tên đăng nhập hoặc mật khẩu quản trị viên không chính xác!"
+    )
+
+
+@app.post("/api/auth/forgot-password/request-otp")
+async def api_request_password_otp(req: ForgotPasswordRequest):
+    """
+    Tạo và gửi mã xác nhận OTP 6 số qua email hoabhk31@gmail.com
+    khi Quản trị viên quên mật khẩu.
+    """
+    email_clean = (req.email or "").strip().lower()
+    auth_data = get_admin_auth_data()
+    expected_email = auth_data.get("recovery_email", ADMIN_RECOVERY_EMAIL).lower()
+
+    if email_clean != expected_email:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Email không hợp lệ! Tính năng khôi phục mật khẩu chỉ chấp nhận email quản trị viên đã đăng ký: {expected_email}"
+        )
+
+    # Sinh mã OTP 6 số ngẫu nhiên
+    otp = f"{secrets.randbelow(900000) + 100000}"
+    expires_at = time.time() + (15 * 60)  # Có hiệu lực trong 15 phút
+
+    auth_data["active_otp"] = otp
+    auth_data["otp_expires_at"] = expires_at
+    save_admin_auth_data(auth_data)
+
+    send_res = send_recovery_otp_email(expected_email, otp)
+
+    return {
+        "status": "ok",
+        "message": f"Mã xác thực OTP (6 chữ số) đã được gửi đến email {expected_email}. Vui lòng kiểm tra hộp thư (hoặc mục Spam/Quảng cáo).",
+        "recipient": expected_email,
+        "expires_in_minutes": 15,
+        "details": send_res
+    }
+
+
+@app.post("/api/auth/forgot-password/verify-reset")
+async def api_verify_and_reset_password(req: VerifyResetPasswordRequest):
+    """
+    Xác minh mã OTP và cập nhật mật khẩu mới cho Quản trị viên.
+    """
+    email_clean = (req.email or "").strip().lower()
+    otp_clean = (req.otp or "").strip()
+    new_pwd = (req.new_password or "").strip()
+
+    if len(new_pwd) < 4:
+        raise HTTPException(status_code=400, detail="Mật khẩu mới phải có ít nhất 4 ký tự!")
+
+    auth_data = get_admin_auth_data()
+    expected_email = auth_data.get("recovery_email", ADMIN_RECOVERY_EMAIL).lower()
+
+    if email_clean != expected_email:
+        raise HTTPException(status_code=400, detail="Email không khớp với email quản trị viên đã đăng ký!")
+
+    active_otp = auth_data.get("active_otp")
+    otp_expires_at = auth_data.get("otp_expires_at", 0)
+
+    if not active_otp or time.time() > otp_expires_at:
+        raise HTTPException(status_code=400, detail="Mã OTP đã hết hạn hoặc chưa được tạo. Vui lòng bấm 'Gửi mã OTP' để nhận mã mới!")
+
+    if otp_clean != active_otp:
+        raise HTTPException(status_code=400, detail="Mã OTP không chính xác! Vui lòng kiểm tra lại email.")
+
+    # Cập nhật mật khẩu mới bền vững vào file JSON
+    auth_data["password"] = new_pwd
+    auth_data["active_otp"] = None
+    auth_data["otp_expires_at"] = 0
+    save_admin_auth_data(auth_data)
+
+    return {
+        "status": "ok",
+        "message": "Đổi mật khẩu Quản trị viên thành công! Mật khẩu mới đã được cập nhật.",
+        "username": auth_data.get("username", DEFAULT_ADMIN_USER)
+    }
+
+
 @app.post("/api/crawl-url")
-async def api_crawl_url(req: CrawlRequest):
+async def api_crawl_url(
+    req: CrawlRequest,
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization,
+        fallback_user=req.admin_user,
+        fallback_password=req.admin_password
+    )
     try:
         clean_ticker = (req.ticker or "HPG").upper().strip()
         data = await crawl_url_content(req.url, ticker=clean_ticker, institution=req.institution or "CTCK")
@@ -943,8 +1212,20 @@ async def api_crawl_url(req: CrawlRequest):
 async def api_upload_pdf(
     file: UploadFile = File(...),
     ticker: Optional[str] = Form("HPG"),
-    institution: Optional[str] = Form("CTCK")
+    institution: Optional[str] = Form("CTCK"),
+    admin_user: Optional[str] = Form(None),
+    admin_password: Optional[str] = Form(None),
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
 ):
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization,
+        fallback_user=admin_user,
+        fallback_password=admin_password
+    )
     try:
         clean_ticker = (ticker or "HPG").upper().strip()
         content = await file.read()
@@ -978,7 +1259,19 @@ async def api_upload_pdf(
 
 
 @app.post("/api/analyze-raw")
-async def api_analyze_raw(req: RawTextAnalysisRequest):
+async def api_analyze_raw(
+    req: RawTextAnalysisRequest,
+    x_admin_user: Optional[str] = Header(None, alias="X-Admin-User"),
+    x_admin_password: Optional[str] = Header(None, alias="X-Admin-Password"),
+    authorization: Optional[str] = Header(None, alias="Authorization")
+):
+    enforce_admin_permission(
+        x_admin_user=x_admin_user,
+        x_admin_password=x_admin_password,
+        authorization=authorization,
+        fallback_user=req.admin_user,
+        fallback_password=req.admin_password
+    )
     if not req.raw_text or len(req.raw_text.strip()) < 20:
         raise HTTPException(status_code=400, detail="Nội dung văn bản quá ngắn để phân tích")
     
