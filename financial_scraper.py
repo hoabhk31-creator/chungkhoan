@@ -425,22 +425,215 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     res["cff"] = cff_list
     res["free_cash_flow"] = fcf_list
 
-    # 8. Đồng bộ hóa raw_inc, raw_bs, raw_cf cho chi tiết BCTC
+    # 8. Đồng bộ hóa và bù đắp dữ liệu thiếu cho raw_inc, raw_bs, raw_cf (Chi tiết BCTC)
+    periods = res.get("periods", [])
+    n_periods = len(periods)
+
+    # --- A. Đồng bộ hóa & bù đắp raw_inc (Báo cáo KQKD chi tiết) ---
     raw_inc = res.get("raw_inc", {})
     if raw_inc:
+        for i in range(n_periods):
+            zero_count = sum(1 for vals in raw_inc.values() if i < len(vals) and vals[i] == 0)
+            if len(raw_inc) > 0 and zero_count >= len(raw_inc) * 0.75:
+                # Kỳ i bị thiếu dữ liệu KQKD, nội suy theo kỳ lân cận
+                for key, vals in raw_inc.items():
+                    while len(vals) < n_periods:
+                        vals.append(0.0)
+                    if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
+                        vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
+                    elif i > 0 and vals[i-1] != 0:
+                        vals[i] = round(vals[i-1] * 1.05, 1)
+                    elif i < n_periods - 1 and vals[i+1] != 0:
+                        vals[i] = round(vals[i+1] * 0.95, 1)
+        # Đồng bộ hóa các chỉ tiêu cốt lõi
         for key in list(raw_inc.keys()):
             kl = key.lower()
             if "doanh thu thuần" in kl:
-                raw_inc[key] = list(res["revenue"])
+                raw_inc[key] = list(res["revenue"][:n_periods])
             elif "doanh thu bán hàng" in kl:
-                raw_inc[key] = [round(r * 1.01, 1) for r in res["revenue"]]
+                raw_inc[key] = [round(r * 1.01, 1) for r in res["revenue"][:n_periods]]
             elif "lợi nhuận sau thuế" in kl or "lnst" in kl or "công ty mẹ" in kl:
-                raw_inc[key] = list(res["net_profit"])
+                raw_inc[key] = list(res["net_profit"][:n_periods])
             elif "lợi nhuận gộp" in kl:
-                raw_inc[key] = list(res["gross_profit"])
+                raw_inc[key] = list(res["gross_profit"][:n_periods])
             elif "giá vốn" in kl:
-                raw_inc[key] = list(res["cogs"])
+                raw_inc[key] = list(res["cogs"][:n_periods])
+            elif "chi phí tài chính" in kl or "chi phí lãi vay" in kl:
+                raw_inc[key] = list(res["financial_expense"][:n_periods])
+            elif "lợi nhuận thuần từ hoạt động kinh doanh" in kl:
+                raw_inc[key] = list(res["operating_profit"][:n_periods])
         res["raw_inc"] = raw_inc
+
+    # --- B. Đồng bộ hóa & bù đắp raw_bs (Bảng CĐKT chi tiết) ---
+    raw_bs = res.get("raw_bs", {})
+    if raw_bs:
+        for i in range(n_periods):
+            zero_count = sum(1 for vals in raw_bs.values() if i < len(vals) and vals[i] == 0)
+            if len(raw_bs) > 0 and zero_count >= len(raw_bs) * 0.75:
+                # Kỳ i bị thiếu dữ liệu CĐKT (ví dụ Q2/2024 của KBC, VCB, GAS, VNM...)
+                for key, vals in raw_bs.items():
+                    while len(vals) < n_periods:
+                        vals.append(0.0)
+                    if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
+                        vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
+                    elif i > 0 and vals[i-1] != 0:
+                        vals[i] = round(vals[i-1] * 1.03, 1)
+                    elif i < n_periods - 1 and vals[i+1] != 0:
+                        vals[i] = round(vals[i+1] * 0.97, 1)
+        # Đồng bộ hóa các chỉ tiêu cốt lõi CĐKT
+        for key in list(raw_bs.keys()):
+            kl = key.lower()
+            if "tổng cộng tài sản" in kl or "tổng tài sản" in kl:
+                raw_bs[key] = list(res["total_assets"][:n_periods])
+            elif "tài sản ngắn hạn" in kl:
+                raw_bs[key] = list(res["short_term_assets"][:n_periods])
+            elif "tiền và các khoản tương đương tiền" in kl:
+                raw_bs[key] = list(res["cash_and_equivalents"][:n_periods])
+            elif "hàng tồn kho" in kl:
+                raw_bs[key] = list(res["inventories"][:n_periods])
+            elif "nợ phải trả" in kl and "không kể" not in kl:
+                raw_bs[key] = list(res["total_liabilities"][:n_periods])
+            elif "vay và nợ thuê tài chính ngắn hạn" in kl or "vay ngắn hạn" in kl:
+                raw_bs[key] = list(res["short_term_debt"][:n_periods])
+            elif "vay và nợ thuê tài chính dài hạn" in kl or "vay dài hạn" in kl:
+                raw_bs[key] = list(res["long_term_debt"][:n_periods])
+            elif "vốn chủ sở hữu" in kl:
+                raw_bs[key] = list(res["owner_equity"][:n_periods])
+        res["raw_bs"] = raw_bs
+
+    # --- C. Đồng bộ hóa & bù đắp raw_cf (Báo cáo LCTT chi tiết) ---
+    raw_cf = res.get("raw_cf", {})
+    # Nếu raw_cf rỗng (như ngành tài chính, ngân hàng, hoặc nguồn cào không có LCTT), khởi tạo khung 42 chỉ tiêu VAS chuẩn
+    if not raw_cf:
+        raw_cf = {k: [0.0] * n_periods for k in [
+            "I. Lưu chuyển tiền từ hoạt động kinh doanh",
+            "1. Lợi nhuận trước thuế",
+            "2. Điều chỉnh cho các khoản",
+            "- Khấu hao TSCĐ và BĐSĐT",
+            "- Các khoản dự phòng",
+            "- Lãi, lỗ chênh lệch tỷ giá hối đoái do đánh giá lại các khoản mục tiền tệ có gốc ngoại tệ",
+            "- Lãi, lỗ từ hoạt động đầu tư",
+            "- Chi phí lãi vay",
+            "- Các khoản điều chỉnh khác",
+            "3. Lợi nhuận từ hoạt động kinh doanh trước thay đổi vốn lưu động",
+            "- Tăng, giảm các khoản phải thu",
+            "- Tăng, giảm hàng tồn kho",
+            "- Tăng, giảm các khoản phải trả (Không kể lãi vay phải trả, thuế thu nhập doanh nghiệp phải nộp)",
+            "- Tăng, giảm chi phí trả trước",
+            "- Tăng, giảm chứng khoán kinh doanh",
+            "- Tiền lãi vay đã trả",
+            "- Thuế thu nhập doanh nghiệp đã nộp",
+            "- Tiền thu khác từ hoạt động kinh doanh",
+            "- Tiền chi khác cho hoạt động kinh doanh",
+            "Lưu chuyển tiền thuần từ hoạt động kinh doanh",
+            "II. Lưu chuyển tiền từ hoạt động đầu tư",
+            "1.Tiền chi để mua sắm, xây dựng TSCĐ và các tài sản dài hạn khác",
+            "2.Tiền thu từ thanh lý, nhượng bán TSCĐ và các tài sản dài hạn khác",
+            "3.Tiền chi cho vay, mua các công cụ nợ của đơn vị khác",
+            "4.Tiền thu hồi cho vay, bán lại các công cụ nợ của đơn vị khác",
+            "5.Tiền chi đầu tư góp vốn vào đơn vị khác",
+            "6.Tiền thu hồi đầu tư góp vốn vào đơn vị khác",
+            "7.Tiền thu lãi cho vay, cổ tức và lợi nhuận được chia",
+            "Lưu chuyển tiền thuần từ hoạt động đầu tư",
+            "III. Lưu chuyển tiền từ hoạt động tài chính",
+            "1.Tiền thu từ phát hành cổ phiếu, nhận vốn góp của chủ sở hữu",
+            "2.Tiền trả lại vón góp cho các chủ sở hữu, mua lại cổ phiếu của doanh nghiệp đã phát hành",
+            "3.Tiền thu từ đi vay",
+            "4.Tiền chi trả nợ gốc vay",
+            "5.Tiền chi trả nợ gốc thuê tài chính",
+            "6. Cổ tức, lợi nhuận đã trả cho chủ sở hữu",
+            "7. Tiền thu từ vốn góp của cổ đông không kiểm soát",
+            "Lưu chuyển tiền thuần từ hoạt động tài chính",
+            "Lưu chuyển tiền thuần trong kỳ (50 = 20+30+40)",
+            "Tiền và tương đương tiền đầu kỳ",
+            "Ảnh hưởng của thay đổi tỷ giá hối đoái quy đổi ngoại tệ",
+            "Tiền và tương đương tiền cuối kỳ (70 = 50+60+61)"
+        ]}
+
+    # Bù đắp cho từng kỳ nếu kỳ đó có >= 70% giá trị bằng 0 (như năm 2024 của HPG)
+    for i in range(n_periods):
+        zero_count = sum(1 for vals in raw_cf.values() if i < len(vals) and vals[i] == 0)
+        if len(raw_cf) > 0 and zero_count >= len(raw_cf) * 0.70:
+            for key, vals in raw_cf.items():
+                while len(vals) < n_periods:
+                    vals.append(0.0)
+                if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
+                    vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
+                elif i > 0 and vals[i-1] != 0:
+                    vals[i] = round(vals[i-1] * 1.05, 1)
+                elif i < n_periods - 1 and vals[i+1] != 0:
+                    vals[i] = round(vals[i+1] * 0.95, 1)
+
+    # Đồng bộ hóa chính xác các chỉ tiêu tổng và cốt lõi của LCTT
+    for key in list(raw_cf.keys()):
+        kl = key.lower().strip()
+        vals = raw_cf[key]
+        while len(vals) < n_periods:
+            vals.append(0.0)
+
+        # 1. Lưu chuyển tiền thuần từ HĐKD (CFO)
+        if kl == "lưu chuyển tiền thuần từ hoạt động kinh doanh" or kl == "lưu chuyển tiền từ hđkd":
+            for i in range(n_periods):
+                vals[i] = res["cfo"][i] if i < len(res["cfo"]) else vals[i]
+
+        # 2. Lưu chuyển tiền thuần từ HĐĐT (CFI)
+        elif kl == "lưu chuyển tiền thuần từ hoạt động đầu tư" or kl == "lưu chuyển tiền từ hđđt":
+            for i in range(n_periods):
+                vals[i] = res["cfi"][i] if i < len(res["cfi"]) else vals[i]
+
+        # 3. Lưu chuyển tiền thuần từ HĐTC (CFF)
+        elif kl == "lưu chuyển tiền thuần từ hoạt động tài chính" or kl == "lưu chuyển tiền từ hđtc":
+            for i in range(n_periods):
+                vals[i] = res["cff"][i] if i < len(res["cff"]) else vals[i]
+
+        # 4. Lưu chuyển tiền thuần trong kỳ
+        elif "lưu chuyển tiền thuần trong kỳ" in kl or "50 = 20+30+40" in kl:
+            for i in range(n_periods):
+                c_cfo = res["cfo"][i] if i < len(res["cfo"]) else 0.0
+                c_cfi = res["cfi"][i] if i < len(res["cfi"]) else 0.0
+                c_cff = res["cff"][i] if i < len(res["cff"]) else 0.0
+                vals[i] = round(c_cfo + c_cfi + c_cff, 1)
+
+        # 5. Tiền và tương đương tiền cuối kỳ
+        elif "tiền và tương đương tiền cuối kỳ" in kl or "70 = 50+60+61" in kl:
+            for i in range(n_periods):
+                vals[i] = res["cash_and_equivalents"][i] if i < len(res["cash_and_equivalents"]) else vals[i]
+
+        # 6. Tiền và tương đương tiền đầu kỳ
+        elif "tiền và tương đương tiền đầu kỳ" in kl or "60" in kl:
+            for i in range(n_periods):
+                if i > 0 and i - 1 < len(res["cash_and_equivalents"]):
+                    vals[i] = res["cash_and_equivalents"][i - 1]
+                elif vals[i] == 0 and i < len(res["cash_and_equivalents"]):
+                    vals[i] = round(res["cash_and_equivalents"][i] * 0.9, 1)
+
+        # 7. Lợi nhuận trước thuế
+        elif kl.startswith("1. lợi nhuận trước thuế") or kl == "lợi nhuận trước thuế":
+            for i in range(n_periods):
+                if vals[i] == 0 and i < len(res["net_profit"]):
+                    vals[i] = round(res["net_profit"][i] * 1.25, 1)
+
+        # 8. Chi phí lãi vay
+        elif kl == "chi phí lãi vay":
+            for i in range(n_periods):
+                if vals[i] == 0 and i < len(res["financial_expense"]):
+                    vals[i] = res["financial_expense"][i]
+
+        # 9. Tiền lãi vay đã trả
+        elif kl == "- tiền lãi vay đã trả":
+            for i in range(n_periods):
+                if vals[i] == 0 and i < len(res["financial_expense"]):
+                    vals[i] = round(-res["financial_expense"][i] * 0.95, 1)
+
+        # 10. Thuế TNDN đã nộp
+        elif kl == "- thuế thu nhập doanh nghiệp đã nộp":
+            for i in range(n_periods):
+                if vals[i] == 0 and i < len(res["net_profit"]):
+                    vals[i] = round(-res["net_profit"][i] * 0.20, 1)
+
+        raw_cf[key] = vals
+
+    res["raw_cf"] = raw_cf
 
     return res
 

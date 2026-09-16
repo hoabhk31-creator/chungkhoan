@@ -1113,14 +1113,19 @@ def extract_forecasts_from_content(content: str) -> Tuple[str, str]:
     return rev_f, npat_f
 
 
-async def fetch_edocs_reports(ticker: str, limit: int = 8) -> List[Dict[str, Any]]:
+async def fetch_edocs_reports(ticker: str = "", limit: int = 8) -> List[Dict[str, Any]]:
     """
     Tìm kiếm và lấy trực tiếp danh sách báo cáo phân tích thực tế từ cổng thông tin
     Vietstock eDocs (https://edocs.vietstock.vn/).
+    Nếu ticker rỗng, API sẽ cào toàn bộ các báo cáo mới nhất phát hành trên toàn thị trường.
     Endpoint: POST https://edocs.vietstock.vn/Home/Report_GetAllByStockCode_Paging?xml=StockCode:{ticker}&pageIndex=1&pageSize={limit}
     """
-    clean_ticker = ticker.upper().strip()
-    url = f"https://edocs.vietstock.vn/Home/Report_GetAllByStockCode_Paging?xml=StockCode:{clean_ticker}&pageIndex=1&pageSize={limit}"
+    clean_ticker = ticker.upper().strip() if ticker else ""
+    if clean_ticker:
+        url = f"https://edocs.vietstock.vn/Home/Report_GetAllByStockCode_Paging?xml=StockCode:{clean_ticker}&pageIndex=1&pageSize={limit}"
+    else:
+        url = f"https://edocs.vietstock.vn/Home/Report_GetAllByStockCode_Paging?xml=&pageIndex=1&pageSize={limit}"
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
@@ -1137,7 +1142,7 @@ async def fetch_edocs_reports(ticker: str, limit: int = 8) -> List[Dict[str, Any
                 if raw_items:
                     return raw_items
     except Exception as e:
-        print(f"Error fetching Vietstock eDocs for {clean_ticker}: {e}")
+        print(f"Error fetching Vietstock eDocs for {clean_ticker or 'ALL'}: {e}")
 
     return []
 
@@ -2177,32 +2182,51 @@ async def fetch_industry_reports(
         "Accept": "application/json, text/plain, */*"
     }
 
-    type_id = report_type_id if report_type_id else 57
-
-    # Xây dựng tham số xml theo chuẩn API Vietstock eDocs: ReportTypeID:{type_id}|Keyword:{effective_kw}
-    xml_parts = [f"ReportTypeID:{type_id}"]
-    if effective_kw:
-        xml_parts.append(f"Keyword:{effective_kw}")
-    xml_str = urllib.parse.quote("|".join(xml_parts))
-    url = f"https://edocs.vietstock.vn/Home/Report_GetAllByReportTypeID_Paging?xml={xml_str}&pageIndex=1&pageSize=50"
+    # Xác định danh sách loại báo cáo cần truy xuất
+    if report_type_id and str(report_type_id).isdigit() and int(report_type_id) > 0:
+        query_type_ids = [int(report_type_id)]
+    else:
+        query_type_ids = [58, 57] if (user_kw or not all_industries) else [57]
 
     raw_reports = []
+    seen_report_ids = set()
     try:
         async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
-            r = await client.post(url, json={})
-            if r.status_code == 200:
-                raw_reports = r.json().get("Data", {}).get("ListReport", [])
+            reqs = []
+            for tid in query_type_ids:
+                xml_parts = [f"ReportTypeID:{tid}"]
+                if effective_kw:
+                    xml_parts.append(f"Keyword:{effective_kw}")
+                xml_str = urllib.parse.quote("|".join(xml_parts))
+                url = f"https://edocs.vietstock.vn/Home/Report_GetAllByReportTypeID_Paging?xml={xml_str}&pageIndex=1&pageSize=50"
+                reqs.append(client.post(url, json={}))
+            resps = await asyncio.gather(*reqs, return_exceptions=True)
+            for r in resps:
+                if not isinstance(r, Exception) and getattr(r, "status_code", None) == 200:
+                    for it in r.json().get("Data", {}).get("ListReport", []):
+                        rid = it.get("ReportID")
+                        if rid not in seen_report_ids:
+                            seen_report_ids.add(rid)
+                            raw_reports.append(it)
     except Exception as e:
         print(f"Error crawling Vietstock eDocs: {e}")
 
-    # Fallback nếu gọi có keyword trả về rỗng: gọi lại danh sách chung của type_id
+    # Fallback nếu gọi có keyword trả về rỗng: gọi lại danh sách chung của type 58 & 57
     if not raw_reports and effective_kw:
         try:
-            fallback_url = f"https://edocs.vietstock.vn/Home/Report_GetAllByReportTypeID_Paging?xml=ReportTypeID:{type_id}&pageIndex=1&pageSize=100"
             async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
-                r = await client.post(fallback_url, json={})
-                if r.status_code == 200:
-                    raw_reports = r.json().get("Data", {}).get("ListReport", [])
+                fallback_reqs = [
+                    client.post(f"https://edocs.vietstock.vn/Home/Report_GetAllByReportTypeID_Paging?xml=ReportTypeID:{tid}&pageIndex=1&pageSize=60", json={})
+                    for tid in query_type_ids
+                ]
+                fb_resps = await asyncio.gather(*fallback_reqs, return_exceptions=True)
+                for r in fb_resps:
+                    if not isinstance(r, Exception) and getattr(r, "status_code", None) == 200:
+                        for it in r.json().get("Data", {}).get("ListReport", []):
+                            rid = it.get("ReportID")
+                            if rid not in seen_report_ids:
+                                seen_report_ids.add(rid)
+                                raw_reports.append(it)
         except Exception as e:
             print(f"Error crawling Vietstock eDocs fallback: {e}")
 
@@ -2251,8 +2275,8 @@ async def fetch_industry_reports(
             "file_url": file_url,
             "head_image_url": rep.get("HeadImageUrl"),
             "page_count": pages,
-            "report_type_id": rep.get("ReportTypeID", type_id),
-            "report_type_name": rep.get("ReportTypeName", "Phân tích Ngành"),
+            "report_type_id": rep.get("ReportTypeID") or query_type_ids[0],
+            "report_type_name": rep.get("ReportTypeName") or ("Phân tích Doanh nghiệp" if (rep.get("ReportTypeID") == 58 or query_type_ids[0] == 58) else "Phân tích Ngành"),
             "is_sector_match": is_sector_match
         })
 

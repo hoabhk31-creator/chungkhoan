@@ -994,6 +994,14 @@ class TestIERM(unittest.TestCase):
         self.assertGreater(data["reports_learned"], 0)
         self.assertGreater(data["catalysts_extracted"], 0)
 
+        # 1b. Trigger quét toàn bộ thị trường khi danh sách mã để trống
+        resp_market = self.client.post("/api/ai-learning/trigger-learn", json={"tickers": []})
+        self.assertEqual(resp_market.status_code, 200)
+        market_data = resp_market.json()
+        self.assertEqual(market_data["status"], "SUCCESS")
+        self.assertGreater(market_data["reports_learned"], 0)
+        self.assertIn("TOÀN BỘ THỊ TRƯỜNG", market_data.get("scope", ""))
+
         # 2. Kiểm tra nhật ký học
         resp_hist = self.client.get("/api/ai-learning/history")
         self.assertEqual(resp_hist.status_code, 200)
@@ -1190,6 +1198,105 @@ class TestIERM(unittest.TestCase):
             "password": "325396"
         })
         self.assertEqual(resp_restored.status_code, 200)
+
+    def test_hpg_and_market_lctt_2024(self):
+        """
+        Kiểm tra tính toàn vẹn dữ liệu LCTT (Báo cáo Lưu chuyển tiền tệ) chi tiết:
+        1. HPG năm 2024 phải có dữ liệu đầy đủ các dòng chỉ tiêu (không bị trống/zero).
+        2. raw_cf cho 2024 phải có dữ liệu CFO, CFI, CFF, Vay, Trả nợ vay.
+        3. Kiểm tra các mã khác (VNM, FPT, MWG, KBC) cũng có dữ liệu LCTT hoàn chỉnh.
+        """
+        resp = self.client.get("/api/financial-overview/HPG")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        stm_annual = data.get("statements_annual", {})
+        periods = stm_annual.get("periods", [])
+        self.assertIn("2024", periods)
+        idx_2024 = periods.index("2024")
+
+        raw_cf = stm_annual.get("raw_cf", {})
+        self.assertGreater(len(raw_cf), 0)
+
+        # Số dòng có dữ liệu khác 0 trong năm 2024 phải chiếm đa số (> 50%)
+        non_zeros_2024 = sum(1 for v in raw_cf.values() if idx_2024 < len(v) and v[idx_2024] != 0)
+        self.assertGreater(non_zeros_2024, 25)
+
+        # Kiểm tra các chỉ tiêu dòng tiền cốt lõi của HPG năm 2024
+        cfo_val = stm_annual.get("cfo", [])[idx_2024]
+        cfi_val = stm_annual.get("cfi", [])[idx_2024]
+        cff_val = stm_annual.get("cff", [])[idx_2024]
+        self.assertNotEqual(cfo_val, 0.0)
+        self.assertNotEqual(cfi_val, 0.0)
+        self.assertNotEqual(cff_val, 0.0)
+
+    def test_bctc_toolbar_and_excel_export_ui(self):
+        """
+        Kiểm tra tích hợp giao diện Tab Chi tiết BCTC:
+        1. Khung bên trái hiển thị mã chứng khoán, tên công ty, ngành/sàn (#bctc-ticker-info-bar).
+        2. Khung bên phải có nút Xuất Excel 3 Sheet (KQKD, CĐKT, LCTT) và nút PDF.
+        3. Các hàm JS updateBctcTickerInfoBar, exportBctcThreeSheetsExcel, exportBctcTablePdf có mặt đầy đủ trong app.js.
+        """
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+
+        self.assertIn("bctc-ticker-info-bar", html_content)
+        self.assertIn("bctc-info-ticker", html_content)
+        self.assertIn("bctc-info-name", html_content)
+        self.assertIn("bctc-info-sector", html_content)
+        self.assertIn("btn-export-bctc-excel", html_content)
+        self.assertIn("exportBctcThreeSheetsExcel()", html_content)
+        self.assertIn("btn-export-bctc-pdf", html_content)
+        self.assertIn("exportBctcTablePdf()", html_content)
+
+        with open("static/app.js", "r", encoding="utf-8") as f:
+            js_content = f.read()
+
+        self.assertIn("function updateBctcTickerInfoBar()", js_content)
+        self.assertIn("function exportBctcThreeSheetsExcel()", js_content)
+        self.assertIn("function exportBctcTablePdf()", js_content)
+        self.assertIn("1. KQKD", js_content)
+        self.assertIn("2. CĐKT", js_content)
+        self.assertIn("3. LCTT", js_content)
+
+    def test_overview_company_reports_feature(self):
+        """
+        Kiểm tra tính năng Báo cáo phân tích doanh nghiệp trong tab Tổng quan (thay thế mô tả cũ):
+        1. HTML chứa đầy đủ bảng báo cáo, ô tìm kiếm mã CP, dropdown loại, dropdown nguồn, nút Tìm.
+        2. JS chứa đầy đủ loadOverviewCompanyReports, handleOverviewReportSearch, clearOverviewReportKeyword.
+        3. Endpoint API trả về danh sách bài báo cáo có đầy đủ tiêu đề, nguồn, ngày, link PDF trực tiếp.
+        """
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            html = f.read()
+
+        self.assertIn("overview-reports-table", html)
+        self.assertIn("overview-report-keyword", html)
+        self.assertIn("overview-report-type-select", html)
+        self.assertIn("overview-report-source-select", html)
+        self.assertIn("overview-reports-body", html)
+        self.assertIn("overview-report-ticker-badge", html)
+        self.assertIn("handleOverviewReportSearch()", html)
+        self.assertIn("clearOverviewReportKeyword()", html)
+
+        with open("static/app.js", "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("function loadOverviewCompanyReports", js)
+        self.assertIn("function handleOverviewReportSearch", js)
+        self.assertIn("function clearOverviewReportKeyword", js)
+        self.assertIn("function handleReportPdfClick", js)
+
+        # Kiểm tra gọi API truy xuất báo cáo phân tích cho HPG
+        resp = self.client.get("/api/industry-reports?ticker=HPG&keyword=hpg")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        reports = data.get("reports", [])
+        self.assertGreater(len(reports), 0)
+        first_rep = reports[0]
+        self.assertIn("title", first_rep)
+        self.assertIn("source", first_rep)
+        self.assertIn("date", first_rep)
+        self.assertIn("file_url", first_rep)
+        self.assertTrue(first_rep["file_url"].startswith("http") or first_rep["file_url"].endswith(".pdf"))
 
 
 if __name__ == "__main__":

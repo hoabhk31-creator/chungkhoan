@@ -274,8 +274,15 @@ function switchTab(tabId) {
         if (chartOverviewMiniDonut) chartOverviewMiniDonut.resize();
         if (chartOverviewKqkd) chartOverviewKqkd.resize();
         if (chartOverviewCdkt) chartOverviewCdkt.resize();
+        const activeOverviewTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+        if (typeof loadOverviewCompanyReports === 'function') {
+            loadOverviewCompanyReports(activeOverviewTicker);
+        }
     }
-    if (tabId === "tab-bctc" && chartRevenueProfit) chartRevenueProfit.resize();
+    if (tabId === "tab-bctc") {
+        if (chartRevenueProfit) chartRevenueProfit.resize();
+        updateBctcTickerInfoBar();
+    }
     if (tabId === "tab-industry" && chartPeerRadar) chartPeerRadar.resize();
     if (tabId === "tab-valuation") {
         const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
@@ -669,12 +676,11 @@ function renderHero(report) {
     const matrixSectEl = document.getElementById("matrix-header-sector");
     if (matrixSectEl) matrixSectEl.textContent = report.sector;
     
-    // Live price source badge
-    const sourceLabel = cs.price_source_label || "Vietstock Chart & CTCK";
-    const dateLabel = cs.price_date_str || "Gần nhất";
+    // Live price source badge: Chỉ hiển thị Live và ngày tháng theo yêu cầu người dùng
+    const dateLabel = cs.price_date_str || new Date().toLocaleDateString('vi-VN');
     const sourceTextEl = document.getElementById("display-source-text");
     if (sourceTextEl) {
-        sourceTextEl.textContent = `${sourceLabel} (${dateLabel})`;
+        sourceTextEl.textContent = `Live (${dateLabel})`;
     }
 
     document.getElementById("display-date").textContent = report.analysis_date || `Tháng 09/2026`;
@@ -1827,6 +1833,216 @@ function toggleCompanyDesc() {
     }
 }
 
+// -------------------------------------------------------------
+// TAB TỔNG QUAN: BÁO CÁO PHÂN TÍCH DOANH NGHIỆP TỪ CÁC CÔNG TY CHỨNG KHOÁN
+// -------------------------------------------------------------
+let currentOverviewReportsTicker = "";
+
+async function loadOverviewCompanyReports(ticker, keyword = null, reportTypeId = "", sourceName = "", isExplicitSearch = false) {
+    const tbody = document.getElementById("overview-reports-body");
+    const countBadge = document.getElementById("overview-report-count-badge");
+    const tickerBadge = document.getElementById("overview-report-ticker-badge");
+    const kwInput = document.getElementById("overview-report-keyword");
+
+    if (!tbody) return;
+
+    const cleanTicker = (ticker || currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG")).toUpperCase().trim();
+    if (tickerBadge) tickerBadge.textContent = cleanTicker;
+
+    // Tự động điền mã cổ phiếu đang xem vào ô tìm kiếm theo định dạng chữ thường như Hình 2 nếu không phải tìm kiếm chủ động
+    if (kwInput) {
+        if (!isExplicitSearch) {
+            kwInput.value = cleanTicker.toLowerCase();
+        } else if (keyword !== null) {
+            kwInput.value = keyword;
+        }
+    }
+
+    const effectiveKw = (keyword !== null && isExplicitSearch) ? keyword.trim() : cleanTicker.toLowerCase();
+    currentOverviewReportsTicker = cleanTicker;
+
+    // Loading indicator
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6" class="p-6 text-center text-slate-400 font-mono">
+                <div class="flex items-center justify-center gap-2.5">
+                    <svg class="animate-spin h-4 w-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Đang tìm kiếm báo cáo phân tích CTCK cho mã ${cleanTicker}...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+    if (countBadge) countBadge.textContent = "Đang tải...";
+
+    try {
+        let url = `/api/industry-reports?ticker=${encodeURIComponent(cleanTicker)}`;
+        if (effectiveKw) {
+            url += `&keyword=${encodeURIComponent(effectiveKw)}`;
+        }
+        if (reportTypeId) {
+            url += `&report_type=${encodeURIComponent(reportTypeId)}`;
+        }
+        if (sourceName) {
+            url += `&source=${encodeURIComponent(sourceName)}`;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const reports = data.reports || [];
+
+        if (countBadge) {
+            countBadge.innerHTML = `<span class="text-cyan-400 font-bold font-mono">${reports.length}</span> báo cáo`;
+        }
+
+        if (reports.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="p-6 text-center text-slate-400 font-mono">
+                        <div class="flex flex-col items-center justify-center gap-1.5">
+                            <i data-lucide="inbox" class="w-6 h-6 text-slate-600"></i>
+                            <span class="text-xs">Không tìm thấy báo cáo phân tích nào phù hợp với từ khóa "${effectiveKw}".</span>
+                            <button type="button" onclick="resetOverviewReportFilter()" class="mt-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded text-xs border border-slate-700">
+                                Xem tất cả báo cáo
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        let rowsHtml = "";
+        reports.forEach((rep, idx) => {
+            const pdfUrl = rep.file_url || "#";
+            const rowBg = idx % 2 === 0 ? "bg-slate-900/40" : "bg-slate-950/40";
+            const safeSource = (rep.source || "CTCK").replace(/'/g, "\\'");
+            const safeTitle = (rep.title || "").replace(/"/g, '&quot;');
+            const safePdfUrl = pdfUrl.replace(/'/g, "\\'");
+
+            rowsHtml += `
+                <tr class="${rowBg} hover:bg-slate-800/60 transition-colors group">
+                    <!-- 1. Tiêu đề + Trích dẫn tóm tắt -->
+                    <td class="p-2.5 sticky left-0 z-10 ${rowBg} group-hover:bg-slate-800/90 border-r border-slate-800/80 min-w-[280px]">
+                        <div class="space-y-0.5">
+                            <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" 
+                               onclick="handleReportPdfClick(event, '${safePdfUrl}', '${safeSource}', '${cleanTicker}')" 
+                               class="text-cyan-400 hover:text-cyan-300 font-bold hover:underline leading-snug line-clamp-2 block transition-colors text-xs" 
+                               title="${safeTitle}">
+                                ${rep.title}
+                            </a>
+                            ${rep.snippet ? `<p class="text-[11px] text-slate-400 font-sans line-clamp-2 leading-relaxed pl-0.5">${rep.snippet}</p>` : ''}
+                        </div>
+                    </td>
+
+                    <!-- 2. Ngày phát hành -->
+                    <td class="p-2.5 text-center text-slate-300 whitespace-nowrap font-mono text-[11px] w-28">
+                        ${rep.date || "-"}
+                    </td>
+
+                    <!-- 3. Nguồn CTCK -->
+                    <td class="p-2.5 text-left whitespace-nowrap text-slate-200 font-medium text-[11px] w-36">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span>
+                            <span class="truncate max-w-[130px]" title="${rep.source || 'CTCK'}">${rep.source || "CTCK"}</span>
+                        </div>
+                    </td>
+
+                    <!-- 4. Ngôn ngữ -->
+                    <td class="p-2.5 text-center whitespace-nowrap text-slate-300 font-mono text-[11px] w-24">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] ${rep.language === 'English' ? 'bg-amber-950/80 text-amber-300 border border-amber-800' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+                            ${rep.language || "Tiếng Việt"}
+                        </span>
+                    </td>
+
+                    <!-- 5. Loại (Icon PDF đỏ như Hình 2) -->
+                    <td class="p-2.5 text-center whitespace-nowrap w-16">
+                        <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" 
+                           onclick="handleReportPdfClick(event, '${safePdfUrl}', '${safeSource}', '${cleanTicker}')" 
+                           class="inline-flex items-center justify-center p-1 rounded bg-rose-950/80 hover:bg-rose-900 border border-rose-700/80 text-rose-400 hover:text-rose-200 transition-colors shadow-sm group/btn cursor-pointer" 
+                           title="Xem trực tiếp file PDF báo cáo gốc của ${rep.source || 'CTCK'}">
+                            <svg class="w-4 h-4 text-rose-400 group-hover/btn:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </a>
+                    </td>
+
+                    <!-- 6. Số trang -->
+                    <td class="p-2.5 text-center whitespace-nowrap text-slate-400 font-mono text-[11px] w-20">
+                        ${rep.page_count ? `${rep.page_count}` : "-"}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = rowsHtml;
+        initDragToScroll("overview-reports-container");
+        if (window.lucide) lucide.createIcons();
+    } catch (err) {
+        console.error("loadOverviewCompanyReports err:", err);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="p-6 text-center text-rose-400 font-mono">
+                    <p class="text-xs">Không thể nạp danh sách báo cáo: ${err.message}</p>
+                    <button type="button" onclick="loadOverviewCompanyReports('${cleanTicker}')" class="mt-2 px-3 py-1 bg-slate-800 text-slate-200 hover:bg-slate-700 rounded text-xs">Thử lại</button>
+                </td>
+            </tr>
+        `;
+        if (countBadge) countBadge.textContent = "Lỗi nạp";
+    }
+}
+
+function handleOverviewReportSearch() {
+    const kwInput = document.getElementById("overview-report-keyword");
+    const typeSelect = document.getElementById("overview-report-type-select");
+    const srcSelect = document.getElementById("overview-report-source-select");
+
+    const keyword = kwInput ? kwInput.value.trim() : "";
+    const typeId = typeSelect ? typeSelect.value : "";
+    const source = srcSelect ? srcSelect.value : "";
+    const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+
+    loadOverviewCompanyReports(activeTicker, keyword, typeId, source, true);
+}
+
+function clearOverviewReportKeyword() {
+    const kwInput = document.getElementById("overview-report-keyword");
+    if (kwInput) {
+        kwInput.value = "";
+        kwInput.focus();
+    }
+    handleOverviewReportSearch();
+}
+
+function resetOverviewReportFilter() {
+    const kwInput = document.getElementById("overview-report-keyword");
+    const typeSelect = document.getElementById("overview-report-type-select");
+    const srcSelect = document.getElementById("overview-report-source-select");
+
+    const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+    if (kwInput) kwInput.value = activeTicker.toLowerCase();
+    if (typeSelect) typeSelect.value = "";
+    if (srcSelect) srcSelect.value = "";
+
+    loadOverviewCompanyReports(activeTicker);
+}
+
+function handleReportPdfClick(event, pdfUrl, source, ticker) {
+    if (!pdfUrl || pdfUrl === "#") return;
+    if (!event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        openPdfViewerModal(pdfUrl, source, ticker);
+    }
+}
+
 async function renderOverviewSection(ticker) {
     const cleanTicker = (ticker || "HPG").trim().toUpperCase();
     try {
@@ -1871,6 +2087,9 @@ async function renderOverviewSection(ticker) {
                 : currentFinancialBundle.statements_annual;
             renderOverviewFinancials(stm, currentOverviewFinancialPeriod);
         }
+
+        // Tự động tải danh sách bài báo cáo phân tích CTCK về mã cổ phiếu đang xem
+        try { loadOverviewCompanyReports(cleanTicker); } catch(e) { console.warn("loadOverviewCompanyReports err", e); }
 
         if (window.lucide) lucide.createIcons();
     } catch (err) {
@@ -3673,6 +3892,7 @@ function switchBctcSubtab(tabKey) {
 }
 
 function renderBctcTable(stm, subtab) {
+    updateBctcTickerInfoBar();
     const table = document.getElementById("bctc-table-element");
     if (!stm || !table) return;
 
@@ -3745,8 +3965,39 @@ function renderBctcTable(stm, subtab) {
         let r = `<tr class="${rowClass}">
             <td class="${titleClass}">${trimmed}</td>`;
         
-        (dataList || []).forEach(v => {
-            const num = Number(v);
+        (dataList || []).forEach((v, colIdx) => {
+            let num = Number(v);
+
+            // Bổ sung cơ chế bảo vệ nếu 1 dòng chỉ tiêu chính bị 0 do nguồn CafeF khuyết kỳ
+            if (num === 0 && subtab === "lctt") {
+                const lower = trimmed.toLowerCase();
+                if ((lower.includes("lưu chuyển tiền thuần từ hoạt động kinh doanh") || lower === "lưu chuyển tiền từ hđkd") && activeStm.cfo && activeStm.cfo[colIdx]) {
+                    num = Number(activeStm.cfo[colIdx]);
+                } else if ((lower.includes("lưu chuyển tiền thuần từ hoạt động đầu tư") || lower === "lưu chuyển tiền từ hđđt") && activeStm.cfi && activeStm.cfi[colIdx]) {
+                    num = Number(activeStm.cfi[colIdx]);
+                } else if ((lower.includes("lưu chuyển tiền thuần từ hoạt động tài chính") || lower === "lưu chuyển tiền từ hđtc") && activeStm.cff && activeStm.cff[colIdx]) {
+                    num = Number(activeStm.cff[colIdx]);
+                } else if (lower.includes("lưu chuyển tiền thuần trong kỳ") && activeStm.cfo && activeStm.cfi && activeStm.cff) {
+                    num = Number(activeStm.cfo[colIdx] || 0) + Number(activeStm.cfi[colIdx] || 0) + Number(activeStm.cff[colIdx] || 0);
+                }
+            } else if (num === 0 && subtab === "cdkt") {
+                const lower = trimmed.toLowerCase();
+                if ((lower === "tổng cộng tài sản" || lower === "tổng tài sản") && activeStm.total_assets && activeStm.total_assets[colIdx]) {
+                    num = Number(activeStm.total_assets[colIdx]);
+                } else if (lower.includes("vốn chủ sở hữu") && activeStm.owner_equity && activeStm.owner_equity[colIdx]) {
+                    num = Number(activeStm.owner_equity[colIdx]);
+                } else if (lower.includes("nợ phải trả") && !lower.includes("không kể") && activeStm.total_liabilities && activeStm.total_liabilities[colIdx]) {
+                    num = Number(activeStm.total_liabilities[colIdx]);
+                }
+            } else if (num === 0 && subtab === "kqkd") {
+                const lower = trimmed.toLowerCase();
+                if (lower.includes("doanh thu thuần") && activeStm.revenue && activeStm.revenue[colIdx]) {
+                    num = Number(activeStm.revenue[colIdx]);
+                } else if ((lower.includes("lợi nhuận sau thuế") || lower.includes("lnst")) && activeStm.net_profit && activeStm.net_profit[colIdx]) {
+                    num = Number(activeStm.net_profit[colIdx]);
+                }
+            }
+
             let valFormatted;
             if (num === 0) {
                 valFormatted = `<span class="text-slate-500 font-mono">-</span>`;
@@ -3899,6 +4150,305 @@ function initBctcDragToScroll() {
             container.scrollTop = touchScrollTop - (y - touchStartY);
         }
     }, { passive: true });
+}
+
+// -------------------------------------------------------------
+// BCTC TOOLBAR: CẬP NHẬT THÔNG TIN MÃ CHỨNG KHOÁN & XUẤT EXCEL 3 SHEET / PDF
+// -------------------------------------------------------------
+function updateBctcTickerInfoBar() {
+    const tickerEl = document.getElementById("bctc-info-ticker");
+    const nameEl = document.getElementById("bctc-info-name");
+    const sectorEl = document.getElementById("bctc-info-sector");
+    if (!tickerEl && !nameEl && !sectorEl) return;
+
+    const ticker = (currentReport && currentReport.ticker) || 
+                   (currentFinancialBundle && currentFinancialBundle.ticker) || 
+                   (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+
+    const compName = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.name) ||
+                     (currentReport && currentReport.company_name) ||
+                     document.getElementById("company-name")?.textContent ||
+                     ticker;
+
+    const sector = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.sector) ||
+                   (currentReport && currentReport.sector) ||
+                   document.getElementById("company-sector")?.textContent ||
+                   "";
+
+    const exchange = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.exchange) ||
+                     (currentReport && currentReport.exchange) ||
+                     "HOSE";
+
+    if (tickerEl) tickerEl.textContent = ticker;
+    if (nameEl) {
+        nameEl.textContent = compName;
+        nameEl.title = `${ticker} - ${compName}`;
+    }
+    if (sectorEl) {
+        let details = [];
+        if (sector && sector !== "Doanh nghiệp niêm yết") details.push(sector);
+        if (exchange) details.push(exchange);
+        sectorEl.textContent = details.length > 0 ? `(${details.join(" • ")})` : "";
+    }
+}
+
+function exportBctcThreeSheetsExcel() {
+    try {
+        const stm = getActiveStatements();
+        if (!stm || !stm.periods || stm.periods.length === 0) {
+            showToast("⚠️ Chưa có dữ liệu Báo cáo Tài chính để xuất Excel!");
+            return;
+        }
+
+        if (typeof XLSX === 'undefined') {
+            showToast("⚠️ Thư viện SheetJS đang tải hoặc chưa sẵn sàng, vui lòng thử lại sau vài giây!");
+            return;
+        }
+
+        const activeStm = sliceStatements(stm, currentPeriodCount);
+        if (!activeStm || !activeStm.periods || activeStm.periods.length === 0) {
+            showToast("⚠️ Không tìm thấy dữ liệu kỳ tài chính phù hợp để xuất!");
+            return;
+        }
+
+        const ticker = (currentReport && currentReport.ticker) || 
+                       (currentFinancialBundle && currentFinancialBundle.ticker) || 
+                       (document.getElementById("bctc-info-ticker")?.textContent || "HPG").trim().toUpperCase();
+
+        const compName = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.name) ||
+                         (currentReport && currentReport.company_name) ||
+                         document.getElementById("bctc-info-name")?.textContent ||
+                         ticker;
+
+        const sector = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.sector) ||
+                       (currentReport && currentReport.sector) ||
+                       document.getElementById("bctc-info-sector")?.textContent ||
+                       "";
+
+        const periodModeLabel = currentPeriodMode === 'quarter' ? 'Theo Quý' : 'Theo Năm';
+        const periods = activeStm.periods;
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const exportDateStr = new Date().toLocaleDateString('vi-VN');
+
+        const wb = XLSX.utils.book_new();
+
+        // Hàm hỗ trợ build dữ liệu cho 1 sheet BCTC
+        const buildSheetData = (reportTitle, rawDict, fallbackList, statementKey) => {
+            const sheetRows = [];
+            // Header thông tin doanh nghiệp & báo cáo
+            sheetRows.push([`${ticker} - ${reportTitle.toUpperCase()}`]);
+            sheetRows.push([`Công ty: ${compName}`, "", `Ngành: ${sector}`]);
+            sheetRows.push([`Kỳ báo cáo: ${periodModeLabel}`, "", `Đơn vị tính: Tỷ VND`, "", `Ngày xuất: ${exportDateStr}`]);
+            sheetRows.push([]); // Dòng trống
+
+            // Dòng tiêu đề cột
+            sheetRows.push(["CHỈ TIÊU (TỶ VND)", ...periods]);
+
+            // Dòng dữ liệu
+            if (rawDict && Object.keys(rawDict).length > 0) {
+                for (const [title, vals] of Object.entries(rawDict)) {
+                    const rowVals = (vals || []).map((v, colIdx) => {
+                        let num = Number(v) || 0;
+                        const trimmed = title.trim();
+                        const lower = trimmed.toLowerCase();
+                        // Đồng bộ chỉ tiêu cốt lõi nếu khuyết số
+                        if (num === 0) {
+                            if (statementKey === 'lctt') {
+                                if ((lower.includes("lưu chuyển tiền thuần từ hoạt động kinh doanh") || lower === "lưu chuyển tiền từ hđkd") && activeStm.cfo && activeStm.cfo[colIdx]) {
+                                    num = Number(activeStm.cfo[colIdx]) || 0;
+                                } else if ((lower.includes("lưu chuyển tiền thuần từ hoạt động đầu tư") || lower === "lưu chuyển tiền từ hđđt") && activeStm.cfi && activeStm.cfi[colIdx]) {
+                                    num = Number(activeStm.cfi[colIdx]) || 0;
+                                } else if ((lower.includes("lưu chuyển tiền thuần từ hoạt động tài chính") || lower === "lưu chuyển tiền từ hđtc") && activeStm.cff && activeStm.cff[colIdx]) {
+                                    num = Number(activeStm.cff[colIdx]) || 0;
+                                } else if (lower.includes("lưu chuyển tiền thuần trong kỳ") && activeStm.cfo && activeStm.cfi && activeStm.cff) {
+                                    num = (Number(activeStm.cfo[colIdx]) || 0) + (Number(activeStm.cfi[colIdx]) || 0) + (Number(activeStm.cff[colIdx]) || 0);
+                                }
+                            } else if (statementKey === 'cdkt') {
+                                if ((lower === "tổng cộng tài sản" || lower === "tổng tài sản") && activeStm.total_assets && activeStm.total_assets[colIdx]) {
+                                    num = Number(activeStm.total_assets[colIdx]) || 0;
+                                } else if (lower.includes("vốn chủ sở hữu") && activeStm.owner_equity && activeStm.owner_equity[colIdx]) {
+                                    num = Number(activeStm.owner_equity[colIdx]) || 0;
+                                } else if (lower.includes("nợ phải trả") && !lower.includes("không kể") && activeStm.total_liabilities && activeStm.total_liabilities[colIdx]) {
+                                    num = Number(activeStm.total_liabilities[colIdx]) || 0;
+                                }
+                            } else if (statementKey === 'kqkd') {
+                                if (lower.includes("doanh thu thuần") && activeStm.revenue && activeStm.revenue[colIdx]) {
+                                    num = Number(activeStm.revenue[colIdx]) || 0;
+                                } else if ((lower.includes("lợi nhuận sau thuế") || lower.includes("lnst")) && activeStm.net_profit && activeStm.net_profit[colIdx]) {
+                                    num = Number(activeStm.net_profit[colIdx]) || 0;
+                                }
+                            }
+                        }
+                        return num;
+                    });
+                    sheetRows.push([title.trim(), ...rowVals]);
+                }
+            } else if (fallbackList && fallbackList.length > 0) {
+                fallbackList.forEach(item => {
+                    const rowVals = (item.data || []).map(v => Number(v) || 0);
+                    sheetRows.push([item.name, ...rowVals]);
+                });
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(sheetRows);
+            const colWidths = [{ wch: 46 }];
+            periods.forEach(() => colWidths.push({ wch: 15 }));
+            ws['!cols'] = colWidths;
+            return ws;
+        };
+
+        // 1. SHEET 1: KQKD
+        const fallbackKqkd = [
+            { name: "1. Doanh thu thuần", data: activeStm.revenue },
+            { name: "2. Giá vốn hàng bán", data: activeStm.cogs },
+            { name: "3. Lợi nhuận gộp", data: activeStm.gross_profit },
+            { name: "4. Lợi nhuận từ HĐKD (EBIT)", data: activeStm.operating_profit },
+            { name: "5. Chi phí tài chính (lãi vay)", data: activeStm.financial_expense },
+            { name: "6. Lợi nhuận sau thuế (LNST)", data: activeStm.net_profit }
+        ];
+        const wsKqkd = buildSheetData("Báo Cáo Kết Quả Kinh Doanh", activeStm.raw_inc, fallbackKqkd, 'kqkd');
+        XLSX.utils.book_append_sheet(wb, wsKqkd, "1. KQKD");
+
+        // 2. SHEET 2: CĐKT
+        const fallbackCdkt = [
+            { name: "1. Tổng tài sản", data: activeStm.total_assets },
+            { name: "   • Tài sản ngắn hạn", data: activeStm.short_term_assets },
+            { name: "   • Tiền & tương đương tiền", data: activeStm.cash_and_equivalents },
+            { name: "   • Hàng tồn kho", data: activeStm.inventories },
+            { name: "2. Nợ phải trả", data: activeStm.total_liabilities },
+            { name: "   • Vay ngắn hạn", data: activeStm.short_term_debt },
+            { name: "   • Vay dài hạn", data: activeStm.long_term_debt },
+            { name: "3. Vốn chủ sở hữu (VCSH)", data: activeStm.owner_equity }
+        ];
+        const wsCdkt = buildSheetData("Bảng Cân Đối Kế Toán", activeStm.raw_bs, fallbackCdkt, 'cdkt');
+        XLSX.utils.book_append_sheet(wb, wsCdkt, "2. CĐKT");
+
+        // 3. SHEET 3: LCTT
+        const fallbackLctt = [
+            { name: "1. Dòng tiền HĐ Kinh Doanh (CFO)", data: activeStm.cfo },
+            { name: "2. Dòng tiền HĐ Đầu Tư (CFI)", data: activeStm.cfi },
+            { name: "3. Dòng tiền HĐ Tài Chính (CFF)", data: activeStm.cff },
+            { name: "4. Dòng tiền tự do (FCF)", data: activeStm.free_cash_flow }
+        ];
+        const wsLctt = buildSheetData("Báo Cáo Lưu Chuyển Tiền Tệ", activeStm.raw_cf, fallbackLctt, 'lctt');
+        XLSX.utils.book_append_sheet(wb, wsLctt, "3. LCTT");
+
+        // Xuất file .xlsx
+        const filename = `${ticker}_BCTC_3_Bao_Cao_${currentPeriodMode === 'quarter' ? 'Theo_Quy' : 'Theo_Nam'}_${todayStr}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        showToast(`✅ Đã xuất thành công file Excel 3 Sheet: ${filename}`);
+    } catch(err) {
+        console.error("Export BCTC Excel 3 sheets error:", err);
+        showToast("⚠️ Lỗi khi xuất file Excel 3 Sheet BCTC: " + err.message);
+    }
+}
+
+function exportBctcTablePdf() {
+    try {
+        const table = document.getElementById("bctc-table-element");
+        if (!table) {
+            showToast("⚠️ Chưa có bảng dữ liệu BCTC để xuất PDF!");
+            return;
+        }
+
+        const ticker = (currentReport && currentReport.ticker) || 
+                       (currentFinancialBundle && currentFinancialBundle.ticker) || 
+                       (document.getElementById("bctc-info-ticker")?.textContent || "HPG").trim().toUpperCase();
+
+        const compName = (currentFinancialBundle && currentFinancialBundle.company_profile && currentFinancialBundle.company_profile.name) ||
+                         (currentReport && currentReport.company_name) ||
+                         document.getElementById("bctc-info-name")?.textContent ||
+                         ticker;
+
+        const subtabNames = {
+            "kqkd": "BÁO CÁO KẾT QUẢ KINH DOANH",
+            "cdkt": "BẢNG CÂN ĐỐI KẾ TOÁN",
+            "lctt": "BÁO CÁO LƯU CHUYỂN TIỀN TỆ"
+        };
+        const reportTitle = subtabNames[currentBctcSubtab] || "BÁO CÁO TÀI CHÍNH";
+        const periodModeLabel = currentPeriodMode === 'quarter' ? 'Theo Quý' : 'Theo Năm';
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const exportDateStr = new Date().toLocaleDateString('vi-VN');
+
+        showToast("⏳ Đang tạo bản PDF Báo Cáo Tài Chính...");
+
+        // Tạo container ẩn để render PDF chất lượng cao (nền sáng tiêu chuẩn A4 ngang)
+        const container = document.createElement("div");
+        container.style.padding = "20px";
+        container.style.backgroundColor = "#ffffff";
+        container.style.color = "#0f172a";
+        container.style.fontFamily = "Arial, sans-serif";
+        container.style.fontSize = "11px";
+
+        // Tiêu đề
+        container.innerHTML = `
+            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <h2 style="margin: 0; font-size: 16px; font-weight: bold; color: #0369a1; text-transform: uppercase;">${ticker} - ${reportTitle}</h2>
+                    <div style="font-size: 12px; color: #334155; margin-top: 3px; font-weight: 600;">${compName}</div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #64748b;">
+                    <div>Kỳ báo cáo: <strong>${periodModeLabel}</strong> | Đơn vị tính: <strong>Tỷ VND</strong></div>
+                    <div>Ngày xuất: ${exportDateStr}</div>
+                </div>
+            </div>
+        `;
+
+        // Clone table và chuẩn hóa CSS cho in ấn
+        const clonedTable = table.cloneNode(true);
+        clonedTable.style.width = "100%";
+        clonedTable.style.borderCollapse = "collapse";
+        clonedTable.style.fontSize = "10px";
+        
+        // Gỡ bỏ sticky classes và đặt border sáng
+        const allTh = clonedTable.querySelectorAll("th");
+        allTh.forEach(th => {
+            th.style.backgroundColor = "#f1f5f9";
+            th.style.color = "#0f172a";
+            th.style.border = "1px solid #cbd5e1";
+            th.style.padding = "6px 8px";
+            th.style.position = "static";
+        });
+
+        const allTd = clonedTable.querySelectorAll("td");
+        allTd.forEach(td => {
+            td.style.border = "1px solid #e2e8f0";
+            td.style.padding = "5px 6px";
+            td.style.color = "#1e293b";
+            td.style.position = "static";
+            if (td.querySelector(".text-rose-400")) {
+                td.style.color = "#dc2626";
+                td.style.fontWeight = "bold";
+            }
+        });
+
+        container.appendChild(clonedTable);
+        document.body.appendChild(container);
+
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin: [8, 8, 8, 8],
+                filename: `${ticker}_BCTC_${currentBctcSubtab.toUpperCase()}_${todayStr}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(container).save().then(() => {
+                document.body.removeChild(container);
+                showToast("✅ Đã xuất file PDF thành công!");
+            }).catch(e => {
+                console.error("html2pdf err", e);
+                document.body.removeChild(container);
+                window.print();
+            });
+        } else {
+            document.body.removeChild(container);
+            window.print();
+        }
+    } catch(err) {
+        console.error("Export BCTC PDF error:", err);
+        showToast("⚠️ Lỗi khi xuất PDF BCTC: " + err.message);
+    }
 }
 
 function switchBreakdownMode(mode) {
@@ -8463,10 +9013,10 @@ async function loadAiLearningDashboard() {
         const nextRun = document.getElementById("ai-next-run");
 
         if (intervalSelect && cfgRes.interval_hours !== undefined) {
-            intervalSelect.value = cfgRes.interval_hours;
+            intervalSelect.value = String(cfgRes.interval_hours);
         }
-        if (watchlistInput && cfgRes.watchlist) {
-            watchlistInput.value = cfgRes.watchlist.join(", ");
+        if (watchlistInput) {
+            watchlistInput.value = (cfgRes.watchlist && cfgRes.watchlist.length > 0) ? cfgRes.watchlist.join(", ") : "";
         }
         if (lastRun) lastRun.textContent = cfgRes.last_run || "Chưa chạy";
         if (nextRun) nextRun.textContent = cfgRes.next_run || "Theo lịch";
@@ -8605,7 +9155,8 @@ function toggleTemplateDetail(id) {
 }
 
 async function saveAiLearningConfig() {
-    const interval = parseInt(document.getElementById("ai-interval-select")?.value || "6", 10);
+    const intervalSelect = document.getElementById("ai-interval-select");
+    const interval = parseInt(intervalSelect?.value || "6", 10);
     const rawWatchlist = document.getElementById("ai-watchlist-input")?.value || "";
     const watchlist = rawWatchlist.split(",").map(s => s.trim().toUpperCase()).filter(s => s.length >= 2);
 
@@ -8620,10 +9171,13 @@ async function saveAiLearningConfig() {
             })
         });
         if (!resp.ok) throw new Error("Lỗi khi lưu cấu hình");
-        showToast("Đã cập nhật tần suất tự động quét và học online thành công!");
-        loadAiLearningDashboard();
+        const updatedCfg = await resp.json();
+        const scopeDesc = watchlist.length > 0 ? `Watchlist (${watchlist.length} mã: ${watchlist.join(', ')})` : "Toàn bộ thị trường (Tất cả báo cáo CTCK)";
+        const timeDesc = interval > 0 ? `Mỗi ${interval} giờ` : "Thủ công (Tắt định kỳ)";
+        showToast(`Đã lưu tần suất: ${timeDesc} | Phạm vi: ${scopeDesc}`);
+        await loadAiLearningDashboard();
     } catch (e) {
-        showToast(`Lỗi: ${e.message}`, true);
+        showToast(`Lỗi lưu cấu hình: ${e.message}`, true);
     }
 }
 
@@ -8637,19 +9191,25 @@ async function triggerAiLearningNow() {
         if (window.lucide) lucide.createIcons();
     }
 
-    showToast("AI đang cào tài liệu phân tích online từ Vietstock eDocs & các CTCK...");
-    try {
-        const watchlistInput = document.getElementById("ai-watchlist-input")?.value || "";
-        const tickers = watchlistInput ? watchlistInput.split(",").map(s => s.trim().toUpperCase()).filter(s => s.length >= 2) : ["HPG", "SSI", "FPT", "MWG"];
+    const watchlistInput = document.getElementById("ai-watchlist-input")?.value || "";
+    const tickers = watchlistInput ? watchlistInput.split(",").map(s => s.trim().toUpperCase()).filter(s => s.length >= 2) : [];
 
+    if (tickers.length === 0) {
+        showToast("AI đang quét TOÀN BỘ thị trường (Vietstock eDocs, FireAnt & các CTCK)...");
+    } else {
+        showToast(`AI đang cào tài liệu phân tích cho ${tickers.length} mã (${tickers.join(', ')})...`);
+    }
+
+    try {
         const resp = await fetch("/api/ai-learning/trigger-learn", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tickers: tickers.slice(0, 4) })
+            body: JSON.stringify({ tickers: tickers })
         });
         if (!resp.ok) throw new Error("Tiến trình tự học thất bại");
         const data = await resp.json();
-        showToast(`Hoàn tất tự học! Đã bóc tách ${data.reports_learned || 0} báo cáo và tích lũy ${data.catalysts_extracted || 0} catalysts mới.`);
+        const scopeMsg = data.scope || (tickers.length === 0 ? "Toàn bộ thị trường" : tickers.join(", "));
+        showToast(`Hoàn tất tự học! Đã bóc tách ${data.reports_learned || 0} báo cáo (${scopeMsg}) và tích lũy ${data.catalysts_extracted || 0} catalysts mới.`);
         await loadAiLearningDashboard();
     } catch (e) {
         showToast(`Lỗi quét tự học: ${e.message}`, true);
@@ -9138,8 +9698,10 @@ async function refreshLivePrice(isManual = false) {
             pEl.textContent = `${newPrice.toLocaleString("vi-VN")} VND`;
         }
         const srcEl = document.getElementById("display-source-text");
-        if (srcEl && priceInfo.selected_source) {
-            srcEl.textContent = `${priceInfo.selected_source}`;
+        if (srcEl) {
+            const dateMatch = priceInfo.selected_source ? priceInfo.selected_source.match(/\d{1,2}\/\d{1,2}\/\d{4}/) : null;
+            const dStr = dateMatch ? dateMatch[0] : (priceInfo.date_str || new Date().toLocaleDateString('vi-VN'));
+            srcEl.textContent = `Live (${dStr})`;
         }
 
         // 2. Tab Kỹ thuật: Toolbar Price & Tham chiếu
