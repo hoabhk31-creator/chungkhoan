@@ -348,7 +348,8 @@ async function loadMarketTickerTape(activeTicker = null) {
         if (data.indices && data.indices.length > 0) {
             data.indices.forEach(idx => {
                 const colorClass = idx.direction === "up" ? "text-emerald-400" : (idx.direction === "down" ? "text-rose-400" : "text-amber-400");
-                const ping = idx.symbol === "VN-INDEX" ? `<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping inline-block"></span>` : "";
+                const pingColor = idx.direction === "up" ? "bg-emerald-500" : (idx.direction === "down" ? "bg-rose-500" : "bg-amber-500");
+                const ping = idx.symbol === "VN-INDEX" ? `<span class="w-2 h-2 rounded-full ${pingColor} mr-2 animate-ping inline-block"></span>` : "";
                 const displayStr = idx.display || `${idx.value.toLocaleString("vi-VN")} (${idx.change >= 0 ? "+" : ""}${idx.change} / ${idx.change_pct >= 0 ? "+" : ""}${idx.change_pct}%)`;
                 html += `
                 <span class="flex items-center text-slate-400">

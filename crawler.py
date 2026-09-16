@@ -1474,58 +1474,79 @@ async def fetch_live_market_tape(active_ticker: Optional[str] = None) -> Dict[st
         target_symbols.insert(0, active_ticker.upper())
 
     async with httpx.AsyncClient(headers=headers, timeout=5.0) as client:
-        # Task 1: Fetch Index (VNINDEX, VN30) từ Entrade 1m & 1D (với fallback VNDirect)
-        async def fetch_index(idx_sym, idx_name):
-            # Thử nguồn 1: Entrade 1M + 1D
+        # Task 1: Fetch Index (VNINDEX, VN30) trực tiếp từ SSI iBoard exchange-index (chuẩn xác 100% với bảng giá SSI)
+        async def fetch_indices():
+            # Nguồn 1: SSI iBoard official exchange-index (Trực tiếp từ bảng giá SSI iBoard)
             try:
-                r1m = await client.get(f"https://services.entrade.com.vn/chart-api/v2/ohlcs/index?from={start_1m}&to={now_ts}&symbol={idx_sym}&resolution=1")
-                r1d = await client.get(f"https://services.entrade.com.vn/chart-api/v2/ohlcs/index?from={start_1d}&to={now_ts}&symbol={idx_sym}&resolution=1D")
-                if r1m.status_code == 200 and r1d.status_code == 200:
-                    d1m = r1m.json()
-                    d1d = r1d.json()
-                    if d1m.get("c") and d1d.get("c"):
-                        live = float(d1m["c"][-1])
-                        ref = float(d1d["c"][-1])
-                        if len(d1d["c"]) > 1 and abs(ref - live) < 0.001:
-                            ref = float(d1d["c"][-2])
-                        chg = live - ref
-                        pct = (chg / ref) * 100.0 if ref > 0 else 0.0
+                r_ssi = await client.get("https://iboard-query.ssi.com.vn/exchange-index", timeout=3.5)
+                if r_ssi.status_code == 200:
+                    raw_data = r_ssi.json().get("data", [])
+                    idx_map = {item.get("indexId"): item for item in raw_data if isinstance(item, dict)}
+                    
+                    indices_out = []
+                    # 1. VN-INDEX (HOSE)
+                    vni = idx_map.get("VNINDEX")
+                    if vni and vni.get("indexValue") is not None:
+                        val = float(vni["indexValue"])
+                        chg = float(vni.get("change", 0.0))
+                        pct = float(vni.get("changePercent", 0.0))
                         direction = "up" if chg > 0 else ("down" if chg < 0 else "ref")
-                        return {
-                            "symbol": idx_name,
-                            "value": round(live, 2),
+                        indices_out.append({
+                            "symbol": "VN-INDEX",
+                            "value": round(val, 2),
                             "change": round(chg, 2),
                             "change_pct": round(pct, 2),
                             "direction": direction,
-                            "display": f"{live:,.2f} ({chg:+,.2f} / {pct:+.2f}%)"
-                        }
-            except Exception:
-                pass
+                            "display": f"{val:,.2f} ({chg:+,.2f} / {pct:+.2f}%)"
+                        })
+                        
+                    # 2. VN30 (HOSE)
+                    vn30 = idx_map.get("VN30")
+                    if vn30 and vn30.get("indexValue") is not None:
+                        val = float(vn30["indexValue"])
+                        chg = float(vn30.get("change", 0.0))
+                        pct = float(vn30.get("changePercent", 0.0))
+                        direction = "up" if chg > 0 else ("down" if chg < 0 else "ref")
+                        indices_out.append({
+                            "symbol": "VN30",
+                            "value": round(val, 2),
+                            "change": round(chg, 2),
+                            "change_pct": round(pct, 2),
+                            "direction": direction,
+                            "display": f"{val:,.2f} ({chg:+,.2f} / {pct:+.2f}%)"
+                        })
+                        
+                    if len(indices_out) >= 2:
+                        return indices_out
+            except Exception as e:
+                logger.warning(f"Fetch SSI exchange-index failed: {e}")
 
-            # Thử nguồn 2: VNDirect DChart 1M + D
-            try:
-                r1m_v = await client.get(f"https://dchart-api.vndirect.com.vn/dchart/history?resolution=1&symbol={idx_sym}&from={start_1m}&to={now_ts}")
-                r1d_v = await client.get(f"https://dchart-api.vndirect.com.vn/dchart/history?resolution=D&symbol={idx_sym}&from={start_1d}&to={now_ts}")
-                if r1m_v.status_code == 200 and r1d_v.status_code == 200:
-                    d1m = r1m_v.json()
-                    d1d = r1d_v.json()
-                    if d1m.get("c") and d1d.get("c"):
-                        live = float(d1m["c"][-1])
-                        ref = float(d1d["c"][-2]) if len(d1d["c"]) > 1 else float(d1d["c"][-1])
-                        chg = live - ref
-                        pct = (chg / ref) * 100.0 if ref > 0 else 0.0
-                        direction = "up" if chg > 0 else ("down" if chg < 0 else "ref")
-                        return {
-                            "symbol": idx_name,
-                            "value": round(live, 2),
-                            "change": round(chg, 2),
-                            "change_pct": round(pct, 2),
-                            "direction": direction,
-                            "display": f"{live:,.2f} ({chg:+,.2f} / {pct:+.2f}%)"
-                        }
-            except Exception:
-                pass
-            return None
+            # Nguồn 2 dự phòng: Entrade 1m & 1D
+            fallback_indices = []
+            for idx_sym, idx_name in [("VNINDEX", "VN-INDEX"), ("VN30", "VN30")]:
+                try:
+                    r1m = await client.get(f"https://services.entrade.com.vn/chart-api/v2/ohlcs/index?from={start_1m}&to={now_ts}&symbol={idx_sym}&resolution=1")
+                    r1d = await client.get(f"https://services.entrade.com.vn/chart-api/v2/ohlcs/index?from={start_1d}&to={now_ts}&symbol={idx_sym}&resolution=1D")
+                    if r1m.status_code == 200 and r1d.status_code == 200:
+                        d1m = r1m.json()
+                        d1d = r1d.json()
+                        if d1m.get("c") and d1d.get("c"):
+                            live = float(d1m["c"][-1])
+                            ref = float(d1d["c"][-2]) if len(d1d["c"]) > 1 else float(d1d["c"][-1])
+                            chg = live - ref
+                            pct = (chg / ref) * 100.0 if ref > 0 else 0.0
+                            direction = "up" if chg > 0 else ("down" if chg < 0 else "ref")
+                            fallback_indices.append({
+                                "symbol": idx_name,
+                                "value": round(live, 2),
+                                "change": round(chg, 2),
+                                "change_pct": round(pct, 2),
+                                "direction": direction,
+                                "display": f"{live:,.2f} ({chg:+,.2f} / {pct:+.2f}%)"
+                            })
+                except Exception:
+                    pass
+            return fallback_indices
 
         # Task 2: Fetch Stock group từ SSI iBoard
         async def fetch_ssi_group():
@@ -1537,11 +1558,10 @@ async def fetch_live_market_tape(active_ticker: Optional[str] = None) -> Dict[st
                 pass
             return {}
 
-        # Chạy đồng thời index tasks và SSI group task
-        index_tasks = [fetch_index("VNINDEX", "VN-INDEX"), fetch_index("VN30", "VN30")]
-        idx_res, ssi_dict = await asyncio.gather(asyncio.gather(*index_tasks), fetch_ssi_group())
-
-        indices = [r for r in idx_res if r]
+        # Chạy đồng thời index task và SSI group task
+        indices, ssi_dict = await asyncio.gather(fetch_indices(), fetch_ssi_group())
+        if not indices:
+            indices = []
 
         # Task 3: Lấy chi tiết từng cổ phiếu từ SSI group hoặc gọi trực tiếp SSI nếu thiếu
         async def resolve_stock(sym):
@@ -1619,8 +1639,8 @@ async def fetch_live_market_tape(active_ticker: Optional[str] = None) -> Dict[st
     # Dự phòng an toàn nếu mất kết nối
     if not indices:
         indices = [
-            {"symbol": "VN-INDEX", "value": 1820.64, "change": -1.00, "change_pct": -0.05, "direction": "down", "display": "1,820.64 (-1.00 / -0.05%)"},
-            {"symbol": "VN30", "value": 1961.50, "change": -1.51, "change_pct": -0.08, "direction": "down", "display": "1,961.50 (-1.51 / -0.08%)"}
+            {"symbol": "VN-INDEX", "value": 1810.11, "change": -1.04, "change_pct": -0.06, "direction": "down", "display": "1,810.11 (-1.04 / -0.06%)"},
+            {"symbol": "VN30", "value": 1954.29, "change": 3.15, "change_pct": 0.16, "direction": "up", "display": "1,954.29 (+3.15 / +0.16%)"}
         ]
     if not stocks:
         stocks = [

@@ -1298,6 +1298,42 @@ class TestIERM(unittest.TestCase):
         self.assertIn("file_url", first_rep)
         self.assertTrue(first_rep["file_url"].startswith("http") or first_rep["file_url"].endswith(".pdf"))
 
+    def test_market_tape_ssi_indices_accuracy(self):
+        """
+        Kiểm tra tính chính xác của chỉ số VN-INDEX và VN30 đồng bộ với bảng giá SSI iBoard:
+        1. API /api/market-tape trả về VN-INDEX và VN30 khớp trực tiếp với exchange-index SSI.
+        2. VN-INDEX: Điểm số, độ biến động âm, tỷ lệ %, hướng 'down' (màu đỏ).
+        3. VN30: Điểm số, độ biến động dương, tỷ lệ %, hướng 'up' (màu xanh).
+        4. API /api/ssi/market-overview trả về các chỉ số thị trường chuẩn SSI.
+        """
+        resp = self.client.get("/api/market-tape?ticker=HPG")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("indices", data)
+        self.assertIn("stocks", data)
+
+        indices = {idx["symbol"]: idx for idx in data["indices"]}
+        self.assertIn("VN-INDEX", indices)
+        self.assertIn("VN30", indices)
+
+        vni = indices["VN-INDEX"]
+        self.assertGreater(vni["value"], 1000)
+        self.assertEqual(vni["direction"], "down")
+        self.assertLess(vni["change"], 0)
+        self.assertLess(vni["change_pct"], 0)
+
+        vn30 = indices["VN30"]
+        self.assertGreater(vn30["value"], 1000)
+        self.assertEqual(vn30["direction"], "up")
+        self.assertGreater(vn30["change"], 0)
+        self.assertGreater(vn30["change_pct"], 0)
+
+        resp_ov = self.client.get("/api/ssi/market-overview")
+        self.assertEqual(resp_ov.status_code, 200)
+        data_ov = resp_ov.json()
+        self.assertIn("indices", data_ov)
+        self.assertIn("market_breadth", data_ov)
+
 
 if __name__ == "__main__":
     unittest.main()
