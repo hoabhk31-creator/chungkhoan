@@ -1334,6 +1334,28 @@ class TestIERM(unittest.TestCase):
         self.assertIn("indices", data_ov)
         self.assertIn("market_breadth", data_ov)
 
+    def test_exact_market_price_synchronization_in_valuation(self):
+        """
+        Kiểm tra đồng bộ chính xác thị giá live giữa Header Hero và Thẻ Định giá Blended (Tab 5):
+        1. Giá 20.950 VND không bị làm tròn sai số thành 21.000 đ.
+        2. get_financial_data_bundle bảo toàn nguyên vẹn thị giá live.
+        3. Endpoint /api/valuation/multi-model và /api/valuation/dcf bảo toàn và đồng bộ chính xác.
+        """
+        from financial_data import get_financial_data_bundle
+        test_price = 20950.0
+        bundle = get_financial_data_bundle("HPG", current_market_price=test_price)
+        self.assertEqual(bundle["valuation"]["current_market_price"], test_price, "Giá trong bundle valuation phải bằng chính xác thị giá live 20.950 VND")
+
+        resp = self.client.post("/api/valuation/multi-model", json={"ticker": "HPG", "current_market_price": test_price})
+        self.assertEqual(resp.status_code, 200)
+        val_data = resp.json()
+        self.assertEqual(val_data["current_market_price"], test_price, "Giá trong multi-model valuation endpoint phải khớp 20.950 VND")
+
+        resp_dcf = self.client.post("/api/valuation/dcf", json={"ticker": "HPG", "current_market_price": test_price})
+        self.assertEqual(resp_dcf.status_code, 200)
+        dcf_data = resp_dcf.json()
+        self.assertEqual(dcf_data["current_market_price"], test_price, "Giá trong dcf valuation endpoint phải khớp 20.950 VND")
+
 
 if __name__ == "__main__":
     unittest.main()

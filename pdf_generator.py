@@ -198,18 +198,22 @@ def generate_ctck_report_pdf(
     pdf.set_xy(150, box_y + 3)
     pdf.set_font(pdf.font_family_bold, "B", 8)
     pdf.set_text_color(100, 116, 139)
-    pdf.cell(42, 5, "ĐÃ VƯỢT (%)" if upside_pct < 0 else "BIÊN KỲ VỌNG (%)", new_x=XPos.LEFT, new_y=YPos.NEXT, align="L")
+    is_exceeded = (upside_pct is not None and upside_pct < 0)
+    pdf.cell(42, 5, "ĐÃ VƯỢT (%)" if is_exceeded else "BIÊN KỲ VỌNG (%)", new_x=XPos.LEFT, new_y=YPos.NEXT, align="L")
     pdf.set_font(pdf.font_family_bold, "B", 13)
     
-    if upside_pct > 0:
+    if upside_pct is not None and upside_pct > 0:
         pdf.set_text_color(16, 185, 129)
         pdf.cell(42, 7, f"+{upside_pct:.1f}%", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    elif upside_pct < 0:
+    elif upside_pct is not None and upside_pct < 0:
         pdf.set_text_color(239, 68, 68)
         pdf.cell(42, 7, f"Vượt +{abs(upside_pct):.1f}%", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    else:
+    elif upside_pct is not None:
         pdf.set_text_color(100, 116, 139)
         pdf.cell(42, 7, "0.0%", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    else:
+        pdf.set_text_color(100, 116, 139)
+        pdf.cell(42, 7, "N/A", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
 
     pdf.set_y(box_y + 30)
 
@@ -221,10 +225,12 @@ def generate_ctck_report_pdf(
     pdf.line(14, pdf.get_y(), 196, pdf.get_y())
     pdf.ln(2)
 
-    if upside_pct < 0:
+    if upside_pct is not None and upside_pct < 0:
         up_thesis = f"thị giá hiện tại ({current_price:,.0f} VND) đã vượt mức giá mục tiêu này (+{abs(upside_pct):.1f}%)"
-    else:
+    elif upside_pct is not None:
         up_thesis = f"tương ứng với biên tăng giá kỳ vọng là +{upside_pct:.1f}% so với thị giá hiện tại {current_price:,.0f} VND"
+    else:
+        up_thesis = "đang theo dõi sát diễn biến thị giá và cập nhật định giá mới nhất"
 
     thesis_text = (
         f"{institution} công bố báo cáo phân tích đối với {company_name} ({ticker}) "

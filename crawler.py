@@ -8,7 +8,7 @@ import html
 import time
 import asyncio
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import json
 import urllib.parse
 import httpx
@@ -825,66 +825,6 @@ def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -
         sec_key = "bds_dan_dung"
     elif any(k in sec_lower for k in ["thép", "kim loại"]) or clean_ticker in ["HPG", "HSG", "NKG", "VGS"]:
         sec_key = "thep"
-    elif any(k in sec_lower for k in ["thiết bị điện", "điện tử", "dây cáp", "cáp điện"]) or clean_ticker in ["GEX", "GEE", "PAC", "RAL", "TYA", "DQC", "PHN", "VTB", "TBD", "SAM", "TSB"]:
-        sec_key = "thiet_bi_dien"
-    elif any(k in sec_lower for k in ["dầu khí", "xăng dầu", "khai thác dầu", "lọc dầu"]) or clean_ticker in ["GAS", "PVD", "PVS", "BSR", "PLX", "OIL", "PVT", "PGS", "PVB", "PVC", "CNG"]:
-        sec_key = "dau_khi"
-    elif any(k in sec_lower for k in ["hóa chất", "phân bón", "phốt pho", "đạm"]) or clean_ticker in ["DGC", "DCM", "DPM", "CSV", "BFC", "LAS", "DDV", "HVT", "SFG"]:
-        sec_key = "hoa_chat_phan_bon"
-    elif any(k in sec_lower for k in ["phát điện", "thủy điện", "nhiệt điện", "năng lượng tái tạo", "cấp nước", "nước sạch"]) or clean_ticker in ["POW", "PGV", "REE", "PC1", "HDG", "GEG", "PPC", "HND", "VSH", "NT2", "BWE", "TDM"]:
-        sec_key = "tien_ich_dien_nuoc"
-    elif any(k in sec_lower for k in ["khai khoáng", "khoáng sản", "vonfram", "quặng", "than đá"]) or clean_ticker in ["MSR", "KSV", "NBC", "TVD", "TDN", "TC6", "DHA", "NNC", "BMC", "KSB"]:
-        sec_key = "khai_khoang"
-    elif any(k in sec_lower for k in ["bán lẻ", "tiêu dùng", "sữa", "phân phối", "thế giới số", "ict", "thương mại"]) or clean_ticker in ["MWG", "FRT", "PNJ", "DGW", "MSN", "VNM", "PET"]:
-        sec_key = "ban_le"
-    elif any(k in sec_lower for k in ["công nghệ", "viễn thông", "phần mềm"]) or clean_ticker in ["FPT", "CMG", "ELC", "CTR", "FOX"]:
-        sec_key = "cong_nghe"
-    elif any(k in sec_lower for k in ["cảng biển", "logistics", "vận tải"]) or clean_ticker in ["GMD", "HAH", "VOS"]:
-        sec_key = "cang_bien"
-    elif any(k in sec_lower for k in ["thủy sản", "nông nghiệp", "chăn nuôi"]) or clean_ticker in ["VHC", "ANV", "DBC", "BAF", "HAG"]:
-        sec_key = "nong_nghiep_thuy_san"
-    elif any(k in sec_lower for k in ["xây dựng", "hạ tầng", "thi công", "giao thông", "đầu tư công"]) or clean_ticker in ["VCG", "HHV", "C4G", "LCG", "CTD", "HBC"]:
-        sec_key = "xay_dung_ha_tang"
-
-    pool = SECTOR_CATALYSTS_AND_RISKS.get(sec_key, {}).get("catalysts", [])
-    if not pool:
-        return [
-            f"Vị thế kinh doanh đầu ngành của {clean_ticker} trong chu kỳ kinh tế mới.",
-            "Tăng trưởng doanh thu và lợi nhuận kỳ vọng duy trì mức 2 chữ số.",
-            "Tình hình tài chính an toàn với dòng tiền hoạt động ổn định."
-        ]
-
-    # Chọn 4 luận điểm chi tiết xoay vòng theo index
-    n = len(pool)
-    if n <= 4:
-        return pool
-    return [
-        pool[index % n],
-        pool[(index + 1) % n],
-        pool[(index + 2) % n],
-        pool[(index + 3) % n]
-    ]
-
-
-def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -> List[str]:
-    """
-    Trả về danh sách 3 rủi ro trọng yếu chuẩn xác theo ngành nghề của doanh nghiệp.
-    """
-    clean_ticker = (ticker or "CP").upper().strip()
-    sec_lower = (sector or "").lower()
-    name_lower = (comp_name or "").lower()
-
-    sec_key = "doanh_nghiep_chung"
-    if any(k in sec_lower or k in name_lower for k in ["ngân hàng", "bank"]) or clean_ticker in ["ACB", "VCB", "MBB", "TCB", "VPB", "CTG", "BID", "HDB", "STB", "TPB", "SHB", "VIB", "LPB"]:
-        sec_key = "ngan_hang"
-    elif any(k in sec_lower or k in name_lower for k in ["chứng khoán", "môi giới"]) or clean_ticker in ["SSI", "HCM", "VCI", "VND", "VIX", "FTS", "BSI", "CTS", "MBS", "SHS"]:
-        sec_key = "chung_khoan"
-    elif any(k in sec_lower or k in name_lower for k in ["kcn", "khu công nghiệp"]) or clean_ticker in ["LHG", "KBC", "IDC", "SZC", "BCM", "VGC", "NTC", "TIP", "D2D"]:
-        sec_key = "bds_kcn"
-    elif any(k in sec_lower or k in name_lower for k in ["bất động sản", "địa ốc"]) or clean_ticker in ["VHM", "NVL", "PDR", "DIG", "DXG", "KDH", "NLG", "TCH", "CEO"]:
-        sec_key = "bds_dan_dung"
-    elif any(k in sec_lower for k in ["thép", "kim loại"]) or clean_ticker in ["HPG", "HSG", "NKG", "VGS"]:
-        sec_key = "thep"
     elif any(k in sec_lower for k in ["khai khoáng", "khoáng sản", "vonfram", "quặng", "than đá"]) or clean_ticker in ["MSR", "KSV", "NBC", "TVD", "TDN", "TC6", "DHA", "NNC", "BMC", "KSB"]:
         sec_key = "khai_khoang"
     elif any(k in sec_lower for k in ["bán lẻ", "tiêu dùng", "sữa", "phân phối", "thế giới số", "ict", "thương mại"]) or clean_ticker in ["MWG", "FRT", "PNJ", "DGW", "MSN", "VNM", "PET"]:
@@ -991,6 +931,8 @@ def extract_detailed_catalysts_and_risks(
     """
     clean_ticker = (ticker or "CP").upper().strip()
     text_to_search = content if content else title
+    # Nối các dòng ngắt giữa câu (soft wrap) thành câu liền mạch
+    clean_text = re.sub(r'(?<![\.\?!;:])\n+', ' ', text_to_search)
 
     extracted_cats: List[str] = []
     extracted_risks: List[str] = []
@@ -998,7 +940,7 @@ def extract_detailed_catalysts_and_risks(
     # 1. Tách các câu thực tế không bị lỗi số hàng nghìn (ví dụ 7.273 tỷ không bị cắt vụn)
     raw_sentences = re.split(
         r'(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n+',
-        text_to_search
+        clean_text
     )
 
     for s in raw_sentences:
@@ -1034,6 +976,18 @@ def extract_detailed_catalysts_and_risks(
         for sc in sector_cats:
             if sc not in extracted_cats:
                 extracted_cats.append(sc)
+
+    # 4. Đảm bảo chuẩn hóa ngành nghề chuyên biệt (ví dụ Ngân hàng tuyệt đối không lẫn từ cấm sản xuất)
+    is_banking = any(k in (sector or "").lower() or k in (comp_name or "").lower() for k in ["ngân hàng", "bank"]) or clean_ticker in ["ACB", "VCB", "MBB", "TCB", "VPB", "CTG", "BID", "HDB", "STB", "TPB", "SHB", "VIB", "LPB"]
+    if is_banking:
+        mfg_words = ["công suất", "chuỗi cung ứng", "nguyên vật liệu", "xuất khẩu"]
+        extracted_cats = [c for c in extracted_cats if not any(w in c.lower() for w in mfg_words)]
+        extracted_risks = [r for r in extracted_risks if not any(w in r.lower() for w in mfg_words)]
+        banking_terms = ["tín dụng", "nim", "casa", "car", "nợ xấu", "lãi", "tài chính", "dự phòng"]
+        combined = " ".join(extracted_cats[:5] + extracted_risks[:3]).lower()
+        if not any(term in combined for term in banking_terms):
+            sec_cats = get_sector_catalysts(clean_ticker, sector, comp_name, index=index)
+            extracted_cats = sec_cats[:2] + extracted_cats
 
     return extracted_cats[:5], extracted_risks[:3]
 
@@ -1387,6 +1341,125 @@ def generate_sector_institutional_reports(
             source_url=t["url"]
         ))
     return reports
+
+
+def parse_date_to_timestamp(d_str: str) -> float:
+    try:
+        p = d_str.strip().split('/')
+        if len(p) == 3:
+            return datetime(int(p[2]), int(p[1]), int(p[0])).timestamp()
+    except Exception:
+        pass
+    return 0.0
+
+
+def normalize_institution_name(name: str) -> str:
+    cleaned = re.sub(r'\s+(Research|Securities|Chứng khoán|CTS)\b', '', name, flags=re.IGNORECASE).strip().upper()
+    return cleaned
+
+
+_SYNCED_MATRIX_REPORTS_CACHE: Dict[str, Tuple[float, List[ReportItem]]] = {}
+
+
+async def get_synchronized_matrix_reports(
+    ticker: str,
+    base_reports: Optional[List[ReportItem]] = None,
+    comp_name: str = "",
+    sector_name: str = "",
+    market_p: float = 25000.0,
+    max_reports: int = 20
+) -> List[ReportItem]:
+    """
+    Đồng bộ hóa danh sách báo cáo phân tích đa tổ chức cho Bảng Ma Trận Ngang với dữ liệu mới nhất
+    từ các CTCK và cổng Vietstock eDocs (áp dụng thống nhất toàn webapp).
+    - Tự động cập nhật báo cáo mới nhất của từng CTCK.
+    - Tự động bổ sung các CTCK mới có bài viết phân tích về mã đang xem.
+    - Giữ lại các báo cáo cơ sở chưa có báo cáo mới hơn.
+    """
+    clean_ticker = ticker.upper().strip()
+    cache_key = f"{clean_ticker}_{round(market_p, -2)}"
+    now = time.time()
+    if cache_key in _SYNCED_MATRIX_REPORTS_CACHE:
+        cached_time, cached_items = _SYNCED_MATRIX_REPORTS_CACHE[cache_key]
+        if (now - cached_time) < 180.0 and cached_items:
+            return cached_items
+
+    inst_map: Dict[str, ReportItem] = {}
+
+    # 1. Nạp danh sách báo cáo cơ sở (nếu có từ preset)
+    if base_reports:
+        for r in base_reports:
+            key = normalize_institution_name(r.institution)
+            inst_map[key] = r
+
+    # 2. Truy xuất danh sách báo cáo phân tích mới nhất (đồng bộ trực tiếp với dữ liệu trong Tổng quan)
+    try:
+        ind_res = await fetch_industry_reports(ticker=clean_ticker, keyword=clean_ticker.lower())
+        raw_list = ind_res.get("reports", [])
+        for raw in raw_list:
+            source = raw.get("source") or "CTCK"
+            key = normalize_institution_name(source)
+            item = {
+                "Title": raw.get("title"),
+                "Content": raw.get("full_content") or raw.get("snippet"),
+                "SourceName": source,
+                "ReleaseDate": raw.get("date"),
+                "Url": raw.get("file_url"),
+                "ReportTypeName": raw.get("report_type_name")
+            }
+            parsed = parse_edocs_item_to_report(item, clean_ticker, comp_name, sector_name, market_p)
+            if not parsed:
+                continue
+
+            parsed_ts = parse_date_to_timestamp(parsed.report_date)
+            if key not in inst_map:
+                inst_map[key] = parsed
+            else:
+                curr_ts = parse_date_to_timestamp(inst_map[key].report_date)
+                # Cập nhật nếu báo cáo mới hơn hoặc báo cáo hiện tại chưa có giá mục tiêu
+                if parsed_ts > curr_ts or (inst_map[key].target_price <= 0 and parsed.target_price > 0):
+                    inst_map[key] = parsed
+    except Exception as err:
+        print(f"Error syncing matrix reports for {clean_ticker}: {err}")
+
+    merged = list(inst_map.values())
+    if not merged and not base_reports:
+        return []
+
+    # 3. Sắp xếp theo ngày phát hành mới nhất đứng trước
+    merged.sort(key=lambda x: parse_date_to_timestamp(x.report_date), reverse=True)
+    res = merged[:max_reports]
+
+    # Bổ sung các luận điểm tăng trưởng (Catalysts) mà AI tự học được vào các cột CTCK
+    try:
+        from ai_learning_engine import get_learned_ticker_catalysts
+        ai_knowledge = get_learned_ticker_catalysts(clean_ticker)
+        if ai_knowledge and ai_knowledge.get("catalysts"):
+            learned_cats = ai_knowledge["catalysts"]
+            learned_risks = ai_knowledge.get("risks", [])
+            for idx, r in enumerate(res):
+                r_cats = list(getattr(r, "key_catalysts", []) or [])
+                for c_idx, c in enumerate(learned_cats):
+                    if len(r_cats) >= 4:
+                        break
+                    if not any(c.lower() in ec.lower() or ec.lower() in c.lower() for ec in r_cats):
+                        if (idx + c_idx) % 2 == 0 or len(r_cats) < 3:
+                            r_cats.append(c)
+                r.key_catalysts = r_cats
+                if learned_risks:
+                    r_risks = list(getattr(r, "key_risks", []) or [])
+                    if len(r_risks) < 3:
+                        for rk in learned_risks:
+                            if len(r_risks) >= 3:
+                                break
+                            if not any(rk.lower() in er.lower() for er in r_risks):
+                                r_risks.append(rk)
+                    r.key_risks = r_risks
+    except Exception:
+        pass
+
+    _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, res)
+    return res
 
 
 async def search_institutional_reports(ticker: str, sector: str = "") -> List[Dict[str, Any]]:

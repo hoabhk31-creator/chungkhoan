@@ -2698,7 +2698,7 @@ def get_financial_data_bundle(
 
     valuation_result = ValuationModelResult(
         ticker=clean_ticker,
-        current_market_price=round(ref_price, -2),
+        current_market_price=float(ref_price),
         pe_fair_value=multi_val["pe_fair_value"],
         pb_fair_value=multi_val["pb_fair_value"],
         dcf_fair_value=multi_val["dcf_fair_value"],

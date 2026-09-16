@@ -18,6 +18,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 TEMPLATES_FILE = os.path.join(DATA_DIR, "ai_learning_templates.json")
 CONFIG_FILE = os.path.join(DATA_DIR, "ai_learning_config.json")
 HISTORY_FILE = os.path.join(DATA_DIR, "ai_learning_history.json")
+AI_LEARNED_CATALYSTS_FILE = os.path.join(DATA_DIR, "ai_learned_catalysts.json")
 
 
 # -------------------------------------------------------------
@@ -522,6 +523,184 @@ def extract_advanced_knowledge(
 
 
 # -------------------------------------------------------------
+# 3.5. AI LEARNED CATALYSTS & MULTI-INSTITUTIONAL KNOWLEDGE STORE
+# -------------------------------------------------------------
+
+def get_learned_ticker_catalysts(ticker: str) -> Dict[str, Any]:
+    """Truy xuất danh sách Catalysts, Luận điểm và Rủi ro mà AI đã tích lũy theo mã."""
+    if not ticker:
+        return {}
+    clean_ticker = ticker.upper().strip()
+    if not os.path.exists(AI_LEARNED_CATALYSTS_FILE):
+        return {}
+    try:
+        with open(AI_LEARNED_CATALYSTS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get(clean_ticker, {})
+    except Exception as e:
+        print(f"[AI Learning] Lỗi đọc kho catalysts: {e}")
+        return {}
+
+
+def save_learned_ticker_catalysts(
+    ticker: str,
+    catalysts: List[str],
+    risks: Optional[List[str]] = None,
+    theses: Optional[List[str]] = None,
+    source: str = "",
+    title: str = ""
+) -> Dict[str, Any]:
+    """
+    Lưu trữ bền vững các Catalysts và Rủi ro mà AI trích xuất được từ báo cáo phân tích.
+    Tự động khử trùng lặp và duy trì danh sách cập nhật mới nhất.
+    """
+    if not ticker:
+        return {}
+    clean_ticker = ticker.upper().strip()
+    data: Dict[str, Any] = {}
+    if os.path.exists(AI_LEARNED_CATALYSTS_FILE):
+        try:
+            with open(AI_LEARNED_CATALYSTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"[AI Learning] Lỗi đọc store catalysts để ghi: {e}")
+            data = {}
+
+    ticker_entry = data.get(clean_ticker, {
+        "ticker": clean_ticker,
+        "catalysts": [],
+        "risks": [],
+        "theses": [],
+        "history": [],
+        "last_updated": None
+    })
+
+    # 1. Khử trùng lặp & chèn Catalysts mới lên đầu
+    curr_cats = list(ticker_entry.get("catalysts", []))
+    for c in catalysts or []:
+        c_clean = str(c).strip("-•* 12345. ")
+        if len(c_clean) > 10 and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
+            curr_cats.insert(0, c_clean)
+    ticker_entry["catalysts"] = curr_cats[:15]  # Giữ tối đa 15 catalysts chất lượng cao
+
+    # 2. Khử trùng lặp & chèn Risks mới
+    curr_risks = list(ticker_entry.get("risks", []))
+    for r in risks or []:
+        r_clean = str(r).strip("-•* 12345. ")
+        if len(r_clean) > 10 and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
+            curr_risks.insert(0, r_clean)
+    ticker_entry["risks"] = curr_risks[:10]
+
+    # 3. Luận điểm đầu tư (Theses)
+    curr_theses = list(ticker_entry.get("theses", []))
+    for th in theses or []:
+        th_clean = str(th).strip("-•* 12345. ")
+        if len(th_clean) > 10 and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
+            curr_theses.insert(0, th_clean)
+    ticker_entry["theses"] = curr_theses[:8]
+
+    ticker_entry["last_updated"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # 4. Nhật ký nguồn học
+    if source or title:
+        hist = list(ticker_entry.get("history", []))
+        hist.insert(0, {
+            "source": source or "AI Crawler",
+            "title": (title or "")[:120],
+            "time": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "cats_added": len(catalysts or []),
+            "risks_added": len(risks or [])
+        })
+        ticker_entry["history"] = hist[:20]
+
+    data[clean_ticker] = ticker_entry
+
+    try:
+        os.makedirs(os.path.dirname(AI_LEARNED_CATALYSTS_FILE), exist_ok=True)
+        with open(AI_LEARNED_CATALYSTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[AI Learning] Lỗi ghi store catalysts: {e}")
+
+    return ticker_entry
+
+
+def apply_learned_catalysts_to_report(report: Any) -> Any:
+    """
+    Bơm trực tiếp các luận điểm tăng trưởng (Catalysts) và rủi ro (Risks) mà AI đã học được
+    vào FullMatrixReport của mã cổ phiếu tương ứng (Tab 1 - Báo cáo đa tổ chức).
+    - Cập nhật từng cột CTCK trong matrix_table
+    - Cập nhật cột Đồng thuận (consensus_summary.consensual_catalysts & consensual_risks)
+    - Cập nhật causality_analysis
+    """
+    if not report or not hasattr(report, "ticker"):
+        return report
+
+    ticker = getattr(report, "ticker", "").upper().strip()
+    learned = get_learned_ticker_catalysts(ticker)
+    if not learned:
+        return report
+
+    learned_cats = learned.get("catalysts", [])
+    learned_risks = learned.get("risks", [])
+
+    if not learned_cats and not learned_risks:
+        return report
+
+    # 1. Cập nhật vào consensus_summary.consensual_catalysts & consensual_risks
+    if hasattr(report, "consensus_summary") and report.consensus_summary:
+        cs = report.consensus_summary
+        existing_cs_cats = list(getattr(cs, "consensual_catalysts", []) or [])
+        for cat in learned_cats:
+            if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in existing_cs_cats):
+                existing_cs_cats.insert(0, cat)
+        cs.consensual_catalysts = existing_cs_cats[:5]
+
+        existing_cs_risks = list(getattr(cs, "consensual_risks", []) or [])
+        for rk in learned_risks:
+            if not any(rk.lower() in er.lower() or er.lower() in rk.lower() for er in existing_cs_risks):
+                existing_cs_risks.insert(0, rk)
+        cs.consensual_risks = existing_cs_risks[:4]
+
+    # 2. Phân bổ / bổ sung vào các cột CTCK trong matrix_table
+    if hasattr(report, "matrix_table") and report.matrix_table:
+        for idx, r in enumerate(report.matrix_table):
+            r_cats = list(getattr(r, "key_catalysts", []) or [])
+            for c_idx, cat in enumerate(learned_cats):
+                if len(r_cats) >= 4:
+                    break
+                if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in r_cats):
+                    if (idx + c_idx) % 2 == 0 or len(r_cats) < 3:
+                        r_cats.append(cat)
+            r.key_catalysts = r_cats
+
+            r_risks = list(getattr(r, "key_risks", []) or [])
+            if len(r_risks) < 3 and learned_risks:
+                for rk in learned_risks:
+                    if len(r_risks) >= 3:
+                        break
+                    if not any(rk.lower() in er.lower() for er in r_risks):
+                        r_risks.append(rk)
+                r.key_risks = r_risks
+
+    # 3. Cập nhật vào causality_analysis (chuỗi nguyên nhân - kết quả)
+    if hasattr(report, "causality_analysis") and report.causality_analysis:
+        causality = list(report.causality_analysis)
+        if learned_cats and len(causality) > 0:
+            top_cat = learned_cats[0]
+            for c_item in causality:
+                cat_name = getattr(c_item, "category", "")
+                if "Triển vọng" in cat_name or "Tương lai" in cat_name or "Động lực" in cat_name:
+                    curr_rc = getattr(c_item, "root_causes", "")
+                    if top_cat[:25].lower() not in curr_rc.lower():
+                        c_item.root_causes = f"{curr_rc}; Động cơ AI tự học: {top_cat}"
+                    break
+        report.causality_analysis = causality
+
+    return report
+
+
+# -------------------------------------------------------------
 # 4. AUTONOMOUS LEARNING SCHEDULER & WEB CRAWLER
 # -------------------------------------------------------------
 
@@ -683,6 +862,7 @@ class AutonomousLearningScheduler:
 
         learned_count = 0
         new_catalysts_count = 0
+        updated_tickers: List[str] = []
 
         configured_watchlist = self.config.get("watchlist", [])
         if target_tickers is not None:
@@ -784,6 +964,19 @@ class AutonomousLearningScheduler:
                         current_market_price=market_p
                     )
 
+                    # Tự động lưu Catalysts & Risks vào kho AI
+                    if len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
+                        save_learned_ticker_catalysts(
+                            ticker=clean_ticker,
+                            catalysts=knowledge.get("key_catalysts", []),
+                            risks=knowledge.get("key_risks", []),
+                            theses=knowledge.get("investment_theses", []),
+                            source=source,
+                            title=title
+                        )
+                        if clean_ticker not in updated_tickers:
+                            updated_tickers.append(clean_ticker)
+
                     log_entry = {
                         "id": f"log-{uuid.uuid4().hex[:8]}",
                         "ticker": clean_ticker,
@@ -844,6 +1037,19 @@ class AutonomousLearningScheduler:
                             current_market_price=market_p
                         )
 
+                        # Tự động lưu Catalysts & Risks vào kho AI
+                        if len(clean_ticker) == 3:
+                            save_learned_ticker_catalysts(
+                                ticker=clean_ticker,
+                                catalysts=knowledge.get("key_catalysts", []),
+                                risks=knowledge.get("key_risks", []),
+                                theses=knowledge.get("investment_theses", []),
+                                source=source,
+                                title=title
+                            )
+                            if clean_ticker not in updated_tickers:
+                                updated_tickers.append(clean_ticker)
+
                         log_entry = {
                             "id": f"log-{uuid.uuid4().hex[:8]}",
                             "ticker": clean_ticker,
@@ -880,6 +1086,7 @@ class AutonomousLearningScheduler:
                 "status": "SUCCESS",
                 "reports_learned": learned_count,
                 "catalysts_extracted": new_catalysts_count,
+                "updated_tickers": updated_tickers,
                 "scope": "TOÀN BỘ THỊ TRƯỜNG" if not tickers else f"Watchlist ({len(tickers)} mã: {', '.join(tickers)})",
                 "last_run": now_str,
                 "next_run": self.config.get("next_run")
