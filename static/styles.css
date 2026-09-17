@@ -915,10 +915,10 @@ html:not(.dark) #tab-overview table tbody tr:hover td {
 .ca-tooltip-trigger {
     position: relative;
     cursor: pointer;
-    z-index: 40;
+    z-index: 20;
 }
 .ca-tooltip-trigger:hover {
-    z-index: 50;
+    z-index: 25;
 }
 .ca-tooltip-popup {
     display: none;
@@ -926,7 +926,7 @@ html:not(.dark) #tab-overview table tbody tr:hover td {
     bottom: calc(100% + 10px);
     top: auto;
     left: 0;
-    z-index: 9999;
+    z-index: 35;
     width: 380px;
     max-width: calc(100vw - 32px);
     background: rgba(10, 15, 29, 0.98);
@@ -961,4 +961,38 @@ html:not(.dark) #tab-overview table tbody tr:hover td {
 .ca-tooltip-popup.is-pinned {
     display: block !important;
 }
+
+/* ========================================================================= */
+/* FIX TRỒNG LẤN: KHUNG VÀNG CỐ ĐỊNH (HEADER + MASTER TABS) - CUỘN DỮ LIỆU PHÍA DƯỚI */
+/* ========================================================================= */
+:root {
+    --header-height: 56px;
+}
+
+#main-terminal-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: #020617 !important; /* solid slate-950 không cho lọt chữ */
+    border-bottom: 1px solid #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+html:not(.dark) #main-terminal-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#master-tabs-nav {
+    position: sticky;
+    top: var(--header-height, 56px);
+    z-index: 45;
+    background-color: #020617 !important; /* solid slate-950 không cho lọt chữ */
+    border-bottom: 1px solid #1e293b;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+html:not(.dark) #master-tabs-nav {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
 

@@ -12091,5 +12091,35 @@ document.addEventListener("click", function(e) {
     }
 });
 
+// -------------------------------------------------------------
+// DYNAMIC STICKY HEADER & MASTER TABS HEIGHT SYNCHRONIZATION
+// -------------------------------------------------------------
+function syncStickyHeaderHeight() {
+    const header = document.getElementById("main-terminal-header");
+    if (header) {
+        const h = header.getBoundingClientRect().height;
+        if (h > 0) {
+            document.documentElement.style.setProperty("--header-height", `${Math.round(h)}px`);
+        }
+    }
+}
+
+window.addEventListener("resize", syncStickyHeaderHeight);
+window.addEventListener("load", syncStickyHeaderHeight);
+document.addEventListener("DOMContentLoaded", syncStickyHeaderHeight);
+
+// Tự động thu gọn popover khi người dùng cuộn trang để không bị trôi
+window.addEventListener("scroll", () => {
+    const popup = document.querySelector(".ca-tooltip-popup.is-pinned");
+    if (popup) {
+        popup.classList.remove("is-pinned");
+    }
+}, { passive: true });
+
+// Đồng bộ chiều cao định kỳ khi nạp xong DOM
+setTimeout(syncStickyHeaderHeight, 100);
+setTimeout(syncStickyHeaderHeight, 600);
+
+
 
 
