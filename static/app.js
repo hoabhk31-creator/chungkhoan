@@ -11846,3 +11846,37 @@ async function exportPeersPdf() {
 }
 
 
+// -------------------------------------------------------------
+// ZALO QR MODAL HANDLER
+// -------------------------------------------------------------
+function openZaloQrModal() {
+    const modal = document.getElementById("modal-zalo-qr");
+    if (modal) {
+        modal.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
+function closeZaloQrModal() {
+    const modal = document.getElementById("modal-zalo-qr");
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+}
+
+// Bấm phím Escape hoặc bấm ra ngoài nền để đóng Modal Zalo QR
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        closeZaloQrModal();
+    }
+});
+
+document.addEventListener("click", (e) => {
+    const modal = document.getElementById("modal-zalo-qr");
+    if (modal && !modal.classList.contains("hidden") && e.target === modal) {
+        closeZaloQrModal();
+    }
+});
+
+
+

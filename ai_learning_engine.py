@@ -1120,11 +1120,11 @@ class AutonomousLearningScheduler:
                             should_run = True
 
                     if should_run:
-                        print(f"[LearningScheduler] Kích hoạt chu kỳ tự động quét & học online...")
+                        print("[LearningScheduler] Kich hoat chu ky tu dong quet & hoc online...")
                         await self.run_learning_cycle()
 
             except Exception as e:
-                print(f"[LearningScheduler] Ngoại lệ vòng lặp nền: {e}")
+                print(f"[LearningScheduler] Ngoai le vong lap nen: {e}")
 
             # Kiểm tra mỗi 5 phút một lần
             await asyncio.sleep(300)
