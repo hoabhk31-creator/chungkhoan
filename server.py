@@ -1710,12 +1710,18 @@ def match_ctck_institution(target_inst: str, candidate_name: str) -> bool:
         return True
 
     aliases = {
-        'vietcap': ['vcsc', 'vietcap', 'banviet', 'vcap'],
-        'ssi': ['ssi', 'ssiresearch'],
-        'hsc': ['hsc'],
-        'vndirect': ['vnd', 'vndirect', 'dstock'],
-        'kbsv': ['kbsv', 'kb', 'kbsec'],
+        'kis': ['kis', 'kisvn', 'kisresearch', 'korea'],
+        'bsc': ['bsc', 'bidv', 'bscresearch'],
         'vcbs': ['vcbs', 'vietcombank'],
+        'evs': ['evs', 'everest'],
+        'vpx': ['vpx', 'vpbs', 'vps', 'vpbank', 'vpbanksecurities'],
+        'mbs': ['mbs', 'mbke', 'mbresearch', 'mbsecurities'],
+        'fpts': ['fpts', 'fpt'],
+        'ssi': ['ssi', 'ssiresearch'],
+        'hsc': ['hsc', 'hcm'],
+        'vndirect': ['vnd', 'vndirect', 'dstock'],
+        'vietcap': ['vcsc', 'vietcap', 'banviet', 'vcap'],
+        'kbsv': ['kbsv', 'kb', 'kbsec'],
         'dsc': ['dsc'],
         'mas': ['mas', 'mirae', 'miraeasset'],
         'bvs': ['bvs', 'bvsc', 'baoviet'],
@@ -1723,9 +1729,7 @@ def match_ctck_institution(target_inst: str, candidate_name: str) -> bool:
         'tps': ['tps', 'tienphong'],
         'vds': ['vds', 'vdsc', 'rongviet'],
         'kafi': ['kafi'],
-        'vpx': ['vpx', 'vpbs', 'vps'],
         'ssv': ['ssv', 'shinhan'],
-        'bsc': ['bsc', 'bidv'],
         'vietinbank': ['cts', 'vietin', 'vietinbank', 'vbse'],
         'nhsv': ['nhsv', 'namhae'],
         'ysvn': ['ysvn', 'yuanta'],
@@ -1733,19 +1737,34 @@ def match_ctck_institution(target_inst: str, candidate_name: str) -> bool:
         'beta': ['beta'],
         'bmsc': ['bmsc', 'baominh'],
         'csi': ['csi', 'kienthiet'],
-        'acbs': ['acbs', 'acb']
+        'acbs': ['acbs', 'acb'],
+        'tvsi': ['tvsi', 'tanviet'],
+        'shs': ['shs', 'saigonhanoi'],
+        'phsv': ['phsv', 'phuhung'],
+        'abs': ['abs', 'anbinh'],
+        'pinetree': ['pinetree', 'pine'],
+        'vics': ['vics', 'thuongmai'],
+        'aps': ['aps', 'chauthaibinhduong'],
+        'agriseco': ['agr', 'agriseco', 'agribank']
     }
 
-    # Kiểm tra theo alias groups
+    # 1. Kiểm tra theo alias groups
     for key, group in aliases.items():
-        t_has = any(w == t_clean or (len(w) >= 4 and w in t_clean) for w in group)
-        c_has = any(w == c_clean or (len(w) >= 4 and w in c_clean) for w in group)
+        t_has = any(w == t_clean or (len(w) >= 3 and (t_clean.startswith(w) or w in t_clean)) for w in group)
+        c_has = any(w == c_clean or (len(w) >= 3 and (c_clean.startswith(w) or w in c_clean)) for w in group)
         if t_has and c_has:
             return True
 
-    # Nếu cả 2 đều đủ dài và chứa nhau
-    if len(t_clean) >= 4 and len(c_clean) >= 4:
-        if t_clean in c_clean or c_clean in t_clean:
+    # 2. Kiểm tra nếu cùng chứa một từ khóa mã CTCK trong aliases
+    for key, group in aliases.items():
+        for w in group:
+            if len(w) >= 3:
+                if (w in t_clean and w in c_clean):
+                    return True
+
+    # 3. Nếu cả 2 đều đủ dài và chứa nhau hoặc bắt đầu bằng nhau
+    if len(t_clean) >= 3 and len(c_clean) >= 3:
+        if t_clean in c_clean or c_clean in t_clean or t_clean.startswith(c_clean) or c_clean.startswith(t_clean):
             return True
 
     return False
@@ -1761,13 +1780,12 @@ async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferr
     """
     candidates = []
 
-    # 1. URL được cung cấp nếu là link .pdf VÀ phải đúng thương hiệu của CTCK đó
+    # 1. URL được cung cấp từ matched_item (đã được khớp CTCK từ trước):
+    # Luôn ưu tiên dùng preferred_url vì file trên eDocs thường chỉ đặt tên theo mã CK/tiêu đề
     if preferred_url and preferred_url.startswith("http") and ".pdf" in preferred_url.lower():
-        url_lower = preferred_url.lower()
-        if match_ctck_institution(clean_inst, url_lower):
-            candidates.append((preferred_url, clean_inst))
+        candidates.append((preferred_url, clean_inst))
 
-    # 2. Quét eDocs từ Vietstock eDocs Portal
+    # 2. Quét eDocs từ Vietstock eDocs Portal nếu cần tìm thêm hoặc preferred_url rỗng
     try:
         edocs_items = await fetch_edocs_reports(clean_ticker, limit=20)
     except Exception as e:
@@ -1850,10 +1868,7 @@ async def get_report_pdf(ticker: str, institution: str):
             matched_item = item
             break
 
-    if not matched_item and full_report.matrix_table:
-        matched_item = full_report.matrix_table[0]
-
-    preferred_url = matched_item.source_url if matched_item else None
+    preferred_url = matched_item.source_url if (matched_item and matched_item.source_url) else None
 
     # Tải file PDF báo cáo phân tích thực tế từ Vietstock eDocs / CTCK
     real_pdf_result = await fetch_real_institution_pdf(clean_ticker, clean_inst, preferred_url)
