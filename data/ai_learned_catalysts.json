@@ -107,6 +107,13 @@
       {
         "source": "VCBS",
         "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VCBS",
+        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
@@ -133,7 +140,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "VNM": {
     "ticker": "VNM",
@@ -164,6 +171,13 @@
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VNM"
     ],
     "history": [
+      {
+        "source": "VDS",
+        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "BSC",
         "title": "VNM: Khuyến nghị MUA với giá mục tiêu 75,700 đồng/cổ phiếu",
@@ -249,7 +263,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:39"
+    "last_updated": "16/09/2026 20:48"
   },
   "MWG": {
     "ticker": "MWG",
@@ -271,12 +285,19 @@
       {
         "source": "VDS",
         "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VDS",
+        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "VTO": {
     "ticker": "VTO",
@@ -297,12 +318,19 @@
       {
         "source": "VDS",
         "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VDS",
+        "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "DCM": {
     "ticker": "DCM",
@@ -324,6 +352,20 @@
       {
         "source": "BSC",
         "title": "DCM: Báo cáo cập nhật 15/09/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "Beta",
+        "title": "DCM: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BSC",
+        "title": "DCM: Báo cáo cập nhật 15/09/2026",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
@@ -336,7 +378,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "VCB": {
     "ticker": "VCB",
@@ -357,12 +399,19 @@
       {
         "source": "BSC",
         "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BSC",
+        "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "VSC": {
     "ticker": "VSC",
@@ -383,12 +432,19 @@
       {
         "source": "SHS",
         "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SHS",
+        "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "PHR": {
     "ticker": "PHR",
@@ -409,12 +465,19 @@
       {
         "source": "MAS",
         "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "MAS",
+        "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "NTP": {
     "ticker": "NTP",
@@ -435,12 +498,19 @@
       {
         "source": "KBSV",
         "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "KBSV",
+        "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "BWE": {
     "ticker": "BWE",
@@ -461,12 +531,19 @@
       {
         "source": "KIS",
         "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "KIS",
+        "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "VIX": {
     "ticker": "VIX",
@@ -487,12 +564,19 @@
       {
         "source": "TCBS",
         "title": "VIX: Báo cáo cập nhật 14/09/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "TCBS",
+        "title": "VIX: Báo cáo cập nhật 14/09/2026",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "PVD": {
     "ticker": "PVD",
@@ -513,12 +597,19 @@
       {
         "source": "BSC",
         "title": "PVD: Báo cáo cập nhật 14/09/2026",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BSC",
+        "title": "PVD: Báo cáo cập nhật 14/09/2026",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "FPT": {
     "ticker": "FPT",
@@ -539,12 +630,19 @@
       {
         "source": "SSV",
         "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "HVN": {
     "ticker": "HVN",
@@ -565,12 +663,19 @@
       {
         "source": "FPTS",
         "title": "HVN: Khuyến nghị MUA với giá mục tiêu 33,100 đồng/cổ phiếu",
+        "time": "16/09/2026 20:48",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "FPTS",
+        "title": "HVN: Khuyến nghị MUA với giá mục tiêu 33,100 đồng/cổ phiếu",
         "time": "16/09/2026 20:34",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:34"
+    "last_updated": "16/09/2026 20:48"
   },
   "TCH": {
     "ticker": "TCH",
