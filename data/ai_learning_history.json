@@ -1,5 +1,362 @@
 [
   {
+    "id": "log-ea951dd1",
+    "ticker": "PVD",
+    "title": "PVD: Báo cáo cập nhật 14/09/2026",
+    "institution": "BSC",
+    "learned_at": "17/09/2026 14:34",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Trung hạn, giá thuê giàn kỳ vọng duy trì quanh 90.000 USD/ngày cùng đà mở rộng đội giàn là nền tảng tăng trưởng giai đoạn 2027–2030",
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (PVD)"
+    ]
+  },
+  {
+    "id": "log-f35789e9",
+    "ticker": "VIX",
+    "title": "VIX: Báo cáo cập nhật 14/09/2026",
+    "institution": "TCBS",
+    "learned_at": "17/09/2026 14:34",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VIX)",
+      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VIX)"
+    ]
+  },
+  {
+    "id": "log-a0f8a636",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-8090cf10",
+    "ticker": "BWE",
+    "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "KIS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KIS",
+    "extracted_catalysts_preview": [
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (BWE)",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (BWE)"
+    ]
+  },
+  {
+    "id": "log-911b3bd0",
+    "ticker": "NTP",
+    "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "Công ty chứng khoán KBSV khuyến nghị MUA mã cổ phiếu NTP với giá mục tiêu 73.200 đồng, upside +40,0% so với giá đóng cửa ngày 15/09/2026. KBSV dự phóng sản lượng tiêu thụ của NTP trong năm 2026/2027 lần lượt đạt 150/153 nghìn tấn, tương ứng tăng 12%/2% svck; sản lượng tiêu thụ CAGR đạt 2,3% giai đoạn 2026-2028. Định giá P/E fw 2026F ở mức 9,5 lần, phù hợp với mức dự phóng tăng trưởng LNST 11,6% CAGR giai đoạn 2026-2028. Các dự án triển khai trong năm 2026 đạt gần 1.750 tỷ đồng, tương đương khoảng 24% kế hoạch doanh thu",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (NTP)"
+    ]
+  },
+  {
+    "id": "log-b89e2901",
+    "ticker": "PHR",
+    "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
+    "institution": "MAS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MAS",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (PHR)",
+      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (PHR)"
+    ]
+  },
+  {
+    "id": "log-b7947859",
+    "ticker": "VSC",
+    "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VSC)",
+      "Cổ tức 2026 dự kiến 10% bằng tiền và/hoặc cổ phiếu"
+    ]
+  },
+  {
+    "id": "log-8775dcca",
+    "ticker": "DCM",
+    "title": "DCM: Báo cáo cập nhật 15/09/2026",
+    "institution": "BSC",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Hóa chất & Phân bón (DGC, DCM)",
+    "catalysts_extracted": 2,
+    "theses_extracted": 1,
+    "confidence": 0.8,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới (DCM)",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào (DCM)"
+    ]
+  },
+  {
+    "id": "log-92cb917b",
+    "ticker": "VCB",
+    "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (VCB)",
+      "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp (VCB)"
+    ]
+  },
+  {
+    "id": "log-3f89b1ad",
+    "ticker": "DCM",
+    "title": "DCM: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Hóa chất & Phân bón (DGC, DCM)",
+    "catalysts_extracted": 2,
+    "theses_extracted": 2,
+    "confidence": 0.84,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới (DCM)",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào (DCM)"
+    ]
+  },
+  {
+    "id": "log-01f17659",
+    "ticker": "VTO",
+    "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Kế hoạch mua tàu viễn dương mới 50.000 DWT ngân sách ~56 triệu USD giúp tăng 30-40% công suất đội tàu",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VTO)"
+    ]
+  },
+  {
+    "id": "log-233287bd",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 3,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu (MWG)",
+      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng (MWG)"
+    ]
+  },
+  {
+    "id": "log-ffaf6d13",
+    "ticker": "VNM",
+    "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cửa hàng tự doanh dự kiến mở rộng lên 1.000 điểm cuối năm 2026",
+      "Q2-2026 doanh thu thuần đạt 18.847 tỷ đồng (+12,7% svck), LNST công ty mẹ 3.167 tỷ đồng (+28,0% svck) nhờ mảng xuất khẩu tăng 41,2% svck và giá bột sữa nguyên liệu giảm 20,8% svck"
+    ]
+  },
+  {
+    "id": "log-f89ca490",
+    "ticker": "BÁO CÁO TR",
+    "title": "Báo cáo Trái phiếu Tiền tệ: Tháng 08/2026 - Tỷ giá USD/VND tiếp tục giảm khi áp lực tỷ giá hạ nhiệt",
+    "institution": "Vietcap",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (CP)",
+      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (CP)"
+    ]
+  },
+  {
+    "id": "log-27eb7a92",
+    "ticker": "BÁO CÁO TI",
+    "title": "Báo cáo Tiền tệ - Trái phiếu: Lãi suất biến động thấp khi các yếu tố nội tại dần phát huy tác dụng",
+    "institution": "VNDS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 4,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Giải ngân đầu tư công đến 3/9 đạt 513.3 nghìn tỷ đồng, bằng 50.2% kế hoạch Thủ tướng giao",
+      "Báo cáo Tiền tệ - Trái phiếu: Lãi suất biến động thấp khi các yếu tố nội tại dần phát huy tác dụng"
+    ]
+  },
+  {
+    "id": "log-e51bed7b",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
+    ]
+  },
+  {
+    "id": "log-97fcaa23",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-ed12efd2",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng",
+      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
+    ]
+  },
+  {
+    "id": "log-ff8a4c28",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 26,900 đồng/cổ phiếu",
+    "institution": "DSC",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 3,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / DSC",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-614d62e2",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
+    "id": "log-6cf3e2f0",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "17/09/2026 14:33",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
+    ]
+  },
+  {
     "id": "log-4c27434e",
     "ticker": "PVD",
     "title": "PVD: Báo cáo cập nhật 14/09/2026",
@@ -1340,363 +1697,6 @@
     "extracted_catalysts_preview": [
       "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
       "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn"
-    ]
-  },
-  {
-    "id": "log-e7a4c044",
-    "ticker": "SSI",
-    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "VPX",
-    "learned_at": "17/09/2026 09:42",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VPX",
-    "extracted_catalysts_preview": [
-      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
-    ]
-  },
-  {
-    "id": "log-e2500890",
-    "ticker": "SSI",
-    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-    "institution": "VCBS",
-    "learned_at": "17/09/2026 09:42",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VCBS",
-    "extracted_catalysts_preview": [
-      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
-    ]
-  },
-  {
-    "id": "log-5b2f9e04",
-    "ticker": "HPG",
-    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 26,900 đồng/cổ phiếu",
-    "institution": "DSC",
-    "learned_at": "17/09/2026 09:42",
-    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 3,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / DSC",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
-      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
-    ]
-  },
-  {
-    "id": "log-2d2cd251",
-    "ticker": "HPG",
-    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
-    "institution": "KBSV",
-    "learned_at": "17/09/2026 09:42",
-    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KBSV",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
-      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
-    ]
-  },
-  {
-    "id": "log-d89c560d",
-    "ticker": "HPG",
-    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "17/09/2026 09:42",
-    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)",
-      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)"
-    ]
-  },
-  {
-    "id": "log-b74c98fa",
-    "ticker": "HVN",
-    "title": "HVN: Khuyến nghị MUA với giá mục tiêu 33,100 đồng/cổ phiếu",
-    "institution": "FPTS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / FPTS",
-    "extracted_catalysts_preview": [
-      "Giai đoạn 2027F–2030F, LNST dự phóng phục hồi mạnh với CAGR +36,1%/năm khi giá nhiên liệu hạ nhiệt",
-      "FPTS dự phóng doanh thu thuần năm 2026F của HVN tăng +32,8% YoY nhờ mảng bán hàng/nhiên liệu của SKYPEC tăng 105% và chính sách tăng giá vé"
-    ]
-  },
-  {
-    "id": "log-b8096984",
-    "ticker": "FPT",
-    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
-    "institution": "SSV",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / SSV",
-    "extracted_catalysts_preview": [
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (FPT)",
-      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (FPT)"
-    ]
-  },
-  {
-    "id": "log-0643e9f8",
-    "ticker": "PVD",
-    "title": "PVD: Báo cáo cập nhật 14/09/2026",
-    "institution": "BSC",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Trung hạn, giá thuê giàn kỳ vọng duy trì quanh 90.000 USD/ngày cùng đà mở rộng đội giàn là nền tảng tăng trưởng giai đoạn 2027–2030",
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (PVD)"
-    ]
-  },
-  {
-    "id": "log-16382670",
-    "ticker": "VIX",
-    "title": "VIX: Báo cáo cập nhật 14/09/2026",
-    "institution": "TCBS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / TCBS",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VIX)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VIX)"
-    ]
-  },
-  {
-    "id": "log-6d98da17",
-    "ticker": "SSI",
-    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-    "institution": "VCBS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VCBS",
-    "extracted_catalysts_preview": [
-      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
-    ]
-  },
-  {
-    "id": "log-a800dbd4",
-    "ticker": "BWE",
-    "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "KIS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KIS",
-    "extracted_catalysts_preview": [
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (BWE)",
-      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (BWE)"
-    ]
-  },
-  {
-    "id": "log-fad1b91f",
-    "ticker": "NTP",
-    "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
-    "institution": "KBSV",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KBSV",
-    "extracted_catalysts_preview": [
-      "Công ty chứng khoán KBSV khuyến nghị MUA mã cổ phiếu NTP với giá mục tiêu 73.200 đồng, upside +40,0% so với giá đóng cửa ngày 15/09/2026. KBSV dự phóng sản lượng tiêu thụ của NTP trong năm 2026/2027 lần lượt đạt 150/153 nghìn tấn, tương ứng tăng 12%/2% svck; sản lượng tiêu thụ CAGR đạt 2,3% giai đoạn 2026-2028. Định giá P/E fw 2026F ở mức 9,5 lần, phù hợp với mức dự phóng tăng trưởng LNST 11,6% CAGR giai đoạn 2026-2028. Các dự án triển khai trong năm 2026 đạt gần 1.750 tỷ đồng, tương đương khoảng 24% kế hoạch doanh thu",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (NTP)"
-    ]
-  },
-  {
-    "id": "log-990ce624",
-    "ticker": "PHR",
-    "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
-    "institution": "MAS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / MAS",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (PHR)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (PHR)"
-    ]
-  },
-  {
-    "id": "log-a067aed3",
-    "ticker": "VSC",
-    "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
-    "institution": "SHS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / SHS",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VSC)",
-      "Cổ tức 2026 dự kiến 10% bằng tiền và/hoặc cổ phiếu"
-    ]
-  },
-  {
-    "id": "log-968093e5",
-    "ticker": "DCM",
-    "title": "DCM: Báo cáo cập nhật 15/09/2026",
-    "institution": "BSC",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (DCM)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (DCM)"
-    ]
-  },
-  {
-    "id": "log-61f07b32",
-    "ticker": "VCB",
-    "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
-    "institution": "BSC",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (VCB)",
-      "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp (VCB)"
-    ]
-  },
-  {
-    "id": "log-2510075c",
-    "ticker": "DCM",
-    "title": "DCM: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "Beta",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 3,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Beta",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (DCM)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (DCM)"
-    ]
-  },
-  {
-    "id": "log-027a721f",
-    "ticker": "VTO",
-    "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Kế hoạch mua tàu viễn dương mới 50.000 DWT ngân sách ~56 triệu USD giúp tăng 30-40% công suất đội tàu",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VTO)"
-    ]
-  },
-  {
-    "id": "log-ca7c0621",
-    "ticker": "MWG",
-    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 3,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu (MWG)",
-      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng (MWG)"
-    ]
-  },
-  {
-    "id": "log-30e85794",
-    "ticker": "VNM",
-    "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "16/09/2026 20:48",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Cửa hàng tự doanh dự kiến mở rộng lên 1.000 điểm cuối năm 2026",
-      "Q2-2026 doanh thu thuần đạt 18.847 tỷ đồng (+12,7% svck), LNST công ty mẹ 3.167 tỷ đồng (+28,0% svck) nhờ mảng xuất khẩu tăng 41,2% svck và giá bột sữa nguyên liệu giảm 20,8% svck"
-    ]
-  },
-  {
-    "id": "log-54589527",
-    "ticker": "VNM",
-    "title": "VNM: Khuyến nghị MUA với giá mục tiêu 75,700 đồng/cổ phiếu",
-    "institution": "BSC",
-    "learned_at": "16/09/2026 20:39",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VNM)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VNM)"
     ]
   }
 ]
