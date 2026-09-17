@@ -911,3 +911,54 @@ html:not(.dark) #tab-overview table tbody tr:hover td {
     background-color: #f8fafc;
 }
 
+/* Corporate Action Interactive Hover Tooltip */
+.ca-tooltip-trigger {
+    position: relative;
+    cursor: pointer;
+    z-index: 40;
+}
+.ca-tooltip-trigger:hover {
+    z-index: 50;
+}
+.ca-tooltip-popup {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    top: auto;
+    left: 0;
+    z-index: 9999;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: rgba(10, 15, 29, 0.98);
+    border: 1px solid rgba(245, 158, 11, 0.8);
+    border-radius: 0.75rem;
+    padding: 0.9rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    pointer-events: auto;
+}
+.ca-tooltip-popup::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 14px;
+    background: transparent;
+}
+.ca-tooltip-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 24px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(245, 158, 11, 0.85) transparent transparent transparent;
+}
+.ca-tooltip-trigger:hover .ca-tooltip-popup,
+.ca-tooltip-popup:hover,
+.ca-tooltip-popup.is-pinned {
+    display: block !important;
+}
+

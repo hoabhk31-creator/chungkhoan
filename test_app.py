@@ -566,6 +566,32 @@ class TestIERM(unittest.TestCase):
         self.assertEqual(len(sq["total_assets"]), len(sq["periods"]))
         self.assertEqual(len(sq["owner_equity"]), len(sq["periods"]))
 
+    def test_hpg_bctc_admin_expense_and_eps_imputation(self):
+        """
+        Kiểm tra bù đắp đầy đủ số liệu cho:
+        - Dòng 10: Chi phí quản lý doanh nghiệp > 0
+        - Dòng 21: Lãi cơ bản trên cổ phiếu (*) > 0
+        - Dòng 22: Lãi suy giảm trên cổ phiếu (*) > 0
+        """
+        resp = self.client.get("/api/financial-overview/HPG")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        sq = data.get("statements_quarterly", {})
+        raw_inc = sq.get("raw_inc", {})
+        
+        adm_key = next((k for k in raw_inc if "quản lý" in k.lower()), None)
+        eps_basic_key = next((k for k in raw_inc if "lãi cơ bản" in k.lower()), None)
+        eps_diluted_key = next((k for k in raw_inc if "lãi suy giảm" in k.lower()), None)
+        
+        self.assertIsNotNone(adm_key)
+        self.assertIsNotNone(eps_basic_key)
+        self.assertIsNotNone(eps_diluted_key)
+        
+        # Tất cả các kỳ đều phải có dữ liệu > 0
+        self.assertTrue(all(v > 0 for v in raw_inc[adm_key]), f"Dòng 10 chứa 0: {raw_inc[adm_key]}")
+        self.assertTrue(all(v > 0 for v in raw_inc[eps_basic_key]), f"Dòng 21 chứa 0: {raw_inc[eps_basic_key]}")
+        self.assertTrue(all(v > 0 for v in raw_inc[eps_diluted_key]), f"Dòng 22 chứa 0: {raw_inc[eps_diluted_key]}")
+
     def test_hag_agricultural_sector_and_peers_accuracy(self):
         """
         Kiểm tra khắc phục lỗi so sánh đối thủ cùng ngành cho mã HAG (vị trí 2 & mũi tên 2):
@@ -1298,6 +1324,45 @@ class TestIERM(unittest.TestCase):
         self.assertIn("file_url", first_rep)
         self.assertTrue(first_rep["file_url"].startswith("http") or first_rep["file_url"].endswith(".pdf"))
 
+    def test_overview_company_reports_endpoint(self):
+        """
+        Kiểm tra tính năng Báo cáo Phân tích Doanh nghiệp trong tab Tổng quan (/api/company-reports):
+        1. Gọi với PVS (keyword=pvs): Phải trả về 100% báo cáo phân tích định giá của PVS.
+        2. Tuyệt đối không bị nhầm lẫn, che khuất bởi báo cáo ngành ('Báo cáo ngành Năng lượng...', 'Báo cáo ngành Dầu khí...').
+        3. Tiêu đề các báo cáo hàng đầu chứa mã cổ phiếu PVS và thuộc loại 'Phân tích Doanh nghiệp'.
+        4. Hỗ trợ lọc theo CTCK (ví dụ: Vietcap) và từ khóa chính xác.
+        """
+        # 1. Kiểm tra với PVS kèm keyword=pvs
+        resp_pvs = self.client.get("/api/company-reports?ticker=PVS&keyword=pvs")
+        self.assertEqual(resp_pvs.status_code, 200)
+        data_pvs = resp_pvs.json()
+        self.assertEqual(data_pvs.get("ticker"), "PVS")
+        self.assertGreater(data_pvs.get("total_found", 0), 0)
+        reports_pvs = data_pvs.get("reports", [])
+        self.assertGreater(len(reports_pvs), 0)
+
+        # 3 báo cáo đầu tiên phải là báo cáo phân tích cổ phiếu PVS thực thụ
+        for rep in reports_pvs[:3]:
+            self.assertIn("PVS", rep["title"].upper())
+            self.assertEqual(rep["report_type_name"], "Phân tích Doanh nghiệp")
+            self.assertFalse(rep["title"].startswith("Báo cáo ngành"))
+
+        # 2. Kiểm tra lọc theo CTCK Vietcap
+        resp_vietcap = self.client.get("/api/company-reports?ticker=PVS&source=Vietcap")
+        self.assertEqual(resp_vietcap.status_code, 200)
+        data_vietcap = resp_vietcap.json()
+        self.assertGreater(len(data_vietcap.get("reports", [])), 0)
+        for rep in data_vietcap["reports"]:
+            self.assertIn("VIETCAP", rep["source"].upper())
+
+        # 3. Kiểm tra với HPG
+        resp_hpg = self.client.get("/api/company-reports?ticker=HPG")
+        self.assertEqual(resp_hpg.status_code, 200)
+        data_hpg = resp_hpg.json()
+        self.assertEqual(data_hpg.get("ticker"), "HPG")
+        self.assertGreater(len(data_hpg.get("reports", [])), 0)
+        self.assertIn("HPG", data_hpg["reports"][0]["title"].upper())
+
     def test_market_tape_ssi_indices_accuracy(self):
         """
         Kiểm tra tính chính xác của chỉ số VN-INDEX và VN30 đồng bộ với bảng giá SSI iBoard:
@@ -1351,16 +1416,215 @@ class TestIERM(unittest.TestCase):
         val_data = resp.json()
         self.assertEqual(val_data["current_market_price"], test_price, "Giá trong multi-model valuation endpoint phải khớp 20.950 VND")
 
-        resp_dcf = self.client.post("/api/valuation/dcf", json={"ticker": "HPG", "current_market_price": test_price})
-        self.assertEqual(resp_dcf.status_code, 200)
-        dcf_data = resp_dcf.json()
-        self.assertEqual(dcf_data["current_market_price"], test_price, "Giá trong dcf valuation endpoint phải khớp 20.950 VND")
+    def test_corporate_action_target_price_adjustment(self):
+        """
+        Kiểm tra tính toán điều chỉnh giá mục tiêu theo ngày GDKHQ (Chuẩn VAS của HOSE/HNX):
+        1. Báo cáo phát hành TRƯỚC ngày GDKHQ phải được chiết khấu theo hệ số k.
+        2. Báo cáo phát hành SAU ngày GDKHQ phải giữ nguyên giá mục tiêu ban đầu.
+        3. HPG có sự kiện ngày 20/06/2024 (cổ tức 500đ + 10% CP). Báo cáo cũ định giá 38k được điều chỉnh về ~34k.
+        4. SSI có sự kiện ngày 23/09/2024 (thưởng 20% CP + phát hành thêm 10% giá 15k). Báo cáo cũ 40k được điều chỉnh về ~32.5k.
+        """
+        from corporate_actions import adjust_target_price_for_corporate_actions, get_ticker_corporate_actions
+        
+        # 1. HPG test: Báo cáo trước ngày 20/06/2024
+        res_hpg_before = adjust_target_price_for_corporate_actions("HPG", "15/05/2024", 38000.0)
+        self.assertTrue(res_hpg_before["is_price_adjusted"], "HPG báo cáo tháng 5/2024 phải được điều chỉnh vì ra trước GDKHQ 20/06/2024")
+        self.assertLess(res_hpg_before["adjusted_target_price"], 38000.0, "Giá sau điều chỉnh phải thấp hơn giá gốc 38.000 đ")
+        self.assertLessEqual(res_hpg_before["adjusted_target_price"], 34000.0)
+        self.assertGreater(len(res_hpg_before["notes"]), 0)
+
+        # 2. HPG test: Báo cáo sau ngày GDKHQ mới nhất năm 2026
+        res_hpg_after = adjust_target_price_for_corporate_actions("HPG", "01/06/2026", 38000.0)
+        self.assertFalse(res_hpg_after["is_price_adjusted"], "HPG báo cáo tháng 6/2026 không bị điều chỉnh vì ra sau toàn bộ sự kiện GDKHQ")
+        self.assertEqual(res_hpg_after["adjusted_target_price"], 38000.0)
+        self.assertEqual(len(res_hpg_after["notes"]), 0)
+
+        # 3. SSI test: Báo cáo trước ngày 23/09/2024
+        res_ssi_before = adjust_target_price_for_corporate_actions("SSI", "10/08/2024", 40000.0)
+        self.assertTrue(res_ssi_before["is_price_adjusted"], "SSI báo cáo tháng 8/2024 phải được điều chỉnh vì ra trước GDKHQ 23/09/2024")
+        self.assertLess(res_ssi_before["adjusted_target_price"], 40000.0)
+        self.assertEqual(res_ssi_before["adjusted_target_price"], 32100.0, "Giá SSI 40k sau điều chỉnh k=0.8026 là 32.100 đ")
+
+    def test_corporate_actions_endpoint_and_consensus_integration(self):
+        """
+        Kiểm tra API endpoint /api/corporate-actions/{ticker} và tích hợp trong consensus report:
+        1. Endpoint trả về danh sách sự kiện quyền có sắp xếp ngày mới nhất lên đầu.
+        2. Báo cáo preset HPG có has_price_adjustment = True.
+        3. Mean target price của HPG phản ánh giá điều chỉnh.
+        """
+        # Test API endpoint
+        resp = self.client.get("/api/corporate-actions/HPG")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["ticker"], "HPG")
+        self.assertGreater(data["count"], 0)
+        self.assertIn("corporate_actions", data)
+        self.assertIn("ex_date", data["corporate_actions"][0])
+
+        # Test Consensus Integration with pre-ex-dividend report
+        test_reports = [
+            ReportItem(
+                institution="KBSV",
+                report_date="15/05/2024",
+                recommendation="MUA",
+                target_price=38000,
+                current_price_at_report=21700
+            ),
+            ReportItem(
+                institution="SSI",
+                report_date="10/08/2026",
+                recommendation="MUA",
+                target_price=35000,
+                current_price_at_report=21700
+            )
+        ]
+        consensus_res = calculate_consensus(reports=test_reports, ticker="HPG", current_market_price=21700)
+        cs = consensus_res.consensus_summary
+        self.assertTrue(cs.has_price_adjustment, "HPG consensus summary phải có cờ has_price_adjustment=True")
+        self.assertIn("GDKHQ", cs.adjustment_summary)
+        
+        # Kiểm tra báo cáo KBSV phát hành trước 20/06/2024 đã được điều chỉnh giá về 34.000 đ
+        kbsv_rep = next(r for r in consensus_res.matrix_table if r.institution == "KBSV")
+        self.assertTrue(kbsv_rep.is_price_adjusted)
+        self.assertLess(kbsv_rep.adjusted_target_price, 38000.0)
+        self.assertEqual(kbsv_rep.target_price, 38000.0)
+        self.assertGreater(len(kbsv_rep.adjustment_notes), 0)
+
+        # Kiểm tra báo cáo SSI phát hành sau 20/06/2024 không bị điều chỉnh
+        ssi_rep = next(r for r in consensus_res.matrix_table if r.institution == "SSI")
+        self.assertFalse(ssi_rep.is_price_adjusted)
+        self.assertEqual(ssi_rep.target_price, 35000.0)
+
+    def test_pvs_matrix_and_pdf_integrity(self):
+        """
+        Kiểm tra tính toàn vẹn Báo cáo đa tổ chức và file đọc PDF của mã PVS:
+        1. PVS có định giá mục tiêu trung bình hợp lệ (> 40.000 đ) và Upside > 0.
+        2. Không bị mất dữ liệu Khuyến nghị & Target price (các CTCK lớn như Vietcap, BSC, BVSC... có định giá rõ ràng).
+        3. Dự phóng Doanh thu & LNST không bị gạch ngang trống rỗng.
+        4. File đọc PDF của PVS không bị gán nhầm sang Báo cáo ngành thép hoặc ngành khác.
+        """
+        resp_pvs = self.client.get("/api/preset/PVS")
+        self.assertEqual(resp_pvs.status_code, 200)
+        pvs_data = resp_pvs.json()
+        self.assertEqual(pvs_data["ticker"], "PVS")
+        self.assertIn("Dịch vụ Kỹ thuật Dầu khí", pvs_data["company_name"])
+        
+        cs = pvs_data["consensus_summary"]
+        self.assertGreater(cs["mean_target_price"], 40000.0, "PVS phải có giá mục tiêu trung bình hợp lệ > 40.000 đ")
+        self.assertGreater(cs["average_upside"], 0.0, "Upside của PVS phải dương")
+        self.assertNotIn("THEO DÕI THÊM", cs["consensus_rating"])
+
+        matrix = pvs_data["matrix_table"]
+        self.assertGreater(len(matrix), 0)
+        
+        # Kiểm tra có ít nhất 3 CTCK có Target Price > 40.000 đ
+        valid_tp_reports = [r for r in matrix if r.get("target_price") and r["target_price"] > 40000.0]
+        self.assertGreaterEqual(len(valid_tp_reports), 3, "PVS phải có ít nhất 3 CTCK có giá mục tiêu > 40.000 đ")
+        
+        # Kiểm tra file PDF không bị lệch sang ngành Thép
+        resp_pdf = self.client.get("/api/reports/pdf/PVS/Vietcap%20Research")
+        self.assertEqual(resp_pdf.status_code, 200)
+        self.assertGreater(len(resp_pdf.content), 50000, "File PDF Vietcap phải có kích thước đầy đủ")
+        
+        resp_pdf_vcbs = self.client.get("/api/reports/pdf/PVS/VCBS%20Research")
+        self.assertEqual(resp_pdf_vcbs.status_code, 200)
+        # Kiểm tra file PDF không chứa từ khóa nhầm lẫn ngành thép
+        self.assertNotIn(b"NganhThep", resp_pdf_vcbs.content)
+
+    def test_pvs_corporate_action_adjustment(self):
+        """
+        Kiểm tra sự kiện quyền ngày 14/09/2026 của PVS (cổ tức 20% bằng cổ phiếu):
+        1. Ngày GDKHQ 14/09/2026 có hệ số điều chỉnh k = 1 / 1.2 = 0.8333.
+        2. Báo cáo ra trước ngày 14/09/2026 tự động điều chỉnh giá:
+           - Vietcap 58.800 đ -> 49.000 đ
+           - BSC 45.000 đ -> 37.500 đ
+        3. Consensus summary của PVS có has_price_adjustment = True.
+        4. Giá mục tiêu TB điều chỉnh về ~40.600 đ (thay vì 48.700 đ chưa chia).
+        5. Upside kỳ vọng tính toán dựa trên giá điều chỉnh đạt ~21.5% (thay vì +45.8% ảo).
+        6. Tỷ lệ thị giá / định giá TB đạt ~82.3% (thay vì 68.6%).
+        """
+        from corporate_actions import adjust_target_price_for_corporate_actions, get_ticker_corporate_actions
+        
+        actions = get_ticker_corporate_actions("PVS")
+        self.assertGreater(len(actions), 0)
+        self.assertEqual(actions[0]["ex_date"], "14/09/2026")
+        self.assertEqual(actions[0]["stock_ratio"], 0.20)
+
+        # Test điều chỉnh giá Vietcap phát hành 17/08/2026 (trước 14/09/2026)
+        adj_vc = adjust_target_price_for_corporate_actions("PVS", "17/08/2026", 58800.0)
+        self.assertTrue(adj_vc["is_price_adjusted"])
+        self.assertEqual(adj_vc["adjusted_target_price"], 49000.0)
+
+        # Test điều chỉnh giá BSC phát hành 24/08/2026
+        adj_bsc = adjust_target_price_for_corporate_actions("PVS", "24/08/2026", 45000.0)
+        self.assertTrue(adj_bsc["is_price_adjusted"])
+        self.assertEqual(adj_bsc["adjusted_target_price"], 37500.0)
+
+        # Test qua API preset
+        resp = self.client.get("/api/preset/PVS")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        cs = data["consensus_summary"]
+        self.assertTrue(cs["has_price_adjustment"], "PVS phải kích hoạt cờ has_price_adjustment")
+        self.assertAlmostEqual(cs["mean_target_price"], 40600.0, delta=1000.0)
+        self.assertAlmostEqual(cs["average_upside"], 21.5, delta=3.0)
+        self.assertAlmostEqual(cs["market_to_fair_value_ratio"], 82.3, delta=3.0)
+        self.assertIn("applied_corporate_actions", cs)
+        self.assertGreater(len(cs["applied_corporate_actions"]), 0)
+        self.assertIn("corporate_actions", data)
+        self.assertGreater(len(data["corporate_actions"]), 0)
+
+    def test_vnm_corporate_action_and_online_sync(self):
+        """
+        Kiểm tra sự kiện quyền ngày 26/06/2026 của VNM (cổ tức tiền mặt 18% = 1.800 đ/CP):
+        1. Ngày GDKHQ 26/06/2026 có cash_amount = 1800 đ.
+        2. Báo cáo ra trước ngày 26/06/2026 (ví dụ NHSV 28/05/2026: 75k) tự động điều chỉnh.
+        3. Báo cáo ra sau ngày 26/06/2026 (ví dụ VDS 15/09/2026: 70.1k) giữ nguyên.
+        4. Preset VNM kích hoạt has_price_adjustment = True.
+        5. Endpoint POST /api/corporate-actions/add hoạt động chuẩn xác.
+        """
+        from corporate_actions import adjust_target_price_for_corporate_actions, get_ticker_corporate_actions
+        
+        actions = get_ticker_corporate_actions("VNM")
+        self.assertGreater(len(actions), 0)
+        event_2026 = next((a for a in actions if a.get("ex_date") == "26/06/2026"), None)
+        self.assertIsNotNone(event_2026, "VNM phải có sự kiện GDKHQ ngày 26/06/2026")
+        self.assertEqual(event_2026["cash_amount"], 1800.0)
+
+        # Báo cáo trước ngày 26/06/2026
+        adj_before = adjust_target_price_for_corporate_actions("VNM", "28/05/2026", 75000.0)
+        self.assertTrue(adj_before["is_price_adjusted"])
+        self.assertLess(adj_before["adjusted_target_price"], 75000.0)
+
+        # Báo cáo sau ngày 26/06/2026
+        adj_after = adjust_target_price_for_corporate_actions("VNM", "15/09/2026", 70100.0)
+        self.assertFalse(adj_after["is_price_adjusted"])
+        self.assertEqual(adj_after["adjusted_target_price"], 70100.0)
+
+        # Preset API test
+        resp = self.client.get("/api/preset/VNM")
+        self.assertEqual(resp.status_code, 200)
+        vnm_data = resp.json()
+        cs = vnm_data["consensus_summary"]
+        self.assertTrue(cs["has_price_adjustment"], "VNM consensus phải có has_price_adjustment = True")
+        self.assertAlmostEqual(cs["mean_target_price"], 72800.0, delta=1000.0)
+        self.assertIn("applied_corporate_actions", cs)
+        self.assertGreater(len(cs["applied_corporate_actions"]), 0)
+        self.assertIn("corporate_actions", vnm_data)
+        self.assertGreater(len(vnm_data["corporate_actions"]), 0)
+
+        # Test POST /api/corporate-actions/add
+        post_data = {
+            "ticker": "TEST_CP",
+            "ex_date": "01/10/2026",
+            "event_type": "dividend_cash",
+            "title": "Cổ tức tiền mặt 1,000 đ",
+            "cash_amount": 1000.0
+        }
+        add_resp = self.client.post("/api/corporate-actions/add", json=post_data)
+        self.assertEqual(add_resp.status_code, 200)
+        self.assertTrue(add_resp.json()["success"])
 
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-

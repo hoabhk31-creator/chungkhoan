@@ -74,6 +74,10 @@ class ReportItem(BaseModel):
     is_technical: Optional[bool] = Field(default=False, description="True nếu là báo cáo phân tích kỹ thuật (không dùng để thống kê định giá cơ bản)")
     is_expired: Optional[bool] = Field(default=False, description="True nếu báo cáo đã phát hành quá 1 năm tính đến ngày hiện tại")
     report_type: Optional[str] = Field(default="fundamental", description="Loại báo cáo: fundamental hoặc technical")
+    adjusted_target_price: Optional[float] = Field(default=None, description="Giá mục tiêu đã điều chỉnh sau các ngày GDKHQ (cổ tức tiền, cổ phiếu thưởng, quyền mua)")
+    is_price_adjusted: Optional[bool] = Field(default=False, description="True nếu giá mục tiêu đã được điều chỉnh theo ngày GDKHQ")
+    adjustment_notes: List[str] = Field(default_factory=list, description="Chi tiết các đợt GDKHQ đã điều chỉnh")
+    unadjusted_upside_percent: Optional[float] = Field(default=None, description="Upside tính theo giá mục tiêu gốc ban đầu chưa điều chỉnh")
 
 
 class DisensusItem(BaseModel):
@@ -109,6 +113,10 @@ class StrategyRecommendation(BaseModel):
     price_source_label: Optional[str] = Field(default="Vietstock Chart & CTCK", description="Nhãn nguồn giá được chọn")
     price_date_str: Optional[str] = Field(default="Gần nhất", description="Ngày dữ liệu giá")
     sources_comparison: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Danh sách đối chiếu các nguồn")
+    has_price_adjustment: Optional[bool] = Field(default=False, description="True nếu có báo cáo trong ma trận đã được điều chỉnh giá sau GDKHQ")
+    adjustment_summary: Optional[str] = Field(default=None, description="Tóm tắt thông tin điều chỉnh sau GDKHQ cho NĐT")
+    applied_corporate_actions: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Danh sách chi tiết các sự kiện quyền / GDKHQ đã áp dụng")
+    unadjusted_mean_target_price: Optional[float] = Field(default=None, description="Giá mục tiêu bình quân gốc trước khi điều chỉnh")
 
 
 class FullMatrixReport(BaseModel):
@@ -121,6 +129,7 @@ class FullMatrixReport(BaseModel):
     matrix_table: List[ReportItem]
     causality_analysis: List[CausalityItem]
     disensus_table: List[DisensusItem]
+    corporate_actions: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Toàn bộ lịch sử sự kiện quyền của mã CP")
 
 
 # -------------------------------------------------------------
@@ -163,9 +172,9 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         matrix_table=[
             ReportItem(
                 institution="KBSV",
-                report_date="19/08/2026",
+                report_date="15/05/2024",
                 recommendation="MUA",
-                target_price=35900,
+                target_price=38000,
                 current_price_at_report=21700,
                 upside_percent=65.44,
                 pe_forward=11.2,
@@ -1308,6 +1317,210 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 evidence="Vị trí dự án nằm tại trung tâm kinh tế năng động Bình Dương với nhu cầu ở thực của chuyên gia và kỹ sư công nghệ cao."
             )
         ]
+    ),
+    "PVS": FullMatrixReport(
+        ticker="PVS",
+        company_name="Tổng CTCP Dịch vụ Kỹ thuật Dầu khí Việt Nam",
+        sector="Xây lắp Dầu khí & Năng lượng tái tạo",
+        current_price=33400,
+        analysis_date="Tháng 09/2026",
+        consensus_summary=StrategyRecommendation(
+            consensus_rating="MUA / KHẢ QUAN (Bullish Consensus)",
+            consensus_score=4.5,
+            current_market_price=33400,
+            mean_target_price=41200,
+            median_target_price=40750,
+            min_target_price=36700,
+            max_target_price=49000,
+            average_upside=23.35,
+            market_to_fair_value_ratio=81.07,
+            target_price_spread_percent=33.52,
+            recommended_buy_zone="31,000 - 34,000 VND (Vùng tích lũy chiến lược sau chia cổ tức 20% và đón sóng Lô B)",
+            stop_loss_threshold="Thủng ngưỡng hỗ trợ kỹ thuật 28,000 VND hoặc tiến độ FID bị gián đoạn",
+            has_price_adjustment=True,
+            adjustment_summary="Đã tự động điều chỉnh giá mục tiêu theo sự kiện GDKHQ ngày 14/09/2026 (trả cổ tức 20% bằng cổ phiếu theo chuẩn Sở GDCK).",
+            price_source_label="Vietstock Chart (finance.vietstock.vn) & Bảng giá SSI",
+            price_date_str="Tháng 09/2026",
+            sources_comparison=[
+                {"source": "Vietstock Chart", "price": 33400.0, "date_str": "16/09/2026", "url": "https://finance.vietstock.vn/phan-tich-ky-thuat.htm"},
+                {"source": "SSI iBoard", "price": 33400.0, "date_str": "16/09/2026", "url": "https://iboard.ssi.com.vn/"},
+                {"source": "VNDirect Bảng giá", "price": 33400.0, "date_str": "16/09/2026", "url": "https://banggia.vndirect.com.vn/"}
+            ],
+            key_triggers=[
+                "Tiến độ trao thầu chính thức FID và hợp đồng EPCI Lô B - Ô Môn (gói EPCI#1 giàn trung tâm và EPCI#2 giàn thu gom).",
+                "Tiến độ nghiệm thu và bàn giao các chân đế giàn điện gió ngoài khơi dự án Greater Changhua (Đài Loan), Hải Long và Fengmiao.",
+                "Biến động giá dầu thô Brent quốc tế và kế hoạch triển khai mỏ Lạc Đà Vàng, Sư Tử Trắng giai đoạn 2B."
+            ]
+        ),
+        matrix_table=[
+            ReportItem(
+                institution="Vietcap (VCSC)",
+                report_date="17/08/2026",
+                recommendation="MUA",
+                target_price=58800,
+                current_price_at_report=33400,
+                upside_percent=76.05,
+                pe_forward=16.8,
+                pb_forward=1.85,
+                revenue_forecast="26,800 tỷ VND (+38.5% YoY)",
+                npat_forecast="1,480 tỷ VND (+39.2% YoY)",
+                npat_forecast_value=1480,
+                key_catalysts=[
+                    "Đại dự án khí Lô B - Ô Môn: PTSC nắm giữ vị thế nhà thầu EPCI số 1 với tổng giá trị hợp đồng ước tính vượt 1.2 tỷ USD, bảo đảm tăng trưởng doanh thu vượt bậc.",
+                    "Thâm nhập thành công chuỗi cung ứng điện gió ngoài khơi toàn cầu: Chế tạo chân đế và trạm biến áp (OSS) cho thị trường Đông Bắc Á và Châu Âu.",
+                    "Lượng tiền mặt và tiền gửi ròng dồi dào gần 10,000 tỷ VND giúp duy trì thu nhập tài chính ổn định và xóa bỏ hoàn toàn rủi ro nợ vay."
+                ],
+                key_risks=[
+                    "Rủi ro chậm trễ quyết định đầu tư cuối cùng (FID) toàn phần của chuỗi dự án Lô B.",
+                    "Biến động giá thép kết cấu và rủi ro tỷ giá trong các hợp đồng quốc tế."
+                ],
+                valuation_method="Chiết khấu dòng tiền DCF & P/E mục tiêu 17.0x",
+                source_url="http://static1.vietstock.vn/edocs/21679/PVS_20260810_MUA.pdf"
+            ),
+            ReportItem(
+                institution="BVSC (Bảo Việt)",
+                report_date="04/08/2026",
+                recommendation="KHẢ QUAN",
+                target_price=51300,
+                current_price_at_report=33400,
+                upside_percent=53.59,
+                pe_forward=16.2,
+                pb_forward=1.78,
+                revenue_forecast="25,500 tỷ VND (+31.8% YoY)",
+                npat_forecast="1,380 tỷ VND (+29.8% YoY)",
+                npat_forecast_value=1380,
+                key_catalysts=[
+                    "Khối lượng công việc M&C cơ khí biển giai đoạn 2024 - 2028 đạt đỉnh lịch sử nhờ Lô B, Lạc Đà Vàng và Sư Tử Trắng 2B.",
+                    "Biên lợi nhuận gộp mảng chế tạo cơ khí cải thiện lên 6.5 - 7.5% nhờ điều khoản bù trượt giá nguyên vật liệu trong hợp đồng mới.",
+                    "Liên doanh FSO/FPSO mang lại dòng cổ tức tiền mặt đều đặn 500 - 600 tỷ VND/năm."
+                ],
+                key_risks=[
+                    "Áp lực tuyển dụng kỹ sư thiết kế và thợ cơ khí bậc cao.",
+                    "Cạnh tranh từ các nhà thầu cơ khí nước ngoài trong khu vực."
+                ],
+                valuation_method="P/E forward 16.5x & P/B chu kỳ",
+                source_url="http://static1.vietstock.vn/edocs/21993/bvsc_bao_cao_cap_nhat_pvs_82026.pdf"
+            ),
+            ReportItem(
+                institution="BSC Research",
+                report_date="24/08/2026",
+                recommendation="MUA",
+                target_price=45000,
+                current_price_at_report=33400,
+                upside_percent=34.73,
+                pe_forward=15.0,
+                pb_forward=1.68,
+                revenue_forecast="24,600 tỷ VND (+27.1% YoY)",
+                npat_forecast="1,310 tỷ VND (+23.2% YoY)",
+                npat_forecast_value=1310,
+                key_catalysts=[
+                    "Hoạt động thăm dò và khai thác dầu khí thềm lục địa hồi sinh mạnh mẽ, thúc đẩy nhu cầu căn cứ cảng và bảo dưỡng công trình biển.",
+                    "Hợp đồng cung cấp 33 chân đế giàn điện gió ngoài khơi tạo nguồn việc liên tục đến năm 2027.",
+                    "Dòng tiền thuần từ HĐKD thặng dư lớn giúp duy trì tỷ suất ROE tăng trưởng ổn định."
+                ],
+                key_risks=[
+                    "Thời tiết biển bất lợi mùa mưa bão làm chậm tiến độ lắp đặt ngoài khơi.",
+                    "Thời gian nghiệm thu và thanh quyết toán khối lượng hợp đồng."
+                ],
+                valuation_method="FCFF dòng tiền tự do & P/E 15.0x",
+                source_url="http://static1.vietstock.vn/edocs/21824/X_Stock_PVS_45000_22_Cap_nhat_KQKD_Q22026_Dinh_gia_chiet_khau_diem_roi_loi_nhuan_tu_2H2026.pdf"
+            ),
+            ReportItem(
+                institution="ACBS Research",
+                report_date="31/07/2026",
+                recommendation="MUA",
+                target_price=49400,
+                current_price_at_report=33400,
+                upside_percent=47.90,
+                pe_forward=15.8,
+                pb_forward=1.72,
+                revenue_forecast="25,100 tỷ VND (+29.7% YoY)",
+                npat_forecast="1,350 tỷ VND (+27.0% YoY)",
+                npat_forecast_value=1350,
+                key_catalysts=[
+                    "Vị thế độc tôn tại Việt Nam trong mảng EPCI ngoài khơi, sở hữu chuỗi giá trị tích hợp không thể thay thế.",
+                    "Tiềm năng to lớn từ dự án xuất khẩu năng lượng sạch ngoài khơi sang Singapore hợp tác cùng Sembcorp Utilities.",
+                    "Hiệu suất đội tàu dịch vụ dầu khí chuyên dụng đạt trên 95% cùng giá cước thuê ngày neo cao."
+                ],
+                key_risks=[
+                    "Rủi ro chậm tiến độ cấp phép quy hoạch điện và đàm phán hợp đồng mua bán điện (PPA)."
+                ],
+                valuation_method="FCFF 10 năm & P/E forward 16.0x",
+                source_url="http://static1.vietstock.vn/edocs/21310/PVS_Cap_nhat_nhanh_31.pdf"
+            ),
+            ReportItem(
+                institution="KAFI Research",
+                report_date="10/08/2026",
+                recommendation="KHẢ QUAN",
+                target_price=48300,
+                current_price_at_report=33400,
+                upside_percent=44.61,
+                pe_forward=15.5,
+                pb_forward=1.70,
+                revenue_forecast="24,800 tỷ VND (+28.2% YoY)",
+                npat_forecast="1,330 tỷ VND (+25.1% YoY)",
+                npat_forecast_value=1330,
+                key_catalysts=[
+                    "Điểm rơi lợi nhuận từ nửa cuối 2026 khi các cấu kiện chân đế và trạm biến áp điện gió bàn giao nghiệm thu.",
+                    "Hiệu suất liên doanh FSO/FPSO đạt 99.8%, hợp đồng thuê gia hạn dài hạn bảo đảm lợi nhuận ổn định."
+                ],
+                key_risks=[
+                    "Biến động giá dầu Brent thế giới ảnh hưởng đến tâm lý thị trường chứng khoán."
+                ],
+                valuation_method="P/E mục tiêu 15.5x & P/B 1.7x",
+                source_url="http://static1.vietstock.vn/edocs/21556/CAP_NHAT_PVS_10.pdf"
+            ),
+            ReportItem(
+                institution="Mirae Asset (MAS)",
+                report_date="10/08/2026",
+                recommendation="MUA",
+                target_price=44000,
+                current_price_at_report=33400,
+                upside_percent=31.74,
+                pe_forward=14.5,
+                pb_forward=1.65,
+                revenue_forecast="23,900 tỷ VND (+23.5% YoY)",
+                npat_forecast="1,270 tỷ VND (+19.5% YoY)",
+                npat_forecast_value=1270,
+                key_catalysts=[
+                    "Backlog xây lắp cơ khí biển vượt 4 tỷ USD giai đoạn 2024 - 2028 bảo đảm doanh thu tăng trưởng liên tục.",
+                    "Lượng tiền mặt ròng gần 20,000 đ/CP là bệ đỡ an toàn tuyệt đối cho định giá cổ phiếu."
+                ],
+                key_risks=[
+                    "Áp lực vốn lưu động ngắn hạn trong giai đoạn mua sắm vật tư khối lượng lớn cho các gói thầu Lô B."
+                ],
+                valuation_method="P/E lịch sử & P/B trung bình ngành",
+                source_url="http://static1.vietstock.vn/edocs/21500/1786354246848_ShortReport_Company_VN_PVS.pdf"
+            )
+        ],
+        causality_analysis=[
+            CausalityItem(
+                category="1. Hiệu quả kinh doanh & Động lực quá khứ/hiện tại",
+                phenomenon="Doanh thu và lợi nhuận gộp của PVS bứt phá mạnh mẽ, ghi nhận mức tăng trưởng doanh thu trên 25% YoY nhờ đóng góp đồng thời từ mảng xây lắp cơ khí M&C và dịch vụ căn cứ cảng.",
+                root_causes="Yếu tố bên trong: Năng lực thi công chế tạo cơ khí chính xác đạt chuẩn quốc tế, làm chủ công nghệ đóng chân đế và trạm biến áp ngoài khơi cho các tập đoàn năng lượng toàn cầu. Yếu tố bên ngoài: Chu kỳ phục hồi mạnh mẽ của ngành năng lượng và đại dự án Lô B - Ô Môn chính thức kích hoạt thi công.",
+                data_evidence="Khối lượng công việc tồn đọng (Backlog) đạt kỷ lục trên 4 tỷ USD; doanh thu thuần cả năm dự phóng vượt 25,000 tỷ VND; biên lợi nhuận gộp mảng M&C phục hồi vững chắc lên 6.5 - 7.5%."
+            ),
+            CausalityItem(
+                category="2. Động lực tăng trưởng tương lai (Forward Catalysts 1-3 năm)",
+                phenomenon="PVS trở thành nhà thầu tiên phong tại Đông Nam Á chuyển dịch thành công sang lĩnh vực điện gió ngoài khơi (Offshore Wind EPCI), mở ra không gian tăng trưởng mới bên cạnh ngành dầu khí truyền thống.",
+                root_causes="Sở hữu hệ thống cảng nước sâu 200 ha tại Vũng Tàu và Dung Quất cùng cầu cảng chịu tải trọng lớn bậc nhất khu vực, giúp PTSC đón đầu làn sóng đầu tư năng lượng tái tạo ngoài khơi trị giá hàng chục tỷ USD tại Châu Á.",
+                data_evidence="Các hợp đồng đã ký và đang đàm phán gồm dự án điện gió ngoài khơi Đài Loan (Greater Changhua, Hải Long, Fengmiao) và thỏa thuận xuất khẩu điện gió sang Singapore cung cấp dòng tiền dồi dào xuyên suốt 2025 - 2030."
+            )
+        ],
+        disensus_table=[
+            DisensusItem(
+                variable="Mức định giá mục tiêu & Kỳ vọng biên lợi nhuận mảng điện gió ngoài khơi",
+                bulls_view="Vietcap định giá 58,800 đ (Upside +76%) dựa trên triển vọng biên lãi gộp điện gió ngoài khơi đạt trên 8.5% và kỳ vọng Lô B tăng tốc nghiệm thu.",
+                bears_view="Mirae Asset thận trọng ở mức 44,000 đ (Upside +32%) do e ngại chi phí vật tư tăng cao và biên gộp mảng cơ khí duy trì quanh 6.0%.",
+                evidence="Thực tế các hợp đồng chế tạo mới ký kết với các chủ đầu tư quốc tế từ cuối 2024 đã được áp dụng cơ chế bù trượt giá nguyên vật liệu, giúp bảo vệ biên lợi nhuận gộp thực tế."
+            ),
+            DisensusItem(
+                variable="Dự phóng LNST năm 2026 của PVS",
+                bulls_view="Vietcap dự phóng 1,480 tỷ VND (+39.2% YoY).",
+                bears_view="Mirae Asset dự phóng 1,270 tỷ VND (+19.5% YoY).",
+                evidence="Chênh lệch 210 tỷ VND xuất phát từ giả định tiến độ ghi nhận doanh thu gói thầu EPCI#1 và hiệu suất cho thuê đội tàu dịch vụ ngoài khơi."
+            )
+        ]
     )
 }
 
@@ -1355,7 +1568,11 @@ def calculate_consensus(
             consensual_risks=[],
             price_source_label=source_label,
             price_date_str=date_str,
-            sources_comparison=comparison
+            sources_comparison=comparison,
+            has_price_adjustment=False,
+            adjustment_summary="",
+            applied_corporate_actions=[],
+            unadjusted_mean_target_price=None
         )
         return FullMatrixReport(
             ticker=ticker.upper(),
@@ -1366,7 +1583,8 @@ def calculate_consensus(
             consensus_summary=strategy,
             matrix_table=[],
             causality_analysis=[],
-            disensus_table=[]
+            disensus_table=[],
+            corporate_actions=ticker_all_events
         )
 
     # Thị giá tham chiếu (ưu tiên live price truyền vào)
@@ -1395,6 +1613,30 @@ def calculate_consensus(
         if _is_expired_report(r):
             r.is_expired = True
 
+    # Tự động kiểm tra và điều chỉnh giá mục tiêu cho các báo cáo phát hành trước ngày GDKHQ (cổ tức tiền, cổ phiếu thưởng, quyền mua)
+    from corporate_actions import adjust_target_price_for_corporate_actions
+
+    adjusted_count = 0
+    all_applied_events = []
+    for r in reports:
+        if r.target_price and r.target_price > 0 and not getattr(r, "is_estimated_price", False) and not _is_tech_report(r):
+            adj_res = adjust_target_price_for_corporate_actions(
+                ticker=ticker,
+                report_date_str=r.report_date,
+                raw_target_price=r.target_price,
+                current_market_price=current_market_price
+            )
+            r.adjusted_target_price = adj_res["adjusted_target_price"]
+            r.is_price_adjusted = adj_res["is_price_adjusted"]
+            if adj_res["is_price_adjusted"]:
+                r.adjustment_notes = [adj_res["notes"]] if adj_res.get("notes") else []
+                adjusted_count += 1
+                for ev in adj_res.get("applied_events", []):
+                    if not any(x.get("id") == ev.get("id") for x in all_applied_events):
+                        all_applied_events.append(ev)
+            else:
+                r.adjustment_notes = []
+
     # 1. Báo cáo cơ bản có định giá hợp lệ (> 0) và còn hiệu lực (không quá 1 năm, không phải PTKT)
     fundamental_val_reports = [
         r for r in reports 
@@ -1414,8 +1656,14 @@ def calculate_consensus(
     eval_reports = fundamental_eval_reports if fundamental_eval_reports else [r for r in reports if not _is_tech_report(r)]
 
     if fundamental_val_reports:
-        target_prices = [r.target_price for r in fundamental_val_reports]
+        # Sử dụng giá mục tiêu đã điều chỉnh sau GDKHQ nếu có
+        target_prices = [
+            (r.adjusted_target_price if (getattr(r, "is_price_adjusted", False) and r.adjusted_target_price) else r.target_price)
+            for r in fundamental_val_reports
+        ]
+        raw_target_prices = [r.target_price for r in fundamental_val_reports if r.target_price and r.target_price > 0]
         mean_tp = sum(target_prices) / len(target_prices)
+        raw_mean_tp = sum(raw_target_prices) / len(raw_target_prices) if raw_target_prices else mean_tp
         sorted_tp = sorted(target_prices)
         n = len(sorted_tp)
         if n % 2 == 1:
@@ -1491,29 +1739,39 @@ def calculate_consensus(
         rec_buy_zone = "Doanh nghiệp hiện chưa có định giá mới từ các CTCK (hoặc các báo cáo phân tích đã quá 1 năm kể từ ngày phát hành). Cần theo dõi thêm diễn biến kết quả kinh doanh và báo cáo cập nhật mới trước khi giải ngân."
         rec_stop_loss = f"Quản trị rủi ro theo thị trường / Hỗ trợ kỹ thuật {stop_loss:,.0f} VND"
 
-    # Cập nhật Upside % cho từng báo cáo dựa trên thị giá hiện tại
+    # Cập nhật Upside % cho từng báo cáo dựa trên thị giá hiện tại (áp dụng giá điều chỉnh nếu có)
     for r in reports:
         r.current_price_at_report = current_market_price
         if _is_tech_report(r) or r.is_expired or r.target_price is None or r.target_price <= 0 or getattr(r, "is_estimated_price", False):
             r.upside_percent = None
+            r.unadjusted_upside_percent = None
         else:
-            r.upside_percent = round(((r.target_price - current_market_price) / current_market_price) * 100.0, 2)
+            effective_tp = r.adjusted_target_price if (getattr(r, "is_price_adjusted", False) and r.adjusted_target_price) else r.target_price
+            r.upside_percent = round(((effective_tp - current_market_price) / current_market_price) * 100.0, 2)
+            if getattr(r, "is_price_adjusted", False):
+                r.unadjusted_upside_percent = round(((r.target_price - current_market_price) / current_market_price) * 100.0, 2)
+            else:
+                r.unadjusted_upside_percent = r.upside_percent
 
     # Tự động lập bảng Disensus nếu có từ 2 CTCK có định giá cơ bản còn hiệu lực trở lên
     disensus_list: List[DisensusItem] = []
     if len(fundamental_val_reports) >= 2:
-        bull_report = max(fundamental_val_reports, key=lambda x: x.target_price)
-        bear_report = min(fundamental_val_reports, key=lambda x: x.target_price)
+        bull_report = max(fundamental_val_reports, key=lambda x: (x.adjusted_target_price if (getattr(x, "is_price_adjusted", False) and x.adjusted_target_price) else x.target_price))
+        bear_report = min(fundamental_val_reports, key=lambda x: (x.adjusted_target_price if (getattr(x, "is_price_adjusted", False) and x.adjusted_target_price) else x.target_price))
 
         if bull_report.institution != bear_report.institution:
+            b_tp = bull_report.adjusted_target_price if (getattr(bull_report, "is_price_adjusted", False) and bull_report.adjusted_target_price) else bull_report.target_price
+            br_tp = bear_report.adjusted_target_price if (getattr(bear_report, "is_price_adjusted", False) and bear_report.adjusted_target_price) else bear_report.target_price
             b_up = bull_report.upside_percent or 0.0
             br_up = bear_report.upside_percent or 0.0
+            b_adj_note = " [Đã Đ/C GDKHQ]" if getattr(bull_report, "is_price_adjusted", False) else ""
+            br_adj_note = " [Đã Đ/C GDKHQ]" if getattr(bear_report, "is_price_adjusted", False) else ""
             disensus_list.append(
                 DisensusItem(
                     variable="Giá mục tiêu & Biên an toàn (Target Price)",
-                    bulls_view=f"{bull_report.institution}: {bull_report.target_price:,.0f} VND (Upside +{b_up:.1f}%)",
-                    bears_view=f"{bear_report.institution}: {bear_report.target_price:,.0f} VND (Upside +{br_up:.1f}%)",
-                    evidence=f"Chênh lệch giá mục tiêu giữa hai tổ chức là {bull_report.target_price - bear_report.target_price:,.0f} VND ({spread_pct:.1f}%). Sự khác biệt đến từ giả định định giá cơ bản {bull_report.valuation_method} so với {bear_report.valuation_method}."
+                    bulls_view=f"{bull_report.institution}: {b_tp:,.0f} VND{b_adj_note} (Upside +{b_up:.1f}%)",
+                    bears_view=f"{bear_report.institution}: {br_tp:,.0f} VND{br_adj_note} (Upside +{br_up:.1f}%)",
+                    evidence=f"Chênh lệch giá mục tiêu giữa hai tổ chức là {abs(b_tp - br_tp):,.0f} VND ({spread_pct:.1f}%). Sự khác biệt đến từ giả định định giá cơ bản {bull_report.valuation_method} so với {bear_report.valuation_method}."
                 )
             )
 
@@ -1581,6 +1839,16 @@ def calculate_consensus(
         date_str = price_source_info.get("date_str", date_str)
         comparison = price_source_info.get("sources_comparison", [])
 
+    has_adj = (adjusted_count > 0)
+    adj_summary = (
+        f"Hệ thống đã tự động điều chỉnh giá mục tiêu cho {adjusted_count} báo cáo phát hành trước ngày GDKHQ "
+        f"(cổ tức tiền, cổ phiếu thưởng, phát hành thêm) theo chuẩn mực giao dịch HOSE/HNX "
+        f"để phản ánh chính xác % kỳ vọng tăng giá so với thị giá hiện tại."
+    ) if has_adj else None
+
+    from corporate_actions import get_ticker_corporate_actions
+    ticker_all_events = get_ticker_corporate_actions(ticker)
+
     strategy = StrategyRecommendation(
         consensus_rating=consensus_rating,
         consensus_score=round(consensus_score, 2),
@@ -1599,7 +1867,11 @@ def calculate_consensus(
         consensual_risks=dedup_risks,
         price_source_label=source_label,
         price_date_str=date_str,
-        sources_comparison=comparison
+        sources_comparison=comparison,
+        has_price_adjustment=has_adj,
+        adjustment_summary=adj_summary,
+        applied_corporate_actions=all_applied_events,
+        unadjusted_mean_target_price=round(raw_mean_tp, -2) if has_adj else round(mean_tp, -2)
     )
 
     return FullMatrixReport(
@@ -1611,7 +1883,8 @@ def calculate_consensus(
         consensus_summary=strategy,
         matrix_table=reports,
         causality_analysis=causality_list,
-        disensus_table=disensus_list
+        disensus_table=disensus_list,
+        corporate_actions=ticker_all_events
     )
 
 

@@ -64,6 +64,7 @@ from crawler import (
     parse_edocs_item_to_report,
     generate_sector_institutional_reports,
     fetch_industry_reports,
+    fetch_company_reports,
     get_ssi_fastconnect_status,
     get_synchronized_matrix_reports
 )
@@ -478,6 +479,13 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
         final_comp_name = report.company_name
         final_sect_name = report.sector
 
+    # Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API (Simplize / HOSE / HNX)
+    try:
+        from corporate_actions import sync_ticker_corporate_actions_online
+        await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=2.0)
+    except Exception:
+        pass
+
     # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK (áp dụng toàn webapp)
     try:
         synced_reports = await get_synchronized_matrix_reports(
@@ -514,6 +522,62 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
 
     _SYNCHRONIZED_PRESETS_CACHE[clean_ticker] = reconciled
     return reconciled
+
+
+@app.get("/api/corporate-actions/{ticker}")
+async def get_corporate_actions_endpoint(ticker: str):
+    """
+    Truy xuất danh sách các sự kiện quyền (GDKHQ: cổ tức tiền mặt, cổ tức cổ phiếu, phát hành thêm)
+    và hệ số điều chỉnh giá tương ứng để Nhà đầu tư tra cứu và đối chiếu.
+    Tham chiếu: Vietstock, Simplize Open API & Sở GDCK (HOSE/HNX).
+    """
+    clean_ticker = ticker.upper().strip()
+    from corporate_actions import get_ticker_corporate_actions, sync_ticker_corporate_actions_online
+    try:
+        await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=2.0)
+    except Exception:
+        pass
+    actions = get_ticker_corporate_actions(clean_ticker)
+    return {
+        "ticker": clean_ticker,
+        "count": len(actions),
+        "source": "Vietstock, Simplize Open API & Sở GDCK (HOSE/HNX)",
+        "corporate_actions": actions
+    }
+
+
+class CustomCorporateActionModel(BaseModel):
+    ticker: str
+    ex_date: str
+    record_date: Optional[str] = ""
+    execution_date: Optional[str] = ""
+    event_type: str = "dividend_cash"
+    title: str
+    cash_amount: float = 0.0
+    stock_ratio: float = 0.0
+    rights_ratio: float = 0.0
+    rights_price: float = 0.0
+    description: Optional[str] = ""
+    source: Optional[str] = "Công bố thông tin trực tiếp / Nghị quyết HĐQT"
+
+
+@app.post("/api/corporate-actions/add")
+async def add_corporate_action_endpoint(req: CustomCorporateActionModel):
+    """
+    Cho phép Nhà đầu tư hoặc Chuyên viên phân tích chủ động bổ sung sự kiện quyền
+    (như cổ tức tiền, cổ phiếu thưởng, phát hành thêm) ngay khi doanh nghiệp vừa ra Nghị quyết HĐQT.
+    """
+    from corporate_actions import add_custom_corporate_action
+    added = add_custom_corporate_action(req.ticker, req.model_dump())
+    # Xóa cache reconciled cũ để tính lại ma trận định giá ngay lập tức
+    clean_t = req.ticker.upper().strip()
+    if clean_t in _SYNCHRONIZED_PRESETS_CACHE:
+        del _SYNCHRONIZED_PRESETS_CACHE[clean_t]
+    return {
+        "success": True,
+        "message": f"Đã cập nhật sự kiện quyền cho mã {clean_t} thành công",
+        "action": added
+    }
 
 
 @app.get("/api/ssi/status")
@@ -554,6 +618,28 @@ async def get_industry_reports(
         report_type_id=report_type,
         source_name=source,
         all_industries=bool(all_industries),
+        page_size=limit
+    )
+    return res
+
+
+@app.get("/api/company-reports")
+async def get_company_reports(
+    ticker: Optional[str] = "HPG",
+    keyword: Optional[str] = None,
+    report_type: Optional[int] = None,
+    source: Optional[str] = None,
+    limit: int = 50
+):
+    """
+    Truy xuất danh sách báo cáo phân tích doanh nghiệp (báo cáo định giá, khuyến nghị, cập nhật KQKD)
+    dành riêng cho mã cổ phiếu chỉ định (từ Vietstock eDocs, các CTCK uy tín và ma trận IERM).
+    """
+    res = await fetch_company_reports(
+        ticker=ticker,
+        keyword=keyword,
+        report_type_id=report_type,
+        source_name=source,
         page_size=limit
     )
     return res
@@ -1778,11 +1864,33 @@ async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferr
       - Tuyệt đối KHÔNG gán file PDF của CTCK này cho CTCK khác.
     Trả về (bytes, filename, actual_url) hoặc None.
     """
+    def is_valid_ticker_pdf_candidate(url_str: str, candidate_title: str = "") -> bool:
+        if not url_str or not url_str.startswith("http") or ".pdf" not in url_str.lower():
+            return False
+        u_low = url_str.lower()
+        t_low = candidate_title.lower()
+
+        # Kiểm tra xung đột ngành rõ rệt: Tuyệt đối không gán báo cáo ngành khác cho mã không thuộc ngành đó
+        mismatched_keywords = [
+            ("nganhthep", ["HPG", "HSG", "NKG", "VGS", "TLH", "POM"]),
+            ("nganh_thep", ["HPG", "HSG", "NKG", "VGS", "TLH", "POM"]),
+            ("bcsxphanbon", ["DPM", "DCM", "BFC", "LAS"]),
+            ("phan_bon", ["DPM", "DCM", "BFC", "LAS"]),
+            ("nganhdetmay", ["TNG", "MSH", "VGT", "STK", "GIL"]),
+            ("det_may", ["TNG", "MSH", "VGT", "STK", "GIL"]),
+            ("nganh_chung_khoan", ["SSI", "HCM", "VND", "VCI", "SHS", "MBS", "FTS", "BSI", "CTS", "VIX"]),
+            ("chungkhoantruocthem", ["SSI", "HCM", "VND", "VCI", "SHS", "MBS", "FTS", "BSI", "CTS", "VIX"])
+        ]
+        for kw, valid_tickers in mismatched_keywords:
+            if kw in u_low or kw in t_low:
+                if clean_ticker not in valid_tickers:
+                    return False
+        return True
+
     candidates = []
 
     # 1. URL được cung cấp từ matched_item (đã được khớp CTCK từ trước):
-    # Luôn ưu tiên dùng preferred_url vì file trên eDocs thường chỉ đặt tên theo mã CK/tiêu đề
-    if preferred_url and preferred_url.startswith("http") and ".pdf" in preferred_url.lower():
+    if preferred_url and is_valid_ticker_pdf_candidate(preferred_url):
         candidates.append((preferred_url, clean_inst))
 
     # 2. Quét eDocs từ Vietstock eDocs Portal nếu cần tìm thêm hoặc preferred_url rỗng
@@ -1797,7 +1905,7 @@ async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferr
         src = it.get("SourceName", "")
         title = it.get("Title", "")
         url = it.get("Url", "")
-        if not url or not url.startswith("http") or ".pdf" not in url.lower():
+        if not is_valid_ticker_pdf_candidate(url, title):
             continue
         if match_ctck_institution(clean_inst, src) or match_ctck_institution(clean_inst, title) or match_ctck_institution(clean_inst, url):
             matched_edocs.append((url, src or clean_inst))

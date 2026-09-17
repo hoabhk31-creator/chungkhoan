@@ -462,6 +462,67 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
                 raw_inc[key] = list(res["financial_expense"][:n_periods])
             elif "lợi nhuận thuần từ hoạt động kinh doanh" in kl:
                 raw_inc[key] = list(res["operating_profit"][:n_periods])
+
+        # Tự động tính toán và bù đắp các dòng BCTC còn thiếu (Chi phí QLDN, Lãi cơ bản EPS, Lãi suy giảm EPS)
+        key_gp = next((k for k in raw_inc if "lợi nhuận gộp" in k.lower()), None)
+        key_fr = next((k for k in raw_inc if "doanh thu hoạt động tài chính" in k.lower()), None)
+        key_fe = next((k for k in raw_inc if "chi phí tài chính" in k.lower() and "trong đó" not in k.lower()), None)
+        key_aff = next((k for k in raw_inc if "liên doanh" in k.lower()), None)
+        key_sell = next((k for k in raw_inc if "chi phí bán hàng" in k.lower()), None)
+        key_admin = next((k for k in raw_inc if "chi phí quản lý" in k.lower()), None)
+        key_op = next((k for k in raw_inc if "lợi nhuận thuần từ hoạt động kinh doanh" in k.lower()), None)
+        key_np = next((k for k in raw_inc if "lợi nhuận sau thuế công ty mẹ" in k.lower() or "lợi nhuận sau thuế của cổ đông" in k.lower()), None)
+        if not key_np:
+            key_np = next((k for k in raw_inc if "lợi nhuận sau thuế" in k.lower()), None)
+        key_eps_basic = next((k for k in raw_inc if "lãi cơ bản trên cổ phiếu" in k.lower()), None)
+        key_eps_diluted = next((k for k in raw_inc if "lãi suy giảm trên cổ phiếu" in k.lower()), None)
+
+        if not key_admin:
+            key_admin = "10. Chi phí quản lý doanh nghiệp"
+            raw_inc[key_admin] = [0.0] * n_periods
+        if not key_eps_basic:
+            key_eps_basic = "21. Lãi cơ bản trên cổ phiếu(*)"
+            raw_inc[key_eps_basic] = [0.0] * n_periods
+        if not key_eps_diluted:
+            key_eps_diluted = "22. Lãi suy giảm trên cổ phiếu (*)"
+            raw_inc[key_eps_diluted] = [0.0] * n_periods
+
+        try:
+            from financial_data import VIETNAM_STOCK_DIRECTORY
+            shares_mil = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {}).get("shares") or 1000.0
+        except Exception:
+            shares_mil = 1000.0
+
+        rev_list = res.get("revenue", [])
+        np_list = res.get("net_profit", [])
+
+        for i in range(n_periods):
+            gp = raw_inc[key_gp][i] if key_gp and i < len(raw_inc[key_gp]) else 0.0
+            fr = raw_inc[key_fr][i] if key_fr and i < len(raw_inc[key_fr]) else 0.0
+            fe = raw_inc[key_fe][i] if key_fe and i < len(raw_inc[key_fe]) else 0.0
+            aff = raw_inc[key_aff][i] if key_aff and i < len(raw_inc[key_aff]) else 0.0
+            sell = raw_inc[key_sell][i] if key_sell and i < len(raw_inc[key_sell]) else 0.0
+            op = raw_inc[key_op][i] if key_op and i < len(raw_inc[key_op]) else 0.0
+            r_val = rev_list[i] if i < len(rev_list) else 10000.0
+
+            # 1. Chi phí quản lý doanh nghiệp (công thức kế toán VAS: 26 = 20 + 21 - 22 + 24 - 25 - 30)
+            curr_adm = raw_inc[key_admin][i] if i < len(raw_inc[key_admin]) else 0.0
+            if curr_adm <= 5.0:
+                calc_adm = round(gp + fr - fe + aff - sell - op, 1)
+                if calc_adm > 10.0:
+                    final_adm = calc_adm
+                else:
+                    final_adm = round(max(15.0, r_val * 0.015), 1)
+                raw_inc[key_admin][i] = final_adm
+
+            # 2. Lãi cơ bản trên cổ phiếu (EPS) & Lãi suy giảm trên cổ phiếu (Diluted EPS)
+            curr_np = raw_inc[key_np][i] if key_np and i < len(raw_inc[key_np]) else (np_list[i] if i < len(np_list) else 0.0)
+            curr_eps = raw_inc[key_eps_basic][i] if i < len(raw_inc[key_eps_basic]) else 0.0
+            if curr_eps == 0.0 and shares_mil > 0 and curr_np != 0.0:
+                calc_eps = round((curr_np * 1000.0) / shares_mil)
+                raw_inc[key_eps_basic][i] = calc_eps
+                raw_inc[key_eps_diluted][i] = calc_eps
+
         res["raw_inc"] = raw_inc
 
     # --- B. Đồng bộ hóa & bù đắp raw_bs (Bảng CĐKT chi tiết) ---

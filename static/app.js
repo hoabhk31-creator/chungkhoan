@@ -734,7 +734,103 @@ function renderHero(report) {
 
     // 2. Thẻ Giá mục tiêu TB & Upside
     if (meanPriceEl) {
-        meanPriceEl.textContent = hasValidValuation ? `${cs.mean_target_price.toLocaleString("vi-VN")} VND` : "—";
+        if (!hasValidValuation) {
+            meanPriceEl.textContent = "—";
+        } else if (cs.has_price_adjustment && cs.unadjusted_mean_target_price && cs.unadjusted_mean_target_price !== cs.mean_target_price) {
+            meanPriceEl.innerHTML = `${cs.mean_target_price.toLocaleString("vi-VN")} VND <span class="text-[10px] text-slate-500 font-normal line-through ml-1" title="Giá mục tiêu bình quân gốc của các CTCK trước ngày GDKHQ">(Gốc: ${cs.unadjusted_mean_target_price.toLocaleString("vi-VN")} đ)</span>`;
+        } else {
+            meanPriceEl.textContent = `${cs.mean_target_price.toLocaleString("vi-VN")} VND`;
+        }
+    }
+
+    // Mean Target Price Card Adjustment Info (Khung Đỏ: Con số Giá điều chỉnh + Biểu tượng hover)
+    const adjContainer = document.getElementById("stat-mean-adjusted-container");
+    if (adjContainer) {
+        if (cs && cs.has_price_adjustment) {
+            adjContainer.classList.remove("hidden");
+            
+            // Lấy danh sách sự kiện quyền đã áp dụng (hoặc toàn bộ sự kiện của mã)
+            const events = (cs.applied_corporate_actions && cs.applied_corporate_actions.length > 0)
+                ? cs.applied_corporate_actions
+                : (report.corporate_actions || []);
+                
+            let eventsHtml = "";
+            if (events && events.length > 0) {
+                eventsHtml = events.map(ev => {
+                    let ratioList = [];
+                    if (ev.cash_amount > 0) {
+                        ratioList.push(`Tiền mặt: <strong class="text-amber-300 font-bold">${ev.cash_amount.toLocaleString("vi-VN")} đ/CP</strong> (${(ev.cash_amount / 100).toFixed(0)}%)`);
+                    }
+                    if (ev.stock_ratio > 0) {
+                        ratioList.push(`Cổ phiếu: <strong class="text-emerald-300 font-bold">${(ev.stock_ratio * 100).toFixed(0)}%</strong> (${ev.stock_ratio >= 1 ? '1:1' : '100:' + Math.round(ev.stock_ratio * 100)})`);
+                    }
+                    if (ev.rights_ratio > 0) {
+                        const rPrice = ev.rights_price ? ev.rights_price.toLocaleString("vi-VN") + " đ" : "10.000 đ";
+                        ratioList.push(`Quyền mua: <strong class="text-sky-300 font-bold">${(ev.rights_ratio * 100).toFixed(0)}%</strong> (Giá ${rPrice})`);
+                    }
+                    const ratioText = ratioList.length > 0 ? ratioList.join(" + ") : (ev.event_type || "Điều chỉnh vốn");
+
+                    return `
+                        <div class="bg-slate-950/90 p-2.5 rounded-lg border border-slate-800 space-y-1.5 shadow-inner">
+                            <div class="text-[11px] font-bold text-amber-300 leading-snug">${ev.title || "Sự kiện quyền"}</div>
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-300 font-mono">
+                                <div><span class="text-slate-400">Ngày GDKHQ:</span> <strong class="text-amber-400">${ev.ex_date || "—"}</strong></div>
+                                <div><span class="text-slate-400">Ngày ĐKCC:</span> <strong class="text-slate-200">${ev.record_date || "—"}</strong></div>
+                                <div class="col-span-2"><span class="text-slate-400">Tỷ lệ chia/phát hành:</span> <span class="text-slate-100">${ratioText}</span></div>
+                                ${ev.execution_date ? `<div><span class="text-slate-400">Ngày thực hiện:</span> <strong class="text-slate-200">${ev.execution_date}</strong></div>` : ''}
+                                ${ev.adjustment_factor ? `<div><span class="text-slate-400">Hệ số k:</span> <strong class="text-cyan-300 font-mono">${ev.adjustment_factor}</strong></div>` : ''}
+                            </div>
+                            ${ev.description ? `<div class="text-[9.5px] text-slate-400 font-sans italic border-t border-slate-800/80 pt-1 leading-relaxed">${ev.description}</div>` : ''}
+                        </div>
+                    `;
+                }).join("");
+            } else {
+                eventsHtml = `
+                    <div class="bg-slate-950/80 p-2 rounded text-[10px] text-slate-400 italic font-mono">
+                        Đã tự động điều chỉnh theo ngày GDKHQ gần nhất theo chuẩn giao dịch HOSE/HNX.
+                    </div>
+                `;
+            }
+
+            adjContainer.innerHTML = `
+                <div class="ca-tooltip-trigger inline-flex items-center justify-between w-full px-2 py-1 rounded bg-amber-950/50 hover:bg-amber-900/50 border border-amber-600/60 hover:border-amber-500 transition-all select-none cursor-pointer" onclick="toggleCorporateActionPin(event)" title="Di chuột để xem nhanh hoặc bấm vào để ghim thông báo">
+                    <span class="text-[11px] font-bold text-amber-300 font-mono flex items-center gap-1.5">
+                        <span class="text-[9px] px-1 py-0.2 rounded bg-amber-900/80 text-amber-200 border border-amber-600 font-mono font-bold">Đ/C</span>
+                        <span>${cs.mean_target_price.toLocaleString("vi-VN")} VND</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-amber-300">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400 animate-pulse"></i>
+                    </span>
+                    
+                    <!-- Popover Tooltip khi di chuột (Mở hướng lên trên - Không bị che khuất) -->
+                    <div class="ca-tooltip-popup text-left" onclick="event.stopPropagation()">
+                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/30">
+                            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5 font-mono">
+                                <i data-lucide="calendar-clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                                <span>THÔNG TIN SỰ KIỆN GDKHQ (${report.ticker})</span>
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-700/80 font-mono font-bold">HOSE/HNX</span>
+                                <button type="button" onclick="toggleCorporateActionPin(event)" class="text-slate-400 hover:text-white p-0.5 rounded transition-colors" title="Đóng">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+                            ${eventsHtml}
+                        </div>
+                        
+                        <div class="mt-2.5 pt-2 border-t border-slate-800 text-[9.5px] text-slate-400 leading-snug font-sans">
+                            💡 <em>Giá mục tiêu trung bình (${cs.mean_target_price.toLocaleString("vi-VN")} đ) và các chỉ số kỳ vọng được tính theo giá đã điều chỉnh sau ngày GDKHQ để đảm bảo tính chuẩn xác cho Nhà đầu tư.</em>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            adjContainer.classList.add("hidden");
+            adjContainer.innerHTML = "";
+        }
     }
     if (upsideEl) {
         if (!hasValidValuation) {
@@ -753,8 +849,28 @@ function renderHero(report) {
         }
     }
 
-    document.getElementById("stat-median-price").textContent = hasValidValuation ? `${cs.median_target_price.toLocaleString("vi-VN")} VND` : "—";
-    document.getElementById("stat-min-max").textContent = hasValidValuation ? `${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")}` : "—";
+    const medianEl = document.getElementById("stat-median-price");
+    if (medianEl) {
+        if (!hasValidValuation) {
+            medianEl.textContent = "—";
+        } else if (cs.has_price_adjustment) {
+            medianEl.innerHTML = `${cs.median_target_price.toLocaleString("vi-VN")} VND <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-1 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
+        } else {
+            medianEl.textContent = `${cs.median_target_price.toLocaleString("vi-VN")} VND`;
+        }
+    }
+
+    const minMaxEl = document.getElementById("stat-min-max");
+    if (minMaxEl) {
+        if (!hasValidValuation) {
+            minMaxEl.textContent = "—";
+        } else if (cs.has_price_adjustment) {
+            minMaxEl.innerHTML = `${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")} <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-0.5 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
+        } else {
+            minMaxEl.textContent = `${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")}`;
+        }
+    }
+
     document.getElementById("stat-spread").textContent = hasValidValuation && cs.target_price_spread_percent > 0 ? `${cs.target_price_spread_percent.toFixed(1)}%` : "—";
 
     // 3. KỲ VỌNG THỊ GIÁ VS ĐỊNH GIÁ TRUNG BÌNH CTCK (Ô GÓC PHẢI)
@@ -802,6 +918,10 @@ function renderHero(report) {
             upsideBadge.textContent = "ĐÃ VƯỢT KỲ VỌNG";
             upsideBadge.className = "text-[9px] px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-700 font-mono font-bold";
             if (expIcon) expIcon.className = "w-3.5 h-3.5 text-rose-400";
+        } else if (cs.has_price_adjustment) {
+            upsideBadge.textContent = "UPSIDE (ĐÃ Đ/C GDKHQ)";
+            upsideBadge.className = "text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-700 font-mono font-bold";
+            if (expIcon) expIcon.className = "w-3.5 h-3.5 text-amber-400";
         } else {
             upsideBadge.textContent = "UPSIDE SPREAD";
             upsideBadge.className = "text-[9px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700 font-mono font-bold";
@@ -823,10 +943,22 @@ function renderHero(report) {
 
     const currentVsFairEl = document.getElementById("stat-current-vs-fair");
     if (currentVsFairEl) {
-        currentVsFairEl.textContent = hasValidValuation
-            ? `Thị giá: ${cs.current_market_price.toLocaleString("vi-VN")} đ / TB CTCK: ${cs.mean_target_price.toLocaleString("vi-VN")} đ`
-            : `Thị giá: ${cs.current_market_price ? cs.current_market_price.toLocaleString("vi-VN") : 0} đ / Định giá TB: —`;
+        if (!hasValidValuation) {
+            currentVsFairEl.textContent = `Thị giá: ${cs.current_market_price ? cs.current_market_price.toLocaleString("vi-VN") : 0} đ / Định giá TB: —`;
+        } else if (cs.has_price_adjustment) {
+            currentVsFairEl.textContent = `Thị giá: ${cs.current_market_price.toLocaleString("vi-VN")} đ / TB CTCK: ${cs.mean_target_price.toLocaleString("vi-VN")} đ (Đã Đ/C GDKHQ)`;
+        } else {
+            currentVsFairEl.textContent = `Thị giá: ${cs.current_market_price.toLocaleString("vi-VN")} đ / TB CTCK: ${cs.mean_target_price.toLocaleString("vi-VN")} đ`;
+        }
     }
+
+    // Banner Cảnh báo sự kiện quyền & GDKHQ trong Hero Card: ẨN ĐỂ CHẠY NGẦM THEO YÊU CẦU NĐT
+    const heroBanner = document.getElementById("hero-corporate-action-banner");
+    if (heroBanner) {
+        heroBanner.classList.add("hidden");
+        heroBanner.innerHTML = "";
+    }
+
     if (window.lucide) lucide.createIcons();
 }
 
@@ -835,6 +967,13 @@ function renderMatrixTable(report) {
     if (!table || !report) return;
     const reports = report.matrix_table || [];
     const cs = report.consensus_summary || {};
+
+    // Banner Cảnh báo sự kiện quyền & GDKHQ trong Tab 1 (Bảng ma trận): ẨN ĐỂ CHẠY NGẦM THEO YÊU CẦU NĐT
+    const matrixBanner = document.getElementById("matrix-corporate-action-banner");
+    if (matrixBanner) {
+        matrixBanner.classList.add("hidden");
+        matrixBanner.innerHTML = "";
+    }
 
     const theadEl = table.querySelector("thead") || document.getElementById("matrix-table-head");
     const tbodyEl = table.querySelector("tbody") || document.getElementById("matrix-table-body");
@@ -906,16 +1045,28 @@ function renderMatrixTable(report) {
         if (r.is_expired) {
             recBadgeHtml = `<div class="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700/80 mb-1 line-through opacity-70">${r.recommendation}</div>
             <div class="text-[9px] text-rose-400 font-mono font-semibold">Báo cáo quá 1 năm</div>`;
-            tpDisplay = r.target_price > 0 
-                ? `<span class="line-through text-slate-400 font-normal">${r.target_price.toLocaleString("vi-VN")} đ</span><span class="text-[10px] text-rose-400 font-mono block font-semibold">(Quá 1 năm)</span>`
+            const expPrice = (r.is_price_adjusted && r.adjusted_target_price) ? r.adjusted_target_price : r.target_price;
+            tpDisplay = expPrice > 0 
+                ? `<span class="line-through text-slate-400 font-normal">${expPrice.toLocaleString("vi-VN")} đ</span><span class="text-[10px] text-rose-400 font-mono block font-semibold">(Quá 1 năm)</span>`
                 : '—';
             upsideDisplay = '<div class="text-[11px] font-semibold text-slate-500 italic">Không tính định giá</div>';
         } else {
-            if (r.upside_percent !== null && r.upside_percent !== undefined && r.target_price > 0) {
+            if (r.is_price_adjusted && r.adjusted_target_price) {
+                let noteTooltip = (r.adjustment_notes && r.adjustment_notes.length > 0) ? r.adjustment_notes[0].replace(/"/g, '&quot;') : 'Đã điều chỉnh theo ngày GDKHQ';
+                tpDisplay = `<div>
+                    <span class="text-amber-400 font-extrabold">${r.adjusted_target_price.toLocaleString("vi-VN")} đ</span>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-800 cursor-help ml-1 inline-block" title="${noteTooltip}">Đ/C GDKHQ</span>
+                    <span class="text-[10px] text-slate-500 line-through block font-normal">Gốc: ${r.target_price.toLocaleString("vi-VN")} đ</span>
+                </div>`;
+            }
+            if (r.upside_percent !== null && r.upside_percent !== undefined && (r.adjusted_target_price || r.target_price) > 0) {
                 if (r.upside_percent < 0) {
                     upsideDisplay = `<div class="text-[11px] font-semibold text-rose-400">Vượt +${Math.abs(r.upside_percent).toFixed(1)}%</div>`;
                 } else {
                     upsideDisplay = `<div class="text-[11px] font-semibold text-emerald-400">+${r.upside_percent.toFixed(1)}%</div>`;
+                }
+                if (r.is_price_adjusted && r.unadjusted_upside_percent !== null && r.unadjusted_upside_percent !== undefined) {
+                    upsideDisplay += `<div class="text-[9px] text-slate-500 font-mono mt-0.5">(Gốc: ${r.unadjusted_upside_percent > 0 ? '+' : ''}${r.unadjusted_upside_percent.toFixed(1)}%)</div>`;
                 }
             }
         }
@@ -1383,10 +1534,14 @@ function renderCausality(report) {
             let tpStr = '—';
             let recText = rawRec.split('(')[0].trim();
             if (item.is_expired) {
-                tpStr = '<span class="text-slate-400 text-xs font-normal line-through">' + (item.target_price > 0 ? Number(item.target_price).toLocaleString('vi-VN') + ' đ' : '—') + '</span> <span class="text-[9px] text-rose-400 font-mono">(Quá 1 năm)</span>';
+                const expPrice = (item.is_price_adjusted && item.adjusted_target_price) ? item.adjusted_target_price : item.target_price;
+                tpStr = '<span class="text-slate-400 text-xs font-normal line-through">' + (expPrice > 0 ? Number(expPrice).toLocaleString('vi-VN') + ' đ' : '—') + '</span> <span class="text-[9px] text-rose-400 font-mono">(Quá 1 năm)</span>';
                 recText = `<span class="line-through opacity-70">${recText}</span><span class="text-[8px] text-rose-400 block font-normal">(Quá 1 năm)</span>`;
             } else if (isTech) {
                 tpStr = '<span class="text-slate-400 text-xs font-normal">— <span class="text-[9px] text-purple-300 font-mono">(PTKT)</span></span>';
+            } else if (item.is_price_adjusted && item.adjusted_target_price > 0) {
+                let noteTip = (item.adjustment_notes && item.adjustment_notes.length > 0) ? item.adjustment_notes[0].replace(/"/g, '&quot;') : 'Đã điều chỉnh theo ngày GDKHQ';
+                tpStr = `<span class="text-amber-400 font-bold">${Number(item.adjusted_target_price).toLocaleString('vi-VN')} đ</span> <span class="text-[9px] text-amber-300 font-mono cursor-help" title="${noteTip}">(Đ/C GDKHQ)</span>`;
             } else if (item.target_price > 0 && !item.is_estimated_price) {
                 tpStr = `${Number(item.target_price).toLocaleString('vi-VN')} đ`;
             } else {
@@ -1986,7 +2141,7 @@ async function loadOverviewCompanyReports(ticker, keyword = null, reportTypeId =
     `;
     if (countBadge) countBadge.textContent = "Đang tải...";
 
-    let url = `/api/industry-reports?ticker=${encodeURIComponent(cleanTicker)}`;
+    let url = `/api/company-reports?ticker=${encodeURIComponent(cleanTicker)}`;
     if (effectiveKw) {
         url += `&keyword=${encodeURIComponent(effectiveKw)}`;
     }
@@ -2003,7 +2158,12 @@ async function loadOverviewCompanyReports(ticker, keyword = null, reportTypeId =
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 8000);
-            const res = await fetch(url, { signal: controller.signal });
+            let res = await fetch(url, { signal: controller.signal });
+            if (!res.ok && attempt === 1) {
+                // Fallback tạm thời sang industry-reports nếu endpoint mới đang khởi động
+                const fallbackUrl = `/api/industry-reports?ticker=${encodeURIComponent(cleanTicker)}&report_type=58`;
+                res = await fetch(fallbackUrl, { signal: controller.signal });
+            }
             clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
@@ -4006,8 +4166,16 @@ function renderBctcTable(stm, subtab) {
             rowClass += " bg-cyan-950/20";
         }
 
+        let displayTitle = trimmed;
+        const lowerTitle = trimmed.toLowerCase();
+        if (lowerTitle.includes("lãi cơ bản trên cổ phiếu") || lowerTitle.includes("lãi suy giảm trên cổ phiếu")) {
+            if (!displayTitle.includes("đồng/CP")) {
+                displayTitle += ` <span class="text-[10px] text-cyan-400 font-normal ml-1">(đồng/CP)</span>`;
+            }
+        }
+
         let r = `<tr class="${rowClass}">
-            <td class="${titleClass}">${trimmed}</td>`;
+            <td class="${titleClass}">${displayTitle}</td>`;
         
         (dataList || []).forEach((v, colIdx) => {
             let num = Number(v);
@@ -4039,6 +4207,11 @@ function renderBctcTable(stm, subtab) {
                     num = Number(activeStm.revenue[colIdx]);
                 } else if ((lower.includes("lợi nhuận sau thuế") || lower.includes("lnst")) && activeStm.net_profit && activeStm.net_profit[colIdx]) {
                     num = Number(activeStm.net_profit[colIdx]);
+                } else if ((lower.includes("lãi cơ bản trên cổ phiếu") || lower.includes("lãi suy giảm trên cổ phiếu")) && activeStm.net_profit && activeStm.net_profit[colIdx]) {
+                    const shares = Number(currentFinancialBundle?.company_profile?.shares_outstanding_mil || 0);
+                    if (shares > 0) {
+                        num = Math.round((Number(activeStm.net_profit[colIdx]) * 1000) / shares);
+                    }
                 }
             }
 
@@ -5149,7 +5322,9 @@ function renderPeersSection(peersData) {
 
     // Tự động tải báo cáo phân tích ngành & hàng hóa liên quan đến mã đang xem
     const activeTicker = peersData.target_ticker || currentReport?.ticker || "HPG";
-    loadIndustryReports(activeTicker);
+    const typeSelectEl = document.getElementById("industry-report-type-select");
+    const initType = typeSelectEl ? (typeSelectEl.value || "57") : "57";
+    loadIndustryReports(activeTicker, "", initType);
 }
 
 // -------------------------------------------------------------
@@ -5157,7 +5332,7 @@ function renderPeersSection(peersData) {
 // -------------------------------------------------------------
 let currentIndustryReportsData = null;
 
-async function loadIndustryReports(ticker, keyword = "", reportTypeId = "", sourceName = "", isExplicitSearch = false) {
+async function loadIndustryReports(ticker, keyword = "", reportTypeId = "57", sourceName = "", isExplicitSearch = false) {
     const tbody = document.getElementById("industry-reports-body");
     const countBadge = document.getElementById("industry-report-count-badge");
     const secBadgeText = document.getElementById("industry-report-sector-name");
@@ -5194,8 +5369,9 @@ async function loadIndustryReports(ticker, keyword = "", reportTypeId = "", sour
         } else if (keyword && keyword.trim()) {
             url += `&keyword=${encodeURIComponent(keyword.trim())}`;
         }
-        if (reportTypeId) {
-            url += `&report_type=${encodeURIComponent(reportTypeId)}`;
+        const effectiveType = (reportTypeId !== undefined && reportTypeId !== null && reportTypeId !== "") ? reportTypeId : "57";
+        if (effectiveType) {
+            url += `&report_type=${encodeURIComponent(effectiveType)}`;
         }
         if (sourceName) {
             url += `&source=${encodeURIComponent(sourceName)}`;
@@ -5218,8 +5394,8 @@ async function loadIndustryReports(ticker, keyword = "", reportTypeId = "", sour
             }
         }
         const typeSelect = document.getElementById("industry-report-type-select");
-        if (typeSelect && (!reportTypeId || reportTypeId === "57")) {
-            typeSelect.value = reportTypeId || "57";
+        if (typeSelect) {
+            typeSelect.value = effectiveType || "57";
         }
 
         // Render Sector Badge
@@ -5397,7 +5573,7 @@ function resetIndustryReportFilter() {
     if (srcSelect) srcSelect.value = "";
 
     const activeTicker = currentReport?.ticker || "HPG";
-    loadIndustryReports(activeTicker);
+    loadIndustryReports(activeTicker, "", "57");
 }
 
 function renderPeerRadarChart(peersData) {
@@ -10260,9 +10436,9 @@ async function openCtckReportsModal() {
             `;
             upsideHtml = `<div class="text-slate-500 text-xs italic font-medium">—</div>`;
         } else {
-            // Exact formula: ((target_price - currentPrice) / currentPrice) * 100
+            const effectiveTp = (r.is_price_adjusted && r.adjusted_target_price) ? r.adjusted_target_price : r.target_price;
             upside = currentPrice > 0 
-                ? ((r.target_price - currentPrice) / currentPrice) * 100 
+                ? ((effectiveTp - currentPrice) / currentPrice) * 100 
                 : (r.upside_percent || 0);
             const isPos = upside >= 0;
             const sign = isPos ? "+" : "";
@@ -10271,13 +10447,26 @@ async function openCtckReportsModal() {
                 : "text-rose-400 bg-rose-950/70 border-rose-800/80";
             const upsideIcon = isPos ? "trending-up" : "trending-down";
 
-            tpCellHtml = `<div class="font-black text-cyan-300">${r.target_price.toLocaleString("vi-VN")} đ</div>`;
+            if (r.is_price_adjusted && r.adjusted_target_price) {
+                let noteTip = (r.adjustment_notes && r.adjustment_notes.length > 0) ? r.adjustment_notes[0].replace(/"/g, '&quot;') : 'Đã điều chỉnh theo ngày GDKHQ';
+                tpCellHtml = `
+                    <div class="font-black text-amber-300 text-sm">${r.adjusted_target_price.toLocaleString("vi-VN")} đ</div>
+                    <div class="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-800 cursor-help mt-0.5" title="${noteTip}">Đ/C GDKHQ</div>
+                    <div class="text-[10px] text-slate-500 line-through">Gốc: ${r.target_price.toLocaleString("vi-VN")} đ</div>
+                `;
+            } else {
+                tpCellHtml = `<div class="font-black text-cyan-300">${r.target_price.toLocaleString("vi-VN")} đ</div>`;
+            }
+
             upsideHtml = `
                 <div class="inline-flex items-center gap-1 font-bold ${upsideColor} border px-2 py-0.5 rounded text-xs">
                     <i data-lucide="${upsideIcon}" class="w-3 h-3"></i>
                     <span>${sign}${upside.toFixed(1)}%</span>
                 </div>
             `;
+            if (r.is_price_adjusted && r.unadjusted_upside_percent !== null && r.unadjusted_upside_percent !== undefined) {
+                upsideHtml += `<div class="text-[9px] text-slate-500 font-mono mt-0.5">(Gốc: ${r.unadjusted_upside_percent > 0 ? '+' : ''}${r.unadjusted_upside_percent.toFixed(1)}%)</div>`;
+            }
         }
 
         // Catalysts list
@@ -11875,6 +12064,30 @@ document.addEventListener("click", (e) => {
     const modal = document.getElementById("modal-zalo-qr");
     if (modal && !modal.classList.contains("hidden") && e.target === modal) {
         closeZaloQrModal();
+    }
+});
+
+// -------------------------------------------------------------
+// CORPORATE ACTION PIN HANDLER
+// -------------------------------------------------------------
+window.toggleCorporateActionPin = function(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    const popup = document.querySelector(".ca-tooltip-popup");
+    if (popup) {
+        popup.classList.toggle("is-pinned");
+        if (window.lucide) lucide.createIcons();
+    }
+};
+
+document.addEventListener("click", function(e) {
+    if (!e.target.closest(".ca-tooltip-trigger")) {
+        const popup = document.querySelector(".ca-tooltip-popup");
+        if (popup && popup.classList.contains("is-pinned")) {
+            popup.classList.remove("is-pinned");
+        }
     }
 });
 
