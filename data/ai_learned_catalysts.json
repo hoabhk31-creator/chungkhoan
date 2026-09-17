@@ -29,6 +29,55 @@
       {
         "source": "SSI",
         "title": "File: report.pdf",
+        "time": "17/09/2026 09:43",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSI",
+        "title": "Nhập văn bản thô HPG",
+        "time": "17/09/2026 09:43",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSI Research",
+        "title": "Nhập văn bản thô HPG",
+        "time": "17/09/2026 09:43",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "DSC",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 26,900 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "KBSV",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "Vietcap",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSI Research",
+        "title": "Nhập văn bản thô HPG",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSI",
+        "title": "File: report.pdf",
         "time": "16/09/2026 20:35",
         "cats_added": 3,
         "risks_added": 2
@@ -83,7 +132,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:35"
+    "last_updated": "17/09/2026 09:43"
   },
   "SSI": {
     "ticker": "SSI",
@@ -104,6 +153,34 @@
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với SSI"
     ],
     "history": [
+      {
+        "source": "VCBS",
+        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "EVS.,JSC",
+        "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VPX",
+        "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VCBS",
+        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "VCBS",
         "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
@@ -140,7 +217,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "VNM": {
     "ticker": "VNM",
@@ -171,6 +248,13 @@
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VNM"
     ],
     "history": [
+      {
+        "source": "VDS",
+        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "VDS",
         "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
@@ -263,7 +347,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "MWG": {
     "ticker": "MWG",
@@ -285,6 +369,13 @@
       {
         "source": "VDS",
         "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VDS",
+        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -297,7 +388,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "VTO": {
     "ticker": "VTO",
@@ -318,6 +409,13 @@
       {
         "source": "VDS",
         "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VDS",
+        "title": "VTO: Khuyến nghị  MUA với giá mục tiêu 13,450 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -330,25 +428,43 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "DCM": {
     "ticker": "DCM",
     "catalysts": [
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào (DCM)",
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới (DCM)",
       "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ (DCM)",
       "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (DCM)",
       "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (DCM)"
     ],
     "risks": [
+      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc",
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
     "theses": [
+      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh đối với DCM",
       "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với DCM",
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với DCM",
       "Triển vọng giá Urea thế giới kỳ vọng duy trì 450 - 500 USD/tấn nửa cuối năm 2026"
     ],
     "history": [
+      {
+        "source": "BSC",
+        "title": "DCM: Báo cáo cập nhật 15/09/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 2,
+        "risks_added": 1
+      },
+      {
+        "source": "Beta",
+        "title": "DCM: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 2,
+        "risks_added": 1
+      },
       {
         "source": "BSC",
         "title": "DCM: Báo cáo cập nhật 15/09/2026",
@@ -378,7 +494,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "VCB": {
     "ticker": "VCB",
@@ -399,6 +515,13 @@
       {
         "source": "BSC",
         "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BSC",
+        "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -411,7 +534,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "VSC": {
     "ticker": "VSC",
@@ -432,6 +555,13 @@
       {
         "source": "SHS",
         "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SHS",
+        "title": "VSC: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 16,240 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -444,7 +574,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "PHR": {
     "ticker": "PHR",
@@ -465,6 +595,13 @@
       {
         "source": "MAS",
         "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "MAS",
+        "title": "PHR: Khuyến nghị MUA với giá mục tiêu 37,700 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -477,7 +614,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "NTP": {
     "ticker": "NTP",
@@ -498,6 +635,13 @@
       {
         "source": "KBSV",
         "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "KBSV",
+        "title": "NTP: Khuyến nghị MUA với giá mục tiêu 73,200 đồng/cổ phiếu",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -510,7 +654,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "BWE": {
     "ticker": "BWE",
@@ -531,6 +675,13 @@
       {
         "source": "KIS",
         "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "KIS",
+        "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -543,7 +694,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "VIX": {
     "ticker": "VIX",
@@ -564,6 +715,13 @@
       {
         "source": "TCBS",
         "title": "VIX: Báo cáo cập nhật 14/09/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "TCBS",
+        "title": "VIX: Báo cáo cập nhật 14/09/2026",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -576,7 +734,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "PVD": {
     "ticker": "PVD",
@@ -597,6 +755,13 @@
       {
         "source": "BSC",
         "title": "PVD: Báo cáo cập nhật 14/09/2026",
+        "time": "17/09/2026 09:42",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BSC",
+        "title": "PVD: Báo cáo cập nhật 14/09/2026",
         "time": "16/09/2026 20:48",
         "cats_added": 3,
         "risks_added": 2
@@ -609,7 +774,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:48"
+    "last_updated": "17/09/2026 09:42"
   },
   "FPT": {
     "ticker": "FPT",
@@ -693,11 +858,18 @@
       {
         "source": "SSI Research",
         "title": "Báo cáo phân tích TCH",
+        "time": "17/09/2026 09:43",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSI Research",
+        "title": "Báo cáo phân tích TCH",
         "time": "16/09/2026 20:35",
         "cats_added": 3,
         "risks_added": 2
       }
     ],
-    "last_updated": "16/09/2026 20:35"
+    "last_updated": "17/09/2026 09:43"
   }
 }
