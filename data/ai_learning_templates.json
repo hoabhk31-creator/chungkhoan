@@ -393,5 +393,83 @@
     "sample_text": "",
     "is_system": false,
     "updated_at": "17/09/2026 09:42"
+  },
+  {
+    "id": "custom-7ab0001e",
+    "name": "Hóa chất & Phân bón (DGC, DCM)",
+    "sector": "Hóa chất & Phân bón",
+    "keywords": [
+      "dgc",
+      "dcm",
+      "phốt pho vàng",
+      "apatit",
+      "urê",
+      "hóa chất"
+    ],
+    "catalyst_rules": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+    ],
+    "thesis_rules": [
+      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+    ],
+    "risk_rules": [
+      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+    ],
+    "sample_text": "",
+    "is_system": false,
+    "updated_at": "17/09/2026 10:51"
+  },
+  {
+    "id": "custom-40ab1af4",
+    "name": "Hóa chất & Phân bón (DGC, DCM)",
+    "sector": "Hóa chất & Phân bón",
+    "keywords": [
+      "dgc",
+      "dcm",
+      "phốt pho vàng",
+      "apatit",
+      "urê",
+      "hóa chất"
+    ],
+    "catalyst_rules": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+    ],
+    "thesis_rules": [
+      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+    ],
+    "risk_rules": [
+      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+    ],
+    "sample_text": "",
+    "is_system": false,
+    "updated_at": "17/09/2026 11:18"
+  },
+  {
+    "id": "custom-daa98676",
+    "name": "Hóa chất & Phân bón (DGC, DCM)",
+    "sector": "Hóa chất & Phân bón",
+    "keywords": [
+      "dgc",
+      "dcm",
+      "phốt pho vàng",
+      "apatit",
+      "urê",
+      "hóa chất"
+    ],
+    "catalyst_rules": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+    ],
+    "thesis_rules": [
+      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+    ],
+    "risk_rules": [
+      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+    ],
+    "sample_text": "",
+    "is_system": false,
+    "updated_at": "17/09/2026 13:39"
   }
 ]
