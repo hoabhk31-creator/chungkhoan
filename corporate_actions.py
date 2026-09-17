@@ -497,25 +497,44 @@ def calculate_vas_adjustment_factor(
     ref_price_before: Optional[float] = None
 ) -> float:
     """
-    Tính hệ số điều chỉnh giá (k) theo công thức chuẩn mực của Sở GDCK (HOSE / HNX):
+    Tính hệ số điều chỉnh giá (k) theo công thức chuẩn mực của Sở GDCK (HOSE / HNX / UBCKNN):
     P_adj = (P_c - D + P_issue * alpha) / (1 + beta + alpha)
     k = P_adj / P_c
+    
+    Trong đó:
+    - P_c: Giá trước ngày GDKHQ (hoặc Giá mục tiêu TP ban đầu của CTCK)
+    - D: Cổ tức bằng tiền mặt (VNĐ/CP)
+    - beta: Tỷ lệ cổ tức bằng cổ phiếu / cổ phiếu thưởng (ví dụ: 10% -> 0.1, 4:3 -> 0.75)
+    - alpha: Tỷ lệ phát hành quyền mua thêm (ví dụ: 10:1 -> 0.1)
+    - P_issue: Giá phát hành quyền mua (VNĐ/CP)
     """
-    if event.get("adjustment_factor") and float(event["adjustment_factor"]) > 0:
-        return float(event["adjustment_factor"])
-
-    p_c = ref_price_before or float(event.get("ref_price_before") or 25000.0)
     d_cash = float(event.get("cash_amount") or 0.0)
     beta = float(event.get("stock_ratio") or 0.0)
     alpha = float(event.get("rights_ratio") or 0.0)
     p_issue = float(event.get("rights_price") or 0.0)
 
-    denominator = 1.0 + beta + alpha
-    if denominator <= 0 or p_c <= 0:
+    # 1. Thuần chia cổ tức bằng cổ phiếu / cổ phiếu thưởng (D = 0, alpha = 0, beta > 0)
+    # Hệ số k = 1 / (1 + beta) là hằng số toán học độc lập hoàn toàn với giá tham chiếu
+    if d_cash == 0.0 and alpha == 0.0:
+        if beta > 0:
+            return round(1.0 / (1.0 + beta), 4)
         return 1.0
 
-    numerator = p_c - d_cash + (p_issue * alpha)
-    p_adj = max(100.0, numerator / denominator)
+    # 2. Có cổ tức tiền mặt hoặc quyền mua: phụ thuộc trực tiếp vào giá tham chiếu P_c
+    p_c = ref_price_before or float(event.get("ref_price_before") or 0.0)
+    if p_c <= 0:
+        if event.get("adjustment_factor") and float(event["adjustment_factor"]) > 0:
+            return float(event["adjustment_factor"])
+        p_c = 50000.0
+
+    effective_rights_val = (p_issue * alpha) if (alpha > 0 and p_issue < p_c) else 0.0
+    effective_alpha = alpha if (alpha > 0 and p_issue < p_c) else 0.0
+    denom = 1.0 + beta + effective_alpha
+    if denom <= 0:
+        return 1.0
+
+    numerator = p_c - d_cash + effective_rights_val
+    p_adj = max(100.0, numerator / denom)
     k = p_adj / p_c
     return round(k, 4)
 
@@ -544,9 +563,13 @@ def adjust_target_price_for_corporate_actions(
     Thuật toán kiểm tra và điều chỉnh giá mục tiêu ban đầu của CTCK nếu báo cáo được phát hành
     TRƯỚC ngày Giao dịch không hưởng quyền (GDKHQ).
     
-    Quy tắc:
+    Quy tắc chuẩn hóa theo Quy chế niêm yết & giao dịch của Sở GDCK (HOSE / HNX):
     - Nếu T_report >= T_ex: Báo cáo phát hành sau ngày chia, CTCK đã định giá trên cơ sở vốn mới -> Giữ nguyên.
-    - Nếu T_report < T_ex: Báo cáo phát hành trước ngày chia, giá mục tiêu cũ cần nhân hệ số pha loãng k.
+    - Nếu T_report < T_ex: Báo cáo phát hành trước ngày chia, giá mục tiêu cũ cần điều chỉnh:
+      + Chia cổ tức bằng tiền: P_adj = P_c - D
+      + Cổ tức CP / thưởng CP: P_adj = P_c / (1 + beta)
+      + Quyền mua phát hành mới: P_adj = (P_c + P_issue * alpha) / (1 + alpha) (với P_issue < P_c)
+      + Tổng quát đa quyền: P_adj = (P_c - D + P_issue * alpha) / (1 + beta + alpha)
     
     Trả về Dict gồm:
     - raw_target_price: Giá mục tiêu ban đầu
@@ -600,16 +623,38 @@ def adjust_target_price_for_corporate_actions(
 
         # Chỉ xét sự kiện nếu ngày GDKHQ xảy ra SAU ngày phát hành báo cáo và TRƯỚC HOẶC BẰNG ngày hiện tại
         if rep_date < ex_d <= today:
-            k = calculate_vas_adjustment_factor(ev, ref_price_before=curr_p)
-            if 0.1 <= k < 0.999:
-                curr_p = curr_p * k
-                cumulative_factor *= k
-                applied_events.append(ev)
+            d_cash = float(ev.get("cash_amount") or 0.0)
+            beta = float(ev.get("stock_ratio") or 0.0)
+            alpha = float(ev.get("rights_ratio") or 0.0)
+            p_issue = float(ev.get("rights_price") or 0.0)
 
-                # Soạn ghi chú tóm tắt
-                ex_str = ev.get("ex_date", "")
-                title = ev.get("title") or ev.get("description") or "Điều chỉnh quyền"
-                notes_list.append(f"GDKHQ {ex_str}: {title}")
+            # Quyền mua chỉ làm pha loãng giá nếu giá phát hành thấp hơn giá hiện tại
+            effective_rights_val = (p_issue * alpha) if (alpha > 0 and (curr_p <= 0 or p_issue < curr_p)) else 0.0
+            effective_alpha = alpha if (alpha > 0 and (curr_p <= 0 or p_issue < curr_p)) else 0.0
+
+            denom = 1.0 + beta + effective_alpha
+            if denom > 0 and curr_p > 0:
+                # Tính trực tiếp theo công thức chuẩn của Sở GDCK (HOSE / HNX / UBCKNN):
+                # P_adj = (P_c - D + P_issue * alpha) / (1 + beta + alpha)
+                p_adj = max(100.0, (curr_p - d_cash + effective_rights_val) / denom)
+                
+                # Áp dụng nếu có sự điều chỉnh giảm giá hợp lệ
+                if p_adj < curr_p - 1e-4:
+                    k = p_adj / curr_p
+                    prev_p = curr_p
+                    curr_p = p_adj
+                    cumulative_factor *= k
+
+                    ev_applied = dict(ev)
+                    ev_applied["adjustment_factor"] = round(k, 4)
+                    ev_applied["applied_price_before"] = round(prev_p, -2)
+                    ev_applied["applied_price_after"] = round(p_adj, -2)
+                    applied_events.append(ev_applied)
+
+                    # Soạn ghi chú tóm tắt
+                    ex_str = ev.get("ex_date", "")
+                    title = ev.get("title") or ev.get("description") or "Điều chỉnh quyền"
+                    notes_list.append(f"GDKHQ {ex_str}: {title}")
 
     is_adjusted = len(applied_events) > 0
     adj_price = round(curr_p, -2) if is_adjusted else raw_target_price
@@ -643,6 +688,7 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
     title = item.get("title") or ""
     event_type_name = item.get("eventTypeName") or ""
     text = f"{title} {desc} {event_type_name}"
+    text_lower = text.lower()
     
     ex_date = item.get("exDividendDate")
     record_date = item.get("recordDate")
@@ -658,7 +704,7 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
     ev_type = "other"
     
     # 1. Cổ tức tiền mặt
-    if "tiền" in text.lower():
+    if "tiền" in text_lower:
         m_cash = re.search(r"([0-9]{1,3}(?:[.,][0-9]{3})*)\s*(?:đồng|đ|vnd|/cp)", text, re.IGNORECASE)
         if m_cash:
             val_str = m_cash.group(1).replace(".", "").replace(",", "")
@@ -674,29 +720,11 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
                 if pct <= 100:
                     cash_amount = pct * 100.0
                     ev_type = "dividend_cash"
-                    
-    # 2. Cổ tức cổ phiếu / Cổ phiếu thưởng
-    if "cổ phiếu" in text.lower() or "thưởng" in text.lower():
-        m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
-        if m_ratio:
-            a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            if a > 0 and b > 0:
-                stock_ratio = b / a if a >= b else a / b
-                ev_type = "bonus_share" if "thưởng" in text.lower() else "dividend_stock"
-        else:
-            m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
-            if m_pct and "tiền" not in text.lower():
-                stock_ratio = float(m_pct.group(1)) / 100.0
-                ev_type = "dividend_stock"
 
-    # 3. Phát hành thêm / Quyền mua
-    if "quyền mua" in text.lower() or "phát hành thêm" in text.lower():
+    # 2. Phát hành thêm / Quyền mua cổ phiếu (Phải kiểm tra để tránh nhầm từ 'cổ phiếu' thành cổ tức CP)
+    has_rights = "quyền mua" in text_lower or "chào bán cho cổ đông" in text_lower or "chào bán thêm" in text_lower or "phát hành thêm" in text_lower
+    if has_rights:
         ev_type = "rights_issue"
-        m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
-        if m_ratio:
-            a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            if a > 0 and b > 0:
-                rights_ratio = b / a if a >= b else a / b
         m_price = re.search(r"giá\s*([0-9]{1,3}(?:[.,][0-9]{3})*)", text, re.IGNORECASE)
         if m_price:
             try:
@@ -704,16 +732,75 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
             except Exception:
                 pass
 
+        # Tìm tỷ lệ quyền mua (ví dụ tỷ lệ 5:1, 10:1, 10%)
+        m_ratio = re.search(r"(?:quyền mua|chào bán|phát hành thêm)[^;.,]*?tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+        if not m_ratio and not ("thưởng" in text_lower or "cổ tức" in text_lower):
+            m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+        if m_ratio:
+            a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
+            if a > 0 and b > 0:
+                rights_ratio = b / a if a >= b else a / b
+        else:
+            m_pct = re.search(r"(?:quyền mua|chào bán|phát hành thêm)[^;.,]*?([0-9]+(?:\.[0-9]+)?)\s*%", text, re.IGNORECASE)
+            if not m_pct and not ("thưởng" in text_lower or "cổ tức" in text_lower):
+                m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
+            if m_pct and "tiền" not in text_lower:
+                rights_ratio = float(m_pct.group(1)) / 100.0
+
+    # 3. Cổ tức cổ phiếu / Cổ phiếu thưởng (Chỉ xét khi có từ khóa thưởng, cổ tức CP hoặc tăng vốn từ nguồn vốn CSH)
+    has_bonus = (
+        "thưởng" in text_lower or
+        ("cổ tức" in text_lower and "cổ phiếu" in text_lower and "tiền" not in text_lower) or
+        "nguồn vốn chủ sở hữu" in text_lower or
+        "nguồn vốn csh" in text_lower
+    )
+    if has_bonus:
+        # Tìm tỷ lệ thưởng / cổ tức cổ phiếu
+        m_ratio = re.search(r"(?:thưởng|cổ phiếu thưởng|bằng cổ phiếu|tăng vốn)[^;.,]*?tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+        if not m_ratio and not has_rights:
+            m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+        if m_ratio:
+            a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
+            if a > 0 and b > 0:
+                stock_ratio = b / a if a >= b else a / b
+                ev_type = "bonus_share" if "thưởng" in text_lower else "dividend_stock"
+        else:
+            # Tìm phần trăm cổ phiếu thưởng / cổ tức CP (tránh nhầm phần trăm cổ tức tiền)
+            for m_p in re.finditer(r"(?:cổ phiếu thưởng|thưởng cổ phiếu|bằng cổ phiếu|tăng vốn)[^;.,]*?([0-9]+(?:\.[0-9]+)?)\s*%", text, re.IGNORECASE):
+                span_text = m_p.group(0).lower()
+                if "tiền" not in span_text:
+                    stock_ratio = float(m_p.group(1)) / 100.0
+                    break
+            if stock_ratio == 0 and not has_rights and "tiền" not in text_lower:
+                m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
+                if m_pct:
+                    stock_ratio = float(m_pct.group(1)) / 100.0
+                    ev_type = "dividend_stock"
+
+    # Phân loại event_type
     if cash_amount > 0 and (stock_ratio > 0 or rights_ratio > 0):
         ev_type = "dividend_both"
+    elif stock_ratio > 0 and rights_ratio > 0:
+        ev_type = "dividend_and_rights"
+    elif rights_ratio > 0:
+        ev_type = "rights_issue"
+    elif stock_ratio > 0:
+        ev_type = "bonus_share" if "thưởng" in text_lower else "dividend_stock"
+    elif cash_amount > 0:
+        ev_type = "dividend_cash"
 
     if cash_amount == 0 and stock_ratio == 0 and rights_ratio == 0:
         return None
 
-    # Tính hệ số điều chỉnh ước tính
-    ref_p = 50000.0
-    denom = 1.0 + stock_ratio + rights_ratio
-    factor = round(((ref_p - cash_amount + rights_price * rights_ratio) / denom) / ref_p, 4) if denom > 0 else 1.0
+    # Hệ số điều chỉnh:
+    # Nếu thuần là cổ phiếu thưởng hoặc cổ tức cổ phiếu (không có tiền mặt và không có quyền mua),
+    # hệ số pha loãng là hằng số toán học: 1 / (1 + beta)
+    if cash_amount == 0 and rights_ratio == 0 and stock_ratio > 0:
+        factor = round(1.0 / (1.0 + stock_ratio), 4)
+    else:
+        # Nếu có tiền mặt hoặc quyền mua, hệ số điều chỉnh bắt buộc phải phụ thuộc vào thị giá
+        # tại ngày GDKHQ (hoặc giá mục tiêu ban đầu của báo cáo), không được gán cứng giá 50.000 đ!
+        factor = None
 
     return {
         "id": f"{ticker.lower()}-ca-{ex_date.replace('/', '')}-{ev_type}",

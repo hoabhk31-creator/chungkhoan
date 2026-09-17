@@ -1426,24 +1426,92 @@ class TestIERM(unittest.TestCase):
         """
         from corporate_actions import adjust_target_price_for_corporate_actions, get_ticker_corporate_actions
         
-        # 1. HPG test: Báo cáo trước ngày 20/06/2024
+        # 1. HPG test: Báo cáo ngày 15/05/2024 trải qua các sự kiện từ 2024 đến 2026
         res_hpg_before = adjust_target_price_for_corporate_actions("HPG", "15/05/2024", 38000.0)
-        self.assertTrue(res_hpg_before["is_price_adjusted"], "HPG báo cáo tháng 5/2024 phải được điều chỉnh vì ra trước GDKHQ 20/06/2024")
+        self.assertTrue(res_hpg_before["is_price_adjusted"], "HPG báo cáo tháng 5/2024 phải được điều chỉnh vì ra trước các ngày GDKHQ")
         self.assertLess(res_hpg_before["adjusted_target_price"], 38000.0, "Giá sau điều chỉnh phải thấp hơn giá gốc 38.000 đ")
-        self.assertLessEqual(res_hpg_before["adjusted_target_price"], 34000.0)
+        self.assertEqual(res_hpg_before["adjusted_target_price"], 23000.0, "HPG 38k sau chuỗi điều chỉnh đến nay là 23.000 đ")
         self.assertGreater(len(res_hpg_before["notes"]), 0)
 
-        # 2. HPG test: Báo cáo sau ngày GDKHQ mới nhất năm 2026
+        # 1b. HPG test: Báo cáo ngày 01/05/2026 (trước ngày GDKHQ 11/05/2026 cổ tức 500đ và 25/05/2026 cổ tức CP 10%)
+        # P_adj = (38.000 - 500) / 1.1 = 37.500 / 1.1 = 34.091 -> 34.100 đ
+        res_hpg_2026 = adjust_target_price_for_corporate_actions("HPG", "01/05/2026", 38000.0)
+        self.assertTrue(res_hpg_2026["is_price_adjusted"])
+        self.assertEqual(res_hpg_2026["adjusted_target_price"], 34100.0, "HPG 38k phát hành 01/05/2026 sau cổ tức 500đ và 10% CP là 34.100 đ")
+
+        # 2. HPG test: Báo cáo sau toàn bộ sự kiện GDKHQ (ví dụ 01/06/2026)
         res_hpg_after = adjust_target_price_for_corporate_actions("HPG", "01/06/2026", 38000.0)
         self.assertFalse(res_hpg_after["is_price_adjusted"], "HPG báo cáo tháng 6/2026 không bị điều chỉnh vì ra sau toàn bộ sự kiện GDKHQ")
         self.assertEqual(res_hpg_after["adjusted_target_price"], 38000.0)
         self.assertEqual(len(res_hpg_after["notes"]), 0)
 
-        # 3. SSI test: Báo cáo trước ngày 23/09/2024
-        res_ssi_before = adjust_target_price_for_corporate_actions("SSI", "10/08/2024", 40000.0)
-        self.assertTrue(res_ssi_before["is_price_adjusted"], "SSI báo cáo tháng 8/2024 phải được điều chỉnh vì ra trước GDKHQ 23/09/2024")
+        # 3. SSI test: Báo cáo trước ngày GDKHQ gần nhất
+        res_ssi_before = adjust_target_price_for_corporate_actions("SSI", "10/08/2026", 40000.0)
+        self.assertTrue(res_ssi_before["is_price_adjusted"], "SSI báo cáo trước ngày GDKHQ phải được điều chỉnh")
         self.assertLess(res_ssi_before["adjusted_target_price"], 40000.0)
-        self.assertEqual(res_ssi_before["adjusted_target_price"], 32100.0, "Giá SSI 40k sau điều chỉnh k=0.8026 là 32.100 đ")
+
+    def test_gee_and_all_corporate_action_types(self):
+        """
+        Kiểm tra toàn diện 4 trường hợp sự kiện quyền chuẩn theo Quy chế HOSE/HNX:
+        1. Chia cổ tức bằng tiền mặt (GEE): P_adj = P_c - D = 121.400 - 500 = 120.900 đ.
+        2. Cổ tức bằng cổ phiếu / thưởng CP (PVS): P_adj = P_c / (1 + beta) = 48.700 / 1.2 = 40.600 đ.
+        3. Quyền mua phát hành thêm cổ phiếu mới: P_adj = (P_c + P_issue * alpha) / (1 + alpha).
+        4. Tổng quát đa quyền (Tiền + Thưởng CP + Quyền mua): P_adj = (P_c - D + P_issue * alpha) / (1 + beta + alpha).
+        5. Kiểm thử tích hợp preset API của GEE: mean_target_price đạt đúng 120.900 đ.
+        """
+        from corporate_actions import (
+            adjust_target_price_for_corporate_actions,
+            calculate_vas_adjustment_factor,
+            get_ticker_corporate_actions
+        )
+
+        # Case 1: GEE cổ tức tiền mặt 500 đ (Giá mục tiêu ban đầu 121.400 đ)
+        # VPX Research phát hành 06/07/2026, GDKHQ 17/09/2026: 121.400 - 500 = 120.900 đ
+        res_gee = adjust_target_price_for_corporate_actions("GEE", "06/07/2026", 121400.0)
+        self.assertTrue(res_gee["is_price_adjusted"])
+        self.assertEqual(res_gee["adjusted_target_price"], 120900.0, "GEE 121.400 đ trừ 500 đ tiền mặt phải bằng đúng 120.900 đ")
+        self.assertEqual(res_gee["cumulative_factor"], 0.9959)
+        self.assertEqual(len(res_gee["applied_events"]), 1)
+        self.assertEqual(res_gee["applied_events"][0]["adjustment_factor"], 0.9959)
+
+        # Case 2: PVS thưởng cổ phiếu 20% (beta = 0.20)
+        res_pvs = adjust_target_price_for_corporate_actions("PVS", "17/08/2026", 48700.0)
+        self.assertTrue(res_pvs["is_price_adjusted"])
+        self.assertEqual(res_pvs["adjusted_target_price"], 40600.0, "PVS 48.700 / 1.2 phải bằng 40.600 đ")
+
+        # Case 3: Quyền mua phát hành thêm 2:1 giá 10k (alpha = 0.5, P_issue = 10k)
+        rights_ev = {
+            "ex_date": "01/01/2026",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.5,
+            "rights_price": 10000.0
+        }
+        k_rights = calculate_vas_adjustment_factor(rights_ev, ref_price_before=30000.0)
+        # (30.000 + 10.000 * 0.5) / 1.5 = 35.000 / 1.5 = 23.333 -> k = 23.333 / 30.000 = 0.7778
+        self.assertEqual(k_rights, 0.7778)
+
+        # Case 4: Đa quyền (Tiền 1k + Thưởng CP 20% + Quyền mua 10% giá 10k)
+        mixed_ev = {
+            "ex_date": "01/01/2026",
+            "cash_amount": 1000.0,
+            "stock_ratio": 0.20,
+            "rights_ratio": 0.10,
+            "rights_price": 10000.0
+        }
+        # Với P_c = 50.000: (50.000 - 1.000 + 1.000) / 1.3 = 50.000 / 1.3 = 38.461,5 -> k = 38.461,5 / 50.000 = 0.7692
+        k_mixed = calculate_vas_adjustment_factor(mixed_ev, ref_price_before=50000.0)
+        self.assertEqual(k_mixed, 0.7692)
+
+        # Case 5: Kiểm tra tích hợp qua API preset GEE
+        resp = self.client.get("/api/preset/GEE")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        cs = data["consensus_summary"]
+        self.assertTrue(cs["has_price_adjustment"], "GEE phải có cờ has_price_adjustment = True")
+        self.assertEqual(cs["mean_target_price"], 120900.0, "Giá mục tiêu sau điều chỉnh của GEE qua API phải là 120.900 đ")
+        self.assertEqual(cs["unadjusted_mean_target_price"], 121400.0, "Giá mục tiêu ban đầu của GEE qua API phải là 121.400 đ")
+        self.assertGreater(len(cs["applied_corporate_actions"]), 0)
 
     def test_corporate_actions_endpoint_and_consensus_integration(self):
         """
