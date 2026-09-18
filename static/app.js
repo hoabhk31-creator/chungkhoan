@@ -1054,10 +1054,26 @@ function renderHero(report) {
     if (window.lucide) lucide.createIcons();
 }
 
+function parseDateToTimestamp(dStr) {
+    if (!dStr || typeof dStr !== "string") return 0;
+    const clean = dStr.trim();
+    const m = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10)).getTime();
+    const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) return new Date(clean).getTime() || 0;
+    const my = clean.match(/(\d{1,2})\/(\d{4})/);
+    if (my) return new Date(parseInt(my[2], 10), parseInt(my[1], 10) - 1, 1).getTime();
+    const y = clean.match(/\b(20\d\d)\b/);
+    if (y) return new Date(parseInt(y[1], 10), 0, 1).getTime();
+    return 0;
+}
+
 function renderMatrixTable(report) {
     const table = document.getElementById("matrix-table-element");
     if (!table || !report) return;
-    const reports = report.matrix_table || [];
+    // Sắp xếp ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
+    const reports = (report.matrix_table || []).slice().sort((a, b) => parseDateToTimestamp(b.report_date) - parseDateToTimestamp(a.report_date));
+    report.matrix_table = reports;
     const cs = report.consensus_summary || {};
 
     // Banner Cảnh báo sự kiện quyền & GDKHQ trong Tab 1 (Bảng ma trận): ẨN ĐỂ CHẠY NGẦM THEO YÊU CẦU NĐT
