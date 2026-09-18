@@ -1372,5 +1372,52 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "VCI": [
+    {
+      "id": "vci-ca-26032026-bonus_share",
+      "ex_date": "26/03/2026",
+      "record_date": "27/03/2026",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "VCI: Thông báo về ngày đăng ký cuối cùng phát hành cổ phiếu để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 20:7",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.35,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.7407,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "vci-ca-26032026-dividend_cash",
+      "ex_date": "26/03/2026",
+      "record_date": "27/03/2026",
+      "execution_date": "10/04/2026",
+      "event_type": "dividend_cash",
+      "title": "VCI: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức bằng tiền đợt 2 năm 2025",
+      "description": "Trả cổ tức  đợt 2/2025 bằng tiền, 250 đồng/CP",
+      "cash_amount": 250.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "vci-ca-08012026-dividend_cash",
+      "ex_date": "08/01/2026",
+      "record_date": "09/01/2026",
+      "execution_date": "20/01/2026",
+      "event_type": "dividend_cash",
+      "title": "VCI: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức bằng tiền đợt 1 năm 2025",
+      "description": "Trả cổ tức  đợt 1/2025 bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
