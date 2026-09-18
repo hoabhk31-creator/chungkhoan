@@ -6,6 +6,7 @@ Hỗ trợ đầy đủ tiếng Việt Unicode, bố cục chuẩn báo cáo CTC
 """
 
 import os
+import re
 import base64
 import tempfile
 from datetime import datetime
@@ -435,6 +436,44 @@ class MatrixTableLandscapePDF(FPDF):
         self.cell(93, 5, f"Trang {self.page_no()}/{{nb}}", new_x=XPos.RIGHT, new_y=YPos.TOP, align="R")
 
 
+def sanitize_bullet_item(it: str) -> str:
+    """Làm sạch 1 điểm catalyst/risk, loại bỏ disclaimer, PUA và giữ trọn vẹn độ dài (không giới hạn ký tự)."""
+    if not it or not isinstance(it, str):
+        return ""
+    it_clean = it.strip()
+    # Loại bỏ ký tự lạ Private Use Area (E000-F8FF) để font không bị missing glyphs
+    it_clean = re.sub(r'[\ue000-\uf8ff]', '', it_clean)
+    it_clean = re.sub(r'^[•\-\*\>\➢\★\►\▪\▫\s\d\.\/\:]+', '', it_clean).strip()
+    if not it_clean:
+        return ""
+    disclaimer_markers = [
+        "khuyến cáo", "miễn trừ", "không chịu trách nhiệm", "không mang tính chất mời chào",
+        "chỉ nhằm mục đích", "email:", "tel:", "điện thoại:", "disclaimer", "chuyên viên phân tích",
+        "thời gian lịch sử phát triển", "tiền thân là", "thành lập năm 19", "bản quyền thuộc"
+    ]
+    if any(m in it_clean.lower() for m in disclaimer_markers):
+        return ""
+    return it_clean
+
+
+def sanitize_cell_bullet_text(items: list, max_items: int = 10, default_text: str = "") -> str:
+    """Làm sạch danh sách bullets, lọc bỏ disclaimer và giữ trọn vẹn văn bản không giới hạn ký tự (tối đa max_items)."""
+    if not items:
+        return f"• {default_text}" if default_text else "—"
+
+    clean_bullets = []
+    for it in items:
+        cleaned = sanitize_bullet_item(it)
+        if cleaned:
+            clean_bullets.append(f"• {cleaned}")
+        if len(clean_bullets) >= max_items:
+            break
+
+    if not clean_bullets:
+        return f"• {default_text}" if default_text else "—"
+    return "\n".join(clean_bullets)
+
+
 def generate_matrix_table_pdf(report_data: dict) -> bytes:
     """
     Tạo file PDF A4 Landscape chuẩn mực, linh động, không bị đè chữ, không bị cắt dòng.
@@ -446,6 +485,9 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     company_name = report_data.get("company_name", f"Công ty Cổ phần {ticker}")
     sector = report_data.get("sector", "Doanh nghiệp niêm yết")
     reports = report_data.get("matrix_table", [])
+    if reports:
+        from engine import get_report_date_sort_key
+        reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
     cs = report_data.get("consensus_summary", {})
 
     pdf = MatrixTableLandscapePDF(ticker=ticker, company_name=company_name, sector=sector)
@@ -502,8 +544,9 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     pdf.cell(273, 5, "PHẦN 1: BẢNG ĐỐI CHIẾU TRỰC DIỆN ĐỊNH LƯỢNG (QUANTITATIVE RECONCILIATION MATRIX)", align="L")
     pdf.ln(5)
 
-    # Tính độ rộng cột Trang 1
-    num_reports = max(1, len(reports))
+    # Tính độ rộng cột Trang 1 (Nếu quá 7 báo cáo, hiển thị Top 7 mới nhất trên Trang 1 để cột không bị co rúm)
+    display_reports_p1 = reports[:7] if len(reports) > 7 else reports
+    num_reports = max(1, len(display_reports_p1))
     col_crit_w = 48
     col_cons_w = 45
     rem_w = 273 - col_crit_w - col_cons_w
@@ -512,11 +555,14 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
 
     headings_style = FontFace(family="ArialVN", emphasis="B", size_pt=7.5, color=(255, 255, 255), fill_color=(15, 23, 42))
 
+    pdf.set_font(pdf.font_family_regular, "", 7.2)
+    pdf.set_text_color(15, 23, 42)
+
     with pdf.table(col_widths=col_widths_p1, headings_style=headings_style, line_height=4.6, padding=1.2, text_align="CENTER") as table:
         # Header
         h_row = table.row()
         h_row.cell("TIÊU CHÍ ĐỐI CHIẾU", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             inst = r.get("institution", "CTCK")
             date_str = r.get("report_date", "")
             is_exp = r.get("is_expired", False) or is_report_expired(date_str)
@@ -527,7 +573,7 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         # Row 1: Khuyến nghị
         r1 = table.row()
         r1.cell("1. Khuyến nghị đầu tư", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
             raw_rec = r.get("recommendation", "N/A")
             if is_exp:
@@ -539,7 +585,7 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         # Row 2: Giá mục tiêu
         r2 = table.row()
         r2.cell("2. Giá mục tiêu (VND)", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
             is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
             tp = r.get("target_price", 0)
@@ -556,7 +602,7 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         # Row 3: Upside %
         r3 = table.row()
         r3.cell("3. Tiềm năng tăng giá (Upside)", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
             is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
             tp = r.get("target_price", 0)
@@ -579,50 +625,50 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         # Row 4: P/E forward
         r4 = table.row()
         r4.cell("4. Định giá P/E Forward", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             pe = r.get("pe_forward")
             r4.cell(f"{pe:.1f}x" if pe else "—", align="C")
-        valid_pes = [r.get("pe_forward") for r in reports if r.get("pe_forward") and r.get("pe_forward") > 0]
+        valid_pes = [r.get("pe_forward") for r in display_reports_p1 if r.get("pe_forward") and r.get("pe_forward") > 0]
         avg_pe = sum(valid_pes) / len(valid_pes) if valid_pes else 0
         r4.cell(f"TB: {avg_pe:.1f}x" if avg_pe > 0 else "—", align="C")
 
         # Row 5: P/B forward
         r5 = table.row()
         r5.cell("5. Định giá P/B Forward", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             pb = r.get("pb_forward")
             r5.cell(f"{pb:.2f}x" if pb else "—", align="C")
-        valid_pbs = [r.get("pb_forward") for r in reports if r.get("pb_forward") and r.get("pb_forward") > 0]
+        valid_pbs = [r.get("pb_forward") for r in display_reports_p1 if r.get("pb_forward") and r.get("pb_forward") > 0]
         avg_pb = sum(valid_pbs) / len(valid_pbs) if valid_pbs else 0
         r5.cell(f"TB: {avg_pb:.2f}x" if avg_pb > 0 else "—", align="C")
 
         # Row 6: Dự phóng Doanh thu
         r6 = table.row()
         r6.cell("6. Dự phóng Doanh thu thuần", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             r6.cell(r.get("revenue_forecast", "N/A"), align="C")
         r6.cell("Đồng thuận tích cực", align="C")
 
         # Row 7: Dự phóng LNST
         r7 = table.row()
         r7.cell("7. Dự phóng LNST công ty mẹ", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             r7.cell(r.get("npat_forecast", "N/A"), align="C")
         r7.cell(f"Độ lệch: {cs.get('target_price_spread_percent', 0):.1f}%", align="C")
 
         # Row 8: Phương pháp định giá
         r8 = table.row()
         r8.cell("8. Phương pháp định giá chính", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             r8.cell(r.get("valuation_method", "DCF & P/E") or "DCF / P/E", align="C")
         r8.cell("IERM Blended", align="C")
 
         # Row 9: Dẫn chiếu Luận điểm & Rủi ro
         r9 = table.row()
         r9.cell("9. Luận điểm & Rủi ro chi tiết", align="L")
-        for r in reports:
+        for r in display_reports_p1:
             cats = r.get("key_catalysts", [])
-            txt_short = cats[0][:26] + "..." if cats else "Xem Trang 2"
+            txt_short = cats[0][:24] + "..." if cats else "Xem Trang 2"
             r9.cell(txt_short, align="C")
         r9.cell("→ Xem chi tiết tại Trang 2", align="C")
 
@@ -657,39 +703,78 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
 
     headings_style_p2 = FontFace(family="ArialVN", emphasis="B", size_pt=8, color=(255, 255, 255), fill_color=(15, 23, 42))
 
-    with pdf.table(col_widths=(50, 112, 111), headings_style=headings_style_p2, line_height=4.5, padding=2.0, repeat_headings=1) as table_p2:
-        h_row2 = table_p2.row()
-        h_row2.cell("TỔ CHỨC & KHUYẾN NGHỊ", align="L")
-        h_row2.cell("LUẬN ĐIỂM TĂNG TRƯỞNG THEN CHỐT (KEY CATALYSTS)", align="L")
-        h_row2.cell("RỦI RO TRỌNG YẾU CẦN THEO DÕI (KEY RISKS)", align="L")
+    pdf.set_font(pdf.font_family_regular, "", 7.5)
+    pdf.set_text_color(15, 23, 42)
 
+    try:
+        with pdf.table(col_widths=(48, 113, 112), headings_style=headings_style_p2, line_height=4.5, padding=2.0, repeat_headings=1) as table_p2:
+            h_row2 = table_p2.row()
+            h_row2.cell("TỔ CHỨC & KHUYẾN NGHỊ", align="L")
+            h_row2.cell("LUẬN ĐIỂM TĂNG TRƯỞNG THEN CHỐT (KEY CATALYSTS)", align="L")
+            h_row2.cell("RỦI RO TRỌNG YẾU CẦN THEO DÕI (KEY RISKS)", align="L")
+
+            for r in reports:
+                inst = r.get("institution", "CTCK")
+                date_str = r.get("report_date", "")
+                rec = r.get("recommendation", "MUA")
+                is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
+                is_exp = r.get("is_expired", False) or is_report_expired(date_str)
+                tp = r.get("target_price", 0)
+                up = r.get("upside_percent")
+                if is_exp:
+                    col1_text = f"{inst}\nNgày: {date_str} (Quá 1 năm)\n{rec} (Quá hạn)\nMục tiêu: {tp:,.0f} đ\nUpside: — (Quá hạn)"
+                elif is_tech:
+                    col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: — (PTKT)\nUpside: —"
+                elif not tp or tp <= 0 or r.get("is_estimated_price", False) or up is None:
+                    col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: — (KQKD)\nUpside: —"
+                else:
+                    up_text = f"Vượt +{abs(up):.1f}%" if up < 0 else f"+{up:.1f}%"
+                    col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: {tp:,.0f} đ\nUpside: {up_text}"
+
+                # Lấy tối đa 10 catalysts và 10 rủi ro, không giới hạn độ dài ký tự
+                raw_cats = [sanitize_bullet_item(c) for c in (r.get("key_catalysts", []) or [])]
+                cats = [c for c in raw_cats if c][:10]
+                if not cats:
+                    cats = ["Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."]
+
+                raw_risks = [sanitize_bullet_item(k) for k in (r.get("key_risks", []) or [])]
+                risks = [k for k in raw_risks if k][:10]
+                if not risks:
+                    risks = ["Rủi ro biến động nguyên vật liệu đầu vào và lãi suất."]
+
+                n_rows = max(len(cats), len(risks), 1)
+
+                for sub_i in range(n_rows):
+                    row = table_p2.row()
+                    if sub_i == 0:
+                        row.cell(col1_text, align="L")
+                    else:
+                        row.cell(f"{inst}\n(luận điểm {sub_i+1})", align="L")
+
+                    c_text = f"• {cats[sub_i]}" if sub_i < len(cats) else ""
+                    r_text = f"• {risks[sub_i]}" if sub_i < len(risks) else ""
+                    row.cell(c_text, align="L")
+                    row.cell(r_text, align="L")
+    except Exception as render_err:
+        print(f"[PDF-TABLE-WARN] table_p2 render error, switching to safe fallback: {render_err}")
+        # Safe fallback: vẽ từng box CTCK có kiểm tra page break an toàn
         for r in reports:
-            row = table_p2.row()
+            if pdf.get_y() > 170:
+                pdf.add_page()
             inst = r.get("institution", "CTCK")
             date_str = r.get("report_date", "")
             rec = r.get("recommendation", "MUA")
-            is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
-            is_exp = r.get("is_expired", False) or is_report_expired(date_str)
-            tp = r.get("target_price", 0)
-            up = r.get("upside_percent")
-            if is_exp:
-                col1_text = f"{inst}\nNgày: {date_str} (Quá 1 năm)\n{rec} (Quá hạn)\nMục tiêu: {tp:,.0f} đ\nUpside: — (Quá hạn)"
-            elif is_tech:
-                col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: — (PTKT)\nUpside: —"
-            elif not tp or tp <= 0 or r.get("is_estimated_price", False) or up is None:
-                col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: — (KQKD)\nUpside: —"
-            else:
-                up_text = f"Vượt +{abs(up):.1f}%" if up < 0 else f"+{up:.1f}%"
-                col1_text = f"{inst}\nNgày: {date_str}\n{rec}\nMục tiêu: {tp:,.0f} đ\nUpside: {up_text}"
-            row.cell(col1_text, align="L")
-
-            cats = r.get("key_catalysts", [])
-            cats_text = "\n".join([f"• {c}" for c in cats]) if cats else "• Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."
-            row.cell(cats_text, align="L")
-
-            risks = r.get("key_risks", [])
-            risks_text = "\n".join([f"• {k}" for k in risks]) if risks else "• Rủi ro biến động nguyên vật liệu đầu vào và lãi suất."
-            row.cell(risks_text, align="L")
+            pdf.set_font(pdf.font_family_bold, "B", 8)
+            pdf.set_fill_color(241, 245, 249)
+            pdf.cell(273, 5, f"{inst} ({date_str}) — Khuyến nghị: {rec}", border=1, fill=True)
+            pdf.ln()
+            pdf.set_font(pdf.font_family_regular, "", 7.5)
+            cats_text = sanitize_cell_bullet_text(r.get("key_catalysts", []), max_items=10)
+            risks_text = sanitize_cell_bullet_text(r.get("key_risks", []), max_items=10)
+            pdf.multi_cell(136, 4.5, f"CATALYSTS:\n{cats_text}", border=1)
+            pdf.set_xy(148, pdf.get_y() - 9)
+            pdf.multi_cell(137, 4.5, f"RISKS:\n{risks_text}", border=1)
+            pdf.ln(2)
 
     return bytes(pdf.output())
 

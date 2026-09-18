@@ -664,15 +664,50 @@ SECTOR_CATALYSTS_AND_RISKS = {
             "Tiến độ giải ngân các dự án truyền tải điện và dự án hạ tầng công nghiệp chậm hơn kế hoạch."
         ]
     },
-    "dau_khi": {
+    "dau_khi_van_tai": {
         "catalysts": [
-            "Triển khai các đại dự án khí - điện Lô B Ô Môn và mỏ Lạc Đà Vàng tạo khối lượng công việc E&C xây lắp và bọc ống khổng lồ.",
-            "Giá thuê ngày giàn khoan tự nâng (jack-up) duy trì ở mức cao trên 110,000 USD/ngày với công suất hoạt động 100%.",
-            "Nhu cầu tiêu thụ khí LNG và các sản phẩm xăng dầu nội địa tăng trưởng ổn định."
+            "Giá cước cho thuê tàu chở dầu thô và dầu sản phẩm quốc tế (BIDY, BITY) neo ở vùng đỉnh chu kỳ do căng thẳng địa chính trị kéo dài hải trình.",
+            "Quy mô đội tàu mở rộng liên tục với các tàu chở dầu thô Aframax/VLCC và tàu LPG hiện đại, nâng cao năng lực khai thác thị trường quốc tế.",
+            "Thống lĩnh 100% thị phần vận tải dầu thô và khí LPG nội địa, đảm bảo hợp đồng bao tiêu dài hạn ổn định từ các nhà máy lọc dầu Dung Quất và Nghi Sơn.",
+            "Biên lợi nhuận gộp mảng vận tải biển cải thiện mạnh mẽ lên trên 28% nhờ giá cước tái ký hợp đồng định hạn tăng cao và chi phí khấu hao giảm dần."
         ],
         "risks": [
-            "Biến động khó lường của giá dầu thô thế giới ảnh hưởng đến biên lợi nhuận kinh doanh.",
-            "Tiến độ cấp phép phê duyệt các quyết định đầu tư cuối cùng (FID) dự án thượng nguồn."
+            "Rủi ro hạ nhiệt căng thẳng địa chính trị tại Trung Đông và Biển Đỏ khiến giá cước tàu định hạn toàn cầu điều chỉnh giảm.",
+            "Biến động giá dầu nhiên liệu hàng hải (VLSFO / MGO) làm gia tăng chi phí giá vốn vận hành chuyến tàu.",
+            "Rủi ro biến động tỷ giá USD/VND và lãi suất đối với các khoản vay ngoại tệ tài trợ mua sắm tàu mới."
+        ]
+    },
+    "dau_khi_khoan": {
+        "catalysts": [
+            "Toàn bộ các giàn khoan tự nâng (Jack-up) ký kết hợp đồng dài hạn với giá thuê ngày duy trì ở mức cao trên 110,000 - 130,000 USD/ngày.",
+            "Công suất hoạt động của các giàn khoan đạt tối đa 100% xuyên suốt năm 2026 - 2027.",
+            "Chu kỳ khai thác dầu khí thượng nguồn hồi phục mạnh mẽ, nguồn cung giàn khoan khu vực Đông Nam Á tiếp tục khan hiếm."
+        ],
+        "risks": [
+            "Biến động giá dầu thô thế giới ảnh hưởng đến kế hoạch khoan thăm dò của các nhà điều hành mỏ.",
+            "Thời gian gián đoạn kỹ thuật khi di chuyển và hoán cải giàn khoan giữa các chiến dịch ngoài khơi."
+        ]
+    },
+    "dau_khi_xay_lap": {
+        "catalysts": [
+            "Triển khai các đại dự án khí - điện Lô B Ô Môn và mỏ Lạc Đà Vàng tạo khối lượng công việc EPCI xây lắp và bọc ống khổng lồ.",
+            "Backlog hợp đồng cơ khí chế tạo ngoài khơi và năng lượng tái tạo (điện gió ngoài khơi) đạt mức kỷ lục hàng tỷ USD.",
+            "Nền tảng tài chính không vay nợ ròng với lượng tiền mặt dồi dào trên 10,000 tỷ đồng mang lại nguồn thu lãi tiền gửi lớn."
+        ],
+        "risks": [
+            "Tiến độ giải ngân và trao thầu chính thức các gói thầu FIDs của đại dự án Khí Lô B có thể chậm hơn kế hoạch.",
+            "Biến động giá thép và vật liệu chế tạo kết cấu ngoài khơi ảnh hưởng đến biên lợi nhuận hợp đồng."
+        ]
+    },
+    "dau_khi": {
+        "catalysts": [
+            "Nhu cầu tiêu thụ khí LNG và các sản phẩm xăng dầu nội địa tăng trưởng ổn định theo đà phục hồi sản xuất công nghiệp.",
+            "Biên lợi nhuận lọc dầu (crack spread) các sản phẩm dầu diesel và nhiên liệu bay duy trì mặt bằng khả quan.",
+            "Mở rộng mạng lưới phân phối xăng dầu và hệ thống kho cảng logistics đầu mối hiện đại."
+        ],
+        "risks": [
+            "Biến động khó lường của giá dầu thô thế giới ảnh hưởng đến biên lợi nhuận kinh doanh và trích lập giảm giá tồn kho.",
+            "Chính sách điều hành giá xăng dầu và chi phí kinh doanh định mức của cơ quan quản lý."
         ]
     },
     "hoa_chat_phan_bon": {
@@ -768,7 +803,13 @@ def get_sector_catalysts(ticker: str, sector: str, comp_name: str, index: int = 
         sec_key = "thep"
     elif any(k in sec_lower for k in ["thiết bị điện", "điện tử", "dây cáp", "cáp điện"]) or clean_ticker in ["GEX", "GEE", "PAC", "RAL", "TYA", "DQC", "PHN", "VTB", "TBD", "SAM", "TSB"]:
         sec_key = "thiet_bi_dien"
-    elif any(k in sec_lower for k in ["dầu khí", "xăng dầu", "khai thác dầu", "lọc dầu"]) or clean_ticker in ["GAS", "PVD", "PVS", "BSR", "PLX", "OIL", "PVT", "PGS", "PVB", "PVC", "CNG"]:
+    elif any(k in sec_lower for k in ["vận tải dầu", "vận tải dầu khí", "vận tải biển dầu", "vận tải hàng lỏng"]) or clean_ticker in ["PVT", "PVP", "VIP", "VTO"]:
+        sec_key = "dau_khi_van_tai"
+    elif clean_ticker in ["PVD"]:
+        sec_key = "dau_khi_khoan"
+    elif clean_ticker in ["PVS", "PVB", "PVC"]:
+        sec_key = "dau_khi_xay_lap"
+    elif any(k in sec_lower for k in ["dầu khí", "xăng dầu", "khai thác dầu", "lọc dầu"]) or clean_ticker in ["GAS", "BSR", "PLX", "OIL", "PGS", "CNG"]:
         sec_key = "dau_khi"
     elif any(k in sec_lower for k in ["hóa chất", "phân bón", "phốt pho", "đạm"]) or clean_ticker in ["DGC", "DCM", "DPM", "CSV", "BFC", "LAS", "DDV", "HVT", "SFG"]:
         sec_key = "hoa_chat_phan_bon"
@@ -851,9 +892,15 @@ def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -
         sec_key = "ban_le"
     elif any(k in sec_lower for k in ["công nghệ", "viễn thông", "phần mềm"]) or clean_ticker in ["FPT", "CMG", "ELC", "CTR", "FOX"]:
         sec_key = "cong_nghe"
-    elif any(k in sec_lower for k in ["cảng biển", "logistics", "vận tải"]) or clean_ticker in ["GMD", "HAH", "PVT", "VOS"]:
+    elif any(k in sec_lower for k in ["vận tải dầu", "vận tải dầu khí", "vận tải biển dầu", "vận tải hàng lỏng"]) or clean_ticker in ["PVT", "PVP", "VIP", "VTO"]:
+        sec_key = "dau_khi_van_tai"
+    elif clean_ticker in ["PVD"]:
+        sec_key = "dau_khi_khoan"
+    elif clean_ticker in ["PVS", "PVB", "PVC"]:
+        sec_key = "dau_khi_xay_lap"
+    elif any(k in sec_lower for k in ["cảng biển", "logistics", "vận tải"]) or clean_ticker in ["GMD", "HAH", "VOS"]:
         sec_key = "cang_bien"
-    elif any(k in sec_lower for k in ["dầu khí", "năng lượng", "phân bón", "hóa chất"]) or clean_ticker in ["GAS", "PVD", "PVS", "BSR", "PLX", "DCM", "DPM", "DGC", "POW", "REE"]:
+    elif any(k in sec_lower for k in ["dầu khí", "năng lượng", "phân bón", "hóa chất"]) or clean_ticker in ["GAS", "BSR", "PLX", "DCM", "DPM", "DGC", "POW", "REE"]:
         sec_key = "dau_khi_nang_luong"
     elif any(k in sec_lower for k in ["thủy sản", "nông nghiệp", "chăn nuôi"]) or clean_ticker in ["VHC", "ANV", "DBC", "BAF", "HAG"]:
         sec_key = "nong_nghiep_thuy_san"
@@ -897,11 +944,70 @@ def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -
     ]
 
 
+def is_disclaimer_or_boilerplate(s: str) -> bool:
+    """
+    Nhận diện và loại bỏ triệt để:
+    1. Khuyến cáo miễn trừ trách nhiệm (disclaimer, disclosure, analyst certification)
+    2. Thông tin liên hệ chuyên viên / CTCK (email, tel, address, bloomberg)
+    3. Lịch sử hình thành công ty đơn thuần (thành lập năm 19xx, cổ phần hóa...)
+    """
+    if not s:
+        return True
+    s_clean = s.strip()
+    s_lower = s_clean.lower()
+
+    # 1. Disclaimer / Khuyến cáo / Miễn trừ trách nhiệm
+    disclaimer_keywords = [
+        "khuyến cáo", "tuyên bố miễn trừ", "miễn trừ trách nhiệm", "không chịu trách nhiệm",
+        "không mang tính chất mời chào", "không phải là lời khuyên", "chỉ nhằm mục đích cung cấp thông tin",
+        "chỉ mang tính tham khảo", "khối phân tích", "phòng phân tích", "bộ phận phân tích",
+        "báo cáo này được viết và phát hành bởi", "báo cáo này được công bố bởi",
+        "người sử dụng không được phép", "không được phép sao chép", "bản quyền thuộc",
+        "chính sách xếp hạng", "định nghĩa khuyến nghị", "disclaimer", "disclosures",
+        "analyst certification", "please see analyst", "tuyên bố từ chối", "ý kiến của tác giả",
+        "mọi hành vi sao chép", "thuộc sở hữu của", "đối tượng dự kiến của báo cáo",
+        "chúng tôi không chịu trách nhiệm", "không đại diện hoặc bảo đảm",
+        "không cam đoan, đại diện", "được chuẩn bị bởi", "được lập bởi",
+        "vui lòng xem khuyến cáo", "xem tuyên bố miễn trừ"
+    ]
+    if any(k in s_lower for k in disclaimer_keywords):
+        return True
+
+    # 2. Thông tin liên hệ / Tác giả / Chi nhánh / Email / SĐT
+    contact_keywords = [
+        "email:", "tel:", "điện thoại:", "fax:", "website:", "bloomberg:",
+        "director of research", "head of", "analyst:", "chuyên viên phân tích",
+        "trưởng bộ phận", "giám đốc khối", "trụ sở chính", "chi nhánh",
+        "phòng giao dịch", "nguyễn thượng hiền", "hai bà trưng", "nguyễn công trứ",
+        "phố huế", "lý thường kiệt"
+    ]
+    if any(k in s_lower for k in contact_keywords):
+        return True
+
+    # Nếu chuỗi chứa email format hoặc @...vndirect/@miraeasset/@ssi
+    if re.search(r'[\w\.-]+@[\w\.-]+\.\w+', s_lower):
+        return True
+
+    # 3. Lịch sử công ty đơn thuần (không có luận điểm tăng trưởng tương lai)
+    history_keywords = [
+        "thời gian lịch sử phát triển", "tiền thân là", "thành lập năm 19",
+        "doanh nghiệp nhà nước trực thuộc tổng cục", "tổng cục hóa chất việt nam",
+        "lịch sử phát triển"
+    ]
+    if any(k in s_lower for k in history_keywords):
+        return True
+
+    return False
+
+
 def is_report_boilerplate_or_meta(s: str) -> bool:
     """
     Kiểm tra xem câu văn có phải là tiêu đề báo cáo, câu chào của CTCK,
-    câu khuyến nghị giá mục tiêu, hoặc số liệu quá khứ không phải catalyst hay không.
+    khuyến cáo miễn trừ, câu khuyến nghị giá mục tiêu, hoặc số liệu quá khứ không phải catalyst hay không.
     """
+    if is_disclaimer_or_boilerplate(s):
+        return True
+
     s_clean = s.strip()
     s_lower = s_clean.lower()
 
@@ -925,27 +1031,32 @@ def is_report_boilerplate_or_meta(s: str) -> bool:
     ]):
         return True
 
-    # 3. Kết quả kinh doanh đã qua trong quá khứ (Past Quarterly/Half-year Results)
-    if re.search(r'lũy kế\s+(?:[0-9]+\s*tháng|cả năm\s+202[0-5])', s_lower):
-        return True
-    if 'hoàn thành' in s_lower and 'kế hoạch năm' in s_lower:
-        return True
-    if 'mức lãi kỷ lục sau' in s_lower or 'thua lỗ liên tiếp' in s_lower:
-        return True
-
-    is_future_quarter = any(k in s_lower for k in ["dự kiến", "kỳ vọng", "ước tính", "triển vọng", "kế hoạch", "bắt đầu", "đóng góp từ", "vận hành từ"])
-    if not is_future_quarter:
-        if re.search(r'(?:trong\s+)?(?:quý|q)\s*[1-4]\s*/\s*202[0-9]', s_lower):
-            return True
-        if re.search(r'kết quả\s+(?:quý|q)\s*[1-4]\s*/\s*202[0-9]', s_lower):
-            return True
-
-    # 4. Dự phóng số liệu thuần túy không chứa luận điểm tăng trưởng / lý do
+    # Nhận diện các lý do và động lực tăng trưởng cốt lõi
     has_growth_reason = any(k in s_lower for k in [
         'nhờ', 'do', 'bởi', 'động lực', 'tiềm năng', 'kỳ vọng nhờ', 'thúc đẩy bởi',
         'chu kỳ', 'mở rộng', 'vận hành', 'đóng góp', 'hợp đồng', 'cổ tức', 'chuyển sàn',
-        'niêm yết', 'tự khai thác', 'tinh luyện', 'công suất', 'thị phần', 'đột biến'
+        'niêm yết', 'tự khai thác', 'tinh luyện', 'công suất', 'thị phần', 'đột biến',
+        'giá cước', 'đội tàu', 'biên lãi gộp', 'biên gộp', 'tăng mạnh', 'vượt kế hoạch',
+        'hưởng lợi', 'chiến lược'
     ])
+
+    # 3. Kết quả kinh doanh quá khứ đơn thuần không kèm động lực tăng trưởng
+    if not has_growth_reason:
+        if re.search(r'lũy kế\s+(?:[0-9]+\s*tháng|cả năm\s+202[0-5])', s_lower):
+            return True
+        if 'hoàn thành' in s_lower and 'kế hoạch năm' in s_lower:
+            return True
+        if 'mức lãi kỷ lục sau' in s_lower or 'thua lỗ liên tiếp' in s_lower:
+            return True
+
+        is_future_quarter = any(k in s_lower for k in ["dự kiến", "kỳ vọng", "ước tính", "triển vọng", "kế hoạch", "bắt đầu", "đóng góp từ", "vận hành từ"])
+        if not is_future_quarter:
+            if re.search(r'(?:trong\s+)?(?:quý|q)\s*[1-4]\s*/\s*202[0-9]', s_lower):
+                return True
+            if re.search(r'kết quả\s+(?:quý|q)\s*[1-4]\s*/\s*202[0-9]', s_lower):
+                return True
+
+    # 4. Dự phóng số liệu thuần túy không chứa luận điểm tăng trưởng / lý do
     if not has_growth_reason:
         if re.search(r'(?:ước tính|dự phóng|dự kiến)\s+doanh thu.*lợi nhuận.*đạt\s+[0-9.,]+\s*tỷ', s_lower):
             return True
@@ -998,6 +1109,8 @@ def extract_detailed_catalysts_and_risks(
 
         if len(rem) >= 20 and not rem.lower().startswith('vui lòng xem'):
             cat_str = rem[0].upper() + rem[1:]
+            if is_disclaimer_or_boilerplate(cat_str):
+                continue
             if any(k in cat_str.lower() for k in ["rủi ro", "áp lực", "thách thức", "thận trọng", "suy giảm"]):
                 if cat_str not in extracted_risks:
                     extracted_risks.append(cat_str)
@@ -1023,12 +1136,16 @@ def extract_detailed_catalysts_and_risks(
         extracted_cats = [c for c in extracted_cats if not any(w in c.lower() for w in mfg_words)]
         extracted_risks = [r for r in extracted_risks if not any(w in r.lower() for w in mfg_words)]
         banking_terms = ["tín dụng", "nim", "casa", "car", "nợ xấu", "lãi", "tài chính", "dự phòng"]
-        combined = " ".join(extracted_cats[:5] + extracted_risks[:3]).lower()
+        combined = " ".join(extracted_cats[:10] + extracted_risks[:10]).lower()
         if not any(term in combined for term in banking_terms):
             sec_cats = get_sector_catalysts(clean_ticker, sector, comp_name, index=index)
             extracted_cats = sec_cats[:2] + extracted_cats
 
-    return extracted_cats[:5], extracted_risks[:3]
+    # Lọc lần cuối đảm bảo 100% không có câu disclaimer và lấy tối đa 10 điểm trọn vẹn nội dung
+    final_cats = [c for c in extracted_cats if not is_disclaimer_or_boilerplate(c)][:10]
+    final_risks = [r for r in extracted_risks if not is_disclaimer_or_boilerplate(r)][:10]
+
+    return final_cats, final_risks
 
 
 def extract_forecasts_from_content(content: str) -> Tuple[str, str]:
@@ -1104,6 +1221,128 @@ def extract_forecasts_from_content(content: str) -> Tuple[str, str]:
         npat_f = "—"
 
     return rev_f, npat_f
+
+
+_PDF_CATALYSTS_CACHE: Dict[str, Tuple[List[str], List[str]]] = {}
+
+
+def clean_vietnamese_pdf_spacing(text: str) -> str:
+    """
+    Chuẩn hóa khoảng trắng bị phân tách lỗi giữa các ký tự trong file PDF tiếng Việt (do font subsetting),
+    đồng thời loại bỏ các ký tự biểu tượng lạ Private Use Area (E000-F8FF) như Wingdings/Webdings để tránh lỗi font trong PDF.
+    """
+    # Loại bỏ ký tự lạ Private Use Area (ví dụ \uf0d8 của FPTS hoặc biểu tượng mũi tên Wingdings)
+    text = re.sub(r'[\ue000-\uf8ff]', '', text)
+    # Gộp các ký tự đơn lẻ bị ngắt dòng giữa từ
+    text = re.sub(r'(?<=[^\s\.\:\!\?])\n+(?=[^\s\n])', '', text)
+    text = re.sub(r'(\b\w)\s+(\w\b)', r'\1\2', text)
+    text = re.sub(r'(\w)\s+([àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹ])', r'\1\2', text)
+    text = re.sub(r'Q\s*([1-4])\s*[\.\/]\s*(2[0-9])\b', r'Q\1/20\2', text)
+    text = re.sub(r'(\d+)\s*,\s*(\d+)\s*%', r'\1,\2%', text)
+    return text
+
+
+async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tuple[List[str], List[str]]:
+    """
+    Tải và bóc tách sâu các luận điểm Catalysts và Rủi ro trực tiếp từ file PDF gốc của CTCK (Vietstock eDocs).
+    Tự động quét tối đa 6 trang đầu (hoặc toàn bộ file nếu ngắn) để tìm trọn vẹn luận điểm KQKD, dự án, triển vọng.
+    Lọc bỏ 100% các khuyến cáo miễn trừ, thông tin liên hệ và lịch sử thành lập công ty.
+    """
+    if not pdf_url or ".pdf" not in pdf_url.lower():
+        return [], []
+    if pdf_url in _PDF_CATALYSTS_CACHE:
+        return _PDF_CATALYSTS_CACHE[pdf_url]
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://finance.vietstock.vn/"
+    }
+
+    try:
+        async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
+            resp = await client.get(pdf_url)
+            if resp.status_code == 200 and (resp.content.startswith(b"%PDF") or "pdf" in resp.headers.get("content-type", "").lower()):
+                reader = PdfReader(io.BytesIO(resp.content))
+                num_pages = len(reader.pages)
+                # Quét tối đa 6 trang đầu của báo cáo CTCK
+                pages_to_scan = reader.pages[:min(num_pages, 6)]
+
+                full_text = ""
+                for page in pages_to_scan:
+                    p_txt = page.extract_text() or ""
+                    # Bỏ qua các trang phụ lục chỉ chứa Miễn trừ trách nhiệm / Disclaimer
+                    p_txt_lower = p_txt.lower()
+                    if ("miễn trừ trách nhiệm" in p_txt_lower or "disclaimer" in p_txt_lower) and len(p_txt) < 800 and not any(k in p_txt_lower for k in ["doanh thu", "lợi nhuận", "kế hoạch", "triển vọng", "dự án"]):
+                        continue
+                    full_text += p_txt + "\n"
+
+                # Bảo đảm tính toàn vẹn (Ticker Integrity): File PDF bắt buộc phải nhắc đến mã cổ phiếu đang xem
+                clean_t = (ticker or "").upper().strip()
+                if clean_t and len(clean_t) == 3 and clean_t not in full_text.upper():
+                    _PDF_CATALYSTS_CACHE[pdf_url] = ([], [])
+                    return [], []
+
+                # Tách text thành các câu / bullet rõ ràng (tránh dồn nguyên một đoạn văn 2000 ký tự)
+                raw_chunks = re.split(
+                    r'\n+(?=[•\-\*\>\➢\★\►])|(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n{2,}',
+                    full_text
+                )
+
+                highlight_cats = []
+                regular_cats = []
+                extracted_risks = []
+
+                for chunk in raw_chunks:
+                    clean_c = re.sub(r'\s+', ' ', chunk).strip()
+                    if len(clean_c) < 30:
+                        continue
+
+                    # Lọc sạch triệt để Khuyến cáo miễn trừ / Thông tin liên hệ / Lịch sử doanh nghiệp
+                    if is_disclaimer_or_boilerplate(clean_c):
+                        continue
+
+                    cat_candidate = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:]+', '', clean_c).strip()
+                    cat_candidate = clean_vietnamese_pdf_spacing(cat_candidate)
+                    cat_candidate = re.sub(r'\s+', ' ', cat_candidate).strip()
+
+                    # Giữ nguyên toàn bộ văn bản của luận điểm (không giới hạn độ dài ký tự)
+                    if len(cat_candidate) < 25:
+                        continue
+
+                    if re.match(r'^[%,\.\)\]\/\-]', cat_candidate):
+                        continue
+
+                    cand_lower = cat_candidate.lower()
+                    has_growth_signal = any(k in cand_lower for k in [
+                        "giá cước", "đội tàu", "tăng", "lợi nhuận", "doanh thu", "lãi gộp", "biên",
+                        "mở rộng", "định giá", "kế hoạch", "hoàn thành", "thị phần", "dự phóng",
+                        "công suất", "chiếc", "hợp đồng", "triển vọng", "hồi phục", "động lực",
+                        "dự án", "nghi sơn", "sản xuất", "quặng", "cổ tức", "xút", "tổ hợp", "nhà máy",
+                        "khấu hao", "tiêu thụ", "xuất khẩu", "tinh khiết", "bán dẫn"
+                    ])
+
+                    if has_growth_signal:
+                        if any(k in cand_lower for k in ["rủi ro", "áp lực", "thách thức", "suy giảm", "lao dốc", "đi lùi", "thấp hơn dự phóng"]):
+                            if cat_candidate not in extracted_risks:
+                                extracted_risks.append(cat_candidate)
+                        else:
+                            if re.match(r'^[➢★►]', clean_c):
+                                if cat_candidate not in highlight_cats:
+                                    highlight_cats.append(cat_candidate)
+                            else:
+                                if cat_candidate not in regular_cats:
+                                    regular_cats.append(cat_candidate)
+
+                all_cats = (highlight_cats + regular_cats)[:10]
+                if all_cats:
+                    res = (all_cats, extracted_risks[:10])
+                    _PDF_CATALYSTS_CACHE[pdf_url] = res
+                    return res
+    except Exception as e:
+        print(f"Error extracting catalysts from PDF {pdf_url}: {e}")
+
+    _PDF_CATALYSTS_CACHE[pdf_url] = ([], [])
+    return [], []
 
 
 async def fetch_edocs_reports(ticker: str = "", limit: int = 8) -> List[Dict[str, Any]]:
@@ -1528,7 +1767,29 @@ async def get_synchronized_matrix_reports(
     merged.sort(key=lambda x: parse_date_to_timestamp(x.report_date), reverse=True)
     res = merged[:max_reports]
 
-    # Bổ sung các luận điểm tăng trưởng (Catalysts) mà AI tự học được vào các cột CTCK
+    # Tự động tải và bóc tách trực tiếp luận điểm từ file PDF gốc của các CTCK hàng đầu
+    pdf_tasks = []
+    target_reports = []
+    for r in res[:6]:
+        src_url = getattr(r, "source_url", "") or ""
+        if ".pdf" in src_url.lower() and src_url.startswith("http"):
+            pdf_tasks.append(extract_catalysts_from_pdf_url(src_url, clean_ticker))
+            target_reports.append(r)
+
+    if pdf_tasks:
+        try:
+            pdf_results = await asyncio.gather(*pdf_tasks, return_exceptions=True)
+            for r, p_res in zip(target_reports, pdf_results):
+                if isinstance(p_res, tuple) and len(p_res) == 2:
+                    p_cats, p_risks = p_res
+                    if p_cats and len(p_cats) >= 2:
+                        r.key_catalysts = p_cats
+                    if p_risks and len(p_risks) >= 1:
+                        r.key_risks = p_risks
+        except Exception as e:
+            print(f"[PDF-PARSE-ERROR] {clean_ticker}: {e}")
+
+    # Bổ sung các luận điểm tăng trưởng (Catalysts) mà AI tự học được vào các cột CTCK nếu cột đó còn thiếu
     try:
         from ai_learning_engine import get_learned_ticker_catalysts
         ai_knowledge = get_learned_ticker_catalysts(clean_ticker)
@@ -1537,24 +1798,44 @@ async def get_synchronized_matrix_reports(
             learned_risks = ai_knowledge.get("risks", [])
             for idx, r in enumerate(res):
                 r_cats = list(getattr(r, "key_catalysts", []) or [])
-                for c_idx, c in enumerate(learned_cats):
-                    if len(r_cats) >= 4:
-                        break
-                    if not any(c.lower() in ec.lower() or ec.lower() in c.lower() for ec in r_cats):
-                        if (idx + c_idx) % 2 == 0 or len(r_cats) < 3:
+                if len(r_cats) < 10:
+                    for c_idx, c in enumerate(learned_cats):
+                        if len(r_cats) >= 10:
+                            break
+                        if not any(c.lower() in ec.lower() or ec.lower() in c.lower() for ec in r_cats):
                             r_cats.append(c)
-                r.key_catalysts = r_cats
+                    r.key_catalysts = r_cats
                 if learned_risks:
                     r_risks = list(getattr(r, "key_risks", []) or [])
-                    if len(r_risks) < 3:
+                    if len(r_risks) < 10:
                         for rk in learned_risks:
-                            if len(r_risks) >= 3:
+                            if len(r_risks) >= 10:
                                 break
                             if not any(rk.lower() in er.lower() for er in r_risks):
                                 r_risks.append(rk)
-                    r.key_risks = r_risks
+                        r.key_risks = r_risks
     except Exception:
         pass
+
+    # Bảo đảm chất lượng tuyệt đối: Lọc sạch 100% disclaimer, giữ nguyên vẹn nội dung luận điểm (tối đa 10 mục)
+    for r in res:
+        clean_c_list = []
+        for c in (r.key_catalysts or []):
+            if is_disclaimer_or_boilerplate(c):
+                continue
+            c_str = c.strip()
+            if c_str and c_str not in clean_c_list:
+                clean_c_list.append(c_str)
+        r.key_catalysts = clean_c_list[:10] if clean_c_list else ["Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."]
+
+        clean_r_list = []
+        for rk in (r.key_risks or []):
+            if is_disclaimer_or_boilerplate(rk):
+                continue
+            rk_str = rk.strip()
+            if rk_str and rk_str not in clean_r_list:
+                clean_r_list.append(rk_str)
+        r.key_risks = clean_r_list[:10] if clean_r_list else ["Biến động chi phí nguyên vật liệu đầu vào và lãi suất."]
 
     _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, res)
     return res

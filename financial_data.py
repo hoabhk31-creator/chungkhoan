@@ -3864,6 +3864,24 @@ SPECIFIC_PROJECTS_DB: Dict[str, List[Dict[str, Any]]] = {
             "impact": "Mở ra ngành kinh doanh mới giàu tiềm năng với giá trị hợp đồng hơn 1.5 tỷ USD."
         }
     ],
+    "PVT": [
+        {
+            "name": "Dự án Đầu tư Trẻ hóa & Mở rộng Đội tàu Chở Dầu thô Aframax/VLCC",
+            "scale": "Đầu tư thêm các tàu chở dầu thô trọng tải 105,000 - 300,000 DWT",
+            "investment_bil": 3858,
+            "progress_pct": 85,
+            "commercial_date": "2025 - 2026",
+            "impact": "Tăng cường năng lực vận tải dầu thô tuyến quốc tế và bao tiêu toàn bộ nguồn dầu thô cho nhà máy lọc dầu Dung Quất, Nghi Sơn."
+        },
+        {
+            "name": "Dự án Phát triển Đội tàu Khí hóa lỏng LPG/VLGC & Tàu Hóa chất",
+            "scale": "Đầu tư và thuê bareboat thêm các tàu chở khí LPG 5,000 - 84,000 CBM",
+            "investment_bil": 3120,
+            "progress_pct": 75,
+            "commercial_date": "2026 - 2027",
+            "impact": "Nâng quy mô đội tàu lên 67 chiếc (tổng trọng tải 2.04 triệu DWT), đón đầu nhu cầu nhập khẩu khí LPG và hóa chất công nghiệp."
+        }
+    ],
     "GMD": [
         {
             "name": "Cảng Nước sâu Gemalink Giai đoạn 2A & 2B (Cái Mép - Thị Vải)",
@@ -4197,6 +4215,12 @@ SPECIFIC_CORPORATE_CATALYSTS: Dict[str, List[str]] = {
         "Khai phá thị trường xuất khẩu chân đế và trạm biến áp điện gió ngoài khơi (Offshore Wind) sang châu Âu và châu Á.",
         "Nền tảng tài chính không vay nợ ròng với lượng tiền mặt dồi dào trên 10,000 tỷ đồng, đem lại nguồn thu lãi tiền gửi lớn."
     ],
+    "PVT": [
+        "Giá cước vận tải hàng lỏng quốc tế (dầu thô BIDY tăng 127%, dầu sản phẩm BITY tăng 151%) neo ở vùng đỉnh chu kỳ do căng thẳng địa chính trị kéo dài hải trình.",
+        "Chiến lược mở rộng thần tốc đội tàu lên 67 chiếc (tăng thêm 8 tàu mới trong 12 tháng), hướng tới mốc 100 tàu hiện đại hóa vào năm 2030.",
+        "Vị thế độc quyền 100% thị phần vận tải dầu thô và khí LPG nội địa, đảm bảo hợp đồng bao tiêu dài hạn từ BSR (Dung Quất) và NSRP (Nghi Sơn).",
+        "Biên lợi nhuận gộp mảng vận tải bứt phá mạnh mẽ lên 28.5% nhờ hiệu suất khai thác cao và giá cước tái ký hợp đồng định hạn tăng 30 - 40%."
+    ],
     "GMD": [
         "Cảng nước sâu Gemalink giai đoạn 2 hoàn thành nâng tổng công suất lên 3 triệu TEU, đón trọn xu hướng dịch chuyển xuất khẩu đi Mỹ/EU.",
         "Sản lượng hàng hóa thông qua cụm cảng Cái Mép - Thị Vải và Nam Đình Vũ tăng trưởng 2 chữ số theo đà hồi phục ngoại thương.",
@@ -4367,6 +4391,11 @@ SPECIFIC_CORPORATE_RISKS: Dict[str, List[str]] = {
         "Biên lợi nhuận các dự án EPCI có thể bị ảnh hưởng bởi biến động giá thép và vật liệu chế tạo kết cấu ngoài khơi.",
         "Rủi ro tỷ giá và chi phí vận chuyển quốc tế đối với các hợp đồng xuất khẩu chân đế điện gió."
     ],
+    "PVT": [
+        "Rủi ro hạ nhiệt căng thẳng địa chính trị tại Trung Đông và Biển Đỏ khiến giá cước tàu định hạn trên thị trường quốc tế điều chỉnh giảm.",
+        "Biến động giá dầu nhiên liệu hàng hải (VLSFO / MGO) làm gia tăng chi phí giá vốn vận hành chuyến tàu.",
+        "Rủi ro biến động tỷ giá USD/VND và lãi suất đối với các khoản vay ngoại tệ tài trợ mua sắm mở rộng đội tàu."
+    ],
     "GMD": [
         "Cạnh tranh công suất cảng biển tại khu vực Cái Mép - Thị Vải và Đình Vũ gia tăng khi có thêm các bến mới đi vào hoạt động.",
         "Tốc độ tăng trưởng thương mại toàn cầu chậm lại ảnh hưởng trực tiếp đến sản lượng container thông qua.",
@@ -4460,7 +4489,8 @@ SPECIFIC_CORPORATE_MOAT: Dict[str, str] = {
     "VCG": "Vinaconex có bề dày truyền thống tổng thầu hạ tầng quốc gia, sở hữu các mỏ vật liệu xây dựng chiến lược và khả năng thi công các công trình trọng điểm quy mô lớn.",
     "REE": "REE là tập đoàn đa ngành bền vững với danh mục văn phòng cho thuê chuẩn xanh LEED, hệ thống nhà máy thủy điện - năng lượng tái tạo mang lại dòng tiền cổ tức dồi dào.",
     "POW": "PV Power nắm giữ vị thế phát điện lớn nhất trên TTCK, sở hữu hệ thống nhà máy điện khí hiện đại và tiên phong phát triển nguồn điện LNG sạch quốc gia.",
-    "PC1": "PC1 là doanh nghiệp độc tôn trong lĩnh vực xây lắp lưới điện cao thế 500kV, kết hợp sở hữu mỏ niken giá trị cao và hệ thống các KCN công nghệ cao."
+    "PC1": "PC1 là doanh nghiệp độc tôn trong lĩnh vực xây lắp lưới điện cao thế 500kV, kết hợp sở hữu mỏ niken giá trị cao và hệ thống các KCN công nghệ cao.",
+    "PVT": "Thống lĩnh 100% thị phần vận tải dầu thô và khí LPG nội địa với sự bảo trợ của Tập đoàn Dầu khí PVN; sở hữu đội tàu hàng lỏng lớn nhất Việt Nam (2.04 triệu DWT) đáp ứng tiêu chuẩn an toàn khắt khe của các hãng dầu khí quốc tế (Oil Majors)."
 }
 
 

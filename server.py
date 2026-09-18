@@ -2250,6 +2250,9 @@ async def api_export_matrix_excel(req: ExportRequest):
     """
     data = req.report_data
     reports = data.matrix_table
+    if reports:
+        from engine import get_report_date_sort_key
+        reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
     cs = data.consensus_summary
 
     html_lines = [

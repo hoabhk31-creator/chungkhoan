@@ -43,6 +43,13 @@ def parse_report_date(date_str: Optional[str]) -> Optional[date]:
     return None
 
 
+def get_report_date_sort_key(r) -> date:
+    """Trả về đối tượng date để sắp xếp báo cáo CTCK theo thứ tự ngày phát hành từ mới nhất tới cũ nhất."""
+    d_str = getattr(r, "report_date", "") if hasattr(r, "report_date") else (r.get("report_date", "") if isinstance(r, dict) else "")
+    d = parse_report_date(d_str)
+    return d if d else date(1970, 1, 1)
+
+
 def is_report_expired(report_date_str: Optional[str], max_days: int = 365) -> bool:
     """
     Kiểm tra báo cáo có phát hành quá 1 năm (mặc định > 365 ngày) so với ngày hiện tại hay không.
@@ -1524,6 +1531,11 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
     )
 }
 
+# Tự động sắp xếp các báo cáo trong matrix_table của toàn bộ preset theo thứ tự ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
+for _p_rep in PRESET_DATASETS.values():
+    if getattr(_p_rep, "matrix_table", None):
+        _p_rep.matrix_table = sorted(_p_rep.matrix_table, key=get_report_date_sort_key, reverse=True)
+
 
 # -------------------------------------------------------------
 # RECONCILIATION & CONSENSUS CALCULATION ENGINE
@@ -1540,6 +1552,10 @@ def calculate_consensus(
     """
     Tính toán các chỉ số đồng thuận (Consensus), phân hóa (Disensus), và kỳ vọng thị giá so với định giá trung bình CTCK.
     """
+    # Sắp xếp các báo cáo CTCK theo thứ tự ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
+    if reports:
+        reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
+
     if not reports:
         ref_price = current_market_price or 0.0
         source_label = "Vietstock Chart & CTCK"
