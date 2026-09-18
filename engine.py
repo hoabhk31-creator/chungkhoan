@@ -2023,20 +2023,22 @@ def extract_financial_data_from_text(
     else:
         npat_forecast = "Dự phóng tăng trưởng 25.5% YoY"
 
-    # 6. Luận điểm tăng trưởng (Catalysts) & Rủi ro (Tích hợp AI Knowledge Engine)
+    # 6. Luận điểm tăng trưởng (Catalysts) & Rủi ro (Tích hợp AI Knowledge Engine & Định lượng Vi mô)
     catalysts = []
     risks = []
+    clean_ticker = (ticker or "CP").upper().strip()
+
     try:
-        from ai_learning_engine import extract_advanced_knowledge
+        from ai_learning_engine import extract_advanced_knowledge, is_generic_boilerplate
         adv = extract_advanced_knowledge(
             raw_text=text,
-            ticker=ticker,
+            ticker=clean_ticker,
             current_market_price=ref_market_price
         )
         if adv.get("key_catalysts"):
-            catalysts = adv["key_catalysts"]
+            catalysts = [c for c in adv["key_catalysts"] if not is_generic_boilerplate(c)]
         if adv.get("key_risks"):
-            risks = adv["key_risks"]
+            risks = [r for r in adv["key_risks"] if not is_generic_boilerplate(r)]
         if rev_forecast == "Dự phóng tăng trưởng 18.0% YoY" and adv.get("revenue_forecast"):
             rev_forecast = adv["revenue_forecast"]
         if npat_forecast == "Dự phóng tăng trưởng 25.5% YoY" and adv.get("npat_forecast"):
@@ -2044,34 +2046,86 @@ def extract_financial_data_from_text(
     except Exception as e:
         pass
 
+    # Bóc tách trực tiếp từ các khối văn bản trong báo cáo nếu chưa đủ
     if len(catalysts) < 3:
         cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if cat_blocks:
-            catalysts = [c.strip("-•* 12345.") for c in cat_blocks[:3] if len(c.strip()) > 10]
+            for c in cat_blocks:
+                c_clean = c.strip("-•* 12345.")
+                if len(c_clean) > 10 and c_clean not in catalysts:
+                    try:
+                        from ai_learning_engine import is_generic_boilerplate
+                        if not is_generic_boilerplate(c_clean):
+                            catalysts.append(c_clean)
+                    except Exception:
+                        catalysts.append(c_clean)
+                if len(catalysts) >= 3:
+                    break
+
         if len(catalysts) < 3:
             bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,150})", text)
             for b in bullets:
-                if b not in catalysts and len(catalysts) < 3:
-                    catalysts.append(b.strip())
+                b_clean = b.strip("-•* 12345.")
+                if b_clean not in catalysts and len(b_clean) > 15:
+                    try:
+                        from ai_learning_engine import is_generic_boilerplate
+                        if not is_generic_boilerplate(b_clean):
+                            catalysts.append(b_clean)
+                    except Exception:
+                        catalysts.append(b_clean)
+                if len(catalysts) >= 3:
+                    break
 
+    # Nếu vẫn chưa đủ, bổ sung bằng Tri thức Vi mô Độc bản và Số liệu BCTC Kiểm toán thực tế
     if len(catalysts) < 3:
-        clean_tick_str = ticker or "doanh nghiệp"
-        defaults = [
-            f"Mở rộng công suất thiết kế và củng cố thị phần dẫn đầu của {clean_tick_str}.",
-            "Biên lợi nhuận gộp hồi phục nhờ tự chủ nguyên vật liệu và quản trị chi phí.",
-            "Hưởng lợi từ chu kỳ phục hồi nhu cầu thị trường nội địa và hỗ trợ vĩ mô."
-        ]
-        catalysts.extend(defaults[len(catalysts):3])
+        try:
+            from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
+            spec_cats = get_specific_corporate_catalysts(clean_ticker)
+            for sc in spec_cats:
+                if sc not in catalysts:
+                    catalysts.append(sc)
+                if len(catalysts) >= 4:
+                    break
 
-    # 7. Rủi ro
+            if len(catalysts) < 3:
+                stmt_info = generate_statement_driven_catalysts(clean_ticker)
+                for sc in stmt_info.get("catalysts", []):
+                    if sc not in catalysts:
+                        catalysts.append(sc)
+                    if len(catalysts) >= 4:
+                        break
+        except Exception:
+            pass
+
+    # 7. Rủi ro trọng yếu (Ưu tiên rủi ro đặc thù doanh nghiệp)
     if not risks:
         risk_blocks = re.findall(r"(?:rủi ro|downside risk)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if risk_blocks:
-            risks = [r.strip("-•* 12345.") for r in risk_blocks[:2] if len(r.strip()) > 10]
+            for r in risk_blocks:
+                r_clean = r.strip("-•* 12345.")
+                if len(r_clean) > 10 and r_clean not in risks:
+                    try:
+                        from ai_learning_engine import is_generic_boilerplate
+                        if not is_generic_boilerplate(r_clean):
+                            risks.append(r_clean)
+                    except Exception:
+                        risks.append(r_clean)
+                if len(risks) >= 2:
+                    break
+
+    if not risks:
+        try:
+            from financial_data import get_specific_corporate_risks
+            spec_risks = get_specific_corporate_risks(clean_ticker)
+            if spec_risks:
+                risks = spec_risks[:2]
+        except Exception:
+            pass
+
     if not risks:
         risks = [
-            "Biến động giá nguyên liệu đầu vào và rủi ro tỷ giá hối đoái.",
-            "Tốc độ hấp thụ của thị trường tiêu thụ chậm hơn kỳ vọng."
+            f"Biến động chi phí nguyên vật liệu và áp lực cạnh tranh trong phân khúc hoạt động của {clean_ticker}.",
+            f"Rủi ro thị trường chung và tiến độ giải ngân các dự án đầu tư của {clean_ticker}."
         ]
 
     # Ngày báo cáo

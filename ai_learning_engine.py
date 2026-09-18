@@ -621,19 +621,19 @@ def save_learned_ticker_catalysts(
         "last_updated": None
     })
 
-    # 1. Khử trùng lặp & chèn Catalysts mới lên đầu
+    # 1. Khử trùng lặp & chèn Catalysts mới lên đầu (Áp dụng Boilerplate Shield)
     curr_cats = list(ticker_entry.get("catalysts", []))
     for c in catalysts or []:
         c_clean = str(c).strip("-•* 12345. ")
-        if len(c_clean) > 10 and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
+        if len(c_clean) > 10 and not is_generic_boilerplate(c_clean) and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
             curr_cats.insert(0, c_clean)
     ticker_entry["catalysts"] = curr_cats[:15]  # Giữ tối đa 15 catalysts chất lượng cao
 
-    # 2. Khử trùng lặp & chèn Risks mới
+    # 2. Khử trùng lặp & chèn Risks mới (Áp dụng Boilerplate Shield)
     curr_risks = list(ticker_entry.get("risks", []))
     for r in risks or []:
         r_clean = str(r).strip("-•* 12345. ")
-        if len(r_clean) > 10 and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
+        if len(r_clean) > 10 and not is_generic_boilerplate(r_clean) and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
             curr_risks.insert(0, r_clean)
     ticker_entry["risks"] = curr_risks[:10]
 
@@ -641,7 +641,7 @@ def save_learned_ticker_catalysts(
     curr_theses = list(ticker_entry.get("theses", []))
     for th in theses or []:
         th_clean = str(th).strip("-•* 12345. ")
-        if len(th_clean) > 10 and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
+        if len(th_clean) > 10 and not is_generic_boilerplate(th_clean) and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
             curr_theses.insert(0, th_clean)
     ticker_entry["theses"] = curr_theses[:8]
 
@@ -1054,13 +1054,25 @@ class AutonomousLearningScheduler:
                             print(f"[LearningCycle] Lỗi quét eDocs cho {clean_ticker}: {e}")
 
                     if not edocs:
+                        # Thay vì văn bản mẫu chung chung, nạp dữ liệu thực tế từ BCTC và kho dự án đặc thù
+                        try:
+                            from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts, SPECIFIC_PROJECTS_DB
+                            spec_cats = get_specific_corporate_catalysts(clean_ticker)
+                            stmt_data = generate_statement_driven_catalysts(clean_ticker)
+                            projs = SPECIFIC_PROJECTS_DB.get(clean_ticker, []) or stmt_data.get("projects", [])
+                            proj_names = ", ".join([f"{p.get('name', '')} (Vốn {p.get('investment_bil', 0)} tỷ, tiến độ {p.get('progress_pct', 0)}%)" for p in projs[:2]])
+                            cat_text = " • ".join(spec_cats[:3] if spec_cats else stmt_data.get("catalysts", [])[:3])
+                            content_text = f"Báo cáo phân tích định lượng vi mô cổ phiếu {clean_ticker}. Các dự án trọng điểm nổi bật: {proj_names}. Luận điểm tăng trưởng then chốt: {cat_text}"
+                        except Exception:
+                            content_text = f"Báo cáo phân tích định lượng vi mô độc bản cổ phiếu {clean_ticker}."
+
                         edocs = [{
                             "StockCode": clean_ticker,
-                            "Title": f"Báo cáo cập nhật hoạt động kinh doanh & Triển vọng {clean_ticker}",
-                            "Content": f"{clean_ticker} duy trì triển vọng tăng trưởng vững chắc nhờ các dự án mở rộng công suất và quản trị chi phí tốt. Động lực chính đến từ nhu cầu thị trường hồi phục.",
-                            "SourceName": "SSI Research",
+                            "Title": f"Báo cáo phân tích vi mô & Dự án trọng điểm {clean_ticker}",
+                            "Content": content_text,
+                            "SourceName": "IERM Corporate Intelligence",
                             "ReleaseDate": datetime.now().strftime("%d/%m/%Y"),
-                            "Url": f"https://edocs.vietstock.vn/{clean_ticker}"
+                            "Url": f"https://finance.vietstock.vn/{clean_ticker}"
                         }]
 
                     for item in edocs:
@@ -1082,6 +1094,40 @@ class AutonomousLearningScheduler:
                             ticker=clean_ticker,
                             current_market_price=market_p
                         )
+
+                        # Bổ sung Boilerplate Shield và Định lượng Vi mô thực tế
+                        cats = [c for c in knowledge.get("key_catalysts", []) if not is_generic_boilerplate(c)]
+                        risks_list = [r for r in knowledge.get("key_risks", []) if not is_generic_boilerplate(r)]
+                        if len(cats) < 3:
+                            try:
+                                from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
+                                spec_cats = get_specific_corporate_catalysts(clean_ticker)
+                                for sc in spec_cats:
+                                    if sc not in cats:
+                                        cats.append(sc)
+                                    if len(cats) >= 4:
+                                        break
+                                if len(cats) < 3:
+                                    stmt_info = generate_statement_driven_catalysts(clean_ticker)
+                                    for sc in stmt_info.get("catalysts", []):
+                                        if sc not in cats:
+                                            cats.append(sc)
+                                        if len(cats) >= 4:
+                                            break
+                            except Exception:
+                                pass
+
+                        if not risks_list:
+                            try:
+                                from financial_data import get_specific_corporate_risks
+                                spec_r = get_specific_corporate_risks(clean_ticker)
+                                if spec_r:
+                                    risks_list = spec_r[:2]
+                            except Exception:
+                                pass
+
+                        knowledge["key_catalysts"] = cats
+                        knowledge["key_risks"] = risks_list
 
                         # Tự động lưu Catalysts & Risks vào kho AI
                         if len(clean_ticker) == 3:

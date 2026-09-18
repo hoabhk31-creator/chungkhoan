@@ -13,6 +13,7 @@ import json
 import urllib.parse
 import httpx
 from bs4 import BeautifulSoup
+import unicodedata
 from pypdf import PdfReader
 from engine import ReportItem, extract_financial_data_from_text, is_report_expired, PRESET_DATASETS
 from financial_data import VIETNAM_STOCK_DIRECTORY
@@ -2434,17 +2435,27 @@ async def fetch_industry_reports(
     filter_src = source_name.lower().strip() if source_name and source_name != "all" else None
     is_explicit_ticker_search = bool(user_kw and len(user_kw) <= 4 and user_kw.upper() == clean_ticker)
 
+    KNOWN_VIETNAM_SECTORS = [
+        "cao su", "dệt may", "thép", "ngân hàng", "chứng khoán", "khu công nghiệp", "kcn",
+        "bất động sản", "bán lẻ", "tiêu dùng", "công nghệ", "viễn thông", "thủy sản", "dầu khí", "hóa chất", "phân bón",
+        "cảng biển", "logistics", "vận tải", "xây dựng", "vật liệu xây dựng", "xi măng",
+        "điện", "năng lượng", "chăn nuôi", "nông nghiệp", "thực phẩm", "mía đường", "bảo hiểm",
+        "dược phẩm", "y tế", "hàng không", "du lịch", "khoáng sản", "than"
+    ]
+    primary_kw_clean = mapping.get("primary_keyword", "").lower().strip()
+    commodities_kws = [c.lower().strip() for c in mapping.get("commodities", [])]
+
     for rep in raw_reports:
         title = rep.get("Title", "")
         content = rep.get("Content", "")
         src = rep.get("SourceName", "Tổ chức Phân tích")
         full_text = f"{title} {content} {src}".lower()
-        title_lower = title.lower()
+        title_norm = unicodedata.normalize('NFC', title).lower()
 
         # Phân biệt báo cáo doanh nghiệp (cổ phiếu riêng lẻ) vs báo cáo ngành
         is_type_58 = (rep.get("ReportTypeID") == 58)
-        is_ticker_title = bool(re.search(r'^[a-z0-9]{3,4}\s*:', title_lower)) or any(w in title_lower for w in ["cập nhật kqkd", "khuyến nghị mua", "khuyến nghị bán", "khuyến nghị tăng tỷ trọng", "khuyến nghị giảm tỷ trọng", "định giá cổ phiếu"])
-        has_industry_word = any(w in title_lower for w in ["ngành", "toàn cảnh", "triển vọng", "chu kỳ", "chiến lược", "hàng hóa", "chuỗi giá trị"])
+        is_ticker_title = bool(re.search(r'^[a-z0-9]{3,4}\s*:', title_norm)) or any(w in title_norm for w in ["cập nhật kqkd", "khuyến nghị mua", "khuyến nghị bán", "khuyến nghị tăng tỷ trọng", "khuyến nghị giảm tỷ trọng", "định giá cổ phiếu"])
+        has_industry_word = any(w in title_norm for w in ["ngành", "toàn cảnh", "triển vọng", "chu kỳ", "chiến lược", "hàng hóa", "chuỗi giá trị"])
         is_company_report = (is_type_58 or is_ticker_title) and not has_industry_word
 
         # Nếu đang ở chế độ xem/lọc Báo cáo Ngành (report_type_id == 57 hoặc mặc định không chọn 58):
@@ -2462,22 +2473,62 @@ async def fetch_industry_reports(
         if kw_filter and kw_filter not in full_text:
             continue
 
-        # Đánh dấu khớp ngành:
-        # Tiêu đề báo cáo thực sự chứa từ khóa ngành (ví dụ "thép", "quặng sắt", "kim loại", "hrc"...)
-        # HOẶC là báo cáo thuộc Type 57 (Báo cáo Ngành) và có từ khóa trong nội dung/tiêu đề
-        # TUYỆT ĐỐI KHÔNG đánh dấu khớp ngành nếu là báo cáo cổ phiếu đơn lẻ!
-        if is_company_report:
-            is_sector_match = False
-        else:
-            has_kw_in_title = any(k in title_lower for k in sector_keywords)
-            is_sector_match = has_kw_in_title or (rep.get("ReportTypeID") == 57 and any(k in full_text for k in sector_keywords))
+        # KIỂM TRA PHÁT HIỆN BÁO CÁO CỦA NGÀNH KHÁC (FOREIGN SECTOR DETECTION)
+        # Nếu tiêu đề ghi rõ "Báo cáo ngành X" trong đó X là một ngành khác (VD: "Báo cáo ngành Cao su" khi đang xem KCN),
+        # TUYỆT ĐỐI không gán là Khớp ngành và loại bỏ khỏi danh sách của ngành đang xem!
+        is_foreign_sector = False
+        m_ind = re.search(r'(?:báo cáo\s+)?ngành\s+([^:\-\(\,\.]+)', title_norm)
+        if m_ind:
+            ind_in_title = m_ind.group(1).strip()
+            # Kiểm tra xem tiêu đề ngành có khớp với ngành đang xem không
+            is_target_ind = (primary_kw_clean in ind_in_title) or any(k in ind_in_title for k in sector_keywords if len(k) > 2)
+            # Ngoại lệ đồng nghĩa: kcn <-> khu công nghiệp / bđs kcn
+            if ("khu công nghiệp" in primary_kw_clean or "kcn" in primary_kw_clean) and any(w in ind_in_title for w in ["khu công nghiệp", "kcn", "bđs kcn"]):
+                is_target_ind = True
+            
+            if not is_target_ind:
+                for sec_kw in KNOWN_VIETNAM_SECTORS:
+                    if sec_kw in ind_in_title:
+                        is_foreign_sector = True
+                        break
 
-        # Điểm ưu tiên xếp hạng (Match Score):
-        # 2: Khớp trực tiếp mã cổ phiếu tìm kiếm (hoặc tiêu đề chứa mã cổ phiếu)
-        # 1: Khớp ngành / hàng hóa
-        # 0: Báo cáo chung
+        # Nếu đang xem/tìm theo ngành cụ thể và báo cáo thuộc về một ngành khác rõ rệt: Loại bỏ hoàn toàn!
+        if not all_industries and is_foreign_sector:
+            continue
+
+        # Đánh dấu khớp ngành và phân cấp Điểm khớp (Match Score):
+        # 10: Khớp trực tiếp mã cổ phiếu khi người dùng chủ đích tìm kiếm mã
+        # 5: Khớp Tiêu đề Ngành (Title Sector Match) - Tiêu đề chứa trực tiếp tên ngành/từ khóa ngành
+        # 3: Khớp Tiêu đề Hàng hóa then chốt (Commodity Title Match)
+        # 1: Khớp nội dung tóm tắt (Body Mention) và tiêu đề không mang tên ngành khác
+        # 0: Không khớp ngành
+        has_kw_in_title = (not is_foreign_sector) and (
+            (primary_kw_clean and primary_kw_clean in title_norm) or
+            any(k in title_norm for k in sector_keywords if len(k) > 2)
+        )
+        has_commodity_in_title = (not is_foreign_sector) and any(c in title_norm for c in commodities_kws if len(c) > 3)
+
+        if is_company_report or is_foreign_sector:
+            is_sector_match = False
+            match_score = 0
+        elif has_kw_in_title:
+            is_sector_match = True
+            match_score = 5
+        elif has_commodity_in_title:
+            is_sector_match = True
+            match_score = 3
+        elif rep.get("ReportTypeID") == 57 and any(k in full_text for k in sector_keywords):
+            is_sector_match = True
+            match_score = 1
+        else:
+            is_sector_match = False
+            match_score = 0
+
+        # Nếu tìm kiếm trực tiếp theo mã cổ phiếu:
         is_ticker_match = bool(clean_ticker in title.upper() or (clean_ticker in full_text.upper() and is_company_report))
-        match_score = 2 if (is_explicit_ticker_search and is_ticker_match) else (1 if is_sector_match else 0)
+        if is_explicit_ticker_search and is_ticker_match:
+            match_score = 10
+            is_sector_match = True
 
         # Estimate page count
         c_len = len(content)

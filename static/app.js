@@ -9811,12 +9811,13 @@ function renderAiTemplatesList(templates) {
         return `
             <div class="p-2.5 bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-all">
                 <div class="space-y-1 flex-1">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-bold text-white text-xs">${escapeHtml(tpl.name)}</span>
                         ${isSystem 
                             ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800">Hệ Thống</span>`
                             : `<span class="px-1.5 py-0.2 rounded text-[9px] bg-purple-950 text-purple-300 border border-purple-800">Tùy Biến</span>`
                         }
+                        <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono">Độc bản Vi mô</span>
                         <span class="text-[10px] text-slate-400">(${escapeHtml(tpl.sector || "Đa ngành")})</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
