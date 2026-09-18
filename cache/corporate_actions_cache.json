@@ -523,6 +523,36 @@
       "adjustment_factor": 0.852,
       "description": "Chia cổ tức tiền 500 đ/CP và 15% cổ phiếu thưởng.",
       "source": "HOSE & Vietstock"
+    },
+    {
+      "id": "mbb-ca-09072026-dividend_cash",
+      "ex_date": "09/07/2026",
+      "record_date": "10/07/2026",
+      "execution_date": "17/07/2026",
+      "event_type": "dividend_cash",
+      "title": "MBB: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 1,000 đồng/CP",
+      "cash_amount": 1000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "mbb-ca-13082025-dividend_cash",
+      "ex_date": "13/08/2025",
+      "record_date": "14/08/2025",
+      "execution_date": "21/08/2025",
+      "event_type": "dividend_cash",
+      "title": "MBB: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền trả cổ tức bằng cổ phiếu và bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 300 đồng/CP",
+      "cash_amount": 300.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
     }
   ],
   "TCB": [
@@ -670,6 +700,36 @@
       "adjustment_factor": 0.9739,
       "description": "Tạm ứng cổ tức tiền mặt 3,000 đồng/CP.",
       "source": "HOSE & Vietstock"
+    },
+    {
+      "id": "dgc-ca-14092026-dividend_cash",
+      "ex_date": "14/09/2026",
+      "record_date": "15/09/2026",
+      "execution_date": "25/09/2026",
+      "event_type": "dividend_cash",
+      "title": "DGC: Thông báo ngày ĐKCC chi trả cổ tức đợt 1 năm 2026 bằng tiền và trả cổ tức còn lại năm 2025 bằng tiền",
+      "description": "Trả cổ tức  đợt 2/2025 bằng tiền, 5,000 đồng/CP",
+      "cash_amount": 5000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dgc-ca-24122025-dividend_cash",
+      "ex_date": "24/12/2025",
+      "record_date": "25/12/2025",
+      "execution_date": "15/01/2026",
+      "event_type": "dividend_cash",
+      "title": "DGC: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức bằng tiền đợt 1 năm 2025",
+      "description": "Trả cổ tức  đợt 1/2025 bằng tiền, 3,000 đồng/CP",
+      "cash_amount": 3000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
     }
   ],
   "NKG": [
@@ -1417,6 +1477,102 @@
       "rights_ratio": 0.0,
       "rights_price": 0.0,
       "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "DRC": [
+    {
+      "id": "drc-ca-03062026-dividend_cash",
+      "ex_date": "03/06/2026",
+      "record_date": "04/06/2026",
+      "execution_date": "26/06/2026",
+      "event_type": "dividend_cash",
+      "title": "DRC: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức bằng tiền từ lợi nhuận năm 2025",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "drc-ca-23072025-bonus_share",
+      "ex_date": "23/07/2025",
+      "record_date": "24/07/2025",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "DRC: Thông báo ngày ĐKCC nhận cổ phiếu phát hành do thực hiện tăng vốn cổ phần từ NVCSH",
+      "description": "Thưởng cổ phiếu, tỷ lệ 10:3",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.3,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.7692,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "drc-ca-13062025-dividend_cash",
+      "ex_date": "13/06/2025",
+      "record_date": "16/06/2025",
+      "execution_date": "10/07/2025",
+      "event_type": "dividend_cash",
+      "title": "DRC: Thông báo ngày ĐKCC trả cổ tức còn lại năm 2024 bằng tiền",
+      "description": "Trả cổ tức  đợt 2/2024 bằng tiền, 600 đồng/CP",
+      "cash_amount": 600.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "HDB": [
+    {
+      "id": "hdb-ca-18122025-dividend_stock",
+      "ex_date": "18/12/2025",
+      "record_date": "19/12/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "HDB: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2024 bằng cổ phiếu và nhận cổ phiếu phát hành do thực hiện tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:25",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.25,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "PVT": [
+    {
+      "id": "pvt-ca-05062026-dividend_stock",
+      "ex_date": "05/06/2026",
+      "record_date": "08/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "PVT: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:10",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "pvt-ca-19062025-dividend_stock",
+      "ex_date": "19/06/2025",
+      "record_date": "20/06/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "PVT: Thông báo ngày ĐKCC trả cổ tức năm 2024 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:32",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.32,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.7576,
       "source": "Sở GDCK / Simplize Open API"
     }
   ]
