@@ -61,7 +61,7 @@
   },
   {
     "id": "tpl-ban-le-tieu-dung",
-    "name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
     "sector": "Bán lẻ & Tiêu dùng",
     "is_system": true,
     "keywords": [
@@ -76,14 +76,15 @@
       "ebitda",
       "mwg",
       "frt",
-      "pnj"
+      "pnj",
+      "vnm"
     ],
     "catalyst_rules": [
       "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu",
       "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng",
       "Tối ưu hóa chi phí vận hành, đóng bớt các điểm bán không hiệu quả và tái cấu trúc mạng lưới",
-      "Phục hồi nhu cầu tiêu dùng các mặt hàng giá trị cao (ICT, Điện máy, Vàng trang sức)",
-      "Kế hoạch huy động vốn cổ phần hoặc IPO/bán vốn chuỗi con cho đối tác chiến lược"
+      "Biên lợi nhuận gộp quý mở rộng nhờ giá nguyên liệu đầu vào (sữa bột, vàng, hàng điện tử) hạ nhiệt",
+      "Kế hoạch mở rộng cửa hàng mới (EraBlue, chuỗi tiêm chủng) và khai thác thị trường mới"
     ],
     "thesis_rules": [
       "Hưởng lợi dài hạn từ xu hướng chuyển dịch tiêu dùng từ chợ truyền thống sang kênh hiện đại",
@@ -95,7 +96,7 @@
       "Cạnh tranh gay gắt về giá từ các kênh thương mại điện tử (Shopee, TikTok Shop)",
       "Áp lực chi phí thuê mặt bằng và chi phí nhân sự gia tăng"
     ],
-    "sample_text": "MWG ghi nhận chuỗi Bách Hóa Xanh đạt điểm hòa vốn sau thuế và bắt đầu đóng góp lợi nhuận tích cực. Mảng ICT Thế Giới Di Động & Điện Máy Xanh tăng trưởng ổn định sau chiến dịch tái cơ cấu giảm số lượng cửa hàng kém hiệu quả. Kế hoạch mở rộng mới thận trọng tập trung nâng cao doanh thu trên từng mét vuông sàn.",
+    "sample_text": "MWG ghi nhận chuỗi Bách Hóa Xanh đạt điểm hòa vốn sau thuế và bắt đầu đóng góp lợi nhuận tích cực. Mảng ICT Thế Giới Di Động & Điện Máy Xanh tăng trưởng ổn định sau chiến dịch tái cơ cấu giảm số lượng cửa hàng kém hiệu quả. VNM ghi nhận biên gộp mở rộng 1.7 điểm % nhờ giá sữa bột nguyên liệu WMP giảm.",
     "sample_output": {
       "catalysts": [
         {
@@ -121,7 +122,7 @@
   },
   {
     "id": "tpl-chung-khoan-tai-chinh",
-    "name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
     "sector": "Chứng khoán & Tài chính",
     "is_system": true,
     "keywords": [
@@ -138,14 +139,16 @@
       "ssi",
       "hcm",
       "vnd",
-      "vci"
+      "vci",
+      "cts",
+      "fvtpl"
     ],
     "catalyst_rules": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI)",
-      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ",
+      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging",
+      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ trên 25,000 tỷ đ/phiên",
       "Quy mô dư nợ cho vay ký quỹ (Margin) lập đỉnh mới và biên lãi suất cho vay ổn định",
-      "Kế hoạch tăng vốn điều lệ thông qua phát hành quyền mua hoặc trả cổ tức bằng cổ phiếu"
+      "Danh mục đầu tư tài chính FVTPL tự doanh ghi nhận lãi lớn khi thị trường vào pha tăng tốc",
+      "Kế hoạch tăng vốn điều lệ thông qua phát hành quyền mua hoặc chào bán riêng lẻ mở rộng room cho vay"
     ],
     "thesis_rules": [
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững",
@@ -157,7 +160,7 @@
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Cạnh tranh chính sách Zero-fee (miễn phí giao dịch) làm xói mòn biên lợi nhuận mảng môi giới"
     ],
-    "sample_text": "SSI được kỳ vọng hưởng lợi trực tiếp khi hệ thống KRX vận hành và giải pháp giải quyết ký quỹ trước giao dịch (Non-prefunding) cho nhà đầu tư ngoại được phê duyệt, mở đường nâng hạng thị trường FTSE. Hoạt động tăng vốn điều lệ lên gần 19,600 tỷ đồng giúp nới rộng room cấp margin trong bối cảnh thanh khoản thị trường đạt 20,000-25,000 tỷ/phiên.",
+    "sample_text": "SSI và VCI được kỳ vọng hưởng lợi trực tiếp khi hệ thống KRX vận hành và giải pháp giải quyết ký quỹ trước giao dịch (Non-prefunding) cho nhà đầu tư ngoại được phê duyệt, mở đường nâng hạng thị trường FTSE. Hoạt động tăng vốn điều lệ giúp nới rộng room cấp margin trong bối cảnh thanh khoản thị trường đạt 20,000-25,000 tỷ/phiên.",
     "sample_output": {
       "catalysts": [
         {
@@ -183,13 +186,14 @@
   },
   {
     "id": "tpl-cong-nghe-thong-tin",
-    "name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "name": "Công nghệ thông tin & Viễn thông (FPT, CMG, CTR)",
     "sector": "Công nghệ thông tin",
     "is_system": true,
     "keywords": [
       "công nghệ",
       "fpt",
       "cmg",
+      "ctr",
       "chuyển đổi số",
       "dx",
       "ai",
@@ -202,7 +206,7 @@
       "giáo dục"
     ],
     "catalyst_rules": [
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh",
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng trên 25%/năm",
       "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu",
       "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ",
       "Khối giáo dục FPT Education duy trì tỷ lệ tuyển sinh mới tăng trưởng 2 con số",
@@ -244,7 +248,7 @@
   },
   {
     "id": "tpl-bat-dong-san-kcn",
-    "name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "name": "Bất động sản Dân dụng & KCN (VHM, PDR, TCH, KBC, IDC)",
     "sector": "Bất động sản & KCN",
     "is_system": true,
     "keywords": [
@@ -252,23 +256,25 @@
       "bđs",
       "kcn",
       "khu công nghiệp",
+      "vhm",
+      "pdr",
+      "tch",
+      "kbc",
+      "idc",
+      "lhg",
       "pháp lý",
       "luật đất đai",
       "mở bán",
       "trái phiếu",
       "quỹ đất",
       "fdi",
-      "thuê đất",
-      "pdr",
-      "tch",
-      "kbc",
-      "lhg"
+      "thuê đất"
     ],
     "catalyst_rules": [
-      "Hoàn tất thủ tục pháp lý, phê duyệt quy hoạch 1/500 và cấp giấy phép xây dựng cho các dự án trọng điểm",
-      "Các luật mới (Luật Đất đai, Nhà ở, Kinh doanh BĐS) có hiệu lực giúp tháo gỡ điểm nghẽn nguồn cung",
-      "Mở bán đợt mới các phân khu và tỷ lệ hấp thụ đạt mức cao (tiền người mua trả trước tăng mạnh)",
-      "Dòng vốn đầu tư trực tiếp nước ngoài (FDI) đổ mạnh vào các khu kinh tế, nhu cầu thuê đất KCN tăng cao",
+      "Doanh số bán hàng chưa ghi nhận (Unbilled Bookings) và khoản Người mua trả tiền trước đạt mức kỷ lục",
+      "Các luật mới (Luật Đất đai, Nhà ở, Kinh doanh BĐS) có hiệu lực giúp tháo gỡ điểm nghẽn pháp lý và định giá đất",
+      "Mở bán các đại dự án mới (Vinhomes Vũ Yên, Cổ Loa, Tràng Duệ 3, Hựu Thạnh) với tỷ lệ hấp thụ cao",
+      "Dòng vốn FDI công nghệ cao đổ mạnh vào các khu kinh tế, đẩy giá thuê đất KCN tăng 10 - 15%/năm",
       "Tái cơ cấu thành công nợ vay và xóa bỏ hoàn toàn áp lực đáo hạn trái phiếu doanh nghiệp"
     ],
     "thesis_rules": [
@@ -281,12 +287,12 @@
       "Lãi suất cho vay mua nhà tăng ảnh hưởng tâm lý và khả năng tiếp cận vốn của khách hàng",
       "Cạnh tranh thu hút FDI công nghiệp từ các quốc gia trong khu vực như Indonesia, Ấn Độ"
     ],
-    "sample_text": "PDR đã sạch nợ trái phiếu và tập trung đẩy nhanh tiến độ pháp lý tại các dự án trọng điểm như Bắc Hà Thanh (Bình Định) và Thuận An 1 & 2 (Bình Dương). Dự kiến các dự án này sẽ đủ điều kiện mở bán trong năm 2025, mang lại dòng tiền mặt dồi dào ước tính hàng nghìn tỷ đồng. Luật Đất đai sửa đổi hỗ trợ rút ngắn thời gian phê duyệt định giá đất.",
+    "sample_text": "KBC hoàn tất thủ tục pháp lý KCN Tràng Duệ 3 đón sóng vốn FDI tỷ USD từ LG. VHM mở bán Vinhomes Royal Island với doanh số unbilled bookings kỷ lục. PDR đã sạch nợ trái phiếu và tập trung đẩy nhanh tiến độ pháp lý tại các dự án trọng điểm Bắc Hà Thanh và Thuận An.",
     "sample_output": {
       "catalysts": [
         {
           "category": "Dự án & Capex",
-          "text": "Mở bán dự án trọng điểm Bắc Hà Thanh và cụm căn hộ Thuận An 1&2 khi hoàn thành pháp lý."
+          "text": "KCN Tràng Duệ 3 và Vinhomes Royal Island mở bán ghi nhận doanh số kỷ lục."
         },
         {
           "category": "Vĩ mô & Chính sách",
@@ -298,7 +304,7 @@
         }
       ],
       "theses": [
-        "Quỹ đất sạch ven biển và vùng ven các đô thị vệ tinh đón đầu chu kỳ hồi phục nguồn cung."
+        "Quỹ đất sạch quy mô lớn đón đầu chu kỳ hồi phục nguồn cung và dòng vốn FDI."
       ],
       "risks": [
         "Tiến độ cấp phép xây dựng thực tế phụ thuộc vào tốc độ giải quyết thủ tục của địa phương."
@@ -307,7 +313,7 @@
   },
   {
     "id": "tpl-ngan-hang-tai-chinh",
-    "name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
     "sector": "Ngân hàng",
     "is_system": true,
     "keywords": [
@@ -328,14 +334,14 @@
       "bảo phủ nợ xấu"
     ],
     "catalyst_rules": [
-      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành",
-      "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp",
-      "Tỷ lệ tiền gửi không kỳ hạn (CASA) dẫn đầu giúp duy trì lợi thế nguồn vốn giá rẻ",
-      "Áp lực trích lập dự phòng rủi ro tín dụng giảm dần khi nợ xấu được kiểm soát và xử lý",
-      "Tỷ lệ bao phủ nợ xấu (LLR) cao tạo bộ đệm an toàn vững chắc trước các rủi ro vĩ mô"
+      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (18 - 22%)",
+      "Tỷ lệ tiền gửi không kỳ hạn (CASA) duy trì mức cao (>35%) giúp kiểm soát chi phí vốn (COF) thấp nhất ngành",
+      "Biên lãi thuần (NIM) phục hồi khi sức cầu tín dụng bán lẻ và sản xuất kinh doanh ấm lại",
+      "Áp lực trích lập dự phòng rủi ro tín dụng giảm dần khi nợ xấu được kiểm soát (NPL < 1.3%)",
+      "Thương vụ bán vốn chiến lược cho đối tác ngoại (như VCB phát hành riêng lẻ 6.5%, VPB hợp tác SMBC)"
     ],
     "thesis_rules": [
-      "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu dưới 1.5%",
+      "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu thấp",
       "Hệ sinh thái dịch vụ tài chính đa dạng (bảo hiểm, chứng khoán, quản lý quỹ) mang lại thu nhập ngoài lãi cao",
       "Nền tảng ngân hàng số hiện đại thu hút hàng triệu khách hàng cá nhân và doanh nghiệp trẻ"
     ],
@@ -344,184 +350,387 @@
       "Cạnh tranh gay gắt về lãi suất cho vay đầu ra làm thu hẹp biên lãi ròng NIM",
       "Thu nhập từ phí bảo hiểm qua ngân hàng (Bancassurance) phục hồi chậm sau giai đoạn thanh kiểm tra"
     ],
-    "sample_text": "MBB duy trì mức tăng trưởng tín dụng ấn tượng trên 15% nhờ dòng vốn giải ngân vào phân khúc sản xuất kinh doanh và doanh nghiệp vừa và nhỏ. Tỷ lệ CASA duy trì trong Top 1 hệ thống ngân hàng (khoảng 38-40%) giúp kiểm soát chi phí vốn tối ưu. Tỷ lệ bao phủ nợ xấu đạt trên 115% tạo bộ đệm vững vàng cho ngân hàng trong năm nay.",
+    "sample_text": "VCB chuẩn bị hoàn tất thương vụ phát hành riêng lẻ 6.5% vốn cho cổ đông chiến lược nước ngoài thu về khoảng 1 tỷ USD. Tỷ lệ CASA dẫn đầu toàn hệ thống đạt trên 35% giúp Vietcombank duy trì chi phí vốn rẻ nhất ngành. Tỷ lệ bao phủ nợ xấu đạt trên 200% tạo bộ đệm an toàn vững chắc.",
     "sample_output": {
       "catalysts": [
         {
-          "category": "Chu kỳ & Vĩ mô",
-          "text": "Hạn mức tăng trưởng tín dụng được giao ở mức cao nhờ tham gia hỗ trợ tái cơ cấu hệ thống."
+          "category": "Xúc tác sự kiện",
+          "text": "Phát hành riêng lẻ 6.5% cổ phần cho đối tác chiến lược nước ngoài thu về khoảng 1 tỷ USD."
         },
         {
           "category": "Lợi thế chi phí",
-          "text": "Tỷ lệ CASA dẫn đầu toàn ngành trên 38% giúp giảm mạnh chi phí huy động vốn và mở rộng NIM."
+          "text": "Tỷ lệ CASA dẫn đầu toàn ngành trên 35% giúp giảm mạnh chi phí huy động vốn và mở rộng NIM."
         },
         {
           "category": "Chất lượng tài sản",
-          "text": "Tỷ lệ trích lập dự phòng bao phủ nợ xấu (LLR) vững chắc trên 115% bảo toàn lợi nhuận."
+          "text": "Tỷ lệ trích lập dự phòng bao phủ nợ xấu (LLR) vững chắc trên 200% bảo toàn lợi nhuận."
         }
       ],
       "theses": [
         "Ngân hàng số toàn diện thu hút quy mô tệp khách hàng cá nhân năng động lớn nhất."
       ],
       "risks": [
-        "Rủi ro nợ xấu phát sinh từ phân khúc khách hàng cá nhân vay tiêu dùng."
+        "Cạnh tranh gay gắt về lãi suất cho vay đầu ra làm thu hẹp biên lãi ròng NIM."
       ]
     }
   },
   {
-    "id": "custom-0481e0d7",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
+    "id": "tpl-hoa-chat-phan-bon",
+    "name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
     "sector": "Hóa chất & Phân bón",
+    "is_system": true,
     "keywords": [
+      "hóa chất",
+      "phân bón",
+      "phốt pho",
+      "p4",
+      "đạm",
+      "ure",
       "dgc",
       "dcm",
-      "phốt pho vàng",
+      "dpm",
+      "nghi sơn",
       "apatit",
-      "urê",
-      "hóa chất"
+      "hết khấu hao"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
+      "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới",
+      "Nhà máy phân bón hoàn tất hết khấu hao (như Đạm Cà Mau) giúp tiết kiệm 800 - 1,000 tỷ đ/năm phản ánh vào LNST",
+      "Tự chủ nguồn quặng Apatit nguyên liệu đầu vào giúp nới rộng biên lợi nhuận gộp lên trên 35%",
+      "Dòng tiền cổ tức tiền mặt cao và đều đặn nhờ nền tảng thặng dư tiền mặt ròng dồi dào"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Công nghệ tinh chế hóa chất cơ bản hàng đầu thế giới với giá thành sản xuất cạnh tranh",
+      "Hưởng lợi từ chu kỳ thiếu hụt nguồn cung hóa chất tinh khiết phục vụ công nghệ cao",
+      "Cơ cấu tài chính siêu an toàn với lượng tiền mặt lớn và tỷ lệ đòn bẩy vay nợ gần như bằng 0"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Biến động giá phốt pho vàng và phân bón ure thế giới đảo chiều giảm mạnh",
+      "Tiến độ hoàn tất cấp phép và nghiệm thu môi trường tại các dự án hóa chất mới kéo dài",
+      "Chi phí nguyên liệu khí đầu vào điều chỉnh tăng theo cơ chế thị trường"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "17/09/2026 09:42"
+    "sample_text": "DGC xúc tiến triển khai Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 tổng mức đầu tư 12,000 tỷ đồng. Nhu cầu P4 phục vụ sản xuất chip bán dẫn và pin AI bùng nổ giúp duy trì biên lãi gộp trên 35%. DCM ghi nhận lợi nhuận tăng mạnh nhờ nhà máy đạm hết khấu hao hoàn toàn.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 đi vào vận hành bổ sung doanh thu 4,000 tỷ đ/năm."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Nhà máy đạm Cà Mau hết khấu hao giúp tiết kiệm chi phí khấu hao 800-1,000 tỷ đồng/năm."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Nhu cầu phốt pho vàng P4 toàn cầu phục hồi mạnh mẽ từ ngành công nghiệp bán dẫn."
+        }
+      ],
+      "theses": [
+        "Vị thế độc tôn về công nghệ tinh chế hóa chất cơ bản và tự chủ nguồn quặng apatit."
+      ],
+      "risks": [
+        "Biến động giá bán phân bón và hóa chất trên thị trường quốc tế."
+      ]
+    }
   },
   {
-    "id": "custom-7ab0001e",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
-    "sector": "Hóa chất & Phân bón",
+    "id": "tpl-dau-khi-nang-luong",
+    "name": "Dầu khí & Dịch vụ Năng lượng (PVD, PVS, BSR, GAS)",
+    "sector": "Dầu khí & Năng lượng",
+    "is_system": true,
     "keywords": [
-      "dgc",
-      "dcm",
-      "phốt pho vàng",
-      "apatit",
-      "urê",
-      "hóa chất"
+      "dầu khí",
+      "giàn khoan",
+      "jack-up",
+      "pvd",
+      "pvs",
+      "bsr",
+      "gas",
+      "lô b",
+      "ô môn",
+      "lạc đà vàng",
+      "epci",
+      "điện gió ngoài khơi"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Đơn giá cho thuê giàn khoan tự nâng (Jack-up) duy trì ở mức cao 110,000 - 130,000 USD/ngày với lịch trình khoan full hợp đồng",
+      "Tiến độ trao thầu và triển khai các gói thầu EPCI đại dự án khí điện Lô B - Ô Môn và mỏ dầu Lạc Đà Vàng",
+      "Khối lượng Backlog cơ khí dầu khí và chân đế điện gió ngoài khơi (Offshore Wind) xuất khẩu vượt 5 tỷ USD",
+      "Biên lọc dầu (Crack Spread) phục hồi hỗ trợ mạnh mẽ cho lợi nhuận kinh doanh của các nhà máy lọc dầu",
+      "Dự án nâng cấp mở rộng hạ tầng kho cảng khí hóa lỏng LNG Thị Vải và Sơn Mỹ"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Doanh nghiệp độc quyền cung cấp dịch vụ giàn khoan tự nâng và dịch vụ kỹ thuật giếng khoan ngoài khơi",
+      "Năng lực thi công các kết cấu cơ khí dầu khí và chân đế điện gió siêu trường siêu trọng đạt chuẩn châu Âu",
+      "Vị thế huyết mạch trong chuỗi giá trị khí quốc gia mang lại dòng tiền kinh doanh ổn định"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Giá dầu thô thế giới biến động mạnh làm ảnh hưởng tới kế hoạch giải ngân thăm dò khai thác",
+      "Tiến độ phê duyệt quyết định đầu tư cuối cùng (FID) các đại dự án chậm hơn kỳ vọng",
+      "Chi phí vận hành, bảo dưỡng giàn khoan và chi phí nhân sự kỹ thuật gia tăng"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "17/09/2026 10:51"
+    "sample_text": "PVD cho thuê full 4 giàn khoan tự nâng đến hết năm 2026 với đơn giá 120,000 USD/ngày. PVS ghi nhận backlog đạt kỷ lục hơn 5 tỷ USD nhờ các hợp đồng Lô B - Ô Môn và xuất khẩu chân đế điện gió ngoài khơi sang Đài Loan và châu Âu.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Toàn bộ đội giàn khoan tự nâng ký hợp đồng dài hạn giá cao 110k-130k USD/ngày."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Khởi động chuỗi dự án khí điện Lô B - Ô Môn mang lại khối lượng công việc EPCI khổng lồ."
+        },
+        {
+          "category": "Xúc tác sự kiện",
+          "text": "Xuất khẩu chân đế và trạm biến áp điện gió ngoài khơi mở ra ngành kinh doanh tỷ USD mới."
+        }
+      ],
+      "theses": [
+        "Hưởng lợi trọn vẹn từ chu kỳ đầu tư thượng nguồn dầu khí và chuyển dịch năng lượng xanh."
+      ],
+      "risks": [
+        "Rủi ro chậm tiến độ phê duyệt hợp đồng EPCI từ các chủ đầu tư mỏ khí."
+      ]
+    }
   },
   {
-    "id": "custom-40ab1af4",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
-    "sector": "Hóa chất & Phân bón",
+    "id": "tpl-cang-bien-logistics",
+    "name": "Cảng biển & Logistics Vận tải (GMD, HAH, VOS)",
+    "sector": "Cảng biển & Logistics",
+    "is_system": true,
     "keywords": [
-      "dgc",
-      "dcm",
-      "phốt pho vàng",
-      "apatit",
-      "urê",
-      "hóa chất"
+      "cảng biển",
+      "logistics",
+      "container",
+      "gmd",
+      "hah",
+      "gemalink",
+      "nam đình vũ",
+      "cái mép",
+      "cước tàu",
+      "teu"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Cảng nước sâu Gemalink giai đoạn 2 hoàn thành nâng tổng công suất lên 3 triệu TEU đón tàu mẹ đi Mỹ/EU",
+      "Sản lượng hàng hóa thông qua cụm cảng nước sâu Cái Mép - Thị Vải và Nam Đình Vũ tăng trưởng 2 chữ số",
+      "Giá cước vận tải biển container và phí dịch vụ xếp dỡ cảng biển nội địa tăng theo quy định mới",
+      "Đội tàu container bổ sung tàu mới đóng mở rộng các tuyến vận tải nội Á",
+      "Chuỗi dịch vụ logistics tích hợp khép kín giúp tiết giảm chi phí và nâng cao biên lợi nhuận ròng"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Sở hữu hệ thống cảng biển nước sâu tại các vị trí yết hầu chiến lược của dòng chảy thương mại quốc tế",
+      "Mạng lưới logistics liên kết từ cảng biển, cảng cạn ICD đến vận tải thủy nội địa toàn diện",
+      "Dòng tiền mặt kinh doanh dồi dào, tỷ lệ nợ vay thấp và chia cổ tức đều đặn"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Tăng trưởng thương mại toàn cầu chậm lại ảnh hưởng tới lượng hàng hóa xuất nhập khẩu",
+      "Cạnh tranh công suất cảng biển gia tăng khi có thêm các bến cảng mới đi vào vận hành",
+      "Biến động giá nhiên liệu dầu FO/MGO làm tăng chi phí vận hành đội tàu"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "17/09/2026 11:18"
+    "sample_text": "GMD mở rộng cảng Gemalink giai đoạn 2 nâng công suất lên 3 triệu TEU, đón nhận các tuyến tàu mẹ trực tiếp đi Bắc Mỹ. Cảng Nam Đình Vũ giai đoạn 3 hoàn thiện giúp củng cố vị thế cụm cảng lớn nhất Hải Phòng với thị phần trên 30%.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Gemalink giai đoạn 2 hoàn thành nâng công suất lên 3 triệu TEU đón tàu tải trọng lớn."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Sản lượng thông qua cụm cảng Cái Mép tăng trưởng mạnh mẽ theo đà phục hồi xuất nhập khẩu."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Giá dịch vụ bốc dỡ container cảng biển tăng theo Thông tư mới nới rộng biên gộp."
+        }
+      ],
+      "theses": [
+        "Vị thế độc tôn tại cụm cảng nước sâu lớn nhất Việt Nam đón trọn luồng hàng ngoại thương."
+      ],
+      "risks": [
+        "Cạnh tranh công suất khai thác cảng từ các bến mới trong khu vực."
+      ]
+    }
   },
   {
-    "id": "custom-daa98676",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
-    "sector": "Hóa chất & Phân bón",
+    "id": "tpl-xay-dung-dau-tu-cong",
+    "name": "Xây dựng & Hạ tầng Đầu tư công (CTD, VCG, HHV)",
+    "sector": "Xây dựng & Hạ tầng",
+    "is_system": true,
     "keywords": [
-      "dgc",
-      "dcm",
-      "phốt pho vàng",
-      "apatit",
-      "urê",
-      "hóa chất"
+      "xây dựng",
+      "xây lắp",
+      "hạ tầng",
+      "đầu tư công",
+      "ctd",
+      "vcg",
+      "hhv",
+      "backlog",
+      "long thành",
+      "cao tốc",
+      "repeat sales",
+      "fdi"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Giá trị hợp đồng xây dựng ký mới (Backlog) đạt kỷ lục hàng chục nghìn tỷ đồng bảo đảm doanh thu 2 - 3 năm tới",
+      "Điểm rơi giải ngân vốn đầu tư công các đại dự án hạ tầng quốc gia (Sân bay Long Thành, Cao tốc Bắc - Nam)",
+      "Chiến lược Repeat Sales và trúng thầu các đại dự án công nghiệp tiêu chuẩn FDI tỷ USD (Lego, Pandora)",
+      "Ghi nhận doanh thu và lợi nhuận từ các dự án bất động sản gối đầu chất lượng cao",
+      "Kiểm soát rủi ro công nợ chặt chẽ, trích lập dự phòng đầy đủ giúp biên lợi nhuận gộp phục hồi"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Tổng thầu xây lắp dẫn đầu với uy tín thi công các dự án phức tạp nhất về kỹ thuật và tiến độ",
+      "Khả năng tự chủ nguồn vật liệu xây dựng (mỏ đá, trạm bê tông) giúp tối ưu hóa giá thành",
+      "Cơ cấu tài chính lành mạnh với lượng tiền mặt dồi dào, không chịu áp lực nợ vay lớn"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Biến động giá nguyên vật liệu xây dựng (thép, xi măng, cát đá) làm xói mòn biên lợi nhuận",
+      "Rủi ro chậm giải ngân vốn và thanh quyết toán từ các chủ đầu tư",
+      "Cạnh tranh đấu thầu hạ giá gay gắt trong ngành xây dựng dân dụng"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "17/09/2026 13:39"
+    "sample_text": "CTD ghi nhận backlog chuyển tiếp vượt mốc 25,000 tỷ đồng nhờ các hợp đồng thi công nhà máy Lego và Pandora. VCG tăng tốc thi công gói thầu nhà ga Sân bay Long Thành và các tuyến cao tốc Bắc Nam, mang lại dòng tiền giải ngân đầu tư công lớn.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Tổng thầu các gói thầu trọng điểm Sân bay Long Thành và Cao tốc Bắc - Nam."
+        },
+        {
+          "category": "Xúc tác sự kiện",
+          "text": "Backlog xây lắp đạt trên 25,000 tỷ đồng với các dự án FDI tiêu chuẩn quốc tế."
+        },
+        {
+          "category": "Biên lợi nhuận",
+          "text": "Cải thiện biên lãi gộp nhờ quản trị rủi ro công nợ chặt chẽ và chọn lọc dự án."
+        }
+      ],
+      "theses": [
+        "Năng lực thi công tổng thầu số 1 Việt Nam đón đầu làn sóng đầu tư công và FDI công nghiệp."
+      ],
+      "risks": [
+        "Biến động giá vật liệu xây dựng và rủi ro chậm thanh toán từ chủ đầu tư."
+      ]
+    }
   },
   {
-    "id": "custom-b2b9fe0e",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
-    "sector": "Hóa chất & Phân bón",
+    "id": "tpl-tien-ich-dien-nuoc",
+    "name": "Năng lượng & Tiện ích Điện nước (REE, POW, PC1)",
+    "sector": "Năng lượng & Tiện ích",
+    "is_system": true,
     "keywords": [
-      "dgc",
-      "dcm",
-      "phốt pho vàng",
-      "apatit",
-      "urê",
-      "hóa chất"
+      "điện",
+      "nước",
+      "thủy điện",
+      "nhiệt điện",
+      "điện khí",
+      "lng",
+      "ree",
+      "pow",
+      "pc1",
+      "nhơn trạch",
+      "e-town",
+      "500kv",
+      "truyền tải"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Đưa vào vận hành thương mại các nhà máy điện trọng điểm (Nhà máy điện khí LNG Nhơn Trạch 3 & 4)",
+      "Pha thủy văn La Nina mưa nhiều giúp các nhà máy thủy điện vận hành tối đa công suất với giá thành rẻ",
+      "Dự án bất động sản văn phòng xanh E-Town 6 lấp đầy mang lại dòng tiền cho thuê ổn định",
+      "Tổng thầu xây lắp các tuyến đường dây truyền tải điện 500kV mạch 3 và trạm biến áp quốc gia",
+      "Khai thác khoáng sản giá trị cao (Niken - Đồng) và mở rộng KCN công nghệ cao"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Doanh nghiệp phát điện và hạ tầng năng lượng yết hầu đảm bảo an ninh năng lượng quốc gia",
+      "Mô hình kinh doanh phòng thủ với dòng tiền mặt dồi dào và tỷ suất cổ tức tiền mặt đều đặn",
+      "Danh mục năng lượng sạch đa dạng từ thủy điện, điện gió, điện mặt trời đến điện khí LNG"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Biến động giá nguyên liệu khí LNG và than nhập khẩu ảnh hưởng giá chào trên thị trường điện",
+      "Hiện tượng thời tiết El Nino hạn hán có thể làm giảm sản lượng huy động thủy điện",
+      "Rủi ro chậm thanh toán tiền điện từ EVN trong các giai đoạn áp lực tài chính"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "17/09/2026 14:33"
+    "sample_text": "POW đưa Nhơn Trạch 3 & 4 vào phát điện thương phẩm bổ sung 15,000 tỷ doanh thu. REE hưởng lợi từ pha La Nina mưa nhiều và tòa nhà E-Town 6 chuẩn LEED Platinum đi vào khai thác. PC1 khẳng định vị thế tổng thầu đường dây 500kV mạch 3.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Nhà máy điện khí LNG Nhơn Trạch 3 & 4 vận hành thương mại bổ sung 9 tỷ kWh điện/năm."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Pha thời tiết La Nina mưa nhiều giúp sản lượng thủy điện huy động đạt mức tối đa."
+        },
+        {
+          "category": "Dự án & Capex",
+          "text": "Tòa nhà E-Town 6 vận hành mang lại dòng tiền cho thuê văn phòng ổn định trên 400 tỷ/năm."
+        }
+      ],
+      "theses": [
+        "Hệ thống tài sản năng lượng phòng thủ vững chắc và dòng tiền cổ tức tiền mặt dồi dào."
+      ],
+      "risks": [
+        "Biến động giá khí LNG nhập khẩu và rủi ro chu kỳ thủy văn."
+      ]
+    }
   },
   {
-    "id": "custom-fb9fae86",
-    "name": "Hóa chất & Phân bón (DGC, DCM)",
-    "sector": "Hóa chất & Phân bón",
+    "id": "tpl-thuy-san-nong-nghiep",
+    "name": "Thủy sản & Nông nghiệp xuất khẩu (VHC, ANV, DBC)",
+    "sector": "Thủy sản & Nông nghiệp",
+    "is_system": true,
     "keywords": [
-      "dgc",
-      "dcm",
-      "phốt pho vàng",
-      "apatit",
-      "urê",
-      "hóa chất"
+      "thủy sản",
+      "cá tra",
+      "tôm",
+      "collagen",
+      "vhc",
+      "anv",
+      "dbc",
+      "xuất khẩu",
+      "mỹ",
+      "eu",
+      "giá heo",
+      "thức ăn chăn nuôi"
     ],
     "catalyst_rules": [
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+      "Nhu cầu nhập khẩu cá tra phi lê tại các thị trường trọng điểm Mỹ và EU phục hồi mạnh khi tồn kho cạn kiệt",
+      "Nhà máy chế biến sâu Collagen & Gelatin mở rộng công suất đóng góp biên lợi nhuận gộp trên 35%",
+      "Tự chủ trên 75% vùng nuôi cá nguyên liệu chuẩn quốc tế ASC giúp kiểm soát giá thành sản xuất tối ưu",
+      "Giá heo hơi và thịt gia súc nội địa phục hồi trong khi giá nguyên liệu thức ăn chăn nuôi hạ nhiệt",
+      "Mở rộng thị trường xuất khẩu sang các quốc gia Nam Mỹ và Trung Đông"
     ],
     "thesis_rules": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+      "Nữ hoàng cá tra với chuỗi giá trị khép kín từ con giống, vùng nuôi đến chế biến xuất khẩu",
+      "Hưởng mức thuế chống bán phá giá 0 USD/kg vào thị trường Mỹ qua các kỳ rà soát POR",
+      "Cơ cấu tài chính lành mạnh với lượng tiền mặt dồi dào và tỷ suất sinh lời vượt trội"
     ],
     "risk_rules": [
-      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+      "Rủi ro rào cản kỹ thuật và các đợt rà soát thuế chống bán phá giá từ Bộ Thương mại Mỹ (DOC)",
+      "Biến động chi phí vận tải biển và cước container quốc tế",
+      "Dịch bệnh hoặc biến đổi khí hậu xâm nhập mặn tại vùng nuôi Đồng bằng Sông Cửu Long"
     ],
-    "sample_text": "",
-    "is_system": false,
-    "updated_at": "18/09/2026 08:06"
+    "sample_text": "VHC ghi nhận sản lượng xuất khẩu cá tra sang Mỹ phục hồi mạnh mẽ. Nhà máy Collagen & Gelatin giai đoạn 2 vận hành hết công suất với biên lãi gộp trên 35%. Tỷ lệ tự chủ vùng nuôi cá nguyên liệu trên 75% giúp hạ giá thành sản xuất.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Mở rộng nhà máy Collagen & Gelatin giai đoạn 2 đóng góp biên lợi nhuận gộp vượt 35%."
+        },
+        {
+          "category": "Chu kỳ & Vĩ mô",
+          "text": "Nhu cầu nhập khẩu cá tra tại thị trường Mỹ phục hồi khi tồn kho giảm về đáy."
+        },
+        {
+          "category": "Lợi thế chi phí",
+          "text": "Tự chủ trên 75% vùng nuôi cá nguyên liệu chuẩn ASC giúp kiểm soát chi phí tối ưu."
+        }
+      ],
+      "theses": [
+        "Thương hiệu cá tra xuất khẩu số 1 Việt Nam với chuỗi sản xuất khép kín và sản phẩm chế biến sâu."
+      ],
+      "risks": [
+        "Rủi ro rà soát thuế chống bán phá giá POR và biến động cước vận tải biển."
+      ]
+    }
   }
 ]
