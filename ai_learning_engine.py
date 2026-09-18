@@ -352,9 +352,52 @@ class TemplateStore:
         return matched[:2]
 
 
-# -------------------------------------------------------------
-# 3. KNOWLEDGE & CATALYSTS EXTRACTOR (ADVANCED AI ENGINE)
-# -------------------------------------------------------------
+def is_generic_boilerplate(sentence: str) -> bool:
+    """
+    Kiểm tra xem một câu có phải là văn mẫu khuôn mẫu ngành rỗng không.
+    Văn mẫu rỗng là câu không chứa bất kỳ danh từ riêng thực thể, tên dự án,
+    hoặc con số định lượng (%) nào, chỉ toàn các từ ngữ vĩ mô chung chung.
+    """
+    if not sentence or len(sentence) < 15:
+        return True
+    s_clean = sentence.lower()
+    
+    # Những mẫu câu khuôn mẫu kinh điển
+    generic_patterns = [
+        "lợi thế dẫn đầu ngành",
+        "vị thế thương hiệu lâu năm",
+        "mạng lưới khách hàng sâu rộng",
+        "nhu cầu tiêu thụ và dòng vốn đầu tư trong ngành phục hồi",
+        "theo chu kỳ tăng trưởng kinh tế",
+        "cơ cấu tài chính lành mạnh, tỷ lệ đòn bẩy an toàn",
+        "dòng tiền từ hoạt động kinh doanh (cfo) dương đều đặn",
+        "các dự án đầu tư mở rộng hoàn thành và bắt đầu đóng góp",
+        "tăng trưởng doanh thu và lợi nhuận cốt lõi trong chu kỳ",
+        "tối ưu hóa chi phí vận hành và nâng cao hiệu quả",
+        "duy trì dòng tiền hoạt động lành mạnh",
+        "biến động kinh tế vĩ mô và sức cầu thị trường",
+        "rủi ro chi phí tài chính, biến động lãi suất",
+        "vị thế kinh doanh đầu ngành của",
+        "tăng trưởng doanh thu và lợi nhuận kỳ vọng duy trì mức 2 chữ số"
+    ]
+    for pat in generic_patterns:
+        if pat in s_clean and not re.search(r'\d+', sentence):
+            return True
+            
+    has_number = bool(re.search(r'\d+', sentence))
+    has_specific_entity = any(w in s_clean for w in [
+        "dự án", "nhà máy", "hợp đồng", "công suất", "thị phần", "dở dang", 
+        "fvtpl", "margin", "casa", "npl", "backlog", "hrc", "p4", "kcn", "lô b",
+        "deal", "thoái vốn", "cổ tức", "breakeven", "hòa vốn", "ebitda", "khấu hao",
+        "nhập khẩu", "xuất khẩu", "chi nhánh", "cửa hàng", "lắp đặt", "giai đoạn"
+    ])
+    
+    if not has_number and not has_specific_entity and len(sentence.split()) > 8:
+        if any(w in s_clean for w in ["hưởng lợi", "tiềm năng", "kỳ vọng", "phục hồi"]) and not has_specific_entity:
+            return True
+            
+    return False
+
 
 def extract_advanced_knowledge(
     raw_text: str,
@@ -427,33 +470,36 @@ def extract_advanced_knowledge(
         if not assigned and any(k in s_lower for k in ["tiềm năng", "kỳ vọng", "động lực", "luận điểm", "lợi thế"]):
             extracted_theses.append(sent)
 
-    # 3. Kết hợp với tri thức từ Few-Shot Template nếu nội dung báo cáo ngắn
+    # 3. Kết hợp với tri thức từ Few-Shot Template nếu nội dung báo cáo ngắn và template thực sự khớp mã
     if primary_tpl:
-        # Nếu chưa đủ Catalysts, lấy từ quy tắc mẫu học của ngành
-        tpl_cat_rules = primary_tpl.get("catalyst_rules", [])
-        categories = list(categorized_catalysts.keys())
-        cat_idx = 0
-        while sum(len(v) for v in categorized_catalysts.values()) < 3 and cat_idx < len(tpl_cat_rules):
-            rule_text = tpl_cat_rules[cat_idx]
-            # Bổ sung tên mã nếu phù hợp
-            formatted_rule = f"{rule_text} ({clean_ticker})"
-            target_cat = categories[cat_idx % len(categories)]
-            if formatted_rule not in categorized_catalysts[target_cat]:
-                categorized_catalysts[target_cat].append(formatted_rule)
-            cat_idx += 1
+        tpl_keywords = [str(k).lower() for k in primary_tpl.get("keywords", [])]
+        tpl_name = str(primary_tpl.get("name", "")).lower()
+        is_tpl_truly_matched = (clean_ticker.lower() in tpl_keywords) or (clean_ticker.lower() in tpl_name)
+        
+        # Chỉ bổ sung khi template THỰC SỰ thuộc về mã doanh nghiệp này
+        if is_tpl_truly_matched:
+            tpl_cat_rules = primary_tpl.get("catalyst_rules", [])
+            categories = list(categorized_catalysts.keys())
+            cat_idx = 0
+            while sum(len(v) for v in categorized_catalysts.values()) < 3 and cat_idx < len(tpl_cat_rules):
+                rule_text = tpl_cat_rules[cat_idx]
+                if not is_generic_boilerplate(rule_text):
+                    target_cat = categories[cat_idx % len(categories)]
+                    if rule_text not in categorized_catalysts[target_cat]:
+                        categorized_catalysts[target_cat].append(rule_text)
+                cat_idx += 1
 
-        # Nếu chưa đủ Theses
-        if len(extracted_theses) < 2:
-            for th in primary_tpl.get("thesis_rules", [])[:2]:
-                th_fmt = f"{th} đối với {clean_ticker}."
-                if th_fmt not in extracted_theses:
-                    extracted_theses.append(th_fmt)
+            # Nếu chưa đủ Theses
+            if len(extracted_theses) < 2:
+                for th in primary_tpl.get("thesis_rules", [])[:2]:
+                    if not is_generic_boilerplate(th) and th not in extracted_theses:
+                        extracted_theses.append(th)
 
-        # Nếu chưa đủ Risks
-        if len(extracted_risks) < 2:
-            for rk in primary_tpl.get("risk_rules", [])[:2]:
-                if rk not in extracted_risks:
-                    extracted_risks.append(rk)
+            # Nếu chưa đủ Risks
+            if len(extracted_risks) < 2:
+                for rk in primary_tpl.get("risk_rules", [])[:2]:
+                    if rk not in extracted_risks:
+                        extracted_risks.append(rk)
 
     # Tổng hợp danh sách phẳng key_catalysts (tối đa 4 mục chọn lọc nhất)
     flat_catalysts = []

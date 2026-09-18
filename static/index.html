@@ -1126,6 +1126,7 @@
                         <span class="px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/80 font-bold text-xs shadow-sm" id="bctc-info-ticker">HPG</span>
                         <span class="font-bold text-slate-100 text-xs truncate max-w-[280px] sm:max-w-[420px]" id="bctc-info-name">CTCP TẬP ĐOÀN HÒA PHÁT</span>
                         <span class="text-[11px] text-slate-400 hidden sm:inline" id="bctc-info-sector">(Thép & Vật liệu xây dựng • HOSE)</span>
+                        <span id="bctc-info-industry-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border hidden"></span>
                     </div>
 
                     <!-- Bên phải: Nút Xuất Data Excel 3 Sheet (KQKD - CĐKT - LCTT) & PDF -->
@@ -3598,7 +3599,13 @@
             </div>
 
             <!-- PDF Iframe Container -->
-            <div class="flex-1 bg-slate-950 relative">
+            <div class="flex-1 bg-slate-950 relative overflow-hidden">
+                <!-- Loading Indicator -->
+                <div id="pdf-viewer-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 z-20 transition-opacity duration-300">
+                    <div class="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mb-3"></div>
+                    <div class="text-sm font-mono text-cyan-300 font-bold">Đang tải tài liệu PDF phân tích...</div>
+                    <div class="text-xs text-slate-400 mt-1 font-mono">Tự động kết nối dữ liệu CTCK & nạp báo cáo trực tiếp</div>
+                </div>
                 <iframe id="pdf-viewer-frame" src="" class="w-full h-full border-0" title="PDF Document Viewer"></iframe>
             </div>
         </div>

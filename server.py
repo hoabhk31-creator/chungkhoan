@@ -16,6 +16,7 @@ from email.mime.multipart import MIMEMultipart
 import hashlib
 import asyncio
 import unicodedata
+import urllib.parse
 import sys
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -2008,28 +2009,38 @@ async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferr
 
 
 @app.get("/api/reports/pdf/{ticker}/{institution}")
-async def get_report_pdf(ticker: str, institution: str):
+async def get_report_pdf(
+    ticker: str,
+    institution: str,
+    request: Request,
+    source_url: Optional[str] = None,
+    date: Optional[str] = None,
+    download: Optional[int] = 0
+):
     """
     Trả về file PDF Báo cáo Phân tích & Định giá thực tế của Công ty Chứng khoán tương ứng
     (Tải trực tiếp từ nguồn Vietstock eDocs / CTCK Research Hub, có bộ nhớ đệm cache).
     Cho phép xem trực tiếp trên trình duyệt (inline) hoặc tải về (download).
     """
     clean_ticker = ticker.upper().strip()
-    clean_inst = institution.removesuffix(".pdf").strip()
+    clean_inst = urllib.parse.unquote(institution).removesuffix(".pdf").strip()
 
-    # Tìm kiếm báo cáo trong PRESET_DATASETS hoặc gọi get_preset_by_ticker
-    if clean_ticker in PRESET_DATASETS:
-        full_report = PRESET_DATASETS[clean_ticker]
-    else:
+    is_download = bool(download) or (request.query_params.get("download") in ("1", "true", "yes"))
+    disposition_type = "attachment" if is_download else "inline"
+
+    # Tìm kiếm báo cáo trong _SYNCHRONIZED_PRESETS_CACHE, PRESET_DATASETS hoặc gọi get_preset_by_ticker
+    full_report = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker) or PRESET_DATASETS.get(clean_ticker)
+    if not full_report:
         full_report = await get_preset_by_ticker(clean_ticker, sync_live_price=False)
 
     matched_item = None
-    for item in full_report.matrix_table:
-        if match_ctck_institution(clean_inst, item.institution) or clean_inst.lower() in item.institution.lower() or item.institution.lower() in clean_inst.lower():
-            matched_item = item
-            break
+    if full_report and full_report.matrix_table:
+        for item in full_report.matrix_table:
+            if match_ctck_institution(clean_inst, item.institution) or clean_inst.lower() in item.institution.lower() or item.institution.lower() in clean_inst.lower():
+                matched_item = item
+                break
 
-    preferred_url = matched_item.source_url if (matched_item and matched_item.source_url) else None
+    preferred_url = source_url if (source_url and source_url.startswith(("http://", "https://"))) else (matched_item.source_url if (matched_item and matched_item.source_url) else None)
 
     # Tải file PDF báo cáo phân tích thực tế từ Vietstock eDocs / CTCK
     real_pdf_result = await fetch_real_institution_pdf(clean_ticker, clean_inst, preferred_url)
@@ -2044,47 +2055,53 @@ async def get_report_pdf(ticker: str, institution: str):
             content=pdf_bytes,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": make_content_disposition("inline", filename),
+                "Content-Disposition": make_content_disposition(disposition_type, filename),
                 "Cache-Control": "public, max-age=86400"
             }
         )
 
-    # Fallback chỉ khi hoàn toàn không có kết nối internet và cache trống:
+    # Fallback tự động sinh PDF chuyên nghiệp chuẩn CTCK khi không có kết nối online
+    cs = full_report.consensus_summary if full_report else None
+    cur_p = cs.current_market_price if cs else (getattr(full_report, "current_price", 0) if full_report else 0)
     report_dict = {
         "institution": matched_item.institution if matched_item else clean_inst,
-        "target_price": matched_item.target_price if matched_item else full_report.consensus_summary.mean_target_price,
-        "current_price": full_report.consensus_summary.current_market_price,
-        "upside_pct": matched_item.upside_percent if matched_item else full_report.consensus_summary.average_upside,
-        "recommendation": matched_item.recommendation if matched_item else full_report.consensus_summary.consensus_rating,
-        "date": matched_item.report_date if matched_item else "18/08/2026",
-        "catalysts": " • " + "\n • ".join(matched_item.key_catalysts) if matched_item and matched_item.key_catalysts else "Triển vọng kinh doanh khả quan nhờ mở rộng công suất và nhu cầu thị trường hồi phục mạnh mẽ.",
-        "risks": " • " + "\n • ".join(matched_item.key_risks) if matched_item and matched_item.key_risks else "Biến động chi phí nguyên vật liệu đầu vào và rủi ro tỷ giá.",
+        "target_price": (matched_item.adjusted_target_price or matched_item.target_price) if matched_item else (cs.mean_target_price if cs else 0),
+        "current_price": cur_p,
+        "upside_pct": matched_item.upside_percent if matched_item else (cs.average_upside if cs else 0.0),
+        "recommendation": matched_item.recommendation if matched_item else (cs.consensus_rating if cs else "MUA"),
+        "date": (matched_item.report_date if matched_item else date) or time.strftime("%d/%m/%Y"),
+        "catalysts": " • " + "\n • ".join(matched_item.key_catalysts) if (matched_item and matched_item.key_catalysts) else "Triển vọng kinh doanh khả quan nhờ mở rộng công suất và nhu cầu thị trường hồi phục mạnh mẽ.",
+        "risks": " • " + "\n • ".join(matched_item.key_risks) if (matched_item and matched_item.key_risks) else "Biến động chi phí nguyên vật liệu đầu vào và rủi ro tỷ giá.",
     }
 
     consensus_dict = {
-        "avg_target": full_report.consensus_summary.mean_target_price,
-        "avg_upside_pct": full_report.consensus_summary.average_upside,
-        "highest_target": full_report.consensus_summary.max_target_price,
-        "lowest_target": full_report.consensus_summary.min_target_price,
-        "total_reports": len(full_report.matrix_table),
+        "avg_target": cs.mean_target_price if cs else 0,
+        "avg_upside_pct": cs.average_upside if cs else 0.0,
+        "highest_target": cs.max_target_price if cs else 0,
+        "lowest_target": cs.min_target_price if cs else 0,
+        "total_reports": len(full_report.matrix_table) if (full_report and full_report.matrix_table) else 1,
     }
+
+    comp_info = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+    company_name = (full_report.company_name if full_report else None) or comp_info.get("name") or f"CTCP {clean_ticker}"
+    sector = (full_report.sector if full_report else None) or comp_info.get("sector") or "Doanh nghiệp niêm yết"
 
     pdf_bytes = generate_ctck_report_pdf(
         ticker=clean_ticker,
-        company_name=full_report.company_name,
-        sector=full_report.sector,
+        company_name=company_name,
+        sector=sector,
         report=report_dict,
         consensus=consensus_dict,
     )
 
-    safe_inst_name = report_dict["institution"].replace(" ", "_").replace("/", "_")
+    safe_inst_name = to_ascii_slug(report_dict["institution"]) or "CTCK"
     filename = f"{clean_ticker}_{safe_inst_name}_Bao_Cao_Phan_Tich.pdf"
 
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": make_content_disposition("inline", filename),
+            "Content-Disposition": make_content_disposition(disposition_type, filename),
             "Cache-Control": "public, max-age=3600"
         }
     )
@@ -2169,6 +2186,60 @@ async def api_export_peers_pdf(req: PeerExportPdfRequest):
             "Cache-Control": "no-cache"
         }
     )
+
+
+@app.get("/api/pdf-proxy")
+async def pdf_proxy(
+    url: str,
+    request: Request,
+    ticker: Optional[str] = None,
+    source: Optional[str] = None,
+    download: Optional[int] = 0
+):
+    """
+    Proxy tải an toàn và stream file PDF từ bên ngoài (Vietstock eDocs, CTCK) về cho iframe,
+    loại bỏ lỗi Mixed Content (HTTP vs HTTPS), CSP frame-ancestors và X-Frame-Options SAMEORIGIN.
+    """
+    if not url or not url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="URL không hợp lệ")
+
+    is_download = bool(download) or (request.query_params.get("download") in ("1", "true", "yes"))
+    disposition_type = "attachment" if is_download else "inline"
+    clean_ticker = (ticker or "IERM").upper().strip()
+    safe_source = to_ascii_slug(source or "Bao_Cao")
+    filename = f"{clean_ticker}_{safe_source}.pdf"
+
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://finance.vietstock.vn/"
+        }
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True, headers=headers) as client:
+            res = await client.get(url)
+            if res.status_code == 200:
+                if res.content.startswith(b"%PDF") or "pdf" in res.headers.get("content-type", "").lower():
+                    return Response(
+                        content=res.content,
+                        media_type="application/pdf",
+                        headers={
+                            "Content-Disposition": make_content_disposition(disposition_type, filename),
+                            "Cache-Control": "public, max-age=3600"
+                        }
+                    )
+    except Exception as exc:
+        print(f"[PDF-PROXY-WARN] Failed to fetch {url}: {exc}")
+
+    # Fallback nếu tải không được: nếu có ticker, phục vụ báo cáo PDF tương ứng của mã đó
+    if ticker:
+        return await get_report_pdf(
+            ticker=ticker,
+            institution=f"{source or 'CTCK'}.pdf",
+            request=request,
+            source_url=url,
+            download=download
+        )
+
+    raise HTTPException(status_code=404, detail="Không thể tải file PDF từ nguồn chỉ định")
 
 
 @app.post("/api/export-matrix-excel")

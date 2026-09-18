@@ -786,12 +786,31 @@ def get_sector_catalysts(ticker: str, sector: str, comp_name: str, index: int = 
     elif any(k in sec_lower for k in ["xây dựng", "hạ tầng", "thi công", "giao thông", "đầu tư công"]) or clean_ticker in ["VCG", "HHV", "C4G", "LCG", "CTD", "HBC"]:
         sec_key = "xay_dung_ha_tang"
 
+    # === ƯU TIÊN 1: AI Learned Catalysts + Specific Corporate Catalysts ===
+    try:
+        from financial_data import get_specific_corporate_catalysts
+        specific_cats = get_specific_corporate_catalysts(clean_ticker)
+        if specific_cats and len(specific_cats) >= 3:
+            return specific_cats[:4]
+    except Exception:
+        pass
+
+    try:
+        from ai_learning_engine import get_learned_ticker_catalysts, is_generic_boilerplate
+        learned = get_learned_ticker_catalysts(clean_ticker) or {}
+        ai_cats = [c for c in learned.get("catalysts", []) if not is_generic_boilerplate(c)]
+        if ai_cats and len(ai_cats) >= 3:
+            return ai_cats[:4]
+    except Exception:
+        pass
+
+    # === ƯU TIÊN 2: Sector Pool (fallback) ===
     pool = SECTOR_CATALYSTS_AND_RISKS.get(sec_key, {}).get("catalysts", [])
     if not pool:
         return [
-            f"Vị thế kinh doanh đầu ngành của {clean_ticker} trong chu kỳ kinh tế mới.",
-            "Tăng trưởng doanh thu và lợi nhuận kỳ vọng duy trì mức 2 chữ số.",
-            "Tình hình tài chính an toàn với dòng tiền hoạt động ổn định."
+            f"Vị thế kinh doanh chủ lực của {clean_ticker} trong chu kỳ kinh tế mới.",
+            "Động lực tăng trưởng doanh thu và lợi nhuận kỳ vọng duy trì mức 2 chữ số.",
+            "Nền tảng tài chính vững chắc với dòng tiền hoạt động kinh doanh ổn định."
         ]
 
     # Chọn 4 luận điểm chi tiết xoay vòng theo index
@@ -840,6 +859,25 @@ def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -
     elif any(k in sec_lower for k in ["xây dựng", "hạ tầng", "thi công", "giao thông", "đầu tư công"]) or clean_ticker in ["VCG", "HHV", "C4G", "LCG", "CTD", "HBC"]:
         sec_key = "xay_dung_ha_tang"
 
+    # === ƯU TIÊN 1: Specific Corporate Risks + AI Learned Risks ===
+    try:
+        from financial_data import get_specific_corporate_risks
+        specific_risks = get_specific_corporate_risks(clean_ticker)
+        if specific_risks and len(specific_risks) >= 2:
+            return specific_risks[:3]
+    except Exception:
+        pass
+
+    try:
+        from ai_learning_engine import get_learned_ticker_catalysts, is_generic_boilerplate
+        learned = get_learned_ticker_catalysts(clean_ticker) or {}
+        ai_risks = [r for r in learned.get("risks", []) if not is_generic_boilerplate(r)]
+        if ai_risks and len(ai_risks) >= 2:
+            return ai_risks[:3]
+    except Exception:
+        pass
+
+    # === ƯU TIÊN 2: Sector Pool (fallback) ===
     pool = SECTOR_CATALYSTS_AND_RISKS.get(sec_key, {}).get("risks", [])
     if not pool:
         return [
