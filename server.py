@@ -16,7 +16,17 @@ from email.mime.multipart import MIMEMultipart
 import hashlib
 import asyncio
 import unicodedata
-import urllib.parse
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Header
 from fastapi.responses import HTMLResponse, JSONResponse, Response
@@ -444,84 +454,119 @@ async def get_live_price(ticker: str):
 
 
 _SYNCHRONIZED_PRESETS_CACHE: Dict[str, FullMatrixReport] = {}
+_SYNCHRONIZED_PRESETS_CACHE_TS: Dict[str, float] = {}
+_PRESET_LOCKS: Dict[str, asyncio.Lock] = {}
 
 
 @app.get("/api/preset/{ticker}")
 async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
     clean_ticker = ticker.upper().strip()
-    profile = await fetch_stock_company_profile(clean_ticker)
-    comp_name = profile.get("name")
-    sect_name = profile.get("sector")
+    now_ts = time.time()
 
-    stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
-    final_comp_name = comp_name or stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
-    final_sect_name = sect_name or stock_meta.get("sector", "Doanh nghiệp niêm yết")
+    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (30s TTL)
+    cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
+    cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
+    if cached_rep and (now_ts - cached_time) < 30.0 and cached_rep.ticker == clean_ticker:
+        return cached_rep
 
-    try:
-        live_info = await fetch_reconciled_live_price(clean_ticker)
-        market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
-    except Exception:
-        market_p = 25000.0
-        live_info = None
+    # 2. Khóa concurrency để tránh gọi đúp song song nhiều crawler cùng 1 mã
+    if clean_ticker not in _PRESET_LOCKS:
+        _PRESET_LOCKS[clean_ticker] = asyncio.Lock()
 
-    base_reports = []
-    base_causality = []
-    base_disensus = []
-    if clean_ticker in PRESET_DATASETS:
-        report = PRESET_DATASETS[clean_ticker]
-        if comp_name and (report.company_name.startswith("Công ty Cổ phần " + clean_ticker) or report.company_name.startswith("CTCP " + clean_ticker)):
-            report.company_name = comp_name
-        if sect_name and report.sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"]:
-            report.sector = sect_name
-        base_reports = list(report.matrix_table) if report.matrix_table else []
-        base_causality = report.causality_analysis or []
-        base_disensus = report.disensus_table or []
-        final_comp_name = report.company_name
-        final_sect_name = report.sector
+    async with _PRESET_LOCKS[clean_ticker]:
+        now_ts = time.time()
+        cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
+        cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
+        if cached_rep and (now_ts - cached_time) < 30.0 and cached_rep.ticker == clean_ticker:
+            return cached_rep
 
-    # Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API (Simplize / HOSE / HNX)
-    try:
-        from corporate_actions import sync_ticker_corporate_actions_online
-        await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=2.0)
-    except Exception:
-        pass
+        try:
+            profile = await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=3.0)
+        except Exception:
+            profile = {}
+        comp_name = profile.get("name")
+        sect_name = profile.get("sector")
 
-    # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK (áp dụng toàn webapp)
-    try:
-        synced_reports = await get_synchronized_matrix_reports(
+        stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+        final_comp_name = comp_name or stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
+        final_sect_name = sect_name or stock_meta.get("sector", "Doanh nghiệp niêm yết")
+
+        try:
+            live_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=3.5)
+            market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
+        except Exception:
+            market_p = 25000.0
+            live_info = None
+
+        base_reports = []
+        base_causality = []
+        base_disensus = []
+        if clean_ticker in PRESET_DATASETS:
+            report = PRESET_DATASETS[clean_ticker]
+            if comp_name and (report.company_name.startswith("Công ty Cổ phần " + clean_ticker) or report.company_name.startswith("CTCP " + clean_ticker)):
+                report.company_name = comp_name
+            if sect_name and report.sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"]:
+                report.sector = sect_name
+            base_reports = list(report.matrix_table) if report.matrix_table else []
+            base_causality = report.causality_analysis or []
+            base_disensus = report.disensus_table or []
+            final_comp_name = report.company_name
+            final_sect_name = report.sector
+
+        # Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API (Simplize / HOSE / HNX)
+        try:
+            from corporate_actions import sync_ticker_corporate_actions_online
+            await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=2.0)
+        except Exception:
+            pass
+
+        # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK (áp dụng toàn webapp)
+        try:
+            synced_reports = await asyncio.wait_for(
+                get_synchronized_matrix_reports(
+                    ticker=clean_ticker,
+                    base_reports=base_reports,
+                    comp_name=final_comp_name,
+                    sector_name=final_sect_name,
+                    market_p=market_p,
+                    max_reports=20
+                ),
+                timeout=4.0
+            )
+        except Exception as sync_err:
+            print(f"Error syncing matrix reports for {clean_ticker}: {sync_err}")
+            synced_reports = base_reports
+
+        reconciled = calculate_consensus(
+            reports=synced_reports,
             ticker=clean_ticker,
-            base_reports=base_reports,
-            comp_name=final_comp_name,
-            sector_name=final_sect_name,
-            market_p=market_p,
-            max_reports=20
+            company_name=final_comp_name,
+            sector=final_sect_name,
+            current_market_price=market_p,
+            price_source_info=live_info
         )
-    except Exception as sync_err:
-        print(f"Error syncing matrix reports for {clean_ticker}: {sync_err}")
-        synced_reports = base_reports
 
-    reconciled = calculate_consensus(
-        reports=synced_reports,
-        ticker=clean_ticker,
-        company_name=final_comp_name,
-        sector=final_sect_name,
-        current_market_price=market_p,
-        price_source_info=live_info
-    )
+        # Đảm bảo mã ticker luôn là clean_ticker
+        reconciled.ticker = clean_ticker
+        if final_comp_name:
+            reconciled.company_name = final_comp_name
+        if final_sect_name:
+            reconciled.sector = final_sect_name
 
-    if base_causality and len(base_causality) > len(reconciled.causality_analysis):
-        reconciled.causality_analysis = base_causality
-    if base_disensus and len(reconciled.disensus_table) == 0:
-        reconciled.disensus_table = base_disensus
+        if base_causality and len(base_causality) > len(reconciled.causality_analysis):
+            reconciled.causality_analysis = base_causality
+        if base_disensus and len(reconciled.disensus_table) == 0:
+            reconciled.disensus_table = base_disensus
 
-    # Tự động đồng bộ các luận điểm tăng trưởng (Catalysts) và rủi ro mà AI đã học vào Báo cáo đa tổ chức
-    try:
-        reconciled = apply_learned_catalysts_to_report(reconciled)
-    except Exception as e:
-        print(f"Error applying AI learned catalysts for {clean_ticker}: {e}")
+        # Tự động đồng bộ các luận điểm tăng trưởng (Catalysts) và rủi ro mà AI đã học vào Báo cáo đa tổ chức
+        try:
+            reconciled = apply_learned_catalysts_to_report(reconciled)
+        except Exception as e:
+            print(f"Error applying AI learned catalysts for {clean_ticker}: {e}")
 
-    _SYNCHRONIZED_PRESETS_CACHE[clean_ticker] = reconciled
-    return reconciled
+        _SYNCHRONIZED_PRESETS_CACHE[clean_ticker] = reconciled
+        _SYNCHRONIZED_PRESETS_CACHE_TS[clean_ticker] = time.time()
+        return reconciled
 
 
 @app.get("/api/corporate-actions/{ticker}")
@@ -1593,7 +1638,7 @@ async def api_trigger_ai_learn(req: Optional[TriggerLearnRequest] = None):
     target_tickers = req.tickers if req else None
     res = await ai_scheduler.run_learning_cycle(target_tickers=target_tickers)
     
-    # Tự động xóa cache báo cáo cũ và nạp lại Báo cáo đa tổ chức kèm Catalysts mới từ AI
+    # Tự động xóa cache báo cáo cũ để các lần mở sau nạp lại dữ liệu mới nhất kèm Catalysts từ AI
     updated_tickers = res.get("updated_tickers", [])
     if updated_tickers:
         from crawler import _SYNCED_MATRIX_REPORTS_CACHE
@@ -1603,10 +1648,18 @@ async def api_trigger_ai_learn(req: Optional[TriggerLearnRequest] = None):
                 for k in keys_to_del:
                     _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
                 _SYNCHRONIZED_PRESETS_CACHE.pop(sym, None)
-                # Tải lại báo cáo đa tổ chức cập nhật
-                await get_preset_by_ticker(sym)
-            except Exception as e:
-                print(f"[AI Learn Trigger] Lỗi làm mới báo cáo {sym}: {e}")
+            except Exception:
+                pass
+
+        # Nạp lại dữ liệu ngầm trong nền (fire-and-forget) không làm treo hoặc chậm phản hồi HTTP
+        async def _preload_updated_in_background(symbols: List[str]):
+            for s in symbols[:5]:
+                try:
+                    await get_preset_by_ticker(s)
+                except Exception as pre_err:
+                    print(f"[AI Learn Preload] {s}: {pre_err}")
+
+        asyncio.create_task(_preload_updated_in_background(updated_tickers))
 
     return res
 

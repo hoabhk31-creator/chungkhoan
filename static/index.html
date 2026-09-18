@@ -131,7 +131,7 @@
             <div class="flex-1 max-w-md w-full relative">
                 <form id="central-search-form" action="javascript:void(0);" onsubmit="event.preventDefault(); handleCentralSearch(); return false;" class="relative flex items-center">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none z-10"></i>
-                    <input type="text" id="central-ticker-input" placeholder="Nhập mã chứng khoán (HCM, HPG, SSI, VNM, FPT, GEX, PDR)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-20 py-2 text-xs font-mono text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 uppercase transition-all shadow-inner relative z-0" autocomplete="off" spellcheck="false" autocapitalize="characters" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault();handleCentralSearch();}">
+                    <input type="text" id="central-ticker-input" placeholder="Nhập mã chứng khoán (HCM, HPG, SSI, VNM, FPT, GEX, PDR)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-20 py-2 text-xs font-mono text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 uppercase transition-all shadow-inner relative z-0" autocomplete="off" spellcheck="false" autocapitalize="characters">
                     <button type="button" id="btn-central-search" onclick="handleCentralSearch()" class="absolute right-1.5 px-3 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[11px] font-bold transition-all flex items-center gap-1 shadow cursor-pointer z-20">
                         <span id="btn-search-text">Tải</span>
                     </button>
@@ -3986,6 +3986,6 @@
         </div>
     </footer>
 
-    <script src="/static/app.js?v=10.40-sticky-header-tabs-dock-fix"></script>
+    <script src="/static/app.js?v=10.42-ticker-sync-integrity-fix"></script>
 </body>
 </html>

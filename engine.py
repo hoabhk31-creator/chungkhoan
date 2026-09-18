@@ -1677,6 +1677,7 @@ def calculate_consensus(
         market_to_fair_ratio = (current_market_price / mean_tp) * 100.0 if mean_tp > 0 else 100.0
     else:
         mean_tp = 0.0
+        raw_mean_tp = 0.0
         median_tp = 0.0
         min_tp = 0.0
         max_tp = 0.0

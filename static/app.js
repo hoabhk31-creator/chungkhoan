@@ -2,6 +2,8 @@
  * Institutional Equity Research Matrix (IERM) - Frontend Client Engine
  */
 
+let currentActiveTicker = "HPG";
+window.currentActiveTicker = "HPG";
 let currentReport = null;
 let currentFinancialBundle = null;
 let currentTechnicalData = null;
@@ -13,6 +15,11 @@ let currentPeriodMode = "quarter"; // "year" hoặc "quarter" (Mặc định: Th
 let currentPeriodCount = "all"; // 4, 8, 10 hoặc "all" (Mặc định: Tất cả các kỳ)
 let currentSelectedPeriodIdx = -1; // -1: kỳ mới nhất (mặc định)
 let currentBreakdownMode = "asset"; // "asset" (Cơ cấu Tài sản) hoặc "revenue" (Cơ cấu Doanh thu)
+
+function getActiveTicker() {
+    return (window.currentActiveTicker || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
+}
+
 
 // Chart instances tracker
 let chartRevenueProfit = null;
@@ -80,7 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => {
         try {
             if (typeof isSwitchingTicker !== "undefined" && isSwitchingTicker) return;
-            const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+            const activeTicker = getActiveTicker();
+            if (currentReport && currentReport.ticker && currentReport.ticker.toUpperCase() !== activeTicker) {
+                // Đang có sự lệch pha giữa currentReport và mã đang chọn, không đồng bộ giá của mã cũ
+                return;
+            }
             loadMarketTickerTape(activeTicker);
             refreshLivePrice(false);
 
@@ -202,7 +213,7 @@ function toggleTheme() {
         renderOverviewHeaderAndStats(currentMiniChartData);
         renderOverviewMiniDonut(currentMiniChartData.market_cap_bil, currentMiniChartData.revenue_ttm_bil, currentMiniChartData.net_profit_ttm_bil);
     }
-    const curTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+    const curTicker = getActiveTicker();
     if (typeof initOverviewTvChartInstance === "function") {
         initOverviewTvChartInstance(curTicker, currentOverviewResolution);
         if (currentOverviewCandles && currentOverviewCandles.length > 0) {
@@ -278,7 +289,7 @@ function switchTab(tabId) {
         if (chartOverviewMiniDonut) chartOverviewMiniDonut.resize();
         if (chartOverviewKqkd) chartOverviewKqkd.resize();
         if (chartOverviewCdkt) chartOverviewCdkt.resize();
-        const activeOverviewTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+        const activeOverviewTicker = getActiveTicker();
         if (typeof loadOverviewCompanyReports === 'function') {
             loadOverviewCompanyReports(activeOverviewTicker);
         }
@@ -289,7 +300,7 @@ function switchTab(tabId) {
     }
     if (tabId === "tab-industry" && chartPeerRadar) chartPeerRadar.resize();
     if (tabId === "tab-valuation") {
-        const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+        const activeTicker = getActiveTicker();
         if (currentFinancialBundle && currentFinancialBundle.valuation && (currentFinancialBundle.valuation.ticker === activeTicker || !currentFinancialBundle.valuation.ticker)) {
             renderValuationSection(currentFinancialBundle.valuation);
         } else if (currentMultiValuationState && currentMultiValuationState.ticker === activeTicker) {
@@ -457,6 +468,10 @@ async function selectTicker(ticker) {
     const cleanTicker = (ticker || "HPG").trim().toUpperCase();
     if (!cleanTicker) return;
 
+    window.currentActiveTicker = cleanTicker;
+    currentReport = null;
+    currentFinancialBundle = null;
+    currentTechnicalData = null;
     currentMultiValuationState = null;
     const thisReqSeq = ++activeRequestSeq;
     isSwitchingTicker = true;
@@ -475,11 +490,23 @@ async function selectTicker(ticker) {
     const input = document.getElementById("central-ticker-input");
     if (input) input.value = cleanTicker;
 
-    // Phản hồi trực quan tức thì trên Header
+    // Phản hồi trực quan tức thì trên Header & Hero Card (Đồng bộ tuyệt đối mã đang chọn)
     const dispTicker = document.getElementById("display-ticker");
     if (dispTicker) dispTicker.textContent = cleanTicker;
+    const dispComp = document.getElementById("display-company");
+    if (dispComp) dispComp.textContent = `Công ty Cổ phần ${cleanTicker}`;
+    const dispSector = document.getElementById("display-sector");
+    if (dispSector) dispSector.textContent = "Đang tải dữ liệu...";
+    const dispPrice = document.getElementById("display-market-price");
+    if (dispPrice) dispPrice.textContent = "— VND";
+    const dispCount = document.getElementById("display-report-count");
+    if (dispCount) dispCount.textContent = "Đang nạp...";
     const matrixHeaderTicker = document.getElementById("matrix-header-ticker");
     if (matrixHeaderTicker) matrixHeaderTicker.textContent = cleanTicker;
+    const matrixCompEl = document.getElementById("matrix-header-company");
+    if (matrixCompEl) matrixCompEl.textContent = `Công ty Cổ phần ${cleanTicker}`;
+    const matrixSectEl = document.getElementById("matrix-header-sector");
+    if (matrixSectEl) matrixSectEl.textContent = "Đang tải dữ liệu...";
     const techToolbarTicker = document.getElementById("tech-toolbar-ticker");
     if (techToolbarTicker) techToolbarTicker.textContent = cleanTicker;
 
@@ -506,6 +533,11 @@ async function selectTicker(ticker) {
     if (chip) {
         chip.classList.add("active", "bg-cyan-950/80", "border-cyan-700", "text-cyan-300");
         chip.classList.remove("bg-slate-900", "border-slate-700", "text-slate-300");
+        const tagSpan = chip.querySelector("span:last-child");
+        if (tagSpan) {
+            tagSpan.textContent = "THEO DÕI";
+            tagSpan.className = "text-[9px] text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1 py-0.2 rounded font-semibold";
+        }
     }
 
     try {
@@ -532,12 +564,51 @@ async function selectTicker(ticker) {
             try { techData = await techRes.json(); } catch (e) { console.error("Parse tech err", e); }
         }
 
-        if (reportData) currentReport = reportData;
+        // Kiểm tra tính toàn vẹn dữ liệu: Báo cáo trả về bắt buộc phải khớp với cleanTicker
+        if (reportData && reportData.ticker && reportData.ticker.toUpperCase() !== cleanTicker) {
+            console.warn(`[Integrity Warning] Preset ticker ${reportData.ticker} !== ${cleanTicker}, rejecting mismatched report.`);
+            reportData = null;
+        }
+
+        // Tự động khởi tạo fallback reportData nếu API preset chưa có hoặc gặp lỗi mạng
+        if (!reportData) {
+            const compProfile = (finBundle && finBundle.company_profile) || {};
+            const livePriceVal = (finBundle && finBundle.valuation && finBundle.valuation.current_price) || 0;
+            reportData = {
+                ticker: cleanTicker,
+                company_name: compProfile.name || `Công ty Cổ phần ${cleanTicker}`,
+                sector: compProfile.sector || "Doanh nghiệp niêm yết",
+                current_price: livePriceVal,
+                analysis_date: "Cập nhật " + new Date().toLocaleDateString('vi-VN'),
+                consensus_summary: {
+                    consensus_rating: "CẦN THEO DÕI THÊM (Chưa có định giá)",
+                    consensus_score: 3.0,
+                    current_market_price: livePriceVal,
+                    mean_target_price: 0,
+                    median_target_price: 0,
+                    min_target_price: 0,
+                    max_target_price: 0,
+                    average_upside: 0,
+                    market_to_fair_value_ratio: 100.0,
+                    target_price_spread_percent: 0,
+                    recommended_buy_zone: "Chưa có báo cáo định giá cập nhật cho mã này.",
+                    stop_loss_threshold: "Theo dõi hỗ trợ kỹ thuật thị trường",
+                    price_source_label: "Live",
+                    price_date_str: new Date().toLocaleDateString('vi-VN'),
+                    sources_comparison: []
+                },
+                matrix_table: [],
+                causality_analysis: [],
+                disensus_table: []
+            };
+        }
+
+        currentReport = reportData;
         if (finBundle) currentFinancialBundle = finBundle;
         if (techData) currentTechnicalData = techData;
 
         // 1. Render Tab 1 & Header
-        if (currentReport) {
+        if (currentReport && currentReport.ticker.toUpperCase() === cleanTicker) {
             try { renderHero(currentReport); } catch (e) { console.error("renderHero err", e); }
             try { renderMatrixTable(currentReport); } catch (e) { console.error("renderMatrixTable err", e); }
             try { renderCausality(currentReport); } catch (e) { console.error("renderCausality err", e); }
@@ -601,7 +672,7 @@ async function selectTicker(ticker) {
             try { renderBctcCharts(activeStm); } catch(e) { console.error("renderBctcCharts err", e); }
             try { renderPeersSection(bundle.peers_data); } catch(e) { console.error("renderPeersSection err", e); }
             try { renderValuationSection(bundle.valuation); } catch(e) { console.error("renderValuationSection err", e); }
-            if (currentReport) {
+            if (currentReport && currentReport.ticker.toUpperCase() === cleanTicker) {
                 try { renderCausality(currentReport); } catch(e) { console.error("re-renderCausality err", e); }
             }
         }
@@ -632,6 +703,8 @@ async function selectTicker(ticker) {
     }
 }
 
+let _lastSearchTime = 0;
+let _lastSearchTicker = "";
 function handleCentralSearch(explicitTicker) {
     let ticker = "";
     if (typeof explicitTicker === "string" && explicitTicker.trim()) {
@@ -644,7 +717,14 @@ function handleCentralSearch(explicitTicker) {
         showToast("Vui lòng nhập mã chứng khoán (vd: SSI, HCM, VNM, FPT, MWG, HPG)!", true);
         return;
     }
-    selectTicker(ticker.toUpperCase());
+    const cleanTicker = ticker.toUpperCase().trim();
+    const now = Date.now();
+    if (cleanTicker === _lastSearchTicker && (now - _lastSearchTime) < 400 && isSwitchingTicker) {
+        return; // Bỏ qua nếu đang xử lý mã đó
+    }
+    _lastSearchTime = now;
+    _lastSearchTicker = cleanTicker;
+    selectTicker(cleanTicker);
 }
 
 function loadPreset(ticker) {
@@ -655,6 +735,12 @@ function loadPreset(ticker) {
 // RENDER FULL REPORT
 // -------------------------------------------------------------
 function renderAll(report) {
+    if (!report) return;
+    const activeTicker = getActiveTicker();
+    if (report.ticker && activeTicker && report.ticker.toUpperCase() !== activeTicker) {
+        console.warn(`[Integrity Guard] Refusing renderAll for ${report.ticker} because active ticker is ${activeTicker}`);
+        return;
+    }
     renderHero(report);
     renderMatrixTable(report);
     renderCausality(report);
@@ -664,7 +750,13 @@ function renderAll(report) {
 }
 
 function renderHero(report) {
-    const cs = report.consensus_summary;
+    if (!report) return;
+    const activeTicker = getActiveTicker();
+    if (report.ticker && activeTicker && report.ticker.toUpperCase() !== activeTicker) {
+        console.warn(`[Integrity Guard] Refusing renderHero for ${report.ticker} because active ticker is ${activeTicker}`);
+        return;
+    }
+    const cs = report.consensus_summary || {};
     document.getElementById("display-ticker").textContent = report.ticker;
     document.getElementById("display-company").textContent = report.company_name;
     document.getElementById("display-sector").textContent = report.sector;
@@ -2103,7 +2195,7 @@ async function loadOverviewCompanyReports(ticker, keyword = null, reportTypeId =
 
     if (!tbody) return;
 
-    const cleanTicker = (ticker || currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG")).toUpperCase().trim();
+    const cleanTicker = (ticker || getActiveTicker()).toUpperCase().trim();
     if (tickerBadge) tickerBadge.textContent = cleanTicker;
 
     if (kwInput) {
@@ -2212,7 +2304,7 @@ function handleOverviewReportSearch() {
     const keyword = kwInput ? kwInput.value.trim() : "";
     const typeId = typeSelect ? typeSelect.value : "";
     const source = srcSelect ? srcSelect.value : "";
-    const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+    const activeTicker = getActiveTicker();
 
     loadOverviewCompanyReports(activeTicker, keyword, typeId, source, true);
 }
@@ -2231,7 +2323,7 @@ function resetOverviewReportFilter() {
     const typeSelect = document.getElementById("overview-report-type-select");
     const srcSelect = document.getElementById("overview-report-source-select");
 
-    const activeTicker = currentReport?.ticker || (document.getElementById("central-ticker-input")?.value || "HPG").trim().toUpperCase();
+    const activeTicker = getActiveTicker();
     if (kwInput) kwInput.value = activeTicker.toLowerCase();
     if (typeSelect) typeSelect.value = "";
     if (srcSelect) srcSelect.value = "";
@@ -2417,7 +2509,7 @@ function renderOverviewHeaderAndStats(data) {
 function initOverviewTvChartInstance(ticker, resolution = "D") {
     const renderBox = document.getElementById("overview-tv-chart-box");
     if (!renderBox) return;
-    const cleanSym = (ticker || currentReport?.ticker || "HPG").toUpperCase();
+    const cleanSym = (ticker || getActiveTicker()).toUpperCase();
 
     if (typeof LightweightCharts === "undefined") {
         console.warn("TradingView LightweightCharts not loaded");
@@ -2965,7 +3057,7 @@ function applyOverviewTimeframeRange(tf, closes) {
 }
 
 async function renderOverviewTvChart(ticker, resolution = "D") {
-    const cleanTicker = (ticker || currentReport?.ticker || "HPG").trim().toUpperCase();
+    const cleanTicker = (ticker || getActiveTicker()).trim().toUpperCase();
     currentOverviewResolution = resolution;
 
     initOverviewTvChartInstance(cleanTicker, resolution);
@@ -3027,7 +3119,7 @@ function setOverviewChartType(type) {
         activeBtn.classList.remove("text-slate-400");
     }
 
-    const ticker = currentReport?.ticker || "HPG";
+    const ticker = getActiveTicker();
     initOverviewTvChartInstance(ticker, currentOverviewResolution);
     if (currentOverviewCandles && currentOverviewCandles.length > 0) {
         populateOverviewTvChartData(currentOverviewCandles, currentOverviewTimeframe);
@@ -3050,7 +3142,7 @@ function setOverviewResolution(res) {
         activeBtn.classList.remove("text-slate-400");
     }
 
-    const ticker = currentReport?.ticker || "HPG";
+    const ticker = getActiveTicker();
     renderOverviewTvChart(ticker, res);
 }
 
@@ -5321,7 +5413,7 @@ function renderPeersSection(peersData) {
     }
 
     // Tự động tải báo cáo phân tích ngành & hàng hóa liên quan đến mã đang xem
-    const activeTicker = peersData.target_ticker || currentReport?.ticker || "HPG";
+    const activeTicker = peersData.target_ticker || getActiveTicker();
     const typeSelectEl = document.getElementById("industry-report-type-select");
     const initType = typeSelectEl ? (typeSelectEl.value || "57") : "57";
     loadIndustryReports(activeTicker, "", initType);
@@ -5359,7 +5451,7 @@ async function loadIndustryReports(ticker, keyword = "", reportTypeId = "57", so
     if (commTagsContainer && !isExplicitSearch) commTagsContainer.innerHTML = `<span class="text-slate-500 text-[10px] animate-pulse">Đang cập nhật hàng hóa...</span>`;
 
     try {
-        const cleanTicker = (ticker || currentReport?.ticker || "HPG").toUpperCase();
+        const cleanTicker = (ticker || getActiveTicker()).toUpperCase();
         let url = `/api/industry-reports?ticker=${encodeURIComponent(cleanTicker)}`;
         
         // Nếu người dùng chủ động xóa từ khóa gợi ý và bấm Tìm:
@@ -5548,7 +5640,7 @@ function handleIndustryReportSearch() {
     const keyword = kwInput ? kwInput.value.trim() : "";
     const typeId = typeSelect ? typeSelect.value : "57";
     const source = srcSelect ? srcSelect.value : "";
-    const activeTicker = currentReport?.ticker || "HPG";
+    const activeTicker = getActiveTicker();
 
     // Khi người dùng chủ động bấm "Tìm" (hoặc Enter):
     // Nếu keyword để trống -> Xem toàn bộ báo cáo của tất cả các ngành (isExplicitSearch = true)
@@ -5572,7 +5664,7 @@ function resetIndustryReportFilter() {
     if (typeSelect) typeSelect.value = "57";
     if (srcSelect) srcSelect.value = "";
 
-    const activeTicker = currentReport?.ticker || "HPG";
+    const activeTicker = getActiveTicker();
     loadIndustryReports(activeTicker, "", "57");
 }
 
@@ -9460,8 +9552,15 @@ async function triggerAiLearningNow() {
             body: JSON.stringify({ tickers: tickers })
         });
         if (!resp.ok) {
-            const errJson = await resp.json().catch(() => ({ detail: "Lỗi kết nối máy chủ" }));
-            throw new Error(errJson.detail || "Tiến trình tự học thất bại");
+            let detail = "Tiến trình tự học thất bại";
+            try {
+                const errJson = await resp.json();
+                detail = errJson.detail || errJson.message || detail;
+            } catch (_) {
+                const txt = await resp.text().catch(() => "");
+                detail = txt || `Lỗi máy chủ (HTTP ${resp.status})`;
+            }
+            throw new Error(detail);
         }
         const data = await resp.json();
         const scopeMsg = data.scope || (tickers.length === 0 ? "Toàn bộ thị trường" : tickers.join(", "));
@@ -9915,8 +10014,10 @@ function showToast(message, isError = false) {
 let isSyncingLivePrice = false;
 
 async function refreshLivePrice(isManual = false) {
+    const activeTicker = getActiveTicker();
     if (!currentReport || isSyncingLivePrice || isSwitchingTicker) return;
-    const ticker = currentReport.ticker;
+    if (!activeTicker || currentReport.ticker.toUpperCase() !== activeTicker) return;
+    const ticker = currentReport.ticker.toUpperCase();
     isSyncingLivePrice = true;
 
     const iconEl = document.getElementById("icon-sync-live-price");
@@ -9931,7 +10032,7 @@ async function refreshLivePrice(isManual = false) {
         if (!resp.ok) throw new Error("Không thể tải giá live");
         const priceInfo = await resp.json();
 
-        if (isSwitchingTicker || !currentReport || currentReport.ticker !== ticker) {
+        if (isSwitchingTicker || !currentReport || currentReport.ticker.toUpperCase() !== activeTicker || getActiveTicker() !== activeTicker) {
             return;
         }
 
@@ -9953,7 +10054,7 @@ async function refreshLivePrice(isManual = false) {
                 })
             });
             if (recResp.ok) {
-                if (isSwitchingTicker || !currentReport || currentReport.ticker !== ticker) {
+                if (isSwitchingTicker || !currentReport || currentReport.ticker.toUpperCase() !== activeTicker || getActiveTicker() !== activeTicker) {
                     return;
                 }
                 currentReport = await recResp.json();
@@ -9961,7 +10062,7 @@ async function refreshLivePrice(isManual = false) {
             }
         }
 
-        if (isSwitchingTicker || !currentReport || currentReport.ticker !== ticker) {
+        if (isSwitchingTicker || !currentReport || currentReport.ticker.toUpperCase() !== activeTicker || getActiveTicker() !== activeTicker) {
             return;
         }
 
@@ -10278,7 +10379,7 @@ function closePriceComparisonModal() {
 // CTCK RESEARCH REPORTS COMPARISON MODAL
 // -------------------------------------------------------------
 function getValidReportUrl(r, ticker) {
-    const cleanTicker = (ticker || currentReport?.ticker || "HPG").toUpperCase().trim();
+    const cleanTicker = (ticker || getActiveTicker()).toUpperCase().trim();
     const inst = (r?.institution || "CTCK").trim();
     return `/api/reports/pdf/${cleanTicker}/${encodeURIComponent(inst)}.pdf`;
 }
