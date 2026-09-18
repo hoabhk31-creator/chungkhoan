@@ -8,10 +8,7 @@
       "Hưởng lợi từ chính sách phòng vệ thương mại chống bán phá giá",
       "Đưa lò cao Dung Quất 2 vào hoạt động đúng kế hoạch",
       "Hưởng lợi thuế chống bán phá giá HRC",
-      "Tỷ suất cổ tức tiền mặt dự kiến đạt 5%",
-      "Chính sách bảo hộ, thuế tự vệ chống bán phá giá thép cán nóng nhập khẩu từ Trung Quốc/Ấn Độ (HPG)",
-      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc (HPG)",
-      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC) (HPG)"
+      "Tỷ suất cổ tức tiền mặt dự kiến đạt 5%"
     ],
     "risks": [
       "Rủi ro lãi suất và chi phí vốn vay",
@@ -21,9 +18,7 @@
       "Biến động giá nguyên vật liệu đầu vào (quặng sắt, than mỡ) tăng đột biến"
     ],
     "theses": [
-      "Công ty chứng khoán DSC khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu đạt 26.900 đồng, tiềm năng tăng giá là 22%",
-      "Chuỗi giá trị khép kín từ thượng nguồn phôi thép đến hạ nguồn thép chế tạo chất lượng cao đối với HPG",
-      "Lợi thế quy mô dẫn đầu với giá thành sản xuất cạnh tranh nhất khu vực Đông Nam Á đối với HPG"
+      "Công ty chứng khoán DSC khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu đạt 26.900 đồng, tiềm năng tăng giá là 22%"
     ],
     "history": [
       {
@@ -175,18 +170,13 @@
       "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn",
       "Thị phần môi giới cổ phiếu của SSI trong Q2/2026 trên HOSE đạt 11,2%, nằm trong nhóm dẫn đầu",
       "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026. Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (SSI)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)",
       "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với SSI",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với SSI"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "VCBS",
@@ -334,11 +324,7 @@
   "VNM": {
     "ticker": "VNM",
     "catalysts": [
-      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ (VNM)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VNM)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VNM)",
       "Công ty chứng khoán VPBankS cập nhật kết quả kinh doanh Q2/2026 của mã cổ phiếu VNM với giá mục tiêu là 65.100 đồng, tổng mức sinh lời kỳ vọng +16,7% bao gồm tỷ suất cổ tức 7,3%",
-      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (VNM)",
       "Biên lợi nhuận gộp quý 2 mở rộng thêm 1,7 điểm phần trăm lên 43,5% nhờ tác động của chu kỳ giá sữa nguyên liệu đầu vào thấp, giúp lợi nhuận tăng trưởng nhanh hơn doanh thu",
       "Tối ưu chi phí bao bì và tự chủ nguồn sữa tươi từ tổ hợp Cần Thơ",
       "Mở rộng dòng sản phẩm sữa cao cấp và sữa hạt hữu cơ",
@@ -353,12 +339,7 @@
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Hệ sinh thái dịch vụ tài chính đa dạng (bảo hiểm, chứng khoán, quản lý quỹ) mang lại thu nhập ngoài lãi cao đối với VNM",
-      "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu dưới 1.5% đối với VNM",
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với VNM",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VNM"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "VDS",
@@ -506,11 +487,8 @@
   "MWG": {
     "ticker": "MWG",
     "catalysts": [
-      "Tối ưu hóa chi phí vận hành, đóng bớt các điểm bán không hiệu quả và tái cấu trúc mạng lưới (MWG)",
       "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu",
-      "Năm 2026F, VDSC dự phóng doanh thu thuần đạt 198.033 tỷ đồng (+26,6% YoY), LNST công ty mẹ đạt 11.091 tỷ đồng (+57,6% YoY), EPS đạt 7.553 đồng/cp, P/E dự phóng 10,1 lần (P/E mục tiêu 14,9x), P/B 2,8 lần, ROE 27,2% và cổ tức tiền mặt 2.000 đồng/cp",
-      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng (MWG)",
-      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu (MWG)"
+      "Năm 2026F, VDSC dự phóng doanh thu thuần đạt 198.033 tỷ đồng (+26,6% YoY), LNST công ty mẹ đạt 11.091 tỷ đồng (+57,6% YoY), EPS đạt 7.553 đồng/cp, P/E dự phóng 10,1 lần (P/E mục tiêu 14,9x), P/B 2,8 lần, ROE 27,2% và cổ tức tiền mặt 2.000 đồng/cp"
     ],
     "risks": [
       "Cạnh tranh gay gắt về giá từ các kênh thương mại điện tử (Shopee, TikTok Shop)",
@@ -518,8 +496,6 @@
     ],
     "theses": [
       "Công ty chứng khoán MAS duy trì khuyến nghị MUA đối với mã cổ phiếu MWG với giá mục tiêu là 100.000 đồng, tiềm năng tăng giá đạt 36,6%",
-      "Hệ thống logistics và kho bãi quy mô lớn tạo rào cản gia nhập ngành vững chắc đối với MWG",
-      "Hưởng lợi dài hạn từ xu hướng chuyển dịch tiêu dùng từ chợ truyền thống sang kênh hiện đại đối với MWG",
       "KQKD Q2-2026 vượt kỳ vọng với doanh thu thuần 48.751 tỷ đồng (+29,5% svck) và LNST công ty mẹ 3.244 tỷ đồng (+96,8% svck)"
     ],
     "history": [
@@ -656,17 +632,13 @@
     "ticker": "VTO",
     "catalysts": [
       "Công ty chứng khoán VDSC khuyến nghị MUA mã cổ phiếu VTO với giá mục tiêu 13.450 đồng, upside +27,4% so với giá đóng cửa 10.550 đồng ngày 11/09/2026. Trong năm 2026F, VDSC dự phóng doanh thu đạt 1.275 tỷ đồng (+12,9% YoY), LNST đạt 187 tỷ đồng (+67,0% YoY), EPS đạt 2.346 đồng/cp, ROE 16,3%, ROA 12,2%, P/E dự phóng 6,0 lần, P/B 0,9 lần và cổ tức tiền mặt 1.000 đồng/cp (kế hoạch 2026 cổ tức 10%)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VTO)",
       "Kế hoạch mua tàu viễn dương mới 50.000 DWT ngân sách ~56 triệu USD giúp tăng 30-40% công suất đội tàu"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với VTO",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VTO"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "VDS",
@@ -778,22 +750,13 @@
   },
   "DCM": {
     "ticker": "DCM",
-    "catalysts": [
-      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào (DCM)",
-      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới (DCM)",
-      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ (DCM)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (DCM)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (DCM)"
-    ],
+    "catalysts": [],
     "risks": [
       "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc",
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
     "theses": [
-      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh đối với DCM",
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với DCM",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với DCM",
       "Triển vọng giá Urea thế giới kỳ vọng duy trì 450 - 500 USD/tấn nửa cuối năm 2026"
     ],
     "history": [
@@ -943,18 +906,13 @@
   "VCB": {
     "ticker": "VCB",
     "catalysts": [
-      "Ngân hàng đang triển khai phát hành riêng lẻ 6,5% số cổ phiếu lưu hành (tối đa 543 triệu cổ phiếu) thu về khoảng 1 tỷ USD",
-      "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp (VCB)",
-      "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (VCB)"
+      "Ngân hàng đang triển khai phát hành riêng lẻ 6,5% số cổ phiếu lưu hành (tối đa 543 triệu cổ phiếu) thu về khoảng 1 tỷ USD"
     ],
     "risks": [
       "Nợ xấu tiềm ẩn từ nhóm khách hàng bất động sản và trái phiếu doanh nghiệp phát sinh",
       "Tỷ lệ bao phủ nợ xấu Q2/2026 đạt 280%"
     ],
-    "theses": [
-      "Hệ sinh thái dịch vụ tài chính đa dạng (bảo hiểm, chứng khoán, quản lý quỹ) mang lại thu nhập ngoài lãi cao đối với VCB",
-      "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu dưới 1.5% đối với VCB"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "BSC",
@@ -1068,17 +1026,13 @@
     "ticker": "VSC",
     "catalysts": [
       "Kế hoạch phát hành chào bán >187 triệu CP cho cổ đông hiện hữu giá 10.000 đồng/CP huy động ~1.870 tỷ đồng và phát hành tối đa 15 triệu trái phiếu kèm chứng quyền huy động 1.500 tỷ đồng",
-      "Cổ tức 2026 dự kiến 10% bằng tiền và/hoặc cổ phiếu",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VSC)"
+      "Cổ tức 2026 dự kiến 10% bằng tiền và/hoặc cổ phiếu"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với VSC",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VSC"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "SHS",
@@ -1191,18 +1145,13 @@
   "PHR": {
     "ticker": "PHR",
     "catalysts": [
-      "Tỷ suất cổ tức/thị giá dự phóng ở mức 4,4%",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (PHR)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (PHR)"
+      "Tỷ suất cổ tức/thị giá dự phóng ở mức 4,4%"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với PHR",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với PHR"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "MAS",
@@ -1315,18 +1264,13 @@
   "NTP": {
     "ticker": "NTP",
     "catalysts": [
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (NTP)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (NTP)",
       "Công ty chứng khoán KBSV khuyến nghị MUA mã cổ phiếu NTP với giá mục tiêu 73.200 đồng, upside +40,0% so với giá đóng cửa ngày 15/09/2026. KBSV dự phóng sản lượng tiêu thụ của NTP trong năm 2026/2027 lần lượt đạt 150/153 nghìn tấn, tương ứng tăng 12%/2% svck; sản lượng tiêu thụ CAGR đạt 2,3% giai đoạn 2026-2028. Định giá P/E fw 2026F ở mức 9,5 lần, phù hợp với mức dự phóng tăng trưởng LNST 11,6% CAGR giai đoạn 2026-2028. Các dự án triển khai trong năm 2026 đạt gần 1.750 tỷ đồng, tương đương khoảng 24% kế hoạch doanh thu"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với NTP",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với NTP"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "KBSV",
@@ -1439,18 +1383,13 @@
   "BWE": {
     "ticker": "BWE",
     "catalysts": [
-      "Lợi nhuận gộp đạt 564 tỷ đồng (+11% YoY) nhờ biên lợi nhuận gộp cải thiện lên 46,2% (+7,8 đpt YoY)",
-      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (BWE)",
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (BWE)"
+      "Lợi nhuận gộp đạt 564 tỷ đồng (+11% YoY) nhờ biên lợi nhuận gộp cải thiện lên 46,2% (+7,8 đpt YoY)"
     ],
     "risks": [
       "Lợi nhuận sau thuế Q2/2026 đạt 337 tỷ đồng (+10% YoY), được hỗ trợ bởi đòn bẩy hoạt động mảng nước sạch và chi phí tài chính giảm 12% YoY xuống 111 tỷ đồng nhờ công ty triển khai các hợp đồng CCS phòng ngừa rủi ro tỷ giá",
       "Trong 2Q26, BWE đạt doanh thu 1.222 tỷ đồng (-8% YoY) do sự sụt giảm ở mảng xử lý nước thải và rác thải"
     ],
-    "theses": [
-      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500 đối với BWE",
-      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu đối với BWE"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "KIS",
@@ -1563,18 +1502,13 @@
   "VIX": {
     "ticker": "VIX",
     "catalysts": [
-      "VIX không chi trả cổ tức tiền mặt mà đã phát hành cổ phiếu trả cổ tức tỷ lệ 20:1 vào ngày 21/08/2026",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VIX)",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VIX)"
+      "VIX không chi trả cổ tức tiền mặt mà đã phát hành cổ phiếu trả cổ tức tỷ lệ 20:1 vào ngày 21/08/2026"
     ],
     "risks": [
       "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
       "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin"
     ],
-    "theses": [
-      "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn đối với VIX",
-      "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững đối với VIX"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "TCBS",
@@ -1688,17 +1622,13 @@
     "ticker": "PVD",
     "catalysts": [
       "Điểm rơi phục hồi dự kiến từ Q4/2026 khi Sông Đốc hoàn tất và giàn chuyển sang Malaysia thực hiện hợp đồng mới",
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (PVD)",
       "Trung hạn, giá thuê giàn kỳ vọng duy trì quanh 90.000 USD/ngày cùng đà mở rộng đội giàn là nền tảng tăng trưởng giai đoạn 2027–2030"
     ],
     "risks": [
       "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND",
       "Kết quả kinh doanh Q2–Q3/2026 chịu áp lực ngắn hạn do dự án hủy giếng Sông Đốc kéo dài đến tháng 9/2026, chi phí nhân sự tuyển dụng trước cho Giàn X và cách hạch toán lãi vay mới cho Giàn IX và X"
     ],
-    "theses": [
-      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500 đối với PVD",
-      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu đối với PVD"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "BSC",
@@ -1811,19 +1741,14 @@
   "FPT": {
     "ticker": "FPT",
     "catalysts": [
-      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần",
-      "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ (FPT)",
-      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (FPT)",
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (FPT)"
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần"
     ],
     "risks": [
       "Tình trạng thiếu hụt nhân sự cấp cao trong lĩnh vực bán dẫn và trí tuệ nhân tạo chuyên sâu",
       "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND"
     ],
     "theses": [
-      "Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%",
-      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500 đối với FPT",
-      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu đối với FPT"
+      "Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%"
     ],
     "history": [
       {
@@ -1875,10 +1800,7 @@
       "Tình trạng thiếu hụt nhân sự cấp cao trong lĩnh vực bán dẫn và trí tuệ nhân tạo chuyên sâu",
       "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND"
     ],
-    "theses": [
-      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500 đối với HVN",
-      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu đối với HVN"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "FPTS",
@@ -1905,7 +1827,6 @@
       "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026",
       "Dự phóng niên độ FY2026F, LNST cổ đông công ty mẹ phục hồi mạnh lên 897 tỷ đồng (+182% YoY) và EPS đạt 894 đồng/cp khi mở chu kỳ bàn giao mới từ khoản người mua trả tiền trước đạt 6.125 tỷ đồng (+2.917% YoY)",
       "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%)",
-      "Hoàn tất thủ tục pháp lý, phê duyệt quy hoạch 1/500 và cấp giấy phép xây dựng cho các dự án trọng điểm (TCH)",
       "Kết quả Q1-FY26 ghi nhận doanh thu thuần 453 tỷ đồng (+16% YoY) và LNST-CĐM 125 tỷ đồng (+231% YoY), mới chỉ hoàn thành 5% kế hoạch và dự phóng cả năm do chậm bàn giao dự án HH Green River",
       "Cập nhật chỉ số vĩ mô mới nhất",
       "0. Đầu tư trực tiếp nước ngoài (FDI)",
@@ -1916,10 +1837,7 @@
       "Thời gian hoàn thiện thủ tục pháp lý và tính tiền sử dụng đất kéo dài hơn kế hoạch",
       "Tỷ giá trung tâm USD/VND"
     ],
-    "theses": [
-      "Chi phí giải phóng mặt bằng thấp tạo biên lợi nhuận gộp vượt trội khi mở bán dự án đối với TCH",
-      "Sở hữu quỹ đất sạch quy mô lớn tại các vị trí kết nối hạ tầng giao thông chiến lược đối với TCH"
-    ],
+    "theses": [],
     "history": [
       {
         "source": "SSI Research",
