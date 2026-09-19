@@ -953,9 +953,54 @@ function renderHero(report) {
     document.getElementById("display-date").textContent = report.analysis_date || `Tháng 09/2026`;
     document.getElementById("display-report-count").textContent = `${report.matrix_table ? report.matrix_table.length : 0} Báo cáo`;
 
+function getConsensusRecommendationText(upside, hasValidValuation) {
+    if (!hasValidValuation || upside === null || upside === undefined || isNaN(Number(upside))) {
+        return {
+            text: "CẦN THEO DÕI THÊM (Chưa có định giá)",
+            colorClass: "text-amber-400",
+            icon: "eye"
+        };
+    }
+    const val = Math.round(Number(upside) * 10) / 10;
+    if (val >= 20.0) {
+        return {
+            text: "KỲ VỌNG TĂNG GIÁ RẤT MẠNH",
+            colorClass: "text-emerald-400",
+            icon: "trending-up"
+        };
+    } else if (val >= 7.0) {
+        return {
+            text: "KỲ VỌNG TĂNG GIÁ MẠNH",
+            colorClass: "text-emerald-400",
+            icon: "trending-up"
+        };
+    } else if (val > 0.0) {
+        return {
+            text: "CHÚ Ý GẦN KỲ VỌNG GIÁ",
+            colorClass: "text-sky-400",
+            icon: "target"
+        };
+    } else if (val === 0.0) {
+        return {
+            text: "ĐẠT KỲ VỌNG GIÁ",
+            colorClass: "text-amber-400",
+            icon: "check-circle"
+        };
+    } else {
+        return {
+            text: "ĐÃ VƯỢT GIÁ KỲ VỌNG",
+            colorClass: "text-rose-400",
+            icon: "alert-triangle"
+        };
+    }
+}
+
     // Metrics
-    const hasValidValuation = cs.mean_target_price > 0 && !(cs.consensus_rating || "").includes("THEO DÕI");
+    const hasValidValuation = cs.mean_target_price > 0 && !(cs.consensus_rating || "").includes("THEO DÕI") && !(cs.consensus_rating || "").includes("Chưa có định giá");
     const isExceeded = hasValidValuation && (cs.average_upside < 0 || cs.current_market_price > cs.mean_target_price);
+
+    const recInfo = getConsensusRecommendationText(cs.average_upside, hasValidValuation);
+    cs.consensus_rating = recInfo.text;
 
     const ratingEl = document.getElementById("stat-rating");
     const ratingIcon = document.getElementById("stat-rating-icon");
@@ -965,29 +1010,13 @@ function renderHero(report) {
     const upsideLabelEl = document.getElementById("stat-upside-label");
     const upsideWrapper = document.getElementById("stat-upside-wrapper");
 
-    // 1. Thẻ Consensus
+    // 1. Thẻ Consensus (Khung tô đỏ)
     if (ratingEl) {
-        if (!hasValidValuation) {
-            ratingEl.textContent = cs.consensus_rating || "CẦN THEO DÕI THÊM";
-            ratingEl.className = "text-sm font-bold text-amber-400";
-            if (ratingIcon) {
-                ratingIcon.className = "w-3.5 h-3.5 text-amber-400";
-                ratingIcon.setAttribute("data-lucide", "eye");
-            }
-        } else if (isExceeded) {
-            ratingEl.textContent = cs.consensus_rating || "GIÁ ĐÃ VƯỢT GIÁ MỤC TIÊU";
-            ratingEl.className = "text-sm font-bold text-amber-400";
-            if (ratingIcon) {
-                ratingIcon.className = "w-3.5 h-3.5 text-amber-400";
-                ratingIcon.setAttribute("data-lucide", "alert-triangle");
-            }
-        } else {
-            ratingEl.textContent = cs.consensus_rating;
-            ratingEl.className = "text-sm font-bold text-emerald-400";
-            if (ratingIcon) {
-                ratingIcon.className = "w-3.5 h-3.5 text-emerald-400";
-                ratingIcon.setAttribute("data-lucide", "trending-up");
-            }
+        ratingEl.textContent = recInfo.text;
+        ratingEl.className = `text-sm font-bold ${recInfo.colorClass}`;
+        if (ratingIcon) {
+            ratingIcon.className = `w-3.5 h-3.5 ${recInfo.colorClass}`;
+            ratingIcon.setAttribute("data-lucide", recInfo.icon);
         }
     }
     if (scoreEl) {
@@ -2207,8 +2236,9 @@ function getRecBadgeClass(rec) {
     if (r.includes("PTKT") || r.includes("KỸ THUẬT")) return "bg-purple-950/80 text-purple-300 border border-purple-700/80";
     if (r.includes("CẬP NHẬT") || r.includes("KQKD")) return "bg-sky-950/80 text-sky-300 border border-sky-700/80";
     if (r.includes("VƯỢT GIÁ") || r.includes("VƯỢT MỤC TIÊU") || r.includes("VƯỢT KỲ VỌNG") || r.includes("ĐÃ VƯỢT")) return "bg-rose-950/80 text-rose-300 border border-rose-700/80 font-bold";
-    if (r.includes("TIỆM CẬN")) return "bg-amber-950/80 text-amber-300 border border-amber-700/80";
-    if (r.includes("MUA") || r.includes("BUY")) return "rec-buy";
+    if (r.includes("TIỆM CẬN") || r.includes("CHÚ Ý GẦN") || r.includes("ĐẠT KỲ VỌNG")) return "bg-amber-950/80 text-amber-300 border border-amber-700/80";
+    if (r.includes("TĂNG GIÁ RẤT MẠNH") || r.includes("MUA MẠNH")) return "rec-buy";
+    if (r.includes("TĂNG GIÁ MẠNH") || r.includes("MUA") || r.includes("BUY")) return "rec-buy";
     if (r.includes("KHẢ QUAN") || r.includes("TÍCH LŨY") || r.includes("OUTPERFORM")) return "rec-outperform";
     if (r.includes("NẮM GIỮ") || r.includes("HOLD") || r.includes("TRUNG LẬP")) return "rec-hold";
     return "rec-sell";
