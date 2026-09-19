@@ -1597,7 +1597,7 @@ def calculate_consensus(
         ticker_all_events = get_ticker_corporate_actions(ticker)
 
         strategy = StrategyRecommendation(
-            consensus_rating="Chưa có báo cáo CTCK",
+            consensus_rating="CẦN THEO DÕI THÊM (Chưa có định giá)",
             consensus_score=0.0,
             current_market_price=ref_price,
             mean_target_price=0.0,
@@ -1760,23 +1760,25 @@ def calculate_consensus(
     stop_loss = round(current_market_price * 0.90, -2)
 
     if fundamental_val_reports and mean_tp > 0:
-        if current_market_price > mean_tp or avg_upside < 0:
-            consensus_rating = "GIÁ ĐÃ VƯỢT GIÁ MỤC TIÊU (Exceeds Target Price)"
+        rounded_upside = round(avg_upside, 1)
+        if current_market_price > mean_tp or rounded_upside < 0:
+            consensus_rating = "ĐÃ VƯỢT GIÁ KỲ VỌNG"
             rec_buy_zone = f"Thị giá ({current_market_price:,.0f} đ) đã vượt giá mục tiêu TB ({mean_tp:,.0f} đ). Đã vượt kỳ vọng, KHÔNG khuyến nghị mua mới."
             rec_stop_loss = f"Chặn lãi bảo toàn thành quả quanh vùng {round(current_market_price * 0.93, -2):,.0f} đ hoặc hiện thực hóa lợi nhuận"
-        elif 0 <= avg_upside <= 5.0:
-            consensus_rating = "TIỆM CẬN GIÁ MỤC TIÊU / NẮM GIỮ (Fair Value / Hold)"
+        elif rounded_upside == 0.0:
+            consensus_rating = "ĐẠT KỲ VỌNG GIÁ"
+            rec_buy_zone = f"Thị giá ({current_market_price:,.0f} đ) đã đạt đúng mức định giá kỳ vọng ({mean_tp:,.0f} đ). Nắm giữ hoặc chủ động hiện thực hóa lợi nhuận."
+            rec_stop_loss = f"Ngưỡng bảo toàn vị thế {stop_loss:,.0f} VND (-7% đến -10% từ đỉnh)"
+        elif rounded_upside < 7.0:
+            consensus_rating = "CHÚ Ý GẦN KỲ VỌNG GIÁ"
             rec_buy_zone = f"Thị giá ({current_market_price:,.0f} đ) tiệm cận vùng định giá ({mean_tp:,.0f} đ). Nắm giữ theo dõi, hạn chế giải ngân mới."
             rec_stop_loss = f"Ngưỡng bảo toàn vị thế {stop_loss:,.0f} VND (-7% đến -10% từ đỉnh)"
-        else:
-            if consensus_score >= 4.5:
-                consensus_rating = "MUA MẠNH (Strong Buy Consensus)"
-            elif consensus_score >= 3.8:
-                consensus_rating = "MUA / KHẢ QUAN (Bullish Consensus)"
-            elif consensus_score >= 2.8:
-                consensus_rating = "TÍCH LŨY / NẮM GIỮ (Neutral / Accumulate)"
-            else:
-                consensus_rating = "THẬN TRỌNG / GIẢM TỶ TRỌNG (Bearish Consensus)"
+        elif rounded_upside < 20.0:
+            consensus_rating = "KỲ VỌNG TĂNG GIÁ MẠNH"
+            rec_buy_zone = f"{buy_low:,.0f} - {buy_high:,.0f} VND"
+            rec_stop_loss = f"Thủng mốc {stop_loss:,.0f} VND hoặc khi các giả định tăng trưởng cốt lõi bị vi phạm"
+        else: # rounded_upside >= 20.0
+            consensus_rating = "KỲ VỌNG TĂNG GIÁ RẤT MẠNH"
             rec_buy_zone = f"{buy_low:,.0f} - {buy_high:,.0f} VND"
             rec_stop_loss = f"Thủng mốc {stop_loss:,.0f} VND hoặc khi các giả định tăng trưởng cốt lõi bị vi phạm"
     else:
