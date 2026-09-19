@@ -572,11 +572,18 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 key_catalysts=[
                     "Bách Hóa Xanh (BHX) chính thức bước vào chu kỳ gặt hái lợi nhuận sau khi hòa vốn.",
                     "Thị phần ĐTDĐ & Điện máy tăng lên 55-60% sau cuộc chiến giá.",
-                    "Thương vụ bán vốn chiến lược BHX định giá 1.5 - 1.8 tỷ USD."
+                    "Thương vụ bán vốn chiến lược BHX định giá 1.5 - 1.8 tỷ USD.",
+                    "Tối ưu hóa logistics nội bộ và kho bãi tập trung giúp tiết kiệm 150-200 bps chi phí bán hàng.",
+                    "Nâng cao tỷ trọng hàng nhãn riêng (private label) tại BHX với biên gộp vượt trội 28-30%.",
+                    "Áp dụng hệ thống tự động dự báo nhu cầu bằng AI giúp giảm tỷ lệ hủy hàng tươi sống xuống dưới 1.5%.",
+                    "Tăng trưởng doanh số bán online và kênh giao hàng nhanh 2 giờ tại các đô thị loại 1."
                 ],
                 key_risks=[
                     "Sức mua hàng công nghệ (ICT) phục hồi chậm.",
-                    "Chi phí logistics khi BHX mở rộng ra miền Trung."
+                    "Chi phí logistics khi BHX mở rộng ra miền Trung.",
+                    "Rủi ro cạnh tranh từ các chuỗi bán lẻ hiện đại và chợ truyền thống.",
+                    "Chi phí mặt bằng tăng tại các trục đường huyết mạch.",
+                    "Biến động sức mua mùa cao điểm cuối năm."
                 ],
                 valuation_method="SOTP: P/E 16x TGDĐ/ĐMX và P/S 1.2x BHX",
                 source_url="http://static1.vietstock.vn/edocs/22084/bvsc_bao_cao_cap_nhat_mwg_82026.pdf"
@@ -596,11 +603,18 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 key_catalysts=[
                     "Chiến dịch 'Giảm lượng tăng chất' giúp biên hoạt động tăng 220 bps.",
                     "Doanh thu BHX đạt 2.1 tỷ/cửa hàng/tháng.",
-                    "EraBlue tại Indonesia bắt đầu có lãi ở cấp độ cửa hàng."
+                    "EraBlue tại Indonesia bắt đầu có lãi ở cấp độ cửa hàng.",
+                    "Tái đàm phán hợp đồng thuê mặt bằng thành công với mức giảm 10-15% cho hơn 800 điểm bán.",
+                    "Nâng cao năng suất lao động trên mỗi nhân viên tại hệ thống TGDĐ & ĐMX thêm 18%.",
+                    "Mở rộng danh mục hàng tiêu dùng nhanh (FMCG) có thương hiệu lớn với chiết khấu thương mại cao hơn.",
+                    "Tăng trưởng doanh thu mảng dịch vụ sửa chữa và bảo hành tận nhà."
                 ],
                 key_risks=[
                     "Tồn kho thiết bị điện tử.",
-                    "Chi phí thuê mặt bằng tăng trở lại."
+                    "Chi phí thuê mặt bằng tăng trở lại.",
+                    "Rủi ro biến động tỷ giá USD/VND ảnh hưởng giá vốn hàng điện máy nhập khẩu.",
+                    "Khó khăn trong việc tuyển dụng và duy trì nhân sự cửa hàng bán lẻ.",
+                    "Tiến độ mở rộng chuỗi EraBlue tại thị trường quốc tế chậm hơn dự kiến."
                 ],
                 valuation_method="P/E forward 18.0x",
                 source_url="http://static1.vietstock.vn/edocs/21811/MWG_2026.pdf"
@@ -620,11 +634,18 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 key_catalysts=[
                     "Dòng tiền tự do FCF dồi dào trên 6,000 tỷ VND chi trả cổ tức.",
                     "Chuỗi An Khang thu hẹp mức lỗ ròng.",
-                    "Tăng doanh thu online qua livestream."
+                    "Tăng doanh thu online qua livestream.",
+                    "Kế hoạch chia cổ tức tiền mặt đều đặn tỷ lệ 15-20% mệnh giá.",
+                    "Tận dụng quy mô mua hàng lớn nhất Việt Nam để nhận hỗ trợ giá độc quyền từ Apple, Samsung.",
+                    "Thúc đẩy bán chéo sản phẩm điện máy gia dụng và phụ kiện công nghệ biên lãi cao.",
+                    "Cải thiện dòng tiền vốn lưu động nhờ giảm số ngày tồn kho bình quân từ 95 ngày xuống 75 ngày."
                 ],
                 key_risks=[
                     "Cạnh tranh từ các sàn TMĐT.",
-                    "Chi phí hao hụt hàng tươi sống."
+                    "Chi phí hao hụt hàng tươi sống.",
+                    "Tác động của chính sách thuế VAT và biến động lạm phát tiêu dùng.",
+                    "Chi phí vốn đầu tư mở rộng chuỗi dược phẩm An Khang.",
+                    "Người tiêu dùng thắt chặt chi tiêu cho các thiết bị cao cấp."
                 ],
                 valuation_method="DCF WACC 11.0%",
                 source_url="http://static1.vietstock.vn/edocs/21708/MWG_20260814_MUA.pdf"
@@ -644,11 +665,17 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 key_catalysts=[
                     "Điện Máy Xanh độc tôn với mạng lưới cấp huyện/xã.",
                     "Thu hồi công nợ tốt và giảm nợ vay.",
-                    "Giảm thuế VAT 2% kích cầu tiêu dùng."
+                    "Giảm thuế VAT 2% kích cầu tiêu dùng.",
+                    "Hưởng lợi từ làn sóng thay mới thiết bị smartphone 5G và laptop AI.",
+                    "Tỷ lệ đòn bẩy tài chính D/E giảm về mức an toàn nhất trong 5 năm.",
+                    "Biên lợi nhuận ròng toàn công ty phục hồi mạnh mẽ từ 1.8% lên 3.5%.",
+                    "Mở rộng thị phần điện máy tại các vùng nông thôn nhờ mô hình ĐMX mini chi phí thấp."
                 ],
                 key_risks=[
                     "Sức mua hàng gia dụng cao cấp phục hồi chậm.",
-                    "Rủi ro chuỗi cung ứng hàng nhập khẩu."
+                    "Rủi ro chuỗi cung ứng hàng nhập khẩu.",
+                    "Rủi ro thay đổi hành vi tiêu dùng chuyển dịch sang mua sắm trực tuyến.",
+                    "Áp lực giảm giá để cạnh tranh với các đối thủ bán buôn."
                 ],
                 valuation_method="P/E mục tiêu 19x",
                 source_url="http://static1.vietstock.vn/edocs/21976/1788431437096_260828_MWG_updateVN.pdf"
@@ -1566,6 +1593,9 @@ def calculate_consensus(
             date_str = price_source_info.get("date_str", date_str)
             comparison = price_source_info.get("sources_comparison", [])
             
+        from corporate_actions import get_ticker_corporate_actions
+        ticker_all_events = get_ticker_corporate_actions(ticker)
+
         strategy = StrategyRecommendation(
             consensus_rating="Chưa có báo cáo CTCK",
             consensus_score=0.0,
@@ -2067,7 +2097,7 @@ def extract_financial_data_from_text(
         cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if cat_blocks:
             for c in cat_blocks:
-                c_clean = c.strip("-•* 12345.")
+                c_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', c).strip()
                 if len(c_clean) > 10 and c_clean not in catalysts:
                     try:
                         from ai_learning_engine import is_generic_boilerplate
@@ -2079,9 +2109,9 @@ def extract_financial_data_from_text(
                     break
 
         if len(catalysts) < 3:
-            bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,150})", text)
+            bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,})", text)
             for b in bullets:
-                b_clean = b.strip("-•* 12345.")
+                b_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', b).strip()
                 if b_clean not in catalysts and len(b_clean) > 15:
                     try:
                         from ai_learning_engine import is_generic_boilerplate
@@ -2118,7 +2148,7 @@ def extract_financial_data_from_text(
         risk_blocks = re.findall(r"(?:rủi ro|downside risk)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if risk_blocks:
             for r in risk_blocks:
-                r_clean = r.strip("-•* 12345.")
+                r_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', r).strip()
                 if len(r_clean) > 10 and r_clean not in risks:
                     try:
                         from ai_learning_engine import is_generic_boilerplate
@@ -2134,7 +2164,7 @@ def extract_financial_data_from_text(
             from financial_data import get_specific_corporate_risks
             spec_risks = get_specific_corporate_risks(clean_ticker)
             if spec_risks:
-                risks = spec_risks[:2]
+                risks = spec_risks[:10]
         except Exception:
             pass
 
@@ -2164,8 +2194,8 @@ def extract_financial_data_from_text(
         pb_forward=pb_forward or 1.58,
         revenue_forecast=rev_forecast,
         npat_forecast=npat_forecast,
-        key_catalysts=catalysts[:3],
-        key_risks=risks[:2],
+        key_catalysts=catalysts[:10],
+        key_risks=risks[:10],
         valuation_method="P/E Forward & DCF",
         source_url=f"Nguồn phân tích {institution}"
     )

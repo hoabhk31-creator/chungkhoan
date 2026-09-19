@@ -417,12 +417,16 @@ def extract_advanced_knowledge(
 
     text = raw_text
 
-    # 1. Tách các câu văn từ văn bản
-    raw_sentences = re.split(
-        r'(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n+',
-        text
-    )
-    cleaned_sentences = [s.strip() for s in raw_sentences if len(s.strip()) >= 20]
+    # 1. Tách các câu văn từ văn bản áp dụng bảo vệ số liệu và hàn gắn câu
+    try:
+        from crawler import robust_clean_and_split_catalysts
+        cleaned_sentences = robust_clean_and_split_catalysts(text)
+    except Exception:
+        raw_sentences = re.split(
+            r'(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n+',
+            text
+        )
+        cleaned_sentences = [s.strip() for s in raw_sentences if len(s.strip()) >= 20]
 
     # 2. Bóc tách Catalysts theo 4 nhóm phân loại
     # Nhóm: Dự án & Capex, Chu kỳ & Vĩ mô, Lợi thế chi phí & Biên lợi nhuận, Xúc tác ngắn hạn & Sự kiện
@@ -447,7 +451,7 @@ def extract_advanced_knowledge(
 
         # Kiểm tra rủi ro
         if any(rk in s_lower for rk in risk_keywords):
-            clean_r = sent.strip("-•* 12345. ")
+            clean_r = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', sent).strip()
             if clean_r not in extracted_risks and len(clean_r) > 15:
                 extracted_risks.append(clean_r)
             continue
@@ -505,7 +509,7 @@ def extract_advanced_knowledge(
     flat_catalysts = []
     for cat_name, items in categorized_catalysts.items():
         for item in items[:2]:
-            cleaned_item = item.strip("-•* 12345. ")
+            cleaned_item = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', item).strip()
             if cleaned_item and cleaned_item not in flat_catalysts:
                 flat_catalysts.append(cleaned_item)
 
@@ -624,7 +628,7 @@ def save_learned_ticker_catalysts(
     # 1. Khử trùng lặp & chèn Catalysts mới lên đầu (Áp dụng Boilerplate Shield)
     curr_cats = list(ticker_entry.get("catalysts", []))
     for c in catalysts or []:
-        c_clean = str(c).strip("-•* 12345. ")
+        c_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(c)).strip()
         if len(c_clean) > 10 and not is_generic_boilerplate(c_clean) and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
             curr_cats.insert(0, c_clean)
     ticker_entry["catalysts"] = curr_cats[:15]  # Giữ tối đa 15 catalysts chất lượng cao
@@ -632,7 +636,7 @@ def save_learned_ticker_catalysts(
     # 2. Khử trùng lặp & chèn Risks mới (Áp dụng Boilerplate Shield)
     curr_risks = list(ticker_entry.get("risks", []))
     for r in risks or []:
-        r_clean = str(r).strip("-•* 12345. ")
+        r_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(r)).strip()
         if len(r_clean) > 10 and not is_generic_boilerplate(r_clean) and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
             curr_risks.insert(0, r_clean)
     ticker_entry["risks"] = curr_risks[:10]
@@ -640,7 +644,7 @@ def save_learned_ticker_catalysts(
     # 3. Luận điểm đầu tư (Theses)
     curr_theses = list(ticker_entry.get("theses", []))
     for th in theses or []:
-        th_clean = str(th).strip("-•* 12345. ")
+        th_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(th)).strip()
         if len(th_clean) > 10 and not is_generic_boilerplate(th_clean) and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
             curr_theses.insert(0, th_clean)
     ticker_entry["theses"] = curr_theses[:8]
@@ -699,31 +703,30 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
         existing_cs_cats = list(getattr(cs, "consensual_catalysts", []) or [])
         for cat in learned_cats:
             if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in existing_cs_cats):
-                existing_cs_cats.insert(0, cat)
-        cs.consensual_catalysts = existing_cs_cats[:5]
+                existing_cs_cats.append(cat)
+        cs.consensual_catalysts = existing_cs_cats[:10]
 
         existing_cs_risks = list(getattr(cs, "consensual_risks", []) or [])
         for rk in learned_risks:
             if not any(rk.lower() in er.lower() or er.lower() in rk.lower() for er in existing_cs_risks):
-                existing_cs_risks.insert(0, rk)
-        cs.consensual_risks = existing_cs_risks[:4]
+                existing_cs_risks.append(rk)
+        cs.consensual_risks = existing_cs_risks[:10]
 
     # 2. Phân bổ / bổ sung vào các cột CTCK trong matrix_table
     if hasattr(report, "matrix_table") and report.matrix_table:
         for idx, r in enumerate(report.matrix_table):
             r_cats = list(getattr(r, "key_catalysts", []) or [])
             for c_idx, cat in enumerate(learned_cats):
-                if len(r_cats) >= 4:
+                if len(r_cats) >= 10:
                     break
                 if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in r_cats):
-                    if (idx + c_idx) % 2 == 0 or len(r_cats) < 3:
-                        r_cats.append(cat)
+                    r_cats.append(cat)
             r.key_catalysts = r_cats
 
             r_risks = list(getattr(r, "key_risks", []) or [])
-            if len(r_risks) < 3 and learned_risks:
+            if len(r_risks) < 10 and learned_risks:
                 for rk in learned_risks:
-                    if len(r_risks) >= 3:
+                    if len(r_risks) >= 10:
                         break
                     if not any(rk.lower() in er.lower() for er in r_risks):
                         r_risks.append(rk)

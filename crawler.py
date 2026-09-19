@@ -1066,6 +1066,101 @@ def is_report_boilerplate_or_meta(s: str) -> bool:
     return False
 
 
+def clean_catalyst_intro(s: str) -> str:
+    """
+    Làm sạch an toàn phần giới thiệu CTCK mà không cắt vào số giá mục tiêu hay làm vỡ số hàng nghìn.
+    """
+    m = re.match(
+        r'^(?:công ty chứng khoán|ctck)\s+[\w\s\(\)]+\s+(?:nâng khuyến nghị từ\s+[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ\s]+\s+lên\s+|hạ khuyến nghị.*?xuống\s+|khuyến nghị\s+|cập nhật\s+(?:kết quả kinh doanh\s+)?)(?:đối với\s+)?(?:mã\s+)?(?:cổ phiếu\s+)?\w*\s*(?:với\s+)?giá\s+mục\s+tiêu\s+(?:là\s+)?([0-9]{1,3}(?:[.,][0-9]{3})+)(.*)$',
+        s, flags=re.I
+    )
+    if m:
+        tp = m.group(1)
+        tail = m.group(2).strip()
+        rec = "KHẢ QUAN" if "KHẢ QUAN" in s.upper() else ("MUA" if "MUA" in s.upper() else "CẬP NHẬT")
+        return f"Khuyến nghị {rec} với giá mục tiêu {tp} {tail}".strip()
+    return s
+
+
+def robust_clean_and_split_catalysts(text: str) -> List[str]:
+    """
+    Tách câu tài chính thông minh, bảo vệ tuyệt đối số tiền tệ (22.300, 3.028),
+    tỷ lệ âm trong ngoặc (-32,2%), mã thời gian Q2/2026, và hàn gắn các mảnh vỡ mồ côi.
+    Đảm bảo 100% không bị cắt cụt chữ giữa chừng và không đứt đoạn câu.
+    """
+    if not text:
+        return []
+    t = re.sub(r'[ \t]+', ' ', text)
+    t = re.sub(r'\r', '', t)
+    t = re.sub(r'(?<![\.\?!;:])\n+', ' ', t)
+
+    placeholders = {}
+    def repl_num(m):
+        idx = f'__FIN_TOKEN_{len(placeholders)}__'
+        placeholders[idx] = m.group(0)
+        return idx
+
+    # 1. Bảo vệ phần trăm âm/dương trong ngoặc: (-32,2% svck), (+23,7% svck)
+    masked = re.sub(r'\([+-]?[0-9]{1,3}(?:[.,][0-9]+)?%[^\)]*\)', repl_num, t)
+    # 2. Bảo vệ số tiền / khối lượng có dấu chấm hàng nghìn: 22.300 đồng, 3.028 tỷ, 12.097 tỷ
+    masked = re.sub(r'\b[0-9]{1,3}(?:[.,][0-9]{3})+(?:[.,][0-9]+)?(?:\s*(?:đồng|đ|vnd|tỷ|triệu|nghìn|ngàn|USD|%|x))?\b', repl_num, masked, flags=re.I)
+    # 3. Bảo vệ số thập phân và hệ số: 19,6%, 16.7x, 11,5x, 1,0x
+    masked = re.sub(r'\b[0-9]+[.,][0-9]+(?:\s*(?:%|x|lần|tỷ|triệu))?\b', repl_num, masked, flags=re.I)
+    # 4. Bảo vệ quý và năm: Q1/2026, Q2/2026
+    masked = re.sub(r'\bQ[1-4]/(?:20)?\d{2}\b', repl_num, masked, flags=re.I)
+
+    # 5. Tách câu: theo dòng mới, bullet point, hoặc dấu chấm theo sau bởi khoảng trắng và chữ hoa/số
+    split_pattern = r'\n+|(?:(?<=\.)|(?<=[\?!;]))\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ0-9•\-\*])|[•➢★►]'
+    raw_parts = re.split(split_pattern, masked)
+
+    unmasked_parts = []
+    for p in raw_parts:
+        p_clean = p.strip()
+        for k, v in placeholders.items():
+            p_clean = p_clean.replace(k, v)
+        # Chỉ gọt bullet/số thứ tự ở ĐẦU dòng, TUYỆT ĐỐI không gọt ở cuối dòng
+        p_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', p_clean).strip()
+        if len(p_clean) >= 20:
+            unmasked_parts.append(p_clean)
+
+    # 6. Hàn gắn mảnh vỡ (Orphan healing)
+    healed = []
+    for part in unmasked_parts:
+        if not healed:
+            healed.append(part)
+            continue
+        prev = healed[-1]
+
+        ends_unclosed_paren = prev.count('(') > prev.count(')')
+        ends_connector = bool(re.search(r'\b(?:và|hoặc|do|khi|với|đạt|tại|trong|lên|xuống|khoảng|ước|dự|theo|bởi)\s*$', prev, re.I))
+        starts_continuation = bool(re.match(r'^(?:[0-9.,]+\s*)?(?:đồng|đ|vnd|tỷ|triệu|%|svck|yoy|lần|x|\))\b', part, re.I))
+
+        if ends_unclosed_paren or ends_connector or starts_continuation:
+            sep = ' ' if not prev.endswith('(') and not part.startswith(')') else ''
+            healed[-1] = prev + sep + part
+        else:
+            healed.append(part)
+
+    # 7. Loại bỏ chuỗi bị cắt cụt và chuẩn hóa kết câu
+    final_sentences = []
+    for s in healed:
+        s = re.sub(r'\.{3,}$', '', s).strip()
+        if len(s) < 25:
+            continue
+        words = s.split()
+        if words and len(words[-1]) <= 2 and words[-1].lower() not in ['x', 'đ', 'tỷ', 'vốn', 'mỏ']:
+            words = words[:-1]
+            s = ' '.join(words).strip()
+        if len(s) < 25:
+            continue
+        s = s[0].upper() + s[1:]
+        if not s.endswith(('.', '!', '?')):
+            s += '.'
+        final_sentences.append(s)
+
+    return final_sentences
+
+
 def extract_detailed_catalysts_and_risks(
     content: str,
     title: str,
@@ -1081,17 +1176,12 @@ def extract_detailed_catalysts_and_risks(
     """
     clean_ticker = (ticker or "CP").upper().strip()
     text_to_search = content if content else title
-    # Nối các dòng ngắt giữa câu (soft wrap) thành câu liền mạch
-    clean_text = re.sub(r'(?<![\.\?!;:])\n+', ' ', text_to_search)
 
     extracted_cats: List[str] = []
     extracted_risks: List[str] = []
 
-    # 1. Tách các câu thực tế không bị lỗi số hàng nghìn (ví dụ 7.273 tỷ không bị cắt vụn)
-    raw_sentences = re.split(
-        r'(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n+',
-        clean_text
-    )
+    # 1. Tách các câu thực tế áp dụng thuật toán bảo vệ số liệu và hàn gắn mảnh vỡ
+    raw_sentences = robust_clean_and_split_catalysts(text_to_search)
 
     for s in raw_sentences:
         s = s.strip()
@@ -1100,12 +1190,8 @@ def extract_detailed_catalysts_and_risks(
         if is_report_boilerplate_or_meta(s):
             continue
 
-        # Làm sạch phần mở đầu báo cáo thường gặp nếu còn sót
-        rem = re.sub(
-            r'^(?:công ty chứng khoán|ctck)\s+[\w\s\(\)]+\s+(?:khuyến nghị|cập nhật|đưa ra khuyến nghị)[^\.,]+(?:[\.,]|\svới\sgiá\smục\stiêu[^\.,]+[\.,]?)\s*',
-            '', s, flags=re.I
-        ).strip()
-        rem = re.sub(r'^[0-9.,]+\s*(?:đồng|đ|VND|lần|x|%|svck|yoy)?[,\.]\s*', '', rem, flags=re.I).strip()
+        # Làm sạch phần mở đầu báo cáo thường gặp nếu còn sót một cách an toàn
+        rem = clean_catalyst_intro(s)
 
         if len(rem) >= 20 and not rem.lower().startswith('vui lòng xem'):
             cat_str = rem[0].upper() + rem[1:]
@@ -1282,11 +1368,8 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
                     _PDF_CATALYSTS_CACHE[pdf_url] = ([], [])
                     return [], []
 
-                # Tách text thành các câu / bullet rõ ràng (tránh dồn nguyên một đoạn văn 2000 ký tự)
-                raw_chunks = re.split(
-                    r'\n+(?=[•\-\*\>\➢\★\►])|(?<=[^\d\s])\.\s+(?=[A-ZĐÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ])|\n{2,}',
-                    full_text
-                )
+                # Tách text thành các câu / bullet rõ ràng với thuật toán bảo vệ số liệu
+                raw_chunks = robust_clean_and_split_catalysts(full_text)
 
                 highlight_cats = []
                 regular_cats = []
@@ -1739,6 +1822,36 @@ async def get_synchronized_matrix_reports(
     except Exception as err:
         print(f"Error syncing matrix reports for {clean_ticker}: {err}")
 
+    # 2.2 Tự động bổ sung từ nguồn Báo cáo Phân tích Doanh nghiệp Đa tổ chức nếu inst_map còn ít báo cáo
+    if len(inst_map) < 4:
+        try:
+            cr_res = await fetch_company_reports(ticker=clean_ticker, page_size=20)
+            if cr_res and cr_res.get("reports"):
+                for rep in cr_res["reports"]:
+                    src = rep.get("source") or "CTCK"
+                    key = normalize_institution_name(src)
+                    if key in inst_map and inst_map[key].target_price > 0:
+                        continue
+                    title = rep.get("title", "")
+                    content = rep.get("full_content") or rep.get("snippet") or title
+                    date_str = rep.get("date") or datetime.now().strftime("%d/%m/%Y")
+                    pdf_url = rep.get("file_url") or ""
+                    
+                    item = {
+                        "Title": title,
+                        "Content": content,
+                        "SourceName": src,
+                        "ReleaseDate": date_str,
+                        "Url": pdf_url,
+                        "ReportTypeName": "Phân tích Doanh nghiệp"
+                    }
+                    parsed = parse_edocs_item_to_report(item, clean_ticker, comp_name, sector_name, market_p)
+                    if parsed:
+                        if key not in inst_map or (inst_map[key].target_price <= 0 and parsed.target_price > 0):
+                            inst_map[key] = parsed
+        except Exception as e_cr:
+            print(f"[get_synchronized_matrix_reports] Lỗi lấy từ company reports cho {clean_ticker}: {e_cr}")
+
     # Bổ sung dự phóng DT & LNST từ base_reports nếu báo cáo cào về chưa có số liệu chi tiết
     if base_reports:
         for r_base in base_reports:
@@ -1823,9 +1936,13 @@ async def get_synchronized_matrix_reports(
         for c in (r.key_catalysts or []):
             if is_disclaimer_or_boilerplate(c):
                 continue
-            c_str = c.strip()
-            if c_str and c_str not in clean_c_list:
-                clean_c_list.append(c_str)
+            split_subs = robust_clean_and_split_catalysts(c) if len(c) > 120 else [c.strip()]
+            for sc in split_subs:
+                if is_disclaimer_or_boilerplate(sc):
+                    continue
+                c_str = sc.strip()
+                if len(c_str) >= 20 and c_str not in clean_c_list:
+                    clean_c_list.append(c_str)
         r.key_catalysts = clean_c_list[:10] if clean_c_list else ["Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."]
 
         clean_r_list = []
@@ -3076,10 +3193,17 @@ async def fetch_company_reports(
         if not file_url:
             file_url = f"/api/reports/pdf/{clean_ticker}/{urllib.parse.quote(src)}"
 
+        # Smart snippet: preserve complete content or cut cleanly at word boundary without chopping words
+        if len(content) <= 380:
+            snippet_text = content
+        else:
+            cut_idx = content[:360].rfind(' ')
+            snippet_text = (content[:cut_idx] if cut_idx > 150 else content[:360]).strip() + "..."
+
         processed_items.append({
             "id": rep.get("ReportID"),
             "title": title,
-            "snippet": content[:320] + ("..." if len(content) > 320 else ""),
+            "snippet": snippet_text,
             "full_content": content,
             "date": rep.get("ReleaseDate", datetime.now().strftime("%d/%m/%Y")),
             "source": src,
@@ -3093,8 +3217,14 @@ async def fetch_company_reports(
             "score": score
         })
 
-    # 6. Sắp xếp: Ưu tiên điểm liên quan cao nhất lên đầu, sau đó theo ID / Ngày phát hành mới nhất
-    processed_items.sort(key=lambda x: (x["score"], x["id"] or 0), reverse=True)
+    # 6. Sắp xếp: Ưu tiên điểm liên quan cao nhất lên đầu, sau đó theo Ngày phát hành mới nhất tới cũ nhất (từ trên xuống dưới)
+    processed_items.sort(
+        key=lambda x: (
+            x["score"],
+            parse_date_to_timestamp(x.get("date", ""))
+        ),
+        reverse=True
+    )
 
     result = {
         "ticker": clean_ticker,

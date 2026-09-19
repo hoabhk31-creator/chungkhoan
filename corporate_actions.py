@@ -265,6 +265,74 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
             "source": "HOSE & Vietstock"
         }
     ],
+    "PVS": [
+        {
+            "id": "pvs-ca-2026-div-stock",
+            "ex_date": "14/09/2026",
+            "record_date": "15/09/2026",
+            "event_type": "dividend_stock",
+            "title": "Trả cổ tức năm 2025 bằng cổ phiếu, tỷ lệ 100:20 (20%)",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.20,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 42500.0,
+            "ref_price_after": 35420.0,
+            "adjustment_factor": 0.8333,
+            "description": "Chi trả cổ tức năm 2025 bằng cổ phiếu tỷ lệ 20% (sở hữu 100 cổ phiếu được nhận 20 cổ phiếu mới). Quy mô phát hành gần 96 triệu cổ phiếu.",
+            "source": "HNX & Vietstock"
+        },
+        {
+            "id": "pvs-ca-2025-div-stock",
+            "ex_date": "27/11/2025",
+            "record_date": "28/11/2025",
+            "event_type": "dividend_stock",
+            "title": "Trả cổ tức năm 2024 bằng cổ phiếu, tỷ lệ 100:7 (7%)",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.07,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 38600.0,
+            "ref_price_after": 36070.0,
+            "adjustment_factor": 0.9346,
+            "description": "Chi trả cổ tức năm 2024 bằng cổ phiếu tỷ lệ 7% (sở hữu 100 cổ phiếu được nhận 7 cổ phiếu mới).",
+            "source": "HNX & Vietstock"
+        },
+        {
+            "id": "pvs-ca-2024-div-cash",
+            "ex_date": "29/08/2024",
+            "record_date": "30/08/2024",
+            "execution_date": "27/09/2024",
+            "event_type": "dividend_cash",
+            "title": "Trả cổ tức năm 2023 bằng tiền mặt tỷ lệ 7% (700 đ/CP)",
+            "cash_amount": 700.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 41200.0,
+            "ref_price_after": 40500.0,
+            "adjustment_factor": 0.9830,
+            "description": "Thực hiện chi trả cổ tức năm 2023 bằng tiền mặt với tỷ lệ 7% (700 đồng/cổ phiếu).",
+            "source": "HNX & Vietstock"
+        },
+        {
+            "id": "pvs-ca-2023-div-cash",
+            "ex_date": "28/08/2023",
+            "record_date": "29/08/2023",
+            "execution_date": "27/09/2023",
+            "event_type": "dividend_cash",
+            "title": "Trả cổ tức năm 2022 bằng tiền mặt tỷ lệ 7% (700 đ/CP)",
+            "cash_amount": 700.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 34800.0,
+            "ref_price_after": 34100.0,
+            "adjustment_factor": 0.9799,
+            "description": "Chi trả cổ tức năm 2022 bằng tiền mặt tỷ lệ 7% (700 đ/CP).",
+            "source": "HNX & Vietstock"
+        }
+    ],
     "MBB": [
         {
             "id": "mbb-ca-2024",

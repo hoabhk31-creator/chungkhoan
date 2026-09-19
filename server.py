@@ -8,6 +8,7 @@ import re
 import csv
 import httpx
 import time
+from datetime import datetime, date
 import json
 import secrets
 import smtplib
@@ -28,7 +29,7 @@ if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8")
     except Exception:
         pass
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Header
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -355,7 +356,59 @@ class ReconcileRequest(BaseModel):
 
 
 class ExportRequest(BaseModel):
-    report_data: FullMatrixReport
+    report_data: Union[FullMatrixReport, Dict[str, Any]]
+
+
+def normalize_full_matrix_dict(raw: Any) -> Dict[str, Any]:
+    """Chuyển đổi an toàn dữ liệu ma trận sang dict chuẩn, tương thích cả Pydantic lẫn JSON raw."""
+    if hasattr(raw, "model_dump"):
+        d = raw.model_dump()
+    elif hasattr(raw, "dict") and callable(raw.dict):
+        d = raw.dict()
+    elif isinstance(raw, dict):
+        d = dict(raw)
+    else:
+        try:
+            d = dict(raw)
+        except Exception:
+            d = {}
+
+    cs = d.get("consensus_summary")
+    if hasattr(cs, "model_dump"):
+        d["consensus_summary"] = cs.model_dump()
+    elif hasattr(cs, "dict") and callable(cs.dict):
+        d["consensus_summary"] = cs.dict()
+    elif not isinstance(cs, dict):
+        d["consensus_summary"] = {}
+
+    clean_matrix = []
+    for it in d.get("matrix_table", []):
+        if hasattr(it, "model_dump"):
+            clean_matrix.append(it.model_dump())
+        elif hasattr(it, "dict") and callable(it.dict):
+            clean_matrix.append(it.dict())
+        elif isinstance(it, dict):
+            clean_matrix.append(dict(it))
+        else:
+            try:
+                clean_matrix.append(dict(it))
+            except Exception:
+                pass
+    d["matrix_table"] = clean_matrix
+    return d
+
+
+def safe_float(v, default=None):
+    """Chuyển đổi an toàn giá trị bất kỳ sang float."""
+    if v is None:
+        return default
+    if isinstance(v, (int, float)):
+        return float(v)
+    try:
+        clean_v = str(v).replace("%", "").replace("+", "").replace(",", "").strip()
+        return float(clean_v)
+    except Exception:
+        return default
 
 
 class TemplateCreateUpdateRequest(BaseModel):
@@ -532,7 +585,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
                     market_p=market_p,
                     max_reports=20
                 ),
-                timeout=4.0
+                timeout=8.0
             )
         except Exception as sync_err:
             print(f"Error syncing matrix reports for {clean_ticker}: {sync_err}")
@@ -1702,103 +1755,126 @@ async def api_export_markdown(req: ExportRequest):
     """
     Kết xuất Báo cáo so sánh đối chiếu chuẩn theo đúng cấu trúc 4 phần yêu cầu của người dùng.
     """
-    data = req.report_data
-    cs = data.consensus_summary
-    reports = data.matrix_table
+    data = normalize_full_matrix_dict(req.report_data)
+    cs = data.get("consensus_summary", {})
+    reports = data.get("matrix_table", [])
+
+    ticker = data.get("ticker", "CP")
+    company_name = data.get("company_name", f"Công ty Cổ phần {ticker}")
+    sector = data.get("sector", "")
+    analysis_date = data.get("analysis_date", datetime.now().strftime("%d/%m/%Y"))
+
+    def _get(obj, k, d=""):
+        return obj.get(k, d) if isinstance(obj, dict) else getattr(obj, k, d)
+
+    current_market_p = _get(cs, "current_market_price", 0) or 0
+    mean_target_p = _get(cs, "mean_target_price", 0) or 0
+    avg_upside = _get(cs, "average_upside", 0.0) or 0.0
+    consensus_rating = _get(cs, "consensus_rating", "MUA")
+    consensus_score = _get(cs, "consensus_score", 4.0)
+    rec_buy_zone = _get(cs, "recommended_buy_zone", "—")
+    stop_loss_val = _get(cs, "stop_loss_threshold", "—")
+    key_triggers = _get(cs, "key_triggers", []) or []
 
     md_lines = []
-    md_lines.append(f"# BÁO CÁO PHÂN TÍCH ĐỐI CHIẾU ĐA TỔ CHỨC: {data.ticker} ({data.company_name})")
-    md_lines.append(f"**Ngành:** {data.sector} | **Thị giá tham chiếu:** {cs.current_market_price:,.0f} VND | **Thời điểm phân tích:** {data.analysis_date}")
-    cs_head_up = f"Đã vượt kỳ vọng (+{abs(cs.average_upside):.1f}%)" if cs.average_upside < 0 else f"+{cs.average_upside:.1f}%"
-    md_lines.append(f"**Consensus Rating:** {cs.consensus_rating} (Điểm: {cs.consensus_score}/5.0) | **Vùng giá mục tiêu:** {cs.mean_target_price:,.0f} VND ({cs_head_up})\n")
+    md_lines.append(f"# BÁO CÁO PHÂN TÍCH ĐỐI CHIẾU ĐA TỔ CHỨC: {ticker} ({company_name})")
+    md_lines.append(f"**Ngành:** {sector} | **Thị giá tham chiếu:** {current_market_p:,.0f} VND | **Thời điểm phân tích:** {analysis_date}")
+    cs_head_up = f"Đã vượt kỳ vọng (+{abs(avg_upside):.1f}%)" if avg_upside < 0 else f"+{avg_upside:.1f}%"
+    md_lines.append(f"**Consensus Rating:** {consensus_rating} (Điểm: {consensus_score}/5.0) | **Vùng giá mục tiêu:** {mean_target_p:,.0f} VND ({cs_head_up})\n")
     md_lines.append("---\n")
 
     # 1. BẢNG MA TRẬN SO SÁNH ĐA TỔ CHỨC
     md_lines.append("## 1. BẢNG MA TRẬN SO SÁNH ĐA TỔ CHỨC (BẮT BUỘC)")
-    headers = ["Tiêu chí đối chiếu"] + [r.institution for r in reports] + ["Độ lệch / Đồng thuận chung"]
+    headers = ["Tiêu chí đối chiếu"] + [_get(r, "institution", "CTCK") for r in reports] + ["Độ lệch / Đồng thuận chung"]
     md_lines.append("| " + " | ".join(headers) + " |")
     md_lines.append("| " + " | ".join([":---"] * len(headers)) + " |")
 
     # 1. Ngày phát hành
-    dates = [r.report_date for r in reports]
-    md_lines.append(f"| **1. Ngày phát hành** | " + " | ".join(dates) + f" | {data.analysis_date} |")
+    dates = [_get(r, "report_date", "") for r in reports]
+    md_lines.append(f"| **1. Ngày phát hành** | " + " | ".join(dates) + f" | {analysis_date} |")
 
     # 2. Khuyến nghị
-    recs = [r.recommendation for r in reports]
-    md_lines.append(f"| **2. Khuyến nghị** | " + " | ".join(recs) + f" | **{cs.consensus_rating}** |")
+    recs = [_get(r, "recommendation", "") for r in reports]
+    md_lines.append(f"| **2. Khuyến nghị** | " + " | ".join(recs) + f" | **{consensus_rating}** |")
 
     # 3. Giá mục tiêu
     def _fmt_md_tp(r):
-        if getattr(r, "is_expired", False):
-            return f"{r.target_price:,.0f} VND (Quá 1 năm)" if r.target_price > 0 else "— (Quá 1 năm)"
-        if getattr(r, "is_technical", False) or "PTKT" in (r.recommendation or "").upper():
+        if _get(r, "is_expired", False):
+            tp = _get(r, "target_price", 0)
+            return f"{tp:,.0f} VND (Quá 1 năm)" if tp > 0 else "— (Quá 1 năm)"
+        if _get(r, "is_technical", False) or "PTKT" in (_get(r, "recommendation", "") or "").upper():
             return "— (PTKT)"
-        if not r.target_price or r.target_price <= 0 or getattr(r, "is_estimated_price", False):
+        tp = _get(r, "target_price", 0)
+        if not tp or tp <= 0 or _get(r, "is_estimated_price", False):
             return "— (KQKD)"
-        return f"{r.target_price:,.0f} VND"
+        return f"{tp:,.0f} VND"
     tps = [_fmt_md_tp(r) for r in reports]
-    cs_tp_str = f"**{cs.mean_target_price:,.0f} VND**" if cs.mean_target_price > 0 else "**— (Cần theo dõi thêm)**"
+    cs_tp_str = f"**{mean_target_p:,.0f} VND**" if mean_target_p > 0 else "**— (Cần theo dõi thêm)**"
     md_lines.append(f"| **3. Giá mục tiêu** | " + " | ".join(tps) + f" | {cs_tp_str} |")
 
     # 4. Tiềm năng tăng giá
     def _fmt_up(r):
-        if getattr(r, "is_expired", False):
+        if _get(r, "is_expired", False):
             return "— (Quá 1 năm)"
-        val = r.upside_percent
-        if val is None:
-            return "—"
-        if val < 0:
-            return f"Vượt +{abs(val):.1f}%"
-        return f"+{val:.1f}%"
+        up_val = safe_float(_get(r, "upside_percent"))
+        if up_val is None:
+            raw_up = _get(r, "upside_percent")
+            return str(raw_up) if raw_up else "—"
+        if up_val < 0:
+            return f"Vượt +{abs(up_val):.1f}%"
+        return f"+{up_val:.1f}%"
     ups = [_fmt_up(r) for r in reports]
-    if cs.mean_target_price <= 0:
+    avg_up_val = safe_float(avg_upside)
+    if mean_target_p <= 0 or avg_up_val is None:
         cs_up_str = "— (Cần theo dõi thêm)"
-    elif cs.average_upside < 0:
-        cs_up_str = f"Đã vượt kỳ vọng (+{abs(cs.average_upside):.1f}%)"
+    elif avg_up_val < 0:
+        cs_up_str = f"Đã vượt kỳ vọng (+{abs(avg_up_val):.1f}%)"
     else:
-        cs_up_str = f"+{cs.average_upside:.1f}%"
+        cs_up_str = f"+{avg_up_val:.1f}%"
     md_lines.append(f"| **4. Tiềm năng tăng giá** | " + " | ".join(ups) + f" | **{cs_up_str}** |")
 
     # 5. P/E forward
-    pes = [f"{r.pe_forward:.1f}x" if r.pe_forward else "—" for r in reports]
-    valid_pes = [r.pe_forward for r in reports if r.pe_forward and r.pe_forward > 0]
+    pes = [f"{_get(r, 'pe_forward'):.1f}x" if _get(r, 'pe_forward') else "—" for r in reports]
+    valid_pes = [_get(r, "pe_forward") for r in reports if _get(r, "pe_forward") and _get(r, "pe_forward") > 0]
     avg_pe = sum(valid_pes) / len(valid_pes) if valid_pes else 0
     md_lines.append(f"| **5. P/E forward** | " + " | ".join(pes) + f" | {avg_pe:.1f}x |")
 
     # 6. P/B forward
-    pbs = [f"{r.pb_forward:.2f}x" if r.pb_forward else "—" for r in reports]
-    valid_pbs = [r.pb_forward for r in reports if r.pb_forward and r.pb_forward > 0]
+    pbs = [f"{_get(r, 'pb_forward'):.2f}x" if _get(r, 'pb_forward') else "—" for r in reports]
+    valid_pbs = [_get(r, "pb_forward") for r in reports if _get(r, "pb_forward") and _get(r, "pb_forward") > 0]
     avg_pb = sum(valid_pbs) / len(valid_pbs) if valid_pbs else 0
     md_lines.append(f"| **6. P/B forward** | " + " | ".join(pbs) + f" | {avg_pb:.2f}x |")
 
     # 7. Dự phóng Doanh thu
-    revs = [r.revenue_forecast for r in reports]
+    revs = [_get(r, "revenue_forecast", "") for r in reports]
     md_lines.append(f"| **7. Dự phóng Doanh thu** | " + " | ".join(revs) + " | Đồng thuận tăng trưởng |")
 
     # 8. Dự phóng LNST
-    npats = [r.npat_forecast for r in reports]
+    npats = [_get(r, "npat_forecast", "") for r in reports]
     md_lines.append(f"| **8. Dự phóng LNST** | " + " | ".join(npats) + " | Kỳ vọng lợi nhuận bứt phá |")
 
     # 9. Luận điểm then chốt
     catalysts_cols = []
     for r in reports:
-        cat_str = "<br>".join([f"{i+1}. {c}" for i, c in enumerate(r.key_catalysts or [])])
+        cats = _get(r, "key_catalysts", []) or []
+        cat_str = "<br>".join([f"{i+1}. {c}" for i, c in enumerate(cats)])
         catalysts_cols.append(cat_str)
     md_lines.append(f"| **9. Luận điểm then chốt** | " + " | ".join(catalysts_cols) + f" | Trọng tâm: Mở rộng quy mô kinh doanh |")
 
     # 10. Phương pháp định giá
-    methods = [r.valuation_method or "—" for r in reports]
+    methods = [_get(r, "valuation_method", "") or "—" for r in reports]
     md_lines.append(f"| **10. Phương pháp định giá** | " + " | ".join(methods) + " | Kết hợp P/E & DCF |")
 
     md_lines.append("\n---\n")
 
     # 2. PHÂN TÍCH NHÂN QUẢ & ĐỘNG LỰC TĂNG TRƯỞNG CỐT LÕI
     md_lines.append("## 2. PHÂN TÍCH CHUYÊN SÂU: NGUYÊN NHÂN - KẾT QUẢ - BẰNG CHỨNG (CAUSALITY ANALYSIS)\n")
-    for c in data.causality_analysis:
-        md_lines.append(f"### {c.category}")
-        md_lines.append(f"- **Hiện tượng tài chính:** {c.phenomenon}")
-        md_lines.append(f"- **Nguyên nhân cốt lõi:** {c.root_causes}")
-        md_lines.append(f"- **Bằng chứng số liệu:** {c.data_evidence}\n")
+    causality_items = data.get("causality_analysis", []) or []
+    for c in causality_items:
+        md_lines.append(f"### {_get(c, 'category', 'Phân tích')}")
+        md_lines.append(f"- **Hiện tượng tài chính:** {_get(c, 'phenomenon', '')}")
+        md_lines.append(f"- **Nguyên nhân cốt lõi:** {_get(c, 'root_causes', '')}")
+        md_lines.append(f"- **Bằng chứng số liệu:** {_get(c, 'data_evidence', '')}\n")
 
     md_lines.append("---\n")
 
@@ -1806,25 +1882,30 @@ async def api_export_markdown(req: ExportRequest):
     md_lines.append("## 3. BẢNG PHÂN HÓA QUAN ĐIỂM (DISENSUS & CONSENSUS ANALYSIS)\n")
     md_lines.append("| Tiêu chí phân hóa | Phe Lạc quan (Bulls) | Phe Thận trọng (Bears) | Bằng chứng & Luận điểm |")
     md_lines.append("| :--- | :--- | :--- | :--- |")
-    for d in data.disensus_table:
-        md_lines.append(f"| **{d.variable}** | {d.bulls_view} | {d.bears_view} | {d.evidence} |")
+    disensus_items = data.get("disensus_table", []) or []
+    for d in disensus_items:
+        md_lines.append(f"| **{_get(d, 'variable', '')}** | {_get(d, 'bulls_view', '')} | {_get(d, 'bears_view', '')} | {_get(d, 'evidence', '')} |")
     md_lines.append("\n---\n")
 
     # 4. KẾT LUẬN & HÀNH ĐỘNG DÀNH CHO NHÀ ĐẦU TƯ
     md_lines.append("## 4. KẾT LUẬN & HÀNH ĐỘNG DÀNH CHO NHÀ ĐẦU TƯ\n")
-    md_lines.append(f"- **Consensus Rating:** **{cs.consensus_rating}** (Điểm trung bình: {cs.consensus_score}/5.0).")
+    md_lines.append(f"- **Consensus Rating:** **{consensus_rating}** (Điểm trung bình: {consensus_score}/5.0).")
     md_lines.append(f"- **Vùng giá mục tiêu bình quân:**")
-    if cs.average_upside < 0:
-        mean_upside_str = f"Thị giá vượt định giá: **+{abs(cs.average_upside):.1f}%** (Đã vượt kỳ vọng)"
+    if avg_upside < 0:
+        mean_upside_str = f"Thị giá vượt định giá: **+{abs(avg_upside):.1f}%** (Đã vượt kỳ vọng)"
     else:
-        mean_upside_str = f"Upside tiềm năng: **+{cs.average_upside:.1f}%**"
-    md_lines.append(f"  - Giá bình quân (Mean): **{cs.mean_target_price:,.0f} VND** ({mean_upside_str}).")
-    md_lines.append(f"  - Giá trung vị (Median): **{cs.median_target_price:,.0f} VND**.")
-    md_lines.append(f"  - Khung giá mục tiêu [Min - Max]: **{cs.min_target_price:,.0f} - {cs.max_target_price:,.0f} VND** (Biên độ chênh lệch: {cs.target_price_spread_percent:.1f}%).")
-    md_lines.append(f"- **Vùng giá giải ngân khuyến nghị:** `{cs.recommended_buy_zone}`.")
-    md_lines.append(f"- **Ngưỡng quản trị rủi ro (Stop-loss):** `{cs.stop_loss_threshold}`.")
+        mean_upside_str = f"Upside tiềm năng: **+{avg_upside:.1f}%**"
+    md_lines.append(f"  - Giá bình quân (Mean): **{mean_target_p:,.0f} VND** ({mean_upside_str}).")
+    median_tp = _get(cs, "median_target_price", 0) or mean_target_p
+    min_tp = _get(cs, "min_target_price", 0) or mean_target_p
+    max_tp = _get(cs, "max_target_price", 0) or mean_target_p
+    spread = _get(cs, "target_price_spread_percent", 0) or 0.0
+    md_lines.append(f"  - Giá trung vị (Median): **{median_tp:,.0f} VND**.")
+    md_lines.append(f"  - Khung giá mục tiêu [Min - Max]: **{min_tp:,.0f} - {max_tp:,.0f} VND** (Biên độ chênh lệch: {spread:.1f}%).")
+    md_lines.append(f"- **Vùng giá giải ngân khuyến nghị:** `{rec_buy_zone}`.")
+    md_lines.append(f"- **Ngưỡng quản trị rủi ro (Stop-loss):** `{stop_loss_val}`.")
     md_lines.append(f"- **Trigger then chốt cần theo dõi định kỳ:**")
-    for t in cs.key_triggers:
+    for t in key_triggers:
         md_lines.append(f"  * {t}")
 
     markdown_content = "\n".join(md_lines)
@@ -2109,28 +2190,32 @@ async def get_report_pdf(
 
 @app.post("/api/export-csv")
 async def api_export_csv(req: ExportRequest):
-    data = req.report_data
-    reports = data.matrix_table
+    data = normalize_full_matrix_dict(req.report_data)
+    reports = data.get("matrix_table", [])
     output = io.StringIO()
     writer = csv.writer(output)
 
+    def _get(obj, k, d=""):
+        return obj.get(k, d) if isinstance(obj, dict) else getattr(obj, k, d)
+
     # Header
-    headers = ["Tieu_chi"] + [r.institution for r in reports]
+    headers = ["Tieu_chi"] + [_get(r, "institution", "CTCK") for r in reports]
     writer.writerow(headers)
 
     # Rows
-    writer.writerow(["Ngay_phat_hanh"] + [r.report_date for r in reports])
-    writer.writerow(["Khuyen_nghi"] + [r.recommendation for r in reports])
-    writer.writerow(["Gia_muc_tieu"] + [f"{r.target_price:.0f}" for r in reports])
-    writer.writerow(["Upside_percent"] + [f"{r.upside_percent:.1f}%" if r.upside_percent else "" for r in reports])
-    writer.writerow(["PE_forward"] + [str(r.pe_forward or "") for r in reports])
-    writer.writerow(["PB_forward"] + [str(r.pb_forward or "") for r in reports])
-    writer.writerow(["Du_phong_Doanh_thu"] + [r.revenue_forecast for r in reports])
-    writer.writerow(["Du_phong_LNST"] + [r.npat_forecast for r in reports])
-    writer.writerow(["Phuong_phap_dinh_gia"] + [r.valuation_method or "" for r in reports])
+    writer.writerow(["Ngay_phat_hanh"] + [_get(r, "report_date", "") for r in reports])
+    writer.writerow(["Khuyen_nghi"] + [_get(r, "recommendation", "") for r in reports])
+    writer.writerow(["Gia_muc_tieu"] + [f"{_get(r, 'target_price', 0):.0f}" for r in reports])
+    writer.writerow(["Upside_percent"] + [f"{_get(r, 'upside_percent', 0):.1f}%" if _get(r, 'upside_percent') is not None else "" for r in reports])
+    writer.writerow(["PE_forward"] + [str(_get(r, "pe_forward", "") or "") for r in reports])
+    writer.writerow(["PB_forward"] + [str(_get(r, "pb_forward", "") or "") for r in reports])
+    writer.writerow(["Du_phong_Doanh_thu"] + [_get(r, "revenue_forecast", "") for r in reports])
+    writer.writerow(["Du_phong_LNST"] + [_get(r, "npat_forecast", "") for r in reports])
+    writer.writerow(["Phuong_phap_dinh_gia"] + [_get(r, "valuation_method", "") or "" for r in reports])
 
     csv_content = output.getvalue()
-    filename = f"IERM_{data.ticker}_Matrix.csv"
+    ticker = data.get("ticker", "CP")
+    filename = f"IERM_{ticker}_Matrix.csv"
     return Response(
         content=csv_content,
         media_type="text/csv",
@@ -2143,10 +2228,10 @@ async def api_export_matrix_pdf(req: ExportRequest):
     """
     Xuất toàn bộ Bảng đối chiếu trực diện đa tổ chức ra file PDF A4 Landscape định dạng chuyên nghiệp.
     """
-    data = req.report_data
-    report_dict = data.model_dump()
+    report_dict = normalize_full_matrix_dict(req.report_data)
     pdf_bytes = generate_matrix_table_pdf(report_dict)
-    filename = f"IERM_{data.ticker}_Matrix_Table.pdf"
+    ticker = report_dict.get("ticker", "CP")
+    filename = f"IERM_{ticker}_Matrix_Table.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -2248,18 +2333,32 @@ async def api_export_matrix_excel(req: ExportRequest):
     Xuất Bảng đối chiếu đa tổ chức ra file Excel XML/HTML Spreadsheet (.xls)
     hỗ trợ 100% tiếng Việt UTF-8, định dạng màu sắc cột, tiêu đề, căn chỉnh số liệu chuẩn xác.
     """
-    data = req.report_data
-    reports = data.matrix_table
+    data = normalize_full_matrix_dict(req.report_data)
+    reports = data.get("matrix_table", [])
     if reports:
         from engine import get_report_date_sort_key
         reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
-    cs = data.consensus_summary
+    cs = data.get("consensus_summary", {})
+
+    ticker = data.get("ticker", "CP")
+    company_name = data.get("company_name", f"Công ty Cổ phần {ticker}")
+    sector = data.get("sector", "")
+
+    def _get(obj, k, d=""):
+        return obj.get(k, d) if isinstance(obj, dict) else getattr(obj, k, d)
+
+    current_market_p = _get(cs, "current_market_price", 0) or 0
+    mean_target_p = _get(cs, "mean_target_price", 0) or 0
+    avg_upside = _get(cs, "average_upside", 0.0) or 0.0
+    consensus_rating = _get(cs, "consensus_rating", "MUA")
+    rec_buy_zone = _get(cs, "recommended_buy_zone", "—")
+    stop_loss_val = _get(cs, "stop_loss_threshold", "—")
 
     html_lines = [
         '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">',
         '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
         '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>',
-        f'<x:Name>IERM_{data.ticker}_Matrix</x:Name>',
+        f'<x:Name>IERM_{ticker}_Matrix</x:Name>',
         '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->',
         '<style>',
         'body { font-family: "Segoe UI", Arial, sans-serif; }',
@@ -2272,8 +2371,8 @@ async def api_export_matrix_excel(req: ExportRequest):
         '</style></head><body>',
         f'<div style="background-color: #0f172a; padding: 12px 16px; border-radius: 4px; margin-bottom: 12px;">',
         f'  <div style="font-size: 11px; font-weight: normal; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">IERM TERMINAL // BẢNG ĐỐI CHIẾU TRỰC DIỆN ĐA TỔ CHỨC</div>',
-        f'  <div style="font-size: 17px; font-weight: bold; color: #facc15; margin-top: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><span style="color:#38bdf8;">Mã CK:</span> {data.ticker} - <span style="color:#ffffff;">{data.company_name}</span> | <span style="color:#94a3b8; font-size: 14px; font-weight: normal;">Ngành: {data.sector}</span></div>',
-        f'  <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;"><b>Thị giá tham chiếu:</b> <span style="color:#38bdf8; font-weight:bold;">{cs.current_market_price:,.0f} VND</span> | <b>Định giá TB (Mean):</b> <span style="color:#4ade80; font-weight:bold;">{cs.mean_target_price:,.0f} VND</span> | <b>{"Kỳ vọng thị giá vs Định giá" if cs.average_upside < 0 else "Upside kỳ vọng"}:</b> <span style="color:{"#f43f5e" if cs.average_upside < 0 else "#22c55e"}; font-weight:bold;">{"Đã vượt kỳ vọng (+" + f"{abs(cs.average_upside):.1f}" + "%)" if cs.average_upside < 0 else f"+{cs.average_upside:.1f}%"}</span></div>',
+        f'  <div style="font-size: 17px; font-weight: bold; color: #facc15; margin-top: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><span style="color:#38bdf8;">Mã CK:</span> {ticker} - <span style="color:#ffffff;">{company_name}</span> | <span style="color:#94a3b8; font-size: 14px; font-weight: normal;">Ngành: {sector}</span></div>',
+        f'  <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;"><b>Thị giá tham chiếu:</b> <span style="color:#38bdf8; font-weight:bold;">{current_market_p:,.0f} VND</span> | <b>Định giá TB (Mean):</b> <span style="color:#4ade80; font-weight:bold;">{mean_target_p:,.0f} VND</span> | <b>{"Kỳ vọng thị giá vs Định giá" if avg_upside < 0 else "Upside kỳ vọng"}:</b> <span style="color:{"#f43f5e" if avg_upside < 0 else "#22c55e"}; font-weight:bold;">{"Đã vượt kỳ vọng (+" + f"{abs(avg_upside):.1f}" + "%)" if avg_upside < 0 else f"+{avg_upside:.1f}%"}</span></div>',
         f'</div>',
         '<table border="1">'
     ]
@@ -2282,7 +2381,7 @@ async def api_export_matrix_excel(req: ExportRequest):
     html_lines.append('<tr>')
     html_lines.append('<th class="header-row" style="text-align:left;">TIÊU CHÍ ĐỐI CHIẾU</th>')
     for r in reports:
-        html_lines.append(f'<th class="header-row">{r.institution}<br><span style="font-size:10px;font-weight:normal;">({r.report_date})</span></th>')
+        html_lines.append(f'<th class="header-row">{_get(r, "institution", "CTCK")}<br><span style="font-size:10px;font-weight:normal;">({_get(r, "report_date", "")})</span></th>')
     html_lines.append('<th class="header-row" style="background-color:#059669;color:#ffffff;">CONSENSUS & ĐỒNG THUẬN</th>')
     html_lines.append('</tr>')
 
@@ -2298,56 +2397,63 @@ async def api_export_matrix_excel(req: ExportRequest):
         html_lines.append('</tr>')
 
     # 1. Khuyến nghị
-    add_row("1. Khuyến nghị đầu tư", lambda r: r.recommendation, cs.consensus_rating, is_bold=True)
+    add_row("1. Khuyến nghị đầu tư", lambda r: _get(r, "recommendation", "N/A"), consensus_rating, is_bold=True)
     # 2. Giá mục tiêu
     def _fmt_excel_tp(r):
-        if getattr(r, "is_expired", False):
-            return f"{r.target_price:,.0f} đ (Quá 1 năm)" if r.target_price > 0 else "— (Quá 1 năm)"
-        if getattr(r, "is_technical", False):
+        if _get(r, "is_expired", False):
+            tp = _get(r, "target_price", 0)
+            return f"{tp:,.0f} đ (Quá 1 năm)" if tp > 0 else "— (Quá 1 năm)"
+        if _get(r, "is_technical", False):
             return "— (PTKT)"
-        if not r.target_price or r.target_price <= 0:
+        tp = _get(r, "target_price", 0)
+        if not tp or tp <= 0:
             return "— (KQKD)"
-        return f"{r.target_price:,.0f} đ"
-    excel_cs_tp = f"Mean: {cs.mean_target_price:,.0f} đ" if cs.mean_target_price > 0 else "Mean: — (Cần theo dõi thêm)"
+        return f"{tp:,.0f} đ"
+    excel_cs_tp = f"Mean: {mean_target_p:,.0f} đ" if mean_target_p > 0 else "Mean: — (Cần theo dõi thêm)"
     add_row("2. Giá mục tiêu (VND)", _fmt_excel_tp, excel_cs_tp, is_bold=True)
 
     # 3. Tiềm năng tăng giá
     def _fmt_excel_upside(r):
-        if getattr(r, "is_expired", False):
+        if _get(r, "is_expired", False):
             return "— (Quá 1 năm)"
-        if r.upside_percent is None: return "—"
-        if r.upside_percent < 0: return f"Vượt +{abs(r.upside_percent):.1f}%"
-        return f"+{r.upside_percent:.1f}%"
-    if cs.mean_target_price <= 0:
+        up_val = safe_float(_get(r, "upside_percent"))
+        if up_val is None:
+            raw_up = _get(r, "upside_percent")
+            return str(raw_up) if raw_up else "—"
+        if up_val < 0:
+            return f"Vượt +{abs(up_val):.1f}%"
+        return f"+{up_val:.1f}%"
+    avg_up_val = safe_float(avg_upside)
+    if mean_target_p <= 0 or avg_up_val is None:
         excel_cs_up = "— (Cần theo dõi thêm)"
-    elif cs.average_upside < 0:
-        excel_cs_up = f"Đã vượt kỳ vọng (+{abs(cs.average_upside):.1f}%)"
+    elif avg_up_val < 0:
+        excel_cs_up = f"Đã vượt kỳ vọng (+{abs(avg_up_val):.1f}%)"
     else:
-        excel_cs_up = f"+{cs.average_upside:.1f}%"
+        excel_cs_up = f"+{avg_up_val:.1f}%"
     add_row("3. Tiềm năng tăng giá (Upside)", _fmt_excel_upside, excel_cs_up, is_bold=True)
     # 4. P/E forward
-    valid_pes = [r.pe_forward for r in reports if r.pe_forward and r.pe_forward > 0]
+    valid_pes = [_get(r, "pe_forward") for r in reports if _get(r, "pe_forward") and _get(r, "pe_forward") > 0]
     avg_pe = sum(valid_pes) / len(valid_pes) if valid_pes else 0
-    add_row("4. Hệ số P/E Forward", lambda r: f"{r.pe_forward:.1f}x" if r.pe_forward else "—", f"TB: {avg_pe:.1f}x" if avg_pe > 0 else "—")
+    add_row("4. Hệ số P/E Forward", lambda r: f"{_get(r, 'pe_forward'):.1f}x" if _get(r, 'pe_forward') else "—", f"TB: {avg_pe:.1f}x" if avg_pe > 0 else "—")
     # 5. P/B forward
-    valid_pbs = [r.pb_forward for r in reports if r.pb_forward and r.pb_forward > 0]
+    valid_pbs = [_get(r, "pb_forward") for r in reports if _get(r, "pb_forward") and _get(r, "pb_forward") > 0]
     avg_pb = sum(valid_pbs) / len(valid_pbs) if valid_pbs else 0
-    add_row("5. Hệ số P/B Forward", lambda r: f"{r.pb_forward:.2f}x" if r.pb_forward else "—", f"TB: {avg_pb:.2f}x" if avg_pb > 0 else "—")
+    add_row("5. Hệ số P/B Forward", lambda r: f"{_get(r, 'pb_forward'):.2f}x" if _get(r, 'pb_forward') else "—", f"TB: {avg_pb:.2f}x" if avg_pb > 0 else "—")
     # 6. Dự phóng Doanh thu
-    add_row("6. Dự phóng Doanh thu", lambda r: r.revenue_forecast or "N/A", "Đồng thuận tích cực")
+    add_row("6. Dự phóng Doanh thu", lambda r: _get(r, "revenue_forecast", "") or "N/A", "Đồng thuận tích cực")
     # 7. Dự phóng LNST
-    add_row("7. Dự phóng LNST", lambda r: r.npat_forecast or "N/A", "Tăng trưởng cao", is_bold=True)
+    add_row("7. Dự phóng LNST", lambda r: _get(r, "npat_forecast", "") or "N/A", "Tăng trưởng cao", is_bold=True)
     # 8. Luận điểm tăng trưởng
-    add_row("8. Luận điểm tăng trưởng (Catalysts)", lambda r: "<br>• ".join([""] + (r.key_catalysts or [])), "• Dự án mở rộng công suất<br>• Tăng trưởng thị phần")
+    add_row("8. Luận điểm tăng trưởng (Catalysts)", lambda r: "<br>• ".join([""] + (_get(r, "key_catalysts", []) or [])), "• Dự án mở rộng công suất<br>• Tăng trưởng thị phần")
     # 9. Rủi ro trọng yếu
-    add_row("9. Rủi ro trọng yếu (Key Risks)", lambda r: "<br>• ".join([""] + (r.key_risks or [])), "• Biến động giá hàng hóa<br>• Rủi ro tài chính")
+    add_row("9. Rủi ro trọng yếu (Key Risks)", lambda r: "<br>• ".join([""] + (_get(r, "key_risks", []) or [])), "• Biến động giá hàng hóa<br>• Rủi ro tài chính")
 
     html_lines.append('</table><br>')
-    html_lines.append(f'<p><b>Chiến lược giải ngân:</b> {cs.recommended_buy_zone} | <b>Ngưỡng quản trị dừng lỗ:</b> {cs.stop_loss_threshold}</p>')
+    html_lines.append(f'<p><b>Chiến lược giải ngân:</b> {rec_buy_zone} | <b>Ngưỡng quản trị dừng lỗ:</b> {stop_loss_val}</p>')
     html_lines.append('</body></html>')
 
     excel_content = "\n".join(html_lines)
-    filename = f"IERM_{data.ticker}_Matrix_Table.xls"
+    filename = f"IERM_{ticker}_Matrix_Table.xls"
     return Response(
         content=excel_content,
         media_type="application/vnd.ms-excel",

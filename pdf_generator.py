@@ -124,10 +124,8 @@ def generate_ctck_report_pdf(
     report: dict,
     consensus: dict = None,
 ) -> bytes:
-    """
-    Tạo nội dung file PDF báo cáo phân tích của công ty chứng khoán
-    trả về dưới dạng raw bytes (để gửi trực tiếp về client qua FastAPI).
-    """
+    report = to_dict_safe(report)
+    consensus = to_dict_safe(consensus)
     institution = report.get("institution", "CTCK")
     target_price = report.get("target_price", 0)
     current_price = report.get("current_price", 0)
@@ -474,6 +472,35 @@ def sanitize_cell_bullet_text(items: list, max_items: int = 10, default_text: st
     return "\n".join(clean_bullets)
 
 
+def to_dict_safe(obj):
+    """Chuyển đổi an toàn Pydantic model hoặc object thành dict."""
+    if obj is None:
+        return {}
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump()
+    if hasattr(obj, "dict") and callable(obj.dict):
+        return obj.dict()
+    if isinstance(obj, dict):
+        return obj
+    try:
+        return dict(obj)
+    except Exception:
+        return {}
+
+
+def safe_float(v, default=None):
+    """Chuyển đổi an toàn giá trị bất kỳ sang float."""
+    if v is None:
+        return default
+    if isinstance(v, (int, float)):
+        return float(v)
+    try:
+        clean_v = str(v).replace("%", "").replace("+", "").replace(",", "").strip()
+        return float(clean_v)
+    except Exception:
+        return default
+
+
 def generate_matrix_table_pdf(report_data: dict) -> bytes:
     """
     Tạo file PDF A4 Landscape chuẩn mực, linh động, không bị đè chữ, không bị cắt dòng.
@@ -481,14 +508,16 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     - Trang 1: Bảng Ma Trận Đối Chiếu Định Lượng Đa Tổ Chức & Dải Chiến Lược Đầu Tư.
     - Trang 2+: Bảng So Sánh Chi Tiết Toàn Văn Luận Điểm Tăng Trưởng (Catalysts) & Rủi Ro (Key Risks) Đa Tổ Chức.
     """
+    report_data = to_dict_safe(report_data)
     ticker = report_data.get("ticker", "CP")
     company_name = report_data.get("company_name", f"Công ty Cổ phần {ticker}")
     sector = report_data.get("sector", "Doanh nghiệp niêm yết")
-    reports = report_data.get("matrix_table", [])
+    raw_reports = report_data.get("matrix_table", [])
+    reports = [to_dict_safe(r) for r in raw_reports]
     if reports:
         from engine import get_report_date_sort_key
         reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
-    cs = report_data.get("consensus_summary", {})
+    cs = to_dict_safe(report_data.get("consensus_summary", {}))
 
     pdf = MatrixTableLandscapePDF(ticker=ticker, company_name=company_name, sector=sector)
     pdf.alias_nb_pages()
@@ -605,8 +634,8 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         for r in display_reports_p1:
             is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
             is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
-            tp = r.get("target_price", 0)
-            up = r.get("upside_percent")
+            tp = safe_float(r.get("target_price"), 0)
+            up = safe_float(r.get("upside_percent"))
             if is_exp or is_tech or not tp or tp <= 0 or r.get("is_estimated_price", False) or up is None:
                 r3.cell("—", align="C")
             else:
@@ -614,11 +643,12 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                     r3.cell(f"Vượt +{abs(up):.1f}%", align="C")
                 else:
                     r3.cell(f"+{up:.1f}%", align="C")
-        if mean_target > 0 and avg_upside is not None and avg_upside != 0:
-            if avg_upside < 0:
-                r3.cell(f"Vượt +{abs(avg_upside):.1f}%", align="C")
+        avg_up_val = safe_float(avg_upside)
+        if mean_target > 0 and avg_up_val is not None and avg_up_val != 0:
+            if avg_up_val < 0:
+                r3.cell(f"Vượt +{abs(avg_up_val):.1f}%", align="C")
             else:
-                r3.cell(f"+{avg_upside:.1f}%", align="C")
+                r3.cell(f"+{avg_up_val:.1f}%", align="C")
         else:
             r3.cell("—", align="C")
 
@@ -626,9 +656,9 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         r4 = table.row()
         r4.cell("4. Định giá P/E Forward", align="L")
         for r in display_reports_p1:
-            pe = r.get("pe_forward")
+            pe = safe_float(r.get("pe_forward"))
             r4.cell(f"{pe:.1f}x" if pe else "—", align="C")
-        valid_pes = [r.get("pe_forward") for r in display_reports_p1 if r.get("pe_forward") and r.get("pe_forward") > 0]
+        valid_pes = [safe_float(r.get("pe_forward")) for r in display_reports_p1 if safe_float(r.get("pe_forward")) and safe_float(r.get("pe_forward")) > 0]
         avg_pe = sum(valid_pes) / len(valid_pes) if valid_pes else 0
         r4.cell(f"TB: {avg_pe:.1f}x" if avg_pe > 0 else "—", align="C")
 
@@ -636,9 +666,9 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         r5 = table.row()
         r5.cell("5. Định giá P/B Forward", align="L")
         for r in display_reports_p1:
-            pb = r.get("pb_forward")
+            pb = safe_float(r.get("pb_forward"))
             r5.cell(f"{pb:.2f}x" if pb else "—", align="C")
-        valid_pbs = [r.get("pb_forward") for r in display_reports_p1 if r.get("pb_forward") and r.get("pb_forward") > 0]
+        valid_pbs = [safe_float(r.get("pb_forward")) for r in display_reports_p1 if safe_float(r.get("pb_forward")) and safe_float(r.get("pb_forward")) > 0]
         avg_pb = sum(valid_pbs) / len(valid_pbs) if valid_pbs else 0
         r5.cell(f"TB: {avg_pb:.2f}x" if avg_pb > 0 else "—", align="C")
 

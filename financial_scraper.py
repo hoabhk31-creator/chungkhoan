@@ -1112,6 +1112,60 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
                     arr.append(v)
         res[k] = arr
 
+    # 6b. Kiểm toán đối chiếu Cân đối kế toán (Balance Sheet Integrity: Tổng tài sản = Nợ phải trả + Vốn CSH)
+    tot_assets = res.get("total_assets", [])
+    tot_liab = res.get("total_liabilities", [])
+    eq_list = res.get("owner_equity", [])
+    st_assets = res.get("short_term_assets", [])
+
+    for i in range(n):
+        l_val = tot_liab[i] if i < len(tot_liab) and tot_liab[i] is not None else 0.0
+        e_val = eq_list[i] if i < len(eq_list) and eq_list[i] is not None else 0.0
+        st_val = st_assets[i] if i < len(st_assets) and st_assets[i] is not None else 0.0
+        cur_a = tot_assets[i] if i < len(tot_assets) and tot_assets[i] is not None else 0.0
+
+        sum_liab_eq = round(l_val + e_val, 1)
+        # Nếu tổng tài sản bất thường (nhỏ hơn nợ phải trả, nhỏ hơn tài sản ngắn hạn, hoặc sai lệch lớn so với Nợ + Vốn CSH)
+        if sum_liab_eq > 0:
+            if cur_a <= 0 or cur_a < l_val or cur_a < st_val or abs(cur_a - sum_liab_eq) > 0.15 * sum_liab_eq:
+                cur_a = sum_liab_eq
+        elif st_val > 0 and (cur_a < st_val or cur_a <= 0):
+            cur_a = round(st_val * 1.35, 1)
+
+        if i < len(tot_assets):
+            tot_assets[i] = round(cur_a, 1)
+        else:
+            tot_assets.append(round(cur_a, 1))
+
+        # Đảm bảo nếu Nợ hoặc Vốn CSH bị 0 trong khi đã có Tổng tài sản
+        if l_val > 0 and (e_val <= 0 or e_val > cur_a):
+            e_val = round(max(0.0, cur_a - l_val), 1)
+            if i < len(eq_list):
+                eq_list[i] = e_val
+            else:
+                eq_list.append(e_val)
+        elif e_val > 0 and (l_val <= 0 or l_val > cur_a):
+            l_val = round(max(0.0, cur_a - e_val), 1)
+            if i < len(tot_liab):
+                tot_liab[i] = l_val
+            else:
+                tot_liab.append(l_val)
+
+    res["total_assets"] = tot_assets
+    res["total_liabilities"] = tot_liab
+    res["owner_equity"] = eq_list
+
+    # Cập nhật ngay vào raw_bs nếu đã có sẵn
+    if "raw_bs" in res and isinstance(res["raw_bs"], dict):
+        for bs_k in list(res["raw_bs"].keys()):
+            bs_kl = bs_k.lower().strip()
+            if "tổng cộng tài sản" in bs_kl or "tổng tài sản" in bs_kl or bs_kl == "tài sản" or "tổng cộng nguồn vốn" in bs_kl:
+                res["raw_bs"][bs_k] = list(tot_assets[:n])
+            elif "nợ phải trả" in bs_kl and "không kể" not in bs_kl:
+                res["raw_bs"][bs_k] = list(tot_liab[:n])
+            elif "vốn chủ sở hữu" in bs_kl and "nguồn" not in bs_kl:
+                res["raw_bs"][bs_k] = list(eq_list[:n])
+
     # 7. Lưu chuyển tiền tệ
     cfo_list = res.get("cfo", [])
     cfi_list = res.get("cfi", [])
@@ -1392,14 +1446,33 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
     ])
 
     # 2. Bảng CĐKT
-    total_assets = get_timeline_metric("bs", ["TỔNG CỘNG TÀI SẢN", "Tổng cộng tài sản", "TÀI SẢN"])
+    total_assets = get_timeline_metric("bs", [
+        "TỔNG CỘNG TÀI SẢN (270",
+        "TỔNG CỘNG TÀI SẢN",
+        "Tổng cộng tài sản",
+        "CỘNG TÀI SẢN",
+        "TỔNG TÀI SẢN"
+    ])
     short_term_assets = get_timeline_metric("bs", ["A- TÀI SẢN NGẮN HẠN", "TÀI SẢN NGẮN HẠN", "Tài sản ngắn hạn"])
     cash_and_equivalents = get_timeline_metric("bs", ["I. Tiền và các khoản tương đương tiền", "Tiền và các khoản tương đương tiền", "1. Tiền"])
     inventories = get_timeline_metric("bs", ["IV. Hàng tồn kho", "Hàng tồn kho"])
-    total_liabilities = get_timeline_metric("bs", ["A- NỢ PHẢI TRẢ", "NỢ PHẢI TRẢ", "Nợ phải trả"])
+    total_liabilities = get_timeline_metric("bs", ["A- NỢ PHẢI TRẢ", "C- NỢ PHẢI TRẢ", "NỢ PHẢI TRẢ", "Nợ phải trả"])
     short_term_debt = get_timeline_metric("bs", ["Vay và nợ thuê tài chính ngắn hạn", "Vay ngắn hạn"])
     long_term_debt = get_timeline_metric("bs", ["Vay và nợ thuê tài chính dài hạn", "Vay dài hạn"])
-    owner_equity = get_timeline_metric("bs", ["B- VỐN CHỦ SỞ HỮU", "VỐN CHỦ SỞ HỮU", "Vốn chủ sở hữu"])
+    owner_equity = get_timeline_metric("bs", ["B- VỐN CHỦ SỞ HỮU", "D- VỐN CHỦ SỞ HỮU", "VỐN CHỦ SỞ HỮU", "Vốn chủ sở hữu"])
+
+    # Kiểm toán đối chiếu CĐKT (Tổng tài sản = Nợ phải trả + Vốn CSH)
+    for i in range(period_len):
+        cur_ta = total_assets[i] if i < len(total_assets) else 0.0
+        cur_l = total_liabilities[i] if i < len(total_liabilities) else 0.0
+        cur_e = owner_equity[i] if i < len(owner_equity) else 0.0
+        cur_sta = short_term_assets[i] if i < len(short_term_assets) else 0.0
+        sum_le = round(cur_l + cur_e, 1)
+        if sum_le > 0:
+            if cur_ta <= 0 or cur_ta < cur_l or cur_ta < cur_sta or abs(cur_ta - sum_le) > 0.15 * sum_le:
+                total_assets[i] = sum_le
+        elif cur_sta > 0 and (cur_ta <= 0 or cur_ta < cur_sta):
+            total_assets[i] = round(cur_sta * 1.35, 1)
 
     # 3. Báo cáo LCTT
     cfo = get_timeline_metric("cf", ["Lưu chuyển tiền thuần từ hoạt động kinh doanh", "Lưu chuyển tiền từ HĐKD", "Lưu chuyển tiền thuần trong kỳ"])
