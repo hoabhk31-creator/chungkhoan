@@ -1,5 +1,260 @@
 [
   {
+    "id": "log-04ceabf3",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bất động sản Dân dụng & KCN (VHM, PDR, TCH, KBC, IDC)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "Doanh số bán hàng chưa ghi nhận (Unbilled Bookings) và khoản Người mua trả tiền trước đạt mức kỷ lục"
+    ]
+  },
+  {
+    "id": "log-e4272f55",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bất động sản Dân dụng & KCN (VHM, PDR, TCH, KBC, IDC)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng chưa ghi nhận (Unbilled Bookings) và khoản Người mua trả tiền trước đạt mức kỷ lục",
+      "Dự phóng niên độ FY2026F, LNST cổ đông công ty mẹ phục hồi mạnh lên 897 tỷ đồng (+182% YoY) và EPS đạt 894 đồng/cp khi mở chu kỳ bàn giao mới từ khoản người mua trả tiền trước đạt 6.125 tỷ đồng (+2.917% YoY)."
+    ]
+  },
+  {
+    "id": "log-1233fede",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bất động sản Dân dụng & KCN (VHM, PDR, TCH, KBC, IDC)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Kết quả Q1-FY26 ghi nhận doanh thu thuần 453 tỷ đồng (+16% YoY) và LNST-CĐM 125 tỷ đồng (+231% YoY), mới chỉ hoàn thành 5% kế hoạch và dự phóng cả năm do chậm bàn giao dự án HH Green River.",
+      "Doanh số bán hàng chưa ghi nhận (Unbilled Bookings) và khoản Người mua trả tiền trước đạt mức kỷ lục"
+    ]
+  },
+  {
+    "id": "log-021dd00a",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị OUTPERFORM với giá mục tiêu 106,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 1,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu",
+      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng"
+    ]
+  },
+  {
+    "id": "log-52b0759a",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận của chuỗi Bách Hóa Xanh / Long Châu",
+      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng"
+    ]
+  },
+  {
+    "id": "log-cedb6098",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 4,
+    "theses_extracted": 1,
+    "confidence": 0.84,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-3eae3a7d",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG, CTR)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 3,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng trên 25%/năm",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu"
+    ]
+  },
+  {
+    "id": "log-4194766d",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG, CTR)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng trên 25%/năm",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu"
+    ]
+  },
+  {
+    "id": "log-d55ea295",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG, CTR)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng trên 25%/năm",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu"
+    ]
+  },
+  {
+    "id": "log-95f63f95",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 1,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging",
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn."
+    ]
+  },
+  {
+    "id": "log-0953ae01",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 1,
+    "confidence": 0.88,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging"
+    ]
+  },
+  {
+    "id": "log-915fbf0f",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "19/09/2026 21:20",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 1,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging"
+    ]
+  },
+  {
+    "id": "log-ed68c8e7",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "19/09/2026 21:19",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc"
+    ]
+  },
+  {
+    "id": "log-1fd424ea",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "19/09/2026 21:19",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC)",
+      "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc"
+    ]
+  },
+  {
+    "id": "log-8cdaa3d6",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "19/09/2026 21:19",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 3,
+    "theses_extracted": 2,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Tiến độ giải ngân Capex và vận hành các giai đoạn lò cao (Dung Quất 2, nâng công suất HRC)",
+      "MBS điều chỉnh tăng dự báo lợi nhuận ròng năm 2026/2027 lần lượt thêm 26%/15% lên mức 26.190 tỷ đồng (+70% svck) và 28.197 tỷ đồng (+8% svck), nhờ sản lượng tiêu thụ tăng trưởng 25%/12% và biên lợi nhuận gộp cải thiện lên 17,2%/17,8%."
+    ]
+  },
+  {
     "id": "log-4213e3ae",
     "ticker": "HPG",
     "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
@@ -1393,259 +1648,6 @@
     "extracted_catalysts_preview": [
       "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành (18 - 22%)",
       "Năm 2026F, SSI dự báo Tổng thu nhập hoạt động đạt 80.288 tỷ đồng và LNTT đạt 41.052 tỷ đồng (+19,8% svck) trên nền tăng trưởng tín dụng 26,7%"
-    ]
-  },
-  {
-    "id": "log-f5af82d2",
-    "ticker": "HDB",
-    "title": "HDB: Khuyến nghị  KHẢ QUAN với giá mục tiêu 32,000 đồng/cổ phiếu",
-    "institution": "KAFI",
-    "learned_at": "18/09/2026 13:28",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
-    "catalysts_extracted": 1,
-    "theses_extracted": 0,
-    "confidence": 0.84,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KAFI",
-    "extracted_catalysts_preview": [
-      "Kết quả H1 2026 ghi nhận LNTT đạt 13,2 nghìn tỷ đồng (+31% YoY), hoàn thành 44% kế hoạch năm 2026. Dự phóng năm 2026F, Thu nhập lãi thuần đạt 40.301 tỷ đồng (+16% YoY) và LNTT đạt 20.681 tỷ đồng (+21% YoY) trên cơ sở tăng trưởng tín dụng 31,7%"
-    ]
-  },
-  {
-    "id": "log-bd0f7e3f",
-    "ticker": "DRC",
-    "title": "DRC: Khuyến nghị TÍCH LŨY với giá mục tiêu 11,300 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "18/09/2026 13:28",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
-    "catalysts_extracted": 1,
-    "theses_extracted": 0,
-    "confidence": 0.84,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Cổ tức tiền mặt 12 tháng tới dự kiến bằng 0 đồng"
-    ]
-  },
-  {
-    "id": "log-f9d9e200",
-    "ticker": "PVD",
-    "title": "PVD: Khuyến nghị KHẢ QUAN với giá mục tiêu 22,300 đồng/cổ phiếu",
-    "institution": "SSI",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Dầu khí & Dịch vụ Năng lượng (PVD, PVS, BSR, GAS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / SSI",
-    "extracted_catalysts_preview": [
-      "Đơn giá cho thuê giàn khoan tự nâng (Jack-up) duy trì ở mức cao 110,000 - 130,000 USD/ngày với lịch trình khoan full hợp đồng",
-      "Tiến độ trao thầu và triển khai các gói thầu EPCI đại dự án khí điện Lô B - Ô Môn và mỏ dầu Lạc Đà Vàng"
-    ]
-  },
-  {
-    "id": "log-3f91abdb",
-    "ticker": "PVD",
-    "title": "PVD: Khuyến nghị MUA với giá mục tiêu 22,222 đồng/cổ phiếu",
-    "institution": "NHSV",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Dầu khí & Dịch vụ Năng lượng (PVD, PVS, BSR, GAS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / NHSV",
-    "extracted_catalysts_preview": [
-      "Đơn giá cho thuê giàn khoan tự nâng (Jack-up) duy trì ở mức cao 110,000 - 130,000 USD/ngày với lịch trình khoan full hợp đồng",
-      "Tiến độ trao thầu và triển khai các gói thầu EPCI đại dự án khí điện Lô B - Ô Môn và mỏ dầu Lạc Đà Vàng"
-    ]
-  },
-  {
-    "id": "log-58a3edfc",
-    "ticker": "PVD",
-    "title": "PVD: Báo cáo cập nhật 14/09/2026",
-    "institution": "BSC",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Dầu khí & Dịch vụ Năng lượng (PVD, PVS, BSR, GAS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Trung hạn, giá thuê giàn kỳ vọng duy trì quanh 90.000 USD/ngày cùng đà mở rộng đội giàn là nền tảng tăng trưởng giai đoạn 2027–2030",
-      "Đơn giá cho thuê giàn khoan tự nâng (Jack-up) duy trì ở mức cao 110,000 - 130,000 USD/ngày với lịch trình khoan full hợp đồng"
-    ]
-  },
-  {
-    "id": "log-3885e587",
-    "ticker": "DGC",
-    "title": "DGC: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "MBS",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 1,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / MBS",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
-      "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới"
-    ]
-  },
-  {
-    "id": "log-615304a6",
-    "ticker": "DGC",
-    "title": "DGC: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "SHS",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 1,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / SHS",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
-      "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới"
-    ]
-  },
-  {
-    "id": "log-cfeca810",
-    "ticker": "DGC",
-    "title": "DGC: Khuyến nghị KHẢ QUAN với giá mục tiêu 46,400 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 1,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
-      "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới"
-    ]
-  },
-  {
-    "id": "log-0961aa1d",
-    "ticker": "VCI",
-    "title": "VCI: Khuyến nghị MUA với giá mục tiêu 31,400 đồng/cổ phiếu",
-    "institution": "DSC",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / DSC",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging",
-      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ trên 25,000 tỷ đ/phiên"
-    ]
-  },
-  {
-    "id": "log-d3667098",
-    "ticker": "VCI",
-    "title": "VCI: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "Beta",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 1,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Beta",
-    "extracted_catalysts_preview": [
-      "Tính đến cuối quý 2/2026, quy mô tổng tài sản của doanh nghiệp mở rộng mạnh lên 39.727,39 tỷ đồng (+81,42% YoY) và vốn chủ sở hữu đạt 17.137,89 tỷ đồng",
-      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging"
-    ]
-  },
-  {
-    "id": "log-d22b2cef",
-    "ticker": "VCI",
-    "title": "VCI: Khuyến nghị TÍCH CỰC với giá mục tiêu 33,400 đồng/cổ phiếu",
-    "institution": "NSI",
-    "learned_at": "18/09/2026 13:26",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI, CTS)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / NSI",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX và Non-prefunding vận hành chính thức, đón sóng dòng vốn ngoại nâng hạng FTSE Emerging",
-      "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ trên 25,000 tỷ đ/phiên"
-    ]
-  },
-  {
-    "id": "log-f9e83f74",
-    "ticker": "PVD",
-    "title": "PVD: Báo cáo cập nhật 14/09/2026",
-    "institution": "BSC",
-    "learned_at": "18/09/2026 08:06",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": [
-      "Trung hạn, giá thuê giàn kỳ vọng duy trì quanh 90.000 USD/ngày cùng đà mở rộng đội giàn là nền tảng tăng trưởng giai đoạn 2027–2030",
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (PVD)"
-    ]
-  },
-  {
-    "id": "log-3cb3b3ac",
-    "ticker": "VIX",
-    "title": "VIX: Báo cáo cập nhật 14/09/2026",
-    "institution": "TCBS",
-    "learned_at": "18/09/2026 08:06",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / TCBS",
-    "extracted_catalysts_preview": [
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (VIX)",
-      "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI) (VIX)"
-    ]
-  },
-  {
-    "id": "log-35ecfe52",
-    "ticker": "SSI",
-    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-    "institution": "VCBS",
-    "learned_at": "18/09/2026 08:06",
-    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.92,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VCBS",
-    "extracted_catalysts_preview": [
-      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng",
-      "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống (SSI)"
-    ]
-  },
-  {
-    "id": "log-4b9027f6",
-    "ticker": "BWE",
-    "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "KIS",
-    "learned_at": "18/09/2026 08:06",
-    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
-    "catalysts_extracted": 3,
-    "theses_extracted": 2,
-    "confidence": 0.88,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KIS",
-    "extracted_catalysts_preview": [
-      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh (BWE)",
-      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu (BWE)"
     ]
   }
 ]

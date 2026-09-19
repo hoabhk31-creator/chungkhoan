@@ -36,6 +36,27 @@
     ],
     "history": [
       {
+        "source": "KBSV",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+        "time": "19/09/2026 21:19",
+        "cats_added": 3,
+        "risks_added": 1
+      },
+      {
+        "source": "Vietcap",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+        "time": "19/09/2026 21:19",
+        "cats_added": 3,
+        "risks_added": 1
+      },
+      {
+        "source": "MBS",
+        "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+        "time": "19/09/2026 21:19",
+        "cats_added": 3,
+        "risks_added": 1
+      },
+      {
         "source": "SSI",
         "title": "File: report.pdf",
         "time": "19/09/2026 09:03",
@@ -153,30 +174,9 @@
         "time": "18/09/2026 15:28",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "SSI Research",
-        "title": "Nhập văn bản thô HPG",
-        "time": "18/09/2026 13:26",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "SSI Research",
-        "title": "Nhập văn bản thô HPG",
-        "time": "18/09/2026 13:25",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "SSI",
-        "title": "File: report.pdf",
-        "time": "18/09/2026 08:06",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 09:03"
+    "last_updated": "19/09/2026 21:19"
   },
   "SSI": {
     "ticker": "SSI",
@@ -200,6 +200,27 @@
       "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững"
     ],
     "history": [
+      {
+        "source": "EVS.,JSC",
+        "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VPX",
+        "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VCBS",
+        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "EVS.,JSC",
         "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
@@ -318,30 +339,9 @@
         "time": "17/09/2026 14:58",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "VCBS",
-        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-        "time": "17/09/2026 14:53",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VCBS",
-        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-        "time": "17/09/2026 14:52",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VCBS",
-        "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
-        "time": "17/09/2026 14:50",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 09:03"
+    "last_updated": "19/09/2026 21:20"
   },
   "VNM": {
     "ticker": "VNM",
@@ -520,6 +520,10 @@
   "MWG": {
     "ticker": "MWG",
     "catalysts": [
+      "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu.",
+      "Năm 2026F, VDSC dự phóng doanh thu thuần đạt 198.033 tỷ đồng (+26,6% YoY), LNST công ty mẹ đạt 11.091 tỷ đồng (+57,6% YoY), EPS đạt 7.553 đồng/cp, P/E dự phóng 10,1 lần (P/E mục tiêu 14,9x), P/B 2,8 lần, ROE 27,2% và cổ tức tiền mặt 2.000 đồng/cp.",
+      "Tái cấu trúc chuỗi Thế Giới Di Động & Điện Máy Xanh thành công giúp tối ưu hóa chi phí vận hành, cải thiện biên lợi nhuận ròng 1.5 - 2 điểm %.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc.",
       "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng.",
       "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
       "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng",
@@ -535,11 +539,33 @@
       "Sức mua tiêu dùng phục hồi chậm trong bối cảnh thu nhập người dân chưa bứt phá"
     ],
     "theses": [
+      "KQKD Q2-2026 vượt kỳ vọng với doanh thu thuần 48.751 tỷ đồng (+29,5% svck) và LNST công ty mẹ 3.244 tỷ đồng (+96,8% svck).",
       "Hệ thống logistics và kho bãi quy mô lớn tạo rào cản gia nhập ngành vững chắc",
       "Công ty chứng khoán MAS duy trì khuyến nghị MUA đối với mã cổ phiếu MWG với giá mục tiêu là 100.000 đồng, tiềm năng tăng giá đạt 36,6%",
       "KQKD Q2-2026 vượt kỳ vọng với doanh thu thuần 48.751 tỷ đồng (+29,5% svck) và LNST công ty mẹ 3.244 tỷ đồng (+96,8% svck)"
     ],
     "history": [
+      {
+        "source": "BVS",
+        "title": "MWG: Khuyến nghị OUTPERFORM với giá mục tiêu 106,700 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 1
+      },
+      {
+        "source": "VDS",
+        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 1
+      },
+      {
+        "source": "FPTS",
+        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 4,
+        "risks_added": 1
+      },
       {
         "source": "FPTS",
         "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
@@ -658,30 +684,9 @@
         "time": "17/09/2026 14:33",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 13:40",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 11:18",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 10:51",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 09:03"
+    "last_updated": "19/09/2026 21:20"
   },
   "VTO": {
     "ticker": "VTO",
@@ -1873,6 +1878,10 @@
   "FPT": {
     "ticker": "FPT",
     "catalysts": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ",
+      "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu",
+      "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng trên 25%/năm",
       "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần"
     ],
     "risks": [
@@ -1880,9 +1889,33 @@
       "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND"
     ],
     "theses": [
+      "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026 Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%.",
+      "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500",
+      "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu",
       "Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%"
     ],
     "history": [
+      {
+        "source": "VCBS",
+        "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "BVS",
+        "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "SSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "VCBS",
         "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
@@ -1919,7 +1952,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "17/09/2026 14:49"
+    "last_updated": "19/09/2026 21:20"
   },
   "HVN": {
     "ticker": "HVN",
@@ -1954,6 +1987,13 @@
   "TCH": {
     "ticker": "TCH",
     "catalysts": [
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận.",
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026.",
+      "Dự phóng niên độ FY2026F, LNST cổ đông công ty mẹ phục hồi mạnh lên 897 tỷ đồng (+182% YoY) và EPS đạt 894 đồng/cp khi mở chu kỳ bàn giao mới từ khoản người mua trả tiền trước đạt 6.125 tỷ đồng (+2.917% YoY).",
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Doanh số bán hàng chưa ghi nhận (Unbilled Bookings) và khoản Người mua trả tiền trước đạt mức kỷ lục",
+      "Kết quả Q1-FY26 ghi nhận doanh thu thuần 453 tỷ đồng (+16% YoY) và LNST-CĐM 125 tỷ đồng (+231% YoY), mới chỉ hoàn thành 5% kế hoạch và dự phóng cả năm do chậm bàn giao dự án HH Green River.",
       "Chính sách tiền tệ Chính sách tiền tệ: điều tiết cung tiền, lãi suất, ổn định giá 10.",
       "Chính sách tài khóa và tài chính quốc gia Chi tiết quản lý thu, chi ngân sách và nợ công, điều tiết kinh tế.",
       "Đầu tư trực tiếp nước ngoài (FDI) Vốn nước ngoài vào sản xuất, kinh doanh nội địa 11.",
@@ -1961,12 +2001,7 @@
       "TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận",
       "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II",
       "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026",
-      "Dự phóng niên độ FY2026F, LNST cổ đông công ty mẹ phục hồi mạnh lên 897 tỷ đồng (+182% YoY) và EPS đạt 894 đồng/cp khi mở chu kỳ bàn giao mới từ khoản người mua trả tiền trước đạt 6.125 tỷ đồng (+2.917% YoY)",
-      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%)",
-      "Kết quả Q1-FY26 ghi nhận doanh thu thuần 453 tỷ đồng (+16% YoY) và LNST-CĐM 125 tỷ đồng (+231% YoY), mới chỉ hoàn thành 5% kế hoạch và dự phóng cả năm do chậm bàn giao dự án HH Green River",
-      "Cập nhật chỉ số vĩ mô mới nhất",
-      "0. Đầu tư trực tiếp nước ngoài (FDI)",
-      "TCH: CTCP Đầu tư Dịch vụ Tài chính Hoàng Huy - TCH | VietstockFinance"
+      "Dự phóng niên độ FY2026F, LNST cổ đông công ty mẹ phục hồi mạnh lên 897 tỷ đồng (+182% YoY) và EPS đạt 894 đồng/cp khi mở chu kỳ bàn giao mới từ khoản người mua trả tiền trước đạt 6.125 tỷ đồng (+2.917% YoY)"
     ],
     "risks": [
       "Chính sách tiền tệ Tín dụng Huy động Thị trường mở Kết quả đấu thầu thị trường mở Tỷ giá trung tâm USD/VND Lãi suất liên ngân hàng VNIBOR Lãi suất tái chiết khấu, Lãi suất tái cấp vốn Lãi suất tiền gửi ngân hàng 10.",
@@ -1974,8 +2009,32 @@
       "Thời gian hoàn thiện thủ tục pháp lý và tính tiền sử dụng đất kéo dài hơn kế hoạch",
       "Tỷ giá trung tâm USD/VND"
     ],
-    "theses": [],
+    "theses": [
+      "Chi phí giải phóng mặt bằng thấp tạo biên lợi nhuận gộp vượt trội khi mở bán dự án",
+      "Sở hữu quỹ đất sạch quy mô lớn tại các vị trí kết nối hạ tầng giao thông chiến lược"
+    ],
     "history": [
+      {
+        "source": "TCBS",
+        "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "TCBS",
+        "title": "TCH: Báo cáo cập nhật 10/09/2026",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
+      {
+        "source": "VDS",
+        "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+        "time": "19/09/2026 21:20",
+        "cats_added": 3,
+        "risks_added": 2
+      },
       {
         "source": "SSI Research",
         "title": "Báo cáo phân tích TCH",
@@ -2047,7 +2106,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 09:03"
+    "last_updated": "19/09/2026 21:20"
   },
   "VCI": {
     "ticker": "VCI",
