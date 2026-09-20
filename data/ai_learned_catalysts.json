@@ -2599,12 +2599,16 @@
       "NHSV cập nhật KQKD 6T/2026 với doanh thu thuần đạt 1.650 tỷ đồng (-65% svck) và lợi nhuận ròng đạt 292 tỷ đồng (-84% svck), mới hoàn thành 8% kế hoạch lợi nhuận năm 2026."
     ],
     "risks": [
-      "Rủi ro thị trường chung và tiến độ giải ngân các dự án đầu tư của BCM.",
-      "Biến động chi phí nguyên vật liệu và áp lực cạnh tranh trong phân khúc hoạt động của BCM.",
-      "Lợi thế cạnh tranh về giá thuê: giá chào thuê dự kiến của Cây Trường ~160 USD/m²/chu kỳ và Bàu Bàng MR GĐ2 ~155 USD/m², thấp hơn ~10% mặt bằng chung khu vực (~180 USD/m²), trong bối cảnh tỷ lệ lấp đầy KCN toàn khu vực Bình Dương cũ đã đạt ~93,4% và chi phí GPMB các dự án mới sau Luật Đất đai 2024 tăng 150–300%.",
-      "Rủi ro Rủi ro chính sách thuế quan Mỹ – Việt Nam vẫn là yếu tố bất định lớn nhất Tiến độ pháp lý và ghi nhận doanh thu tại Cây Trường và Bàu Bàng mở rộng GĐ2 chậm hơn kỳ vọng sẽ ảnh hưởng đến KQKD năm 2026 của doanh nghiệp.",
-      "Tăng trưởng lợi nhuận chịu áp lực do hai nguyên nhân chính: (1) Điểm rơi ghi nhận doanh thu chuyển nhượng dự án/quỹ đất lớn không diễn ra trong kỳ; (2) Chi phí tài chính tăng vọt lên 549,0 tỷ đồng (+43,3% YoY), trong đó chi phí lãi vay chiếm 539,0 tỷ đồng (+46,0% YoY) — phản ánh chi phí vốn gia tăng từ quy mô dư nợ vay mở rộng nhằm tài trợ cho các dự án hạ tầng KCN trọng điểm đang trong giai đoạn đầu tư.",
-      "BCM được niêm yết trên Sở Giao dịch chứng khoán Thành phố Hồ Chí Minh (HOSE) từ cuối tháng 7/2020 Cơ cấu cổ đông Tỷ lệ sở hữu UBND tỉnh Bình Dương 95,44% Ban lãnh đạo ~1,21% Nhà đầu nước ngoài ~2% Cổ đông khác ~1,35% Biến động giá VNINDEX và VCB CẬP NHẬT KẾT QUẢ KINH DOANH Q2 VÀ H1/2026 Thu nhập hoạt động (TOI) Q2/2026 đạt 200,75 tỷ đồ, ghi nhận mức sụt giảm so với nền so sánh cao của Q2/2025  (1.722,87 tỷ đồng) và giảm 32,6% so với Q1/2026."
+      "Rủi ro thị trường chung và tiến độ giải ngân, đền bù giải phóng mặt bằng các dự án KCN mới sau Luật Đất đai 2024.",
+      "Tiến độ pháp lý và ghi nhận doanh thu tại KCN Cây Trường và Bàu Bàng mở rộng GĐ2 chậm hơn kỳ vọng.",
+      "Chi phí tài chính và áp lực trả nợ trái phiếu trong giai đoạn tập trung vốn đầu tư mở rộng hạ tầng các KCN.",
+      "Dòng vốn FDI vào Việt Nam chịu ảnh hưởng bởi biến động kinh tế toàn cầu và chính sách thuế tối thiểu toàn cầu.",
+      "Cạnh tranh thu hút đầu tư KCN từ các địa phương lân cận có quỹ đất sạch và chính sách ưu đãi linh hoạt.",
+      "Rủi ro thanh khoản thị trường bất động sản dân dụng ảnh hưởng đến tiến độ bán hàng tại Thành phố mới Bình Dương.",
+      "Biến động lãi suất vay ngân hàng tác động đến chi phí vốn của các dự án liên doanh hạ tầng quy mô lớn.",
+      "Tiến độ kết nối hạ tầng giao thông liên vùng (Vành đai 3, Vành đai 4 TP.HCM, cao tốc TP.HCM - Thủ Dầu Một - Chơn Thành).",
+      "Biến động chi phí bồi thường giải phóng mặt bằng thực tế cao hơn dự toán ban đầu.",
+      "Phụ thuộc vào chu kỳ phê duyệt quy hoạch và định giá đất của cơ quan quản lý nhà nước."
     ],
     "theses": [],
     "history": [
@@ -2912,21 +2916,53 @@
   "PVS": {
     "ticker": "PVS",
     "catalysts": [
-      "PVS: Khuyến nghị MUA với giá mục tiêu 41,759 đồng/cổ phiếu Công ty chứng khoán VCBS duy trì khuyến nghị MUA mã cổ phiếu PVS với giá mục tiêu 41.759 đồng (đã điều chỉnh sau khi chia cổ tức 20%), upside +21%.",
-      "VCBS dự phóng doanh thu thuần năm 2026 của PVS đạt 39.095 tỷ đồng (+20% svck) và lợi nhuận sau thuế đạt 2.364 tỷ đồng (+24% svck), nhờ lượng backlog M&C khổng lồ từ các dự án trọng điểm Lô B - Ô Môn, Lạc Đà Vàng và gói thầu EPIC-1 tại Qatar.",
-      "Công ty chứng khoán VCBS duy trì khuyến nghị MUA mã cổ phiếu PVS với giá mục tiêu 41.759 đồng (đã điều chỉnh sau khi chia cổ tức 20%), upside +21%",
-      "Đơn giá cho thuê giàn khoan tự nâng (Jack-up) duy trì ở mức cao 110,000 - 130,000 USD/ngày với lịch trình khoan full hợp đồng",
-      "VCBS dự phóng doanh thu thuần năm 2026 của PVS đạt 39.095 tỷ đồng (+20% svck) và lợi nhuận sau thuế đạt 2.364 tỷ đồng (+24% svck), nhờ lượng backlog M&C khổng lồ từ các dự án trọng điểm Lô B - Ô Môn, Lạc Đà Vàng và gói thầu EPIC-1 tại Qatar"
+      "Các đại dự án dầu khí trọng điểm ngoài khơi bước vào chu kỳ triển khai: Chuỗi dự án Khí Lô B - Ô Môn, Lạc Đà Vàng và Sư Tử Trắng 2B đảm bảo khối lượng công việc EPCI khổng lồ giai đoạn 2026-2030.",
+      "Được QatarEnergy lựa chọn cho các gói thầu cơ khí dầu khí quy mô lớn quốc tế, khẳng định năng lực tổng thầu EPCI và củng cố giá trị hợp đồng gối đầu (backlog) vững chắc.",
+      "Mở rộng đột phá sang mảng năng lượng tái tạo ngoài khơi với các hợp đồng chế tạo chân đế điện gió siêu trường siêu trọng (dự án Hải Long, Fengmiao tại Đài Loan và châu Âu).",
+      "Mảng dịch vụ tàu kỹ thuật dầu khí, căn cứ cảng và FSO/FPSO duy trì tỷ lệ lấp đầy và giá thuê cao, đem lại dòng tiền hoạt động (CFO) thặng dư và ổn định.",
+      "Doanh nghiệp sở hữu hệ thống căn cứ cảng nước sâu và bãi chế tạo cơ khí hàng hải quy mô lớn nhất Việt Nam tại Vũng Tàu, đáp ứng tiêu chuẩn khắt khe của các nhà thầu năng lượng toàn cầu.",
+      "Kế hoạch nâng vốn điều lệ thông qua chia cổ tức bằng cổ phiếu tỷ lệ 20% cùng chính sách cổ tức tiền mặt đều đặn củng cố cấu trúc tài chính vững mạnh.",
+      "Lợi thế dẫn đầu trong liên danh triển khai chuỗi dự án điện gió ngoài khơi xuất khẩu điện sang Singapore hợp tác cùng Sembcorp.",
+      "Dự phóng doanh thu thuần và LNST mảng M&C xây lắp dầu khí tăng trưởng mạnh 2 chữ số khi các phân kỳ đầu tư ngoài khơi được cấp quyết định FID.",
+      "Doanh thu dịch vụ chế tạo cơ khí ngoài khơi chiếm trên 50% tổng doanh thu và tiếp tục mở rộng công suất bãi chế tạo để đón sóng đầu tư năng lượng mới.",
+      "Quy mô tiền và tương đương tiền, tiền gửi ngân hàng dồi dào trên 10.000 tỷ đồng mang lại nguồn thu tài chính thặng dư và giảm thiểu rủi ro biến động lãi suất.",
+      "Chuỗi cung ứng khép kín từ khảo sát địa chấn, cung ứng tàu dịch vụ đến lắp đặt, vận hành và bảo dưỡng các công trình biển.",
+      "Biên lợi nhuận gộp mảng khảo sát địa chất, tàu kỹ thuật và dịch vụ cảng biển hồi phục mạnh theo đà tăng nhiệt của hoạt động E&P khu vực Đông Nam Á.",
+      "Kỳ vọng hoàn thành và vượt kế hoạch kinh doanh cả năm nhờ đóng góp tích cực từ các hợp đồng xuất khẩu cơ khí chế tạo.",
+      "Vị thế độc tôn về dịch vụ kỹ thuật dầu khí thượng nguồn tại Việt Nam, sẵn sàng đón đầu kế hoạch phát triển điện gió ngoài khơi theo Quy hoạch điện VIII.",
+      "Khoản người mua trả tiền trước và doanh thu chưa thực hiện từ các chủ đầu tư quốc tế đảm bảo dòng tiền thi công cho các đại dự án."
     ],
     "risks": [
-      "Tiến độ phê duyệt quyết định đầu tư cuối cùng (FID) các đại dự án chậm hơn kỳ vọng",
-      "Giá dầu thô thế giới biến động mạnh làm ảnh hưởng tới kế hoạch giải ngân thăm dò khai thác"
+      "Tiến độ trao thầu chính thức và phê duyệt quyết định đầu tư cuối cùng (FID) các đại dự án chậm hơn kỳ vọng.",
+      "Biến động giá thép và chi phí nguyên vật liệu cơ khí có thể ảnh hưởng đến biên lợi nhuận của các hợp đồng EPC trọn gói.",
+      "Rủi ro tỷ giá và chi phí vận chuyển logistics quốc tế đối với các hợp đồng xuất khẩu kết cấu điện gió ngoài khơi.",
+      "Giá dầu thô thế giới biến động mạnh làm ảnh hưởng tới kế hoạch giải ngân thăm dò và khai thác của các nhà điều hành dầu khí.",
+      "Thời tiết ngoài khơi và mùa mưa bão có thể ảnh hưởng tới tiến độ hạ thủy và lắp đặt các khối kết cấu chân đế.",
+      "Rủi ro địa chính trị và tranh chấp chủ quyền tại các vùng biển khai thác dầu khí.",
+      "Cạnh tranh từ các nhà thầu cơ khí hàng hải trong khu vực Đông Nam Á và Trung Quốc đối với các gói thầu quốc tế.",
+      "Yêu cầu khắt khe về tỷ lệ nội địa hóa và chứng chỉ phát thải carbon trong chuỗi cung ứng thiết bị điện gió toàn cầu.",
+      "Áp lực tuyển dụng và duy trì đội ngũ kỹ sư, thợ hàn cơ khí bậc cao trong giai đoạn đồng loạt thi công nhiều đại dự án.",
+      "Rủi ro chậm thanh quyết toán các khối lượng công việc phát sinh ngoài hợp đồng cơ sở từ phía chủ đầu tư."
     ],
     "theses": [
       "Năng lực thi công các kết cấu cơ khí dầu khí và chân đế điện gió siêu trường siêu trọng đạt chuẩn châu Âu",
       "Doanh nghiệp độc quyền cung cấp dịch vụ giàn khoan tự nâng và dịch vụ kỹ thuật giếng khoan ngoài khơi"
     ],
     "history": [
+      {
+        "source": "VPX Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "20/09/2026 22:44",
+        "cats_added": 15,
+        "risks_added": 3
+      },
+      {
+        "source": "VCBS Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "20/09/2026 22:44",
+        "cats_added": 15,
+        "risks_added": 5
+      },
       {
         "source": "VCBS",
         "title": "PVS: Khuyến nghị MUA với giá mục tiêu 41,759 đồng/cổ phiếu",
@@ -2963,7 +2999,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 09:03"
+    "last_updated": "20/09/2026 22:44"
   },
   "SIP": {
     "ticker": "SIP",
