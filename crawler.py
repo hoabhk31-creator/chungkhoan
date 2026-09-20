@@ -983,23 +983,23 @@ def is_disclaimer_or_boilerplate(s: str) -> bool:
         "chỉ mang tính tham khảo", "khối phân tích", "phòng phân tích", "bộ phận phân tích",
         "báo cáo này được viết và phát hành bởi", "báo cáo này được công bố bởi",
         "người sử dụng không được phép", "không được phép sao chép", "bản quyền thuộc",
-        "chính sách xếp hạng", "định nghĩa khuyến nghị", "disclaimer", "disclosures",
+        "chính sách xếp hạng", "định nghĩa khuyến nghị", "disclaimer", "disclosures", "disclosure",
         "analyst certification", "please see analyst", "tuyên bố từ chối", "ý kiến của tác giả",
         "mọi hành vi sao chép", "thuộc sở hữu của", "đối tượng dự kiến của báo cáo",
         "chúng tôi không chịu trách nhiệm", "không đại diện hoặc bảo đảm",
         "không cam đoan, đại diện", "được chuẩn bị bởi", "được lập bởi",
-        "vui lòng xem khuyến cáo", "xem tuyên bố miễn trừ"
+        "vui lòng xem khuyến cáo", "xem tuyên bố miễn trừ", "see important disclosure", "important disclosure"
     ]
     if any(k in s_lower for k in disclaimer_keywords):
         return True
 
-    # 2. Thông tin liên hệ / Tác giả / Chi nhánh / Email / SĐT
+    # 2. Thông tin liên hệ / Tác giả / Chi nhánh / Email / SĐT / Website
     contact_keywords = [
         "email:", "tel:", "điện thoại:", "fax:", "website:", "bloomberg:",
         "director of research", "head of", "analyst:", "chuyên viên phân tích",
         "trưởng bộ phận", "giám đốc khối", "trụ sở chính", "chi nhánh",
         "phòng giao dịch", "nguyễn thượng hiền", "hai bà trưng", "nguyễn công trứ",
-        "phố huế", "lý thường kiệt"
+        "phố huế", "lý thường kiệt", "www.", ".com.vn", "http://"
     ]
     if any(k in s_lower for k in contact_keywords):
         return True
@@ -1922,57 +1922,58 @@ async def get_synchronized_matrix_reports(
         except Exception as e:
             print(f"[PDF-PARSE-ERROR] {clean_ticker}: {e}")
 
-    # Bổ sung các luận điểm tăng trưởng (Catalysts) mà AI tự học được vào các cột CTCK nếu cột đó còn thiếu
-    try:
-        from ai_learning_engine import get_learned_ticker_catalysts
-        ai_knowledge = get_learned_ticker_catalysts(clean_ticker)
-        if ai_knowledge and ai_knowledge.get("catalysts"):
-            learned_cats = ai_knowledge["catalysts"]
-            learned_risks = ai_knowledge.get("risks", [])
-            for idx, r in enumerate(res):
-                r_cats = list(getattr(r, "key_catalysts", []) or [])
-                if len(r_cats) < 10:
-                    for c_idx, c in enumerate(learned_cats):
-                        if len(r_cats) >= 10:
-                            break
-                        if not any(c.lower() in ec.lower() or ec.lower() in c.lower() for ec in r_cats):
-                            r_cats.append(c)
-                    r.key_catalysts = r_cats
-                if learned_risks:
-                    r_risks = list(getattr(r, "key_risks", []) or [])
-                    if len(r_risks) < 10:
-                        for rk in learned_risks:
-                            if len(r_risks) >= 10:
-                                break
-                            if not any(rk.lower() in er.lower() for er in r_risks):
-                                r_risks.append(rk)
-                        r.key_risks = r_risks
-    except Exception:
-        pass
+    def _is_junk_meta_or_table(s: str) -> bool:
+        s_clean = s.strip()
+        s_lower = s_clean.lower()
+        if is_disclaimer_or_boilerplate(s_clean):
+            return True
+        if re.search(r'(?:techcom securities|mbs research|research\s+[a-z]{3,4}|báo cáo cổ phiếu|báo cáo cập nhật kqkd|chứng khoán kỹ thương|vietinbank securities)', s_clean[:80], re.I):
+            return True
+        if re.search(r'(?:tổng tài sản|vốn chủ sở hữu|vốn chủ|lãi sau thuế|nợ phải trả)\s+[0-9.,\s]{8,}', s_lower):
+            return True
+        if re.search(r'^(?:hình|biểu đồ|bảng|phụ lục|nguồn:)\s*\d*', s_lower):
+            return True
+        nums = re.findall(r'\b\d+(?:[.,]\d+)?\b', s_clean)
+        words = [w for w in re.findall(r'[a-zA-Zà-ỹÀ-Ỹ]+', s_clean) if len(w) > 2]
+        if len(nums) >= 4 and len(words) < 6:
+            return True
+        return False
 
-    # Bảo đảm chất lượng tuyệt đối: Lọc sạch 100% disclaimer, giữ nguyên vẹn nội dung luận điểm (tối đa 10 mục)
+    def _is_risk_sentiment(s: str) -> bool:
+        s_lower = s.lower()
+        risk_kw = [
+            'rủi ro', 'áp lực', 'thách thức', 'thận trọng', 'sụt giảm', 'giảm sút', 
+            'nợ vay', 'chậm tiến độ', 'khó khăn', 'cạnh tranh', 'thu hẹp', 'lãi vay', 
+            'chi phí tài chính tăng', 'biến động giá', 'tỷ giá tăng', 'nợ xấu'
+        ]
+        return any(k in s_lower for k in risk_kw)
+
+    # Bảo đảm chất lượng: Phân loại đúng cột Catalysts/Rủi ro theo từng báo cáo CTCK riêng biệt
     for r in res:
-        clean_c_list = []
-        for c in (r.key_catalysts or []):
-            if is_disclaimer_or_boilerplate(c):
+        raw_pool = list(r.key_catalysts or []) + list(r.key_risks or [])
+        clean_cats = []
+        clean_risks = []
+        for item_str in raw_pool:
+            if _is_junk_meta_or_table(item_str):
                 continue
-            split_subs = robust_clean_and_split_catalysts(c) if len(c) > 120 else [c.strip()]
-            for sc in split_subs:
-                if is_disclaimer_or_boilerplate(sc):
+            subs = robust_clean_and_split_catalysts(item_str) if len(item_str) > 120 else [item_str.strip()]
+            for sc in subs:
+                sc_str = sc.strip()
+                if len(sc_str) < 20 or _is_junk_meta_or_table(sc_str):
                     continue
-                c_str = sc.strip()
-                if len(c_str) >= 20 and c_str not in clean_c_list:
-                    clean_c_list.append(c_str)
-        r.key_catalysts = clean_c_list[:10] if clean_c_list else ["Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."]
+                sc_str = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', sc_str).strip()
+                if not sc_str:
+                    continue
+                sc_str = sc_str[0].upper() + sc_str[1:]
+                if _is_risk_sentiment(sc_str):
+                    if sc_str not in clean_risks:
+                        clean_risks.append(sc_str)
+                else:
+                    if sc_str not in clean_cats:
+                        clean_cats.append(sc_str)
 
-        clean_r_list = []
-        for rk in (r.key_risks or []):
-            if is_disclaimer_or_boilerplate(rk):
-                continue
-            rk_str = rk.strip()
-            if rk_str and rk_str not in clean_r_list:
-                clean_r_list.append(rk_str)
-        r.key_risks = clean_r_list[:10] if clean_r_list else ["Biến động chi phí nguyên vật liệu đầu vào và lãi suất."]
+        r.key_catalysts = clean_cats[:15] if clean_cats else [f"Báo cáo phân tích và cập nhật triển vọng kinh doanh {clean_ticker} từ {r.institution}."]
+        r.key_risks = clean_risks[:10] if clean_risks else ["Biến động chi phí nguyên vật liệu đầu vào và lãi suất thị trường."]
 
     _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, res)
     return res

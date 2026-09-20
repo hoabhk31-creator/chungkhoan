@@ -600,7 +600,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
                     market_p=market_p,
                     max_reports=20
                 ),
-                timeout=4.5
+                timeout=10.0
             )
         except Exception as sync_err:
             synced_reports = base_reports
@@ -632,8 +632,10 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
         except Exception as e:
             print(f"Error applying AI learned catalysts for {clean_ticker}: {e}")
 
-        _SYNCHRONIZED_PRESETS_CACHE[clean_ticker] = reconciled
-        _SYNCHRONIZED_PRESETS_CACHE_TS[clean_ticker] = time.time()
+        # Chỉ lưu cache dài hạn khi đã lấy được danh sách báo cáo
+        if synced_reports or clean_ticker in PRESET_DATASETS:
+            _SYNCHRONIZED_PRESETS_CACHE[clean_ticker] = reconciled
+            _SYNCHRONIZED_PRESETS_CACHE_TS[clean_ticker] = time.time()
         return reconciled
 
 

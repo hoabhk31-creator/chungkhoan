@@ -1665,7 +1665,7 @@ function renderMatrixTable(report) {
             }
         });
         if (validCats.length === 0) validCats.push("Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành.");
-        r.key_catalysts = validCats.slice(0, 10);
+        r.key_catalysts = validCats.slice(0, 15);
 
         r.key_catalysts.forEach((c, idx) => {
             catHtml += `<li class="flex items-start gap-1.5">
@@ -1677,13 +1677,13 @@ function renderMatrixTable(report) {
         tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
     });
     
-    // Cột đồng thuận Catalysts
+    // Cột đồng thuận Catalysts (tối đa 15 catalysts từ kho AI và CTCK)
     let consensualCatsHtml = `<div class="text-cyan-300 font-bold mb-1.5 flex items-center gap-1">
         <i data-lucide="check-circle" class="w-3.5 h-3.5 text-cyan-400"></i>
         <span>Điểm giao thoa đồng thuận:</span>
     </div>`;
     const cCats = (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0)
-        ? report.consensus_summary.consensual_catalysts.slice(0, 10)
+        ? report.consensus_summary.consensual_catalysts.slice(0, 15)
         : [
             "Đại dự án mở rộng công suất vận hành thương mại",
             "Bảo hộ thương mại & chiếm lĩnh thị phần nội địa",
@@ -2001,7 +2001,7 @@ function renderCausality(report) {
     if (catalysts.length === 0 && report.consensus_summary?.consensual_catalysts) {
         catalysts = report.consensus_summary.consensual_catalysts.filter(c => !isTechnicalOrInvalidCatalyst(c));
     }
-    catalysts = catalysts.slice(0, 10);
+    catalysts = catalysts.slice(0, 15);
 
     let catalystsListHtml = "";
     if (catalysts.length > 0) {

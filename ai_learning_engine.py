@@ -781,11 +781,15 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
     - Cập nhật từng cột CTCK trong matrix_table
     - Cập nhật cột Đồng thuận (consensus_summary.consensual_catalysts & consensual_risks)
     - Cập nhật causality_analysis
+    Tối đa 15 Catalysts và 10 Risks độc bản của chính doanh nghiệp.
     """
-    if not report or not hasattr(report, "ticker"):
+    if not report:
         return report
 
-    ticker = getattr(report, "ticker", "").upper().strip()
+    ticker = (getattr(report, "ticker", None) or (report.get("ticker") if isinstance(report, dict) else "") or "").upper().strip()
+    if not ticker:
+        return report
+
     learned = get_learned_ticker_catalysts(ticker)
     if not learned:
         return report
@@ -796,54 +800,95 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
     if not learned_cats and not learned_risks:
         return report
 
-    # 1. Cập nhật vào consensus_summary.consensual_catalysts & consensual_risks
-    if hasattr(report, "consensus_summary") and report.consensus_summary:
-        cs = report.consensus_summary
-        existing_cs_cats = list(getattr(cs, "consensual_catalysts", []) or [])
-        for cat in learned_cats:
-            if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in existing_cs_cats):
-                existing_cs_cats.append(cat)
-        cs.consensual_catalysts = existing_cs_cats[:15]
+    # 1. Cập nhật vào consensus_summary.consensual_catalysts & consensual_risks (Tối đa 15 Catalysts, 10 Risks)
+    cs = getattr(report, "consensus_summary", None) or (report.get("consensus_summary") if isinstance(report, dict) else None)
+    if cs:
+        new_cs_cats = [c for c in learned_cats[:15] if c and not is_generic_boilerplate(c)]
+        existing_cs_cats = list(getattr(cs, "consensual_catalysts", None) or (cs.get("consensual_catalysts") if isinstance(cs, dict) else []) or [])
+        for ec in existing_cs_cats:
+            if len(new_cs_cats) >= 15:
+                break
+            if not is_generic_boilerplate(ec) and not any(ec.lower() in c.lower() or c.lower() in ec.lower() for c in new_cs_cats):
+                new_cs_cats.append(ec)
+        final_cs_cats = new_cs_cats[:15]
+        if isinstance(cs, dict):
+            cs["consensual_catalysts"] = final_cs_cats
+        else:
+            cs.consensual_catalysts = final_cs_cats
 
-        existing_cs_risks = list(getattr(cs, "consensual_risks", []) or [])
-        for rk in learned_risks:
-            if not any(rk.lower() in er.lower() or er.lower() in rk.lower() for er in existing_cs_risks):
-                existing_cs_risks.append(rk)
-        cs.consensual_risks = existing_cs_risks[:10]
+        new_cs_risks = [r for r in learned_risks[:10] if r and not is_generic_boilerplate(r)]
+        existing_cs_risks = list(getattr(cs, "consensual_risks", None) or (cs.get("consensual_risks") if isinstance(cs, dict) else []) or [])
+        for er in existing_cs_risks:
+            if len(new_cs_risks) >= 10:
+                break
+            if not is_generic_boilerplate(er) and not any(er.lower() in r.lower() or r.lower() in er.lower() for r in new_cs_risks):
+                new_cs_risks.append(er)
+        final_cs_risks = new_cs_risks[:10]
+        if isinstance(cs, dict):
+            cs["consensual_risks"] = final_cs_risks
+        else:
+            cs.consensual_risks = final_cs_risks
 
-    # 2. Phân bổ / bổ sung vào các cột CTCK trong matrix_table
-    if hasattr(report, "matrix_table") and report.matrix_table:
-        for idx, r in enumerate(report.matrix_table):
-            r_cats = list(getattr(r, "key_catalysts", []) or [])
-            for c_idx, cat in enumerate(learned_cats):
-                if len(r_cats) >= 15:
-                    break
-                if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in r_cats):
-                    r_cats.append(cat)
-            r.key_catalysts = r_cats
+    # 2. Giữ nguyên và sắp xếp luận điểm độc lập của từng CTCK trong matrix_table
+    # TUYỆT ĐỐI KHÔNG GHI ĐÈ bằng danh sách đồng thuận chung để tránh trùng lặp nội dung giữa các CTCK.
+    matrix_table = getattr(report, "matrix_table", None) or (report.get("matrix_table") if isinstance(report, dict) else None)
+    if matrix_table:
+        for idx, r in enumerate(matrix_table):
+            r_cats = list(getattr(r, "key_catalysts", None) or (r.get("key_catalysts") if isinstance(r, dict) else []) or [])
+            r_risks = list(getattr(r, "key_risks", None) or (r.get("key_risks") if isinstance(r, dict) else []) or [])
 
-            r_risks = list(getattr(r, "key_risks", []) or [])
-            if len(r_risks) < 10 and learned_risks:
-                for rk in learned_risks:
-                    if len(r_risks) >= 10:
-                        break
-                    if not any(rk.lower() in er.lower() for er in r_risks):
-                        r_risks.append(rk)
-                r.key_risks = r_risks
+            # Sắp xếp và phân loại chính xác giữa Catalysts và Risks cho từng CTCK
+            final_cats = []
+            final_risks = []
+            all_points = r_cats + r_risks
+
+            for p in all_points:
+                if not p or len(p.strip()) < 15 or is_generic_boilerplate(p):
+                    continue
+                p_clean = p.strip()
+                p_lower = p_clean.lower()
+                is_risk = any(k in p_lower for k in ["rủi ro", "áp lực", "thách thức", "sụt giảm", "thận trọng", "nợ vay", "chậm tiến độ", "khó khăn", "lãi vay", "chi phí tài chính tăng", "biến động giá", "nợ xấu"])
+                if is_risk:
+                    if p_clean not in final_risks:
+                        final_risks.append(p_clean)
+                else:
+                    if p_clean not in final_cats:
+                        final_cats.append(p_clean)
+
+            if not final_cats:
+                inst_name = getattr(r, "institution", "") or (r.get("institution", "") if isinstance(r, dict) else "CTCK")
+                final_cats = [f"Báo cáo phân tích và triển vọng kinh doanh {ticker} phát hành bởi {inst_name}."]
+            if not final_risks:
+                final_risks = ["Biến động chi phí nguyên vật liệu đầu vào và mặt bằng lãi suất."]
+
+            if isinstance(r, dict):
+                r["key_catalysts"] = final_cats[:15]
+                r["key_risks"] = final_risks[:10]
+            else:
+                r.key_catalysts = final_cats[:15]
+                r.key_risks = final_risks[:10]
 
     # 3. Cập nhật vào causality_analysis (chuỗi nguyên nhân - kết quả)
-    if hasattr(report, "causality_analysis") and report.causality_analysis:
-        causality = list(report.causality_analysis)
+    causality_analysis = getattr(report, "causality_analysis", None) or (report.get("causality_analysis") if isinstance(report, dict) else None)
+    if causality_analysis:
+        causality = list(causality_analysis)
         if learned_cats and len(causality) > 0:
             top_cat = learned_cats[0]
             for c_item in causality:
-                cat_name = getattr(c_item, "category", "")
+                cat_name = getattr(c_item, "category", "") or (c_item.get("category", "") if isinstance(c_item, dict) else "")
                 if "Triển vọng" in cat_name or "Tương lai" in cat_name or "Động lực" in cat_name:
-                    curr_rc = getattr(c_item, "root_causes", "")
+                    curr_rc = getattr(c_item, "root_causes", "") or (c_item.get("root_causes", "") if isinstance(c_item, dict) else "")
                     if top_cat[:25].lower() not in curr_rc.lower():
-                        c_item.root_causes = f"{curr_rc}; Động cơ AI tự học: {top_cat}"
+                        new_rc = f"{curr_rc}; Động cơ AI tự học: {top_cat}"
+                        if isinstance(c_item, dict):
+                            c_item["root_causes"] = new_rc
+                        else:
+                            c_item.root_causes = new_rc
                     break
-        report.causality_analysis = causality
+        if isinstance(report, dict):
+            report["causality_analysis"] = causality
+        else:
+            report.causality_analysis = causality
 
     return report
 
