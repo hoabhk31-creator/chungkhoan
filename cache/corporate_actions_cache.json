@@ -1878,5 +1878,52 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "VCG": [
+    {
+      "id": "vcg-ca-14072026-dividend_cash",
+      "ex_date": "14/07/2026",
+      "record_date": "15/07/2026",
+      "execution_date": "14/08/2026",
+      "event_type": "dividend_cash",
+      "title": "VCG: Thông báo ngày ĐKCC trả cổ tức năm 2025 bằng cổ phiếu và bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 800 đồng/CP",
+      "cash_amount": 800.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "vcg-ca-11062025-dividend_stock",
+      "ex_date": "11/06/2025",
+      "record_date": "12/06/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "VCG: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2024 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:8",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.08,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9259,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "vcg-ca-27052025-dividend_cash",
+      "ex_date": "27/05/2025",
+      "record_date": "28/05/2025",
+      "execution_date": "27/06/2025",
+      "event_type": "dividend_cash",
+      "title": "VCG: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2024 bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 800 đồng/CP",
+      "cash_amount": 800.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
