@@ -2094,8 +2094,8 @@ def extract_financial_data_from_text(
     except Exception as e:
         pass
 
-    # Bóc tách trực tiếp từ các khối văn bản trong báo cáo nếu chưa đủ
-    if len(catalysts) < 3:
+    # Bóc tách trực tiếp từ các khối văn bản trong báo cáo nếu chưa đủ 15 catalysts
+    if len(catalysts) < 15:
         cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if cat_blocks:
             for c in cat_blocks:
@@ -2107,10 +2107,10 @@ def extract_financial_data_from_text(
                             catalysts.append(c_clean)
                     except Exception:
                         catalysts.append(c_clean)
-                if len(catalysts) >= 3:
+                if len(catalysts) >= 15:
                     break
 
-        if len(catalysts) < 3:
+        if len(catalysts) < 15:
             bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,})", text)
             for b in bullets:
                 b_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', b).strip()
@@ -2121,32 +2121,32 @@ def extract_financial_data_from_text(
                             catalysts.append(b_clean)
                     except Exception:
                         catalysts.append(b_clean)
-                if len(catalysts) >= 3:
+                if len(catalysts) >= 15:
                     break
 
     # Nếu vẫn chưa đủ, bổ sung bằng Tri thức Vi mô Độc bản và Số liệu BCTC Kiểm toán thực tế
-    if len(catalysts) < 3:
+    if len(catalysts) < 15:
         try:
             from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
             spec_cats = get_specific_corporate_catalysts(clean_ticker)
             for sc in spec_cats:
                 if sc not in catalysts:
                     catalysts.append(sc)
-                if len(catalysts) >= 4:
+                if len(catalysts) >= 15:
                     break
 
-            if len(catalysts) < 3:
+            if len(catalysts) < 15:
                 stmt_info = generate_statement_driven_catalysts(clean_ticker)
                 for sc in stmt_info.get("catalysts", []):
                     if sc not in catalysts:
                         catalysts.append(sc)
-                    if len(catalysts) >= 4:
+                    if len(catalysts) >= 15:
                         break
         except Exception:
             pass
 
-    # 7. Rủi ro trọng yếu (Ưu tiên rủi ro đặc thù doanh nghiệp)
-    if not risks:
+    # 7. Rủi ro trọng yếu (Ưu tiên rủi ro đặc thù doanh nghiệp - tối đa 10 mục)
+    if len(risks) < 10:
         risk_blocks = re.findall(r"(?:rủi ro|downside risk)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if risk_blocks:
             for r in risk_blocks:
@@ -2158,15 +2158,19 @@ def extract_financial_data_from_text(
                             risks.append(r_clean)
                     except Exception:
                         risks.append(r_clean)
-                if len(risks) >= 2:
+                if len(risks) >= 10:
                     break
 
-    if not risks:
+    if len(risks) < 10:
         try:
             from financial_data import get_specific_corporate_risks
             spec_risks = get_specific_corporate_risks(clean_ticker)
             if spec_risks:
-                risks = spec_risks[:10]
+                for sr in spec_risks:
+                    if sr not in risks:
+                        risks.append(sr)
+                    if len(risks) >= 10:
+                        break
         except Exception:
             pass
 
@@ -2196,7 +2200,7 @@ def extract_financial_data_from_text(
         pb_forward=pb_forward or 1.58,
         revenue_forecast=rev_forecast,
         npat_forecast=npat_forecast,
-        key_catalysts=catalysts[:10],
+        key_catalysts=catalysts[:15],
         key_risks=risks[:10],
         valuation_method="P/E Forward & DCF",
         source_url=f"Nguồn phân tích {institution}"

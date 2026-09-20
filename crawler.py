@@ -120,9 +120,10 @@ def get_ssi_fastconnect_status() -> Dict[str, Any]:
     }
 
 
-# Cache nhẹ 3 giây cho giá live để phục vụ tự động đồng bộ thời gian thực mượt mà
+# Cache 30 giây cho giá live và cơ chế Singleflight (chống trùng lặp truy vấn đồng thời)
 _LIVE_PRICE_CACHE: Dict[str, Dict[str, Any]] = {}
 _LIVE_PRICE_CACHE_TS: Dict[str, float] = {}
+_IN_FLIGHT_PRICE_TASKS: Dict[str, asyncio.Task] = {}
 
 # Cache bảng giá sàn HOSE, HNX, UPCOM từ SSI iBoard API (TTL 20 giây với cơ chế stale-while-revalidate)
 _SSI_EXCHANGE_CACHE: Dict[str, Dict[str, Any]] = {}
@@ -213,13 +214,32 @@ async def fetch_reconciled_live_price(ticker: str) -> Dict[str, Any]:
     Lấy giá đóng cửa mới nhất từ SSI (ưu tiên SSI FastConnect / SSI iBoard là ƯU TIÊN SỐ 1)
     và đối chiếu trực tiếp với bảng giá/chart của các công ty chứng khoán (VNDirect, DNSE, Vietstock).
     Nếu SSI không có dữ liệu mới lấy từ các nguồn khác bổ sung vào mục còn thiếu.
-    Hỗ trợ TTL cache 3s để đồng bộ chu kỳ liên tục mà không gây quá tải mạng.
+    Hỗ trợ TTL cache 30s và cơ chế Singleflight chống nghẽn mạng đồng thời.
     """
     clean_ticker = ticker.upper().strip()
     curr_time = time.time()
-    if clean_ticker in _LIVE_PRICE_CACHE and (curr_time - _LIVE_PRICE_CACHE_TS.get(clean_ticker, 0)) < 3.0:
+    if clean_ticker in _LIVE_PRICE_CACHE and (curr_time - _LIVE_PRICE_CACHE_TS.get(clean_ticker, 0)) < 30.0:
         return _LIVE_PRICE_CACHE[clean_ticker]
 
+    # Cơ chế Singleflight: Nếu đang có request lấy giá cùng mã này thì dùng chung, không gọi lại mạng
+    if clean_ticker in _IN_FLIGHT_PRICE_TASKS and not _IN_FLIGHT_PRICE_TASKS[clean_ticker].done():
+        try:
+            return await _IN_FLIGHT_PRICE_TASKS[clean_ticker]
+        except Exception:
+            pass
+
+    loop = asyncio.get_running_loop()
+    task = loop.create_task(_fetch_reconciled_live_price_internal(clean_ticker))
+    _IN_FLIGHT_PRICE_TASKS[clean_ticker] = task
+    try:
+        res = await task
+        return res
+    finally:
+        _IN_FLIGHT_PRICE_TASKS.pop(clean_ticker, None)
+
+
+async def _fetch_reconciled_live_price_internal(clean_ticker: str) -> Dict[str, Any]:
+    curr_time = time.time()
     now_ts = int(curr_time)
     start_ts = now_ts - 86400 * 30  # Lấy 30 ngày gần nhất
 
@@ -231,7 +251,7 @@ async def fetch_reconciled_live_price(ticker: str) -> Dict[str, Any]:
 
     candidates = []
 
-    async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
+    async with httpx.AsyncClient(headers=headers, timeout=3.5, follow_redirects=True) as client:
         # 1. Nguồn SSI API Trực Tuyến (ƯU TIÊN SỐ 1 TUYỆT ĐỐI từ SSI iBoard / FastConnect)
         try:
             ssi_data = await fetch_ssi_live_stock_quote(clean_ticker)
@@ -3109,6 +3129,14 @@ async def fetch_company_reports(
                 for it in resp.json().get("Data", {}).get("ListReport", []):
                     rid = it.get("ReportID")
                     title = (it.get("Title") or "").strip()
+                    stock_code = (it.get("StockCode") or "").strip().upper()
+                    # Loại bỏ tuyệt đối nếu StockCode khác với mã đang tra cứu (ví dụ GMD khi tìm TCH)
+                    if stock_code and stock_code != clean_ticker:
+                        continue
+                    # Loại bỏ nếu tiêu đề bắt đầu bằng mã khác (ví dụ "GMD: Khuyến nghị...")
+                    title_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', title, re.IGNORECASE)
+                    if title_m and title_m.group(1).upper() != clean_ticker:
+                        continue
                     if rid and rid not in seen_ids and title.lower() not in seen_titles:
                         seen_ids.add(rid)
                         seen_titles.add(title.lower())
@@ -3161,6 +3189,15 @@ async def fetch_company_reports(
         title = rep.get("Title", "")
         content = rep.get("Content", "")
         src = rep.get("SourceName", "CTCK")
+        stock_code = (rep.get("StockCode") or "").strip().upper()
+
+        # Kiểm tra nghiêm ngặt: Tuyệt đối không lấy nhầm báo cáo của mã khác
+        if stock_code and stock_code != clean_ticker:
+            continue
+        title_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', title, re.IGNORECASE)
+        if title_m and title_m.group(1).upper() != clean_ticker:
+            continue
+
         full_text = f"{title} {content} {src}".lower()
         title_lower = title.lower()
 
@@ -3174,16 +3211,16 @@ async def fetch_company_reports(
                 continue
 
         # Đánh giá điểm liên quan (Relevance Score) để sắp xếp:
-        # Báo cáo mang mã cổ phiếu trên tiêu đề (ví dụ "PVS:", "CỔ PHIẾU PVS", "PVS -") -> score = 3
-        # Tiêu đề chứa mã cổ phiếu -> score = 2
-        # Nội dung chứa mã cổ phiếu -> score = 1
         score = 0
         if re.search(rf'\b{clean_ticker}\b\s*:', title, re.IGNORECASE) or f"{clean_ticker}:" in title.upper():
             score = 3
-        elif clean_ticker in title.upper():
+        elif re.search(rf'\b{clean_ticker}\b', title, re.IGNORECASE):
             score = 2
-        elif clean_ticker in full_text.upper():
+        elif re.search(rf'\b{clean_ticker}\b', full_text, re.IGNORECASE):
             score = 1
+        else:
+            # Nếu mã clean_ticker không hề xuất hiện như một từ độc lập -> Loại bỏ
+            continue
 
         c_len = len(content)
         pages = 8 if c_len < 300 else (12 if c_len < 600 else (15 if c_len < 1000 else 18))

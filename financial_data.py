@@ -4505,6 +4505,14 @@ SPECIFIC_CORPORATE_CATALYSTS: Dict[str, List[str]] = {
         "Khai thác và xuất khẩu tinh quặng Niken - Đồng từ mỏ Tấn Mối (Cao Bằng) đón sóng giá kim loại công nghiệp và pin xe điện thế giới.",
         "Mảng bất động sản khu công nghiệp (KCN Nomura Hải Phòng, KCN Yên Phong IIA) mang lại dòng tiền tiền thuê đất đều đặn.",
         "Được phê duyệt các dự án năng lượng tái tạo mới theo Quy hoạch Điện 8, gia tăng công suất phát điện sở hữu dài hạn."
+    ],
+    "TCH": [
+        "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến.",
+        "Đại dự án Khu đô thị Đỗ Mười (Hoàng Huy New City - 65 ha) tại Thủy Nguyên (Hải Phòng) hoàn tất pháp lý và khởi công xây dựng, hưởng lợi trực tiếp khi Thủy Nguyên lên thành phố.",
+        "Dự án Hoàng Huy Green River (62 ha tại Hoa Động, Thủy Nguyên) triển khai phân kỳ mở bán mới với quỹ đất sạch và biên lợi nhuận gộp ước tính trên 38%.",
+        "Khoản tiền người mua trả tiền trước ngắn hạn đạt mức kỷ lục trên 6,100 tỷ đồng, bảo chứng chắc chắn cho tăng trưởng doanh thu và LNST trong 2-3 năm tới.",
+        "Mảng kinh doanh xe đầu kéo Mỹ Navistar International phục hồi tích cực theo nhu cầu vận tải container và logistics cảng biển tại Hải Phòng.",
+        "Cơ cấu tài chính an toàn vượt trội với lượng tiền mặt và tiền gửi ngân hàng dồi dào, tỷ lệ nợ vay trên vốn chủ sở hữu D/E duy trì ở mức rất thấp."
     ]
 }
 
@@ -4668,10 +4676,17 @@ SPECIFIC_CORPORATE_RISKS: Dict[str, List[str]] = {
         "Tiến độ giải ngân vốn đầu tư công các dự án lưới điện phụ thuộc vào kế hoạch triển khai của Tổng công ty Truyền tải điện Quốc gia (EVNNPT).",
         "Biến động giá quặng niken và đồng thế giới ảnh hưởng trực tiếp tới biên lợi nhuận mảng khai khoáng.",
         "Chi phí giải phóng mặt bằng và bồi thường tuyến đường dây truyền tải điện phức tạp."
+    ],
+    "TCH": [
+        "Tiến độ cấp phép xây dựng và định giá tiền sử dụng đất tại các dự án mở rộng ở Thủy Nguyên có thể kéo dài hơn dự kiến.",
+        "Sức cầu phân khúc căn hộ và đất nền Hải Phòng phụ thuộc vào tâm lý thị trường bất động sản và mặt bằng lãi suất cho vay mua nhà.",
+        "Biến động giá nguyên vật liệu xây dựng (thép, cát, xi măng) ảnh hưởng tới biên lợi nhuận của các gói thầu thi công hạ tầng.",
+        "Rủi ro gián đoạn chuỗi cung ứng linh kiện và phụ tùng xe đầu kéo nhập khẩu từ thị trường Bắc Mỹ do biến động tỷ giá USD/VND."
     ]
 }
 
 SPECIFIC_CORPORATE_MOAT: Dict[str, str] = {
+    "TCH": "Tài chính Hoàng Huy (TCH) sở hữu lợi thế vượt trội nhờ quỹ đất sạch quy mô lớn tại các vị trí đắc địa ở Hải Phòng (đặc biệt khu vực Thủy Nguyên), năng lực phát triển dự án nhà ở chất lượng cao kết hợp tiềm lực tiền mặt dồi dào và mạng lưới độc quyền phân phối xe đầu kéo Navistar.",
     "SSI": "Lợi thế cạnh tranh bền vững (Economic Moat) của SSI đến từ quy mô vốn chủ sở hữu Top đầu thị trường chứng khoán, tệp khách hàng tổ chức ngoại vững chắc và thương hiệu uy tín số 1 Việt Nam.",
     "HPG": "Economic Moat độc tôn của Hòa Phát hình thành từ chuỗi sản xuất thép khép kín công nghệ lò cao BOF, giá thành sản xuất HRC rẻ nhất Đông Nam Á và hệ thống cảng nước sâu đón tàu tải trọng lớn.",
     "FPT": "Economic Moat của FPT là đội ngũ hơn 30,000 kỹ sư phần mềm tài năng với chi phí cạnh tranh toàn cầu, quan hệ đối tác chiến lược cùng NVIDIA/Microsoft và uy tín lâu năm tại Nhật Bản.",
@@ -5034,6 +5049,10 @@ def get_company_catalysts_and_projects(ticker: str) -> Dict[str, Any]:
         "company_name": company_name,
         "sector": sector,
         "catalysts": catalysts,
+        "risks": ai_learned_risks or specific_risks or [
+            f"Biến động chi phí nguyên vật liệu đầu vào và áp lực cạnh tranh trong ngành {sector}.",
+            f"Rủi ro thị trường chung và biến động lãi suất ảnh hưởng tới chi phí tài chính của {clean_ticker}."
+        ],
         "projects": projects,
         "ai_insights": ai_insights
     }

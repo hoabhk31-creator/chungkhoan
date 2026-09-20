@@ -969,6 +969,21 @@ html:not(.dark) #tab-overview table tbody tr:hover td {
     --header-height: 56px;
 }
 
+/* Scrollbar None Utility */
+.scrollbar-none {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+.scrollbar-none::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Smooth Touch Scrolling */
+.touch-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
 #main-terminal-header {
     position: sticky;
     top: 0;
@@ -989,10 +1004,50 @@ html:not(.dark) #main-terminal-header {
     background-color: #020617 !important; /* solid slate-950 không cho lọt chữ */
     border-bottom: 1px solid #1e293b;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    -webkit-overflow-scrolling: touch;
 }
 html:not(.dark) #master-tabs-nav {
     background-color: #ffffff !important;
     border-bottom: 1px solid #e2e8f0;
 }
+
+/* Responsive Table & Layout Optimizations for Mobile & Tablet */
+@media (max-width: 768px) {
+    /* Reduce sticky column width on mobile so users can see indicators and values side-by-side */
+    #bctc-table-element th:first-child,
+    #bctc-table-element td:first-child,
+    #bctc-table-element .bctc-sticky-col {
+        min-width: 155px !important;
+        width: 165px !important;
+        max-width: 185px !important;
+        font-size: 11px !important;
+        padding: 6px 8px !important;
+        line-height: 1.35 !important;
+    }
+    #matrix-table-element td:first-child,
+    #matrix-table-element th:first-child {
+        min-width: 120px !important;
+        max-width: 135px !important;
+        font-size: 11px !important;
+        padding: 6px 8px !important;
+        line-height: 1.35 !important;
+    }
+
+    /* Modal Responsive Constraint */
+    .modal-container, .modal-box {
+        max-height: 88vh !important;
+        width: 95vw !important;
+        margin: auto !important;
+    }
+
+    /* Master Tabs swipe feel */
+    #master-tabs-nav {
+        scroll-snap-type: x proximity;
+    }
+    #master-tabs-nav .tab-btn {
+        scroll-snap-align: center;
+    }
+}
+
 
 

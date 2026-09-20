@@ -22,10 +22,67 @@ AI_LEARNED_CATALYSTS_FILE = os.path.join(DATA_DIR, "ai_learned_catalysts.json")
 
 
 # -------------------------------------------------------------
-# 1. DEFAULT FEW-SHOT EXTRACTION TEMPLATES (6 NGÀNH CỐT LÕI)
+# 1. DEFAULT FEW-SHOT EXTRACTION TEMPLATES (ĐỘC BẢN DOANH NGHIỆP & CÁC NGÀNH CỐT LÕI)
 # -------------------------------------------------------------
 
 DEFAULT_SYSTEM_TEMPLATES = [
+    {
+        "id": "tpl-doanh-nghiep-doc-ban",
+        "name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+        "sector": "Toàn Thị Trường & Độc Bản Doanh Nghiệp",
+        "is_system": True,
+        "keywords": [
+            "doanh nghiệp", "dự án", "hợp đồng", "công suất", "thị phần", "dở dang",
+            "backlog", "doanh thu", "lợi nhuận", "biên gộp", "dòng tiền", "cổ tức",
+            "tăng vốn", "mở rộng", "nhà máy", "khách hàng", "đơn hàng", "tái cơ cấu",
+            "giá vốn", "chi phí", "nợ vay", "đáo hạn", "tỷ giá", "pháp lý"
+        ],
+        "catalyst_rules": [
+            "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
+            "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+            "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+            "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+            "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+            "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+            "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+            "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+            "Hưởng lợi trực tiếp từ các chính sách ngành, rào cản thuế chống bán phá giá hoặc gói kích cầu đầu tư công của Chính phủ",
+            "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+            "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+            "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+            "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+            "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
+            "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở"
+        ],
+        "thesis_rules": [
+            "Lợi thế cạnh tranh con hào kinh tế bền vững từ công nghệ độc quyền, chi phí thấp hoặc mạng lưới khách hàng trung thành",
+            "Năng lực quản trị rủi ro và thực thi chiến lược vượt trội của ban điều hành qua nhiều chu kỳ kinh tế",
+            "Mô hình kinh doanh tạo dòng tiền tự do vững chắc, khả năng tự tài trợ vốn mở rộng mà không phụ thuộc đòn bẩy",
+            "Định giá P/E và P/B đang chiết khấu sâu so với tiềm năng tăng trưởng EPS và ROE trung dài hạn"
+        ],
+        "risk_rules": [
+            "Tiến độ cấp phép pháp lý, thẩm định quy hoạch hoặc giải phóng mặt bằng dự án kéo dài hơn dự kiến",
+            "Biến động bất lợi của giá nguyên vật liệu đầu vào và chi phí logistics ăn mòn biên lợi nhuận ròng",
+            "Áp lực đáo hạn nợ vay, trái phiếu doanh nghiệp hoặc chi phí tài chính gia tăng trong môi trường lãi suất cao",
+            "Cạnh tranh khốc liệt về giá từ các đối thủ cùng ngành hoặc hàng nhập khẩu giá rẻ gây xói mòn thị phần",
+            "Biến động tỷ giá hối đoái gây lỗ chênh lệch tỷ giá đối với các khoản nợ vay ngoại tệ hoặc chi phí nhập khẩu nguyên liệu",
+            "Rủi ro suy giảm sức mua của thị trường tiêu thụ chính do suy thoái kinh tế hoặc thu nhập khách hàng giảm",
+            "Rủi ro pha loãng giá trị cổ phiếu từ các đợt phát hành tăng vốn quy mô lớn hoặc phát hành ESOP giá thấp",
+            "Rủi ro thay đổi chính sách điều hành, siết chặt quản lý thuế, môi trường hoặc tiêu chuẩn chất lượng kỹ thuật",
+            "Hiệu suất khai thác tài sản hoặc công suất vận hành sau đầu tư không đạt mức hòa vốn như tính toán ban đầu",
+            "Rủi ro tập trung khách hàng hoặc nhà cung cấp chủ lực làm suy giảm năng lực đàm phán thương mại"
+        ],
+        "sample_text": "Doanh nghiệp ghi nhận tiến độ bàn giao dự án trọng điểm vượt kế hoạch 15%, mang lại dòng tiền bán hàng đột biến đạt hơn 2,500 tỷ đồng trong quý. Tỷ lệ nợ vay trên vốn chủ sở hữu giảm từ 0.8x xuống 0.35x. Kế hoạch chia cổ tức tiền mặt 20% đã được ĐHĐCĐ thông qua.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Bàn giao dự án trọng điểm vượt tiến độ 15%, ghi nhận dòng tiền đột biến 2,500 tỷ đồng."},
+                {"category": "Cơ cấu tài chính", "text": "Tỷ lệ nợ vay D/E giảm mạnh về 0.35x giúp hạ gánh nặng chi phí lãi vay."},
+                {"category": "Cổ tức & Sự kiện", "text": "Chi trả cổ tức tiền mặt tỷ lệ 20% mang lại lợi suất hấp dẫn cho cổ đông."}
+            ],
+            "theses": ["Dòng tiền bán hàng đột biến củng cố năng lực tài chính và chu kỳ lợi nhuận bứt phá."],
+            "risks": ["Tiến độ bàn giao các phân kỳ tiếp theo phụ thuộc vào tốc độ hoàn công của nhà thầu."]
+        }
+    },
     {
         "id": "tpl-thep-vat-lieu",
         "name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
@@ -428,90 +485,132 @@ def extract_advanced_knowledge(
         )
         cleaned_sentences = [s.strip() for s in raw_sentences if len(s.strip()) >= 20]
 
-    # 2. Bóc tách Catalysts theo 4 nhóm phân loại
-    # Nhóm: Dự án & Capex, Chu kỳ & Vĩ mô, Lợi thế chi phí & Biên lợi nhuận, Xúc tác ngắn hạn & Sự kiện
+    # 2. Bóc tách Catalysts theo 6 nhóm phân loại độc bản doanh nghiệp
     categorized_catalysts = {
         "Dự án & Capex": [],
-        "Chu kỳ & Vĩ mô": [],
-        "Lợi thế chi phí": [],
-        "Xúc tác ngắn hạn": []
+        "Đơn hàng & Doanh thu": [],
+        "Lợi thế chi phí & Biên gộp": [],
+        "Tài chính & Dòng tiền": [],
+        "Chu kỳ & Vĩ mô ngành": [],
+        "Xúc tác sự kiện & Ngắn hạn": []
     }
     extracted_theses = []
     extracted_risks = []
 
-    # Từ khóa phân loại
-    capex_keywords = ["dự án", "capex", "nhà máy", "công suất", "lò cao", "giai đoạn", "khởi công", "vận hành", "mở rộng", "mở bán", "phân kỳ", "đầu tư", "giải ngân"]
-    macro_keywords = ["chu kỳ", "vĩ mô", "lãi suất", "ngân hàng nhà nước", "chính sách", "nâng hạng", "hrc", "xuất khẩu", "giá thép", "tăng trưởng tín dụng", "krx", "thanh khoản", "fdi"]
-    cost_margin_keywords = ["biên lãi", "biên gộp", "tối ưu chi phí", "quản trị", "giá vốn", "chi phí đầu vào", "than cốc", "casa", "lợi nhuận gộp", "giá thành", "thị phần"]
-    short_term_keywords = ["cổ tức", "tăng vốn", "phát hành", "hợp đồng", "ký mới", "hòa vốn", "ipo", "chuyển sàn", "đột biến", "hoàn nhập"]
-    risk_keywords = ["rủi ro", "áp lực", "thách thức", "sụt giảm", "thận trọng", "nợ xấu", "chậm tiến độ", "tỷ giá", "cạnh tranh", "suy thoái"]
+    # Từ khóa phân loại vi mô chuyên sâu
+    capex_keywords = ["dự án", "capex", "nhà máy", "công suất", "lò cao", "giai đoạn", "khởi công", "vận hành", "mở rộng", "mở bán", "phân kỳ", "đầu tư", "giải ngân", "xây dựng", "hoàn thành"]
+    order_rev_keywords = ["hợp đồng", "ký mới", "order intake", "backlog", "đơn đặt hàng", "xuất khẩu", "doanh thu", "thị phần", "sản lượng", "tăng trưởng"]
+    cost_margin_keywords = ["biên lãi", "biên gộp", "tối ưu chi phí", "quản trị", "giá vốn", "chi phí đầu vào", "than cốc", "casa", "lợi nhuận gộp", "giá thành", "nguyên liệu"]
+    financial_keywords = ["dòng tiền", "cfo", "nợ vay", "đòn bẩy", "tài chính", "d/e", "trái phiếu", "lãi vay", "tiền mặt", "tái cơ cấu", "cơ cấu nợ"]
+    macro_keywords = ["chu kỳ", "vĩ mô", "lãi suất", "ngân hàng nhà nước", "chính sách", "nâng hạng", "hrc", "thuế tự vệ", "chống bán phá giá", "tăng trưởng tín dụng", "krx", "thanh khoản", "fdi", "đầu tư công"]
+    short_term_keywords = ["cổ tức", "tăng vốn", "phát hành", "hòa vốn", "ipo", "chuyển sàn", "đột biến", "hoàn nhập", "bán vốn", "thoái vốn", "mua lại"]
+    risk_keywords = ["rủi ro", "áp lực", "thách thức", "sụt giảm", "thận trọng", "nợ xấu", "chậm tiến độ", "tỷ giá", "cạnh tranh", "suy thoái", "pha loãng", "lạm phát", "thu hẹp"]
 
     for sent in cleaned_sentences:
         s_lower = sent.lower()
 
-        # Kiểm tra rủi ro
+        # Kiểm tra rủi ro (lọc bỏ văn mẫu rỗng)
         if any(rk in s_lower for rk in risk_keywords):
             clean_r = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', sent).strip()
-            if clean_r not in extracted_risks and len(clean_r) > 15:
+            if clean_r not in extracted_risks and len(clean_r) > 15 and not is_generic_boilerplate(clean_r):
                 extracted_risks.append(clean_r)
             continue
 
-        # Kiểm tra Catalysts
+        # Kiểm tra Catalysts theo từng phân loại
         assigned = False
         if any(k in s_lower for k in capex_keywords):
             categorized_catalysts["Dự án & Capex"].append(sent)
             assigned = True
-        elif any(k in s_lower for k in macro_keywords):
-            categorized_catalysts["Chu kỳ & Vĩ mô"].append(sent)
+        elif any(k in s_lower for k in order_rev_keywords):
+            categorized_catalysts["Đơn hàng & Doanh thu"].append(sent)
             assigned = True
         elif any(k in s_lower for k in cost_margin_keywords):
-            categorized_catalysts["Lợi thế chi phí"].append(sent)
+            categorized_catalysts["Lợi thế chi phí & Biên gộp"].append(sent)
+            assigned = True
+        elif any(k in s_lower for k in financial_keywords):
+            categorized_catalysts["Tài chính & Dòng tiền"].append(sent)
+            assigned = True
+        elif any(k in s_lower for k in macro_keywords):
+            categorized_catalysts["Chu kỳ & Vĩ mô ngành"].append(sent)
             assigned = True
         elif any(k in s_lower for k in short_term_keywords):
-            categorized_catalysts["Xúc tác ngắn hạn"].append(sent)
+            categorized_catalysts["Xúc tác sự kiện & Ngắn hạn"].append(sent)
             assigned = True
 
         if not assigned and any(k in s_lower for k in ["tiềm năng", "kỳ vọng", "động lực", "luận điểm", "lợi thế"]):
-            extracted_theses.append(sent)
+            if sent not in extracted_theses and not is_generic_boilerplate(sent):
+                extracted_theses.append(sent)
 
-    # 3. Kết hợp với tri thức từ Few-Shot Template nếu nội dung báo cáo ngắn và template thực sự khớp mã
-    if primary_tpl:
-        tpl_keywords = [str(k).lower() for k in primary_tpl.get("keywords", [])]
-        tpl_name = str(primary_tpl.get("name", "")).lower()
-        is_tpl_truly_matched = (clean_ticker.lower() in tpl_keywords) or (clean_ticker.lower() in tpl_name)
-        
-        # Chỉ bổ sung khi template THỰC SỰ thuộc về mã doanh nghiệp này
-        if is_tpl_truly_matched:
-            tpl_cat_rules = primary_tpl.get("catalyst_rules", [])
-            categories = list(categorized_catalysts.keys())
-            cat_idx = 0
-            while sum(len(v) for v in categorized_catalysts.values()) < 3 and cat_idx < len(tpl_cat_rules):
-                rule_text = tpl_cat_rules[cat_idx]
-                if not is_generic_boilerplate(rule_text):
-                    target_cat = categories[cat_idx % len(categories)]
-                    if rule_text not in categorized_catalysts[target_cat]:
-                        categorized_catalysts[target_cat].append(rule_text)
-                cat_idx += 1
-
-            # Nếu chưa đủ Theses
-            if len(extracted_theses) < 2:
-                for th in primary_tpl.get("thesis_rules", [])[:2]:
-                    if not is_generic_boilerplate(th) and th not in extracted_theses:
-                        extracted_theses.append(th)
-
-            # Nếu chưa đủ Risks
-            if len(extracted_risks) < 2:
-                for rk in primary_tpl.get("risk_rules", [])[:2]:
-                    if rk not in extracted_risks:
-                        extracted_risks.append(rk)
-
-    # Tổng hợp danh sách phẳng key_catalysts (tối đa 4 mục chọn lọc nhất)
+    # Tổng hợp danh sách phẳng key_catalysts (hướng tới tối đa 15 mục chất lượng cao nhất)
     flat_catalysts = []
     for cat_name, items in categorized_catalysts.items():
-        for item in items[:2]:
+        for item in items:
             cleaned_item = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', item).strip()
-            if cleaned_item and cleaned_item not in flat_catalysts:
+            if cleaned_item and cleaned_item not in flat_catalysts and not is_generic_boilerplate(cleaned_item):
                 flat_catalysts.append(cleaned_item)
+            if len(flat_catalysts) >= 15:
+                break
+        if len(flat_catalysts) >= 15:
+            break
+
+    # Nếu văn bản có các bullet points chưa được bóc tách hết, nạp thêm
+    if len(flat_catalysts) < 15:
+        bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,})", text)
+        for b in bullets:
+            b_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', b).strip()
+            if b_clean not in flat_catalysts and len(b_clean) > 15 and not is_generic_boilerplate(b_clean):
+                flat_catalysts.append(b_clean)
+            if len(flat_catalysts) >= 15:
+                break
+
+    # 3. Kết hợp với Tri thức Vi mô Độc bản và Số liệu BCTC Kiểm toán thực tế của chính mã đó (tối đa 15 mục)
+    if len(flat_catalysts) < 15 and len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
+        try:
+            from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
+            spec_cats = get_specific_corporate_catalysts(clean_ticker)
+            for sc in spec_cats:
+                if sc not in flat_catalysts:
+                    flat_catalysts.append(sc)
+                if len(flat_catalysts) >= 15:
+                    break
+
+            if len(flat_catalysts) < 15:
+                stmt_info = generate_statement_driven_catalysts(clean_ticker)
+                for sc in stmt_info.get("catalysts", []):
+                    if sc not in flat_catalysts:
+                        flat_catalysts.append(sc)
+                    if len(flat_catalysts) >= 15:
+                        break
+        except Exception:
+            pass
+
+    # Nếu vẫn còn thiếu dưới 5 mục và có Few-Shot Template khớp thực sự, bổ sung thêm
+    if len(flat_catalysts) < 5 and primary_tpl:
+        tpl_keywords = [str(k).lower() for k in primary_tpl.get("keywords", [])]
+        tpl_name = str(primary_tpl.get("name", "")).lower()
+        is_tpl_truly_matched = (clean_ticker.lower() in tpl_keywords) or (clean_ticker.lower() in tpl_name) or (primary_tpl.get("id") == "tpl-doanh-nghiep-doc-ban")
+        
+        if is_tpl_truly_matched:
+            tpl_cat_rules = primary_tpl.get("catalyst_rules", [])
+            for r_text in tpl_cat_rules:
+                if not is_generic_boilerplate(r_text) and r_text not in flat_catalysts:
+                    flat_catalysts.append(r_text)
+                if len(flat_catalysts) >= 15:
+                    break
+
+    # Bổ sung Rủi ro vi mô đặc thù nếu chưa đủ tối đa 10 mục
+    if len(extracted_risks) < 10 and len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
+        try:
+            from financial_data import get_specific_corporate_risks
+            spec_r = get_specific_corporate_risks(clean_ticker)
+            if spec_r:
+                for sr in spec_r:
+                    if sr not in extracted_risks:
+                        extracted_risks.append(sr)
+                    if len(extracted_risks) >= 10:
+                        break
+        except Exception:
+            pass
 
     # 4. Dự phóng Doanh thu & LNST
     rev_forecast = ""
@@ -545,26 +644,26 @@ def extract_advanced_knowledge(
     upside_pct = round(((target_price - ref_price) / ref_price) * 100.0, 2) if ref_price > 0 else 25.0
 
     # 6. Tính toán Độ tin cậy trích xuất (Confidence Score: 0.70 - 0.99)
-    confidence = 0.70
+    confidence = 0.75
     if primary_tpl:
-        confidence += 0.10
-    if len(flat_catalysts) >= 3:
+        confidence += 0.08
+    if len(flat_catalysts) >= 5:
         confidence += 0.08
     if rev_m and npat_m:
-        confidence += 0.07
+        confidence += 0.05
     if tp_m:
-        confidence += 0.04
+        confidence += 0.03
     confidence = min(0.98, round(confidence, 2))
 
     return {
         "ticker": clean_ticker,
-        "template_used": primary_tpl.get("name") if primary_tpl else "Mẫu chung",
-        "template_id": primary_tpl.get("id") if primary_tpl else None,
+        "template_used": primary_tpl.get("name") if primary_tpl else "Mẫu Độc Bản Doanh Nghiệp",
+        "template_id": primary_tpl.get("id") if primary_tpl else "tpl-doanh-nghiep-doc-ban",
         "confidence_score": confidence,
-        "key_catalysts": flat_catalysts[:4],
+        "key_catalysts": flat_catalysts[:15],
         "categorized_catalysts": categorized_catalysts,
-        "investment_theses": extracted_theses[:3],
-        "key_risks": extracted_risks[:2],
+        "investment_theses": extracted_theses[:6],
+        "key_risks": extracted_risks[:10],
         "target_price": target_price,
         "upside_percent": upside_pct,
         "revenue_forecast": rev_forecast,
@@ -704,7 +803,7 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
         for cat in learned_cats:
             if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in existing_cs_cats):
                 existing_cs_cats.append(cat)
-        cs.consensual_catalysts = existing_cs_cats[:10]
+        cs.consensual_catalysts = existing_cs_cats[:15]
 
         existing_cs_risks = list(getattr(cs, "consensual_risks", []) or [])
         for rk in learned_risks:
@@ -717,7 +816,7 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
         for idx, r in enumerate(report.matrix_table):
             r_cats = list(getattr(r, "key_catalysts", []) or [])
             for c_idx, cat in enumerate(learned_cats):
-                if len(r_cats) >= 10:
+                if len(r_cats) >= 15:
                     break
                 if not any(cat.lower() in ec.lower() or ec.lower() in cat.lower() for ec in r_cats):
                     r_cats.append(cat)
@@ -774,7 +873,7 @@ class AutonomousLearningScheduler:
         default_cfg = {
             "enabled": True,
             "interval_hours": 6,  # 0 = Manual, 1, 3, 6, 12, 24
-            "watchlist": ["HPG", "SSI", "FPT", "MWG", "TCH", "PDR", "VCB", "MBB", "DGC", "VNM"],
+            "watchlist": [],  # Mặc định: Quét toàn bộ thị trường
             "last_run": None,
             "next_run": None,
             "auto_ingest_matrix": True,
@@ -986,9 +1085,13 @@ class AutonomousLearningScheduler:
                     title = item.get("Title", "") or ""
                     content = item.get("Content", "") or title
                     source = item.get("SourceName", "CTCK")
-                    item_code = item.get("StockCode", "") or ""
+                    item_code = (item.get("StockCode", "") or "").upper().strip()
 
-                    if not item_code:
+                    # Ưu tiên lấy mã từ prefix tiêu đề (VD: "HPG: Báo cáo...", "TCH: Triển vọng...")
+                    title_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', title)
+                    if title_m:
+                        item_code = title_m.group(1).upper()
+                    elif not item_code:
                         # Thử bóc tách mã cổ phiếu từ Title nếu item không có StockCode
                         m = re.search(r'\b([A-Z]{3})\b', title.upper())
                         if m and m.group(1) not in ["BCN", "KQKD", "PTKT", "CTCK", "USD", "VND", "HRC", "GDP", "FDI", "KRX", "EBIT", "ROA", "ROE"]:
@@ -1013,7 +1116,7 @@ class AutonomousLearningScheduler:
                         current_market_price=market_p
                     )
 
-                    # Tự động lưu Catalysts & Risks vào kho AI
+                    # Tự động lưu Catalysts & Risks vào kho AI (tối đa 15 catalysts và 10 rủi ro)
                     if len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
                         save_learned_ticker_catalysts(
                             ticker=clean_ticker,
@@ -1032,7 +1135,7 @@ class AutonomousLearningScheduler:
                         "title": title[:110],
                         "institution": source,
                         "learned_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                        "template_name": knowledge.get("template_used", "Mẫu chung"),
+                        "template_name": knowledge.get("template_used", "Mẫu Độc Bản Doanh Nghiệp"),
                         "catalysts_extracted": len(knowledge.get("key_catalysts", [])),
                         "theses_extracted": len(knowledge.get("investment_theses", [])),
                         "confidence": knowledge.get("confidence_score", 0.92),
@@ -1052,7 +1155,7 @@ class AutonomousLearningScheduler:
                     edocs = []
                     if fetch_edocs_reports:
                         try:
-                            edocs = await fetch_edocs_reports(clean_ticker, limit=3)
+                            edocs = await fetch_edocs_reports(clean_ticker, limit=5)
                         except Exception as e:
                             print(f"[LearningCycle] Lỗi quét eDocs cho {clean_ticker}: {e}")
 
@@ -1079,6 +1182,14 @@ class AutonomousLearningScheduler:
                         }]
 
                     for item in edocs:
+                        # LỌC NGHIÊM NGẶT: Tuyệt đối không lấy nhầm báo cáo của mã khác
+                        item_code = (item.get("StockCode") or "").upper().strip()
+                        if item_code and item_code != clean_ticker:
+                            continue
+                        title_prefix_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', item.get("Title", ""))
+                        if title_prefix_m and title_prefix_m.group(1).upper() != clean_ticker:
+                            continue
+
                         title = item.get("Title", "") or ""
                         content = item.get("Content", "") or title
                         source = item.get("SourceName", "CTCK")
@@ -1098,39 +1209,43 @@ class AutonomousLearningScheduler:
                             current_market_price=market_p
                         )
 
-                        # Bổ sung Boilerplate Shield và Định lượng Vi mô thực tế
+                        # Bổ sung Boilerplate Shield và Định lượng Vi mô thực tế (tối đa 15 Catalysts và 10 Rủi ro)
                         cats = [c for c in knowledge.get("key_catalysts", []) if not is_generic_boilerplate(c)]
                         risks_list = [r for r in knowledge.get("key_risks", []) if not is_generic_boilerplate(r)]
-                        if len(cats) < 3:
+                        if len(cats) < 15:
                             try:
                                 from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
                                 spec_cats = get_specific_corporate_catalysts(clean_ticker)
                                 for sc in spec_cats:
                                     if sc not in cats:
                                         cats.append(sc)
-                                    if len(cats) >= 4:
+                                    if len(cats) >= 15:
                                         break
-                                if len(cats) < 3:
+                                if len(cats) < 15:
                                     stmt_info = generate_statement_driven_catalysts(clean_ticker)
                                     for sc in stmt_info.get("catalysts", []):
                                         if sc not in cats:
                                             cats.append(sc)
-                                        if len(cats) >= 4:
+                                        if len(cats) >= 15:
                                             break
                             except Exception:
                                 pass
 
-                        if not risks_list:
+                        if len(risks_list) < 10:
                             try:
                                 from financial_data import get_specific_corporate_risks
                                 spec_r = get_specific_corporate_risks(clean_ticker)
                                 if spec_r:
-                                    risks_list = spec_r[:2]
+                                    for sr in spec_r:
+                                        if sr not in risks_list:
+                                            risks_list.append(sr)
+                                        if len(risks_list) >= 10:
+                                            break
                             except Exception:
                                 pass
 
-                        knowledge["key_catalysts"] = cats
-                        knowledge["key_risks"] = risks_list
+                        knowledge["key_catalysts"] = cats[:15]
+                        knowledge["key_risks"] = risks_list[:10]
 
                         # Tự động lưu Catalysts & Risks vào kho AI
                         if len(clean_ticker) == 3:

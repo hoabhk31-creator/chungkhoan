@@ -511,16 +511,22 @@ _SYNCHRONIZED_PRESETS_CACHE: Dict[str, FullMatrixReport] = {}
 _SYNCHRONIZED_PRESETS_CACHE_TS: Dict[str, float] = {}
 _PRESET_LOCKS: Dict[str, asyncio.Lock] = {}
 
+_FIN_OVERVIEW_CACHE: Dict[str, Dict[str, Any]] = {}
+_FIN_OVERVIEW_CACHE_TS: Dict[str, float] = {}
+
+_TECH_SIGNALS_CACHE: Dict[str, Dict[str, Any]] = {}
+_TECH_SIGNALS_CACHE_TS: Dict[str, float] = {}
+
 
 @app.get("/api/preset/{ticker}")
 async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
 
-    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (30s TTL)
+    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (120s TTL)
     cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
     cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-    if cached_rep and (now_ts - cached_time) < 30.0 and cached_rep.ticker == clean_ticker:
+    if cached_rep and (now_ts - cached_time) < 120.0 and cached_rep.ticker == clean_ticker:
         return cached_rep
 
     # 2. Khóa concurrency để tránh gọi đúp song song nhiều crawler cùng 1 mã
@@ -531,26 +537,42 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
         now_ts = time.time()
         cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
         cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-        if cached_rep and (now_ts - cached_time) < 30.0 and cached_rep.ticker == clean_ticker:
+        if cached_rep and (now_ts - cached_time) < 120.0 and cached_rep.ticker == clean_ticker:
             return cached_rep
 
-        try:
-            profile = await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=3.0)
-        except Exception:
-            profile = {}
-        comp_name = profile.get("name")
-        sect_name = profile.get("sector")
-
         stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
-        final_comp_name = comp_name or stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
-        final_sect_name = sect_name or stock_meta.get("sector", "Doanh nghiệp niêm yết")
+        cached_name = stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
+        cached_sector = stock_meta.get("sector", "Doanh nghiệp niêm yết")
 
-        try:
-            live_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=3.5)
-            market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
-        except Exception:
-            market_p = 25000.0
-            live_info = None
+        # Tối ưu hóa siêu tốc: Chạy song song Profile, Giá Live và Lịch Sự Kiện Quyền
+        async def _safe_profile():
+            try:
+                return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=2.0)
+            except Exception:
+                return {}
+
+        async def _safe_price():
+            try:
+                return await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=3.0)
+            except Exception:
+                return None
+
+        async def _safe_ca():
+            try:
+                from corporate_actions import sync_ticker_corporate_actions_online
+                await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=1.5)
+            except Exception:
+                pass
+
+        prof_res, live_res, _ = await asyncio.gather(_safe_profile(), _safe_price(), _safe_ca(), return_exceptions=True)
+        profile = prof_res if isinstance(prof_res, dict) else {}
+        live_info = live_res if isinstance(live_res, dict) else None
+        market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
+
+        comp_name = profile.get("name") or cached_name
+        sect_name = profile.get("sector") or cached_sector
+        final_comp_name = comp_name
+        final_sect_name = sect_name
 
         base_reports = []
         base_causality = []
@@ -567,14 +589,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
             final_comp_name = report.company_name
             final_sect_name = report.sector
 
-        # Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API (Simplize / HOSE / HNX)
-        try:
-            from corporate_actions import sync_ticker_corporate_actions_online
-            await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=2.0)
-        except Exception:
-            pass
-
-        # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK (áp dụng toàn webapp)
+        # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK
         try:
             synced_reports = await asyncio.wait_for(
                 get_synchronized_matrix_reports(
@@ -585,10 +600,9 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
                     market_p=market_p,
                     max_reports=20
                 ),
-                timeout=8.0
+                timeout=4.5
             )
         except Exception as sync_err:
-            print(f"Error syncing matrix reports for {clean_ticker}: {sync_err}")
             synced_reports = base_reports
 
         reconciled = calculate_consensus(
@@ -817,21 +831,47 @@ async def get_financial_overview(ticker: str):
     Truy xuất toàn bộ phân tích BCTC, Dupont 3 & 5 bước, Piotroski F-score, Altman Z-score, và định giá DCF.
     """
     clean_ticker = ticker.upper().strip()
-    try:
-        live_price_info = await fetch_reconciled_live_price(clean_ticker)
-        market_p = live_price_info.get("latest_close", 25000.0) if live_price_info else 25000.0
-    except Exception:
-        market_p = 25000.0
+    now_ts = time.time()
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 120.0:
+        return _FIN_OVERVIEW_CACHE[clean_ticker]
 
-    profile = await fetch_stock_company_profile(clean_ticker)
-    capital_info = await fetch_stock_corporate_capital(clean_ticker)
+    stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+    default_name = stock_meta.get("name")
+    default_sector = stock_meta.get("sector")
+
+    async def _safe_p():
+        try:
+            live_price_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=2.5)
+            return live_price_info.get("latest_close", 25000.0) if live_price_info else 25000.0
+        except Exception:
+            return 25000.0
+
+    async def _safe_prof():
+        try:
+            return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=2.0)
+        except Exception:
+            return {}
+
+    async def _safe_cap():
+        try:
+            return await asyncio.wait_for(fetch_stock_corporate_capital(clean_ticker), timeout=2.0)
+        except Exception:
+            return {}
+
+    p_res, prof_res, cap_res = await asyncio.gather(_safe_p(), _safe_prof(), _safe_cap(), return_exceptions=True)
+    market_p = p_res if isinstance(p_res, (int, float)) else 25000.0
+    profile = prof_res if isinstance(prof_res, dict) else {}
+    capital_info = cap_res if isinstance(cap_res, dict) else {}
+
     data = get_financial_data_bundle(
         clean_ticker,
         current_market_price=market_p,
-        company_name=profile.get("name"),
-        sector=profile.get("sector"),
+        company_name=profile.get("name") or default_name,
+        sector=profile.get("sector") or default_sector,
         corporate_capital=capital_info
     )
+    _FIN_OVERVIEW_CACHE[clean_ticker] = data
+    _FIN_OVERVIEW_CACHE_TS[clean_ticker] = now_ts
     return data
 
 
@@ -841,22 +881,12 @@ async def get_peers_comparison(ticker: str):
     Truy xuất danh sách đối thủ cùng ngành, trung bình ngành, radar chart và mô hình 5 lực lượng cạnh tranh Porter.
     """
     clean_ticker = ticker.upper().strip()
-    try:
-        live_price_info = await fetch_reconciled_live_price(clean_ticker)
-        market_p = live_price_info.get("latest_close", 25000.0) if live_price_info else 25000.0
-    except Exception:
-        market_p = 25000.0
+    now_ts = time.time()
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 120.0:
+        return _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
 
-    profile = await fetch_stock_company_profile(clean_ticker)
-    capital_info = await fetch_stock_corporate_capital(clean_ticker)
-    data = get_financial_data_bundle(
-        clean_ticker,
-        current_market_price=market_p,
-        company_name=profile.get("name"),
-        sector=profile.get("sector"),
-        corporate_capital=capital_info
-    )
-    return data["peers_data"]
+    data = await get_financial_overview(clean_ticker)
+    return data.get("peers_data", {})
 
 
 @app.get("/api/company-news-events/{ticker}")
@@ -1205,18 +1235,26 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
     Dữ liệu nến được đồng bộ hóa từ SSI FastConnect và Vietstock/VNDirect/DNSE Multi-timeframe Feed.
     """
     clean_ticker = ticker.upper().strip()
+    cache_key = f"{clean_ticker}_{resolution}_{count}"
+    now_ts = time.time()
+    if cache_key in _TECH_SIGNALS_CACHE and (now_ts - _TECH_SIGNALS_CACHE_TS.get(cache_key, 0)) < 30.0:
+        return _TECH_SIGNALS_CACHE[cache_key]
+
     c = get_company(clean_ticker)
     exchange = (c.get("exchange") if c else "HOSE").upper()
     live_p = float(c.get("market_price", 21700)) if c else 21700.0
     try:
-        p_info = await fetch_reconciled_live_price(clean_ticker)
+        p_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=2.5)
         if p_info:
             live_p = p_info.get("latest_close", live_p)
     except Exception:
         pass
 
     # Lấy chuỗi nến thực tế từ SSI FastConnect / VNDirect / Vietstock / DNSE
-    candles = await fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count)
+    try:
+        candles = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count), timeout=4.0)
+    except Exception:
+        candles = []
     
     # Tính toán toàn bộ chỉ báo kỹ thuật
     tech = calculate_technical_indicators(candles, live_p)
@@ -1226,7 +1264,7 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
     shares_out = (c.get("shares_outstanding", 6400000000) if c else 6400000000) or 6400000000
     foreign_pct = (c.get("foreign_ownership_pct", 18.5) if c else 18.5) or 18.5
 
-    return {
+    res_dict = {
         "ticker": clean_ticker,
         "exchange": exchange,
         "last_price": tech["last_price"],
@@ -1273,6 +1311,9 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         "resolution": resolution,
         "data_engine": "SSI FastConnect & Vietstock Multi-timeframe Feed"
     }
+    _TECH_SIGNALS_CACHE[cache_key] = res_dict
+    _TECH_SIGNALS_CACHE_TS[cache_key] = now_ts
+    return res_dict
 
 
 
@@ -2004,6 +2045,18 @@ async def fetch_real_institution_pdf(clean_ticker: str, clean_inst: str, preferr
             return False
         u_low = url_str.lower()
         t_low = candidate_title.lower()
+
+        # Kiểm tra tiêu đề nếu bắt đầu bằng mã khác (ví dụ "GMD: ...")
+        leading_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', candidate_title, re.IGNORECASE)
+        if leading_m and leading_m.group(1).upper() != clean_ticker:
+            return False
+
+        # Kiểm tra nếu url chứa rõ ràng slug của mã khác
+        url_ticker_m = re.search(r'/([a-z0-9]{3,4})[_\-]', u_low)
+        if url_ticker_m:
+            detected_sym = url_ticker_m.group(1).upper()
+            if detected_sym != clean_ticker and detected_sym in VIETNAM_STOCK_DIRECTORY:
+                return False
 
         # Kiểm tra xung đột ngành rõ rệt: Tuyệt đối không gán báo cáo ngành khác cho mã không thuộc ngành đó
         mismatched_keywords = [
