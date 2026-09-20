@@ -1,5 +1,95 @@
 [
   {
+    "id": "tpl-doanh-nghiep-doc-ban",
+    "name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+    "sector": "Toàn Thị Trường & Độc Bản Doanh Nghiệp",
+    "is_system": true,
+    "keywords": [
+      "doanh nghiệp",
+      "dự án",
+      "hợp đồng",
+      "công suất",
+      "thị phần",
+      "dở dang",
+      "backlog",
+      "doanh thu",
+      "lợi nhuận",
+      "biên gộp",
+      "dòng tiền",
+      "cổ tức",
+      "tăng vốn",
+      "mở rộng",
+      "nhà máy",
+      "khách hàng",
+      "đơn hàng",
+      "tái cơ cấu",
+      "giá vốn",
+      "chi phí",
+      "nợ vay",
+      "đáo hạn",
+      "tỷ giá",
+      "pháp lý"
+    ],
+    "catalyst_rules": [
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+      "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+      "Hưởng lợi trực tiếp từ các chính sách ngành, rào cản thuế chống bán phá giá hoặc gói kích cầu đầu tư công của Chính phủ",
+      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+      "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
+      "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở"
+    ],
+    "thesis_rules": [
+      "Lợi thế cạnh tranh con hào kinh tế bền vững từ công nghệ độc quyền, chi phí thấp hoặc mạng lưới khách hàng trung thành",
+      "Năng lực quản trị rủi ro và thực thi chiến lược vượt trội của ban điều hành qua nhiều chu kỳ kinh tế",
+      "Mô hình kinh doanh tạo dòng tiền tự do vững chắc, khả năng tự tài trợ vốn mở rộng mà không phụ thuộc đòn bẩy",
+      "Định giá P/E và P/B đang chiết khấu sâu so với tiềm năng tăng trưởng EPS và ROE trung dài hạn"
+    ],
+    "risk_rules": [
+      "Tiến độ cấp phép pháp lý, thẩm định quy hoạch hoặc giải phóng mặt bằng dự án kéo dài hơn dự kiến",
+      "Biến động bất lợi của giá nguyên vật liệu đầu vào và chi phí logistics ăn mòn biên lợi nhuận ròng",
+      "Áp lực đáo hạn nợ vay, trái phiếu doanh nghiệp hoặc chi phí tài chính gia tăng trong môi trường lãi suất cao",
+      "Cạnh tranh khốc liệt về giá từ các đối thủ cùng ngành hoặc hàng nhập khẩu giá rẻ gây xói mòn thị phần",
+      "Biến động tỷ giá hối đoái gây lỗ chênh lệch tỷ giá đối với các khoản nợ vay ngoại tệ hoặc chi phí nhập khẩu nguyên liệu",
+      "Rủi ro suy giảm sức mua của thị trường tiêu thụ chính do suy thoái kinh tế hoặc thu nhập khách hàng giảm",
+      "Rủi ro pha loãng giá trị cổ phiếu từ các đợt phát hành tăng vốn quy mô lớn hoặc phát hành ESOP giá thấp",
+      "Rủi ro thay đổi chính sách điều hành, siết chặt quản lý thuế, môi trường hoặc tiêu chuẩn chất lượng kỹ thuật",
+      "Hiệu suất khai thác tài sản hoặc công suất vận hành sau đầu tư không đạt mức hòa vốn như tính toán ban đầu",
+      "Rủi ro tập trung khách hàng hoặc nhà cung cấp chủ lực làm suy giảm năng lực đàm phán thương mại"
+    ],
+    "sample_text": "Doanh nghiệp ghi nhận tiến độ bàn giao dự án trọng điểm vượt kế hoạch 15%, mang lại dòng tiền bán hàng đột biến đạt hơn 2,500 tỷ đồng trong quý. Tỷ lệ nợ vay trên vốn chủ sở hữu giảm từ 0.8x xuống 0.35x. Kế hoạch chia cổ tức tiền mặt 20% đã được ĐHĐCĐ thông qua.",
+    "sample_output": {
+      "catalysts": [
+        {
+          "category": "Dự án & Capex",
+          "text": "Bàn giao dự án trọng điểm vượt tiến độ 15%, ghi nhận dòng tiền đột biến 2,500 tỷ đồng."
+        },
+        {
+          "category": "Cơ cấu tài chính",
+          "text": "Tỷ lệ nợ vay D/E giảm mạnh về 0.35x giúp hạ gánh nặng chi phí lãi vay."
+        },
+        {
+          "category": "Cổ tức & Sự kiện",
+          "text": "Chi trả cổ tức tiền mặt tỷ lệ 20% mang lại lợi suất hấp dẫn cho cổ đông."
+        }
+      ],
+      "theses": [
+        "Dòng tiền bán hàng đột biến củng cố năng lực tài chính và chu kỳ lợi nhuận bứt phá."
+      ],
+      "risks": [
+        "Tiến độ bàn giao các phân kỳ tiếp theo phụ thuộc vào tốc độ hoàn công của nhà thầu."
+      ]
+    }
+  },
+  {
     "id": "tpl-thep-vat-lieu",
     "name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
     "sector": "Thép & Vật liệu xây dựng",
