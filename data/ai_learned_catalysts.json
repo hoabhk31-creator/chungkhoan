@@ -346,6 +346,8 @@
   "VNM": {
     "ticker": "VNM",
     "catalysts": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền mặt ở mức 4.350 đồng/cổ phần, tương ứng tỷ lệ cổ tức/thị giá đạt 6,8%.",
+      "BVSC dự phóng doanh thu thuần năm 2026F của VNM đạt 70.463 tỷ đồng (tăng 11% so với cùng kỳ) và lợi nhuận sau thuế công ty mẹ đạt 10.740 tỷ đồng (tăng 14% so với cùng kỳ).",
       "Nền tảng tài chính thặng dư tiền mặt ròng (Net Cash) đạt 1,691.9 tỷ đồng, giúp doanh nghiệp hoàn toàn chủ động về dòng vốn và tối ưu hóa chi phí lãi vay.",
       "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 8,668.1 tỷ đồng (vượt LNST 9,413.6 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào.",
       "Khoản người mua trả tiền trước ngắn hạn đạt 253.1 tỷ đồng, là 'của để dành' bảo đảm chắc chắn cho kế hoạch bàn giao và ghi nhận doanh thu trong các quý tới.",
@@ -358,9 +360,7 @@
       "Công ty sở hữu hơn 18.000 tỷ đồng tiền mặt ròng, duy trì tỷ suất chi trả cổ tức tiền mặt cao trên 4.500 đồng/cổ phiếu.",
       "NHSV dự phóng doanh thu năm 2026 đạt 67.000 tỷ đồng (+5,2% svck) và lợi nhuận sau thuế đạt 9.800 tỷ đồng (+4,4% svck), nhờ sự phục hồi của thị trường nội địa và tăng trưởng hai chữ số ở mảng xuất khẩu.",
       "Cổ phiếu VNM đang giao dịch ở mức P/E hấp dẫn 12,8x và P/B 3,4x với ROAE đạt 51,6%. Tỷ suất cổ tức tiền mặt đạt 4,9%.",
-      "Biên lợi nhuận gộp cải thiện 2 điểm % đạt 43,2%.",
-      "Công ty sở hữu hơn 18.000 tỷ đồng tiền mặt ròng, duy trì tỷ suất chi trả cổ tức tiền mặt cao trên 4.500 đồng/cổ phiếu",
-      "NHSV dự phóng doanh thu năm 2026 đạt 67.000 tỷ đồng (+5,2% svck) và lợi nhuận sau thuế đạt 9.800 tỷ đồng (+4,4% svck), nhờ sự phục hồi của thị trường nội địa và tăng trưởng hai chữ số ở mảng xuất khẩu"
+      "Biên lợi nhuận gộp cải thiện 2 điểm % đạt 43,2%."
     ],
     "risks": [
       "Sức tiêu dùng mặt hàng sữa tại các vùng nông thôn tăng trưởng chậm lại theo cơ cấu dân số.",
@@ -377,6 +377,62 @@
       "Hệ thống logistics và kho bãi quy mô lớn tạo rào cản gia nhập ngành vững chắc"
     ],
     "history": [
+      {
+        "source": "BVS",
+        "title": "VNM: Khuyến nghị NEUTRAL với giá mục tiêu 70,600 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "BVS",
+        "title": "VNM: Khuyến nghị NEUTRAL với giá mục tiêu 70,600 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "BVS",
+        "title": "VNM: Khuyến nghị NEUTRAL với giá mục tiêu 70,600 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "BVS",
+        "title": "VNM: Khuyến nghị NEUTRAL với giá mục tiêu 70,600 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
+        "time": "21/09/2026 12:14",
+        "cats_added": 11,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
+        "time": "21/09/2026 10:10",
+        "cats_added": 11,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 11,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 11,
+        "risks_added": 3
+      },
       {
         "source": "VNDS",
         "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
@@ -460,65 +516,9 @@
         "time": "18/09/2026 15:30",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "NHSV",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 88,888 đồng/cổ phiếu",
-        "time": "18/09/2026 15:28",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VNDS",
-        "title": "VNM: Khuyến nghị Khả quan với giá mục tiêu 71,900 đồng/cổ phiếu",
-        "time": "18/09/2026 15:28",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "18/09/2026 08:06",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "17/09/2026 15:06",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "17/09/2026 14:59",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "17/09/2026 14:58",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "17/09/2026 14:58",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "VNM: Khuyến nghị MUA với giá mục tiêu 70,100 đồng/cổ phiếu",
-        "time": "17/09/2026 14:53",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "22/09/2026 07:27"
   },
   "MWG": {
     "ticker": "MWG",
@@ -555,6 +555,34 @@
       "KQKD Q2-2026 vượt kỳ vọng với doanh thu thuần 48.751 tỷ đồng (+29,5% svck) và LNST công ty mẹ 3.244 tỷ đồng (+96,8% svck)"
     ],
     "history": [
+      {
+        "source": "FPTS",
+        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 8,
+        "risks_added": 4
+      },
+      {
+        "source": "FPTS",
+        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 8,
+        "risks_added": 4
+      },
+      {
+        "source": "FPTS",
+        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 8,
+        "risks_added": 4
+      },
+      {
+        "source": "FPTS",
+        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 8,
+        "risks_added": 4
+      },
       {
         "source": "FPTS",
         "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
@@ -666,37 +694,9 @@
         "time": "17/09/2026 14:58",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 14:58",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 14:53",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 14:52",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "17/09/2026 14:50",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
   },
   "VTO": {
     "ticker": "VTO",
@@ -1888,6 +1888,13 @@
   "FPT": {
     "ticker": "FPT",
     "catalysts": [
+      "Cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. Tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Hợp tác toàn diện cùng các tập đoàn công nghệ hàng đầu thế giới (NVIDIA, Microsoft) mở rộng biên lợi nhuận mảng dịch vụ đám mây Cloud/AI.",
+      "Mảng Giáo dục và Viễn thông đóng vai trò bệ phóng dòng tiền mặt dồi dào, ổn định với tỷ suất sinh lời cao.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu.",
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
       "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
       "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ",
       "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu",
@@ -1895,16 +1902,76 @@
       "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần"
     ],
     "risks": [
+      "Cạnh tranh gay gắt về nguồn nhân lực công nghệ cao và chi phí lương kỹ sư AI, bán dẫn gia tăng.",
+      "Tốc độ giải ngân ngân sách CNTT toàn cầu chững lại do lo ngại bất ổn kinh tế vĩ mô tại các thị trường trọng điểm.",
+      "Rủi ro tỷ giá (JPY/VND và USD/VND) khi đồng Yên Nhật mất giá ảnh hưởng đến doanh thu quy đổi mảng phần mềm.",
       "Tình trạng thiếu hụt nhân sự cấp cao trong lĩnh vực bán dẫn và trí tuệ nhân tạo chuyên sâu",
       "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND"
     ],
     "theses": [
+      "KBSV dự phóng doanh số thuần năm 2026F đạt 56.269 tỷ đồng và lợi nhuận sau thuế của cổ đông công ty mẹ đạt 10.932 tỷ đồng (tăng 17% so với cùng kỳ), với động lực chính đến từ mảng dịch vụ công nghệ thông tin nước ngoài và xu hướng tích hợp AI.",
       "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026 Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%.",
       "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500",
       "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu",
       "Công ty cổ phần Chứng khoán Vietcombanks (VCBS) khuyến nghị MUA đối với mã cổ phiếu FPT với giá mục tiêu 79.900 đồng, tiềm năng tăng giá là +9,8%"
     ],
     "history": [
+      {
+        "source": "KBSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "EVS.,JSC",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "EVS.,JSC",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "EVS.,JSC",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "EVS.,JSC",
+        "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
       {
         "source": "VCBS",
         "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
@@ -1962,7 +2029,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "19/09/2026 21:20"
+    "last_updated": "22/09/2026 07:27"
   },
   "HVN": {
     "ticker": "HVN",
@@ -1990,6 +2057,34 @@
     ],
     "theses": [],
     "history": [
+      {
+        "source": "BSC",
+        "title": "HVN: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 15,
+        "risks_added": 1
+      },
+      {
+        "source": "BSC",
+        "title": "HVN: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 15,
+        "risks_added": 1
+      },
+      {
+        "source": "BSC",
+        "title": "HVN: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 1
+      },
+      {
+        "source": "BSC",
+        "title": "HVN: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 1
+      },
       {
         "source": "BSC",
         "title": "HVN: Báo cáo cập nhật KQKD Q2/2026",
@@ -2033,7 +2128,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
   },
   "TCH": {
     "ticker": "TCH",
@@ -2305,6 +2400,34 @@
       {
         "source": "KBSV",
         "title": "MBB: Khuyến nghị MUA với giá mục tiêu 25,950 đồng/cổ phiếu",
+        "time": "21/09/2026 12:14",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "MBB: Khuyến nghị MUA với giá mục tiêu 25,950 đồng/cổ phiếu",
+        "time": "21/09/2026 10:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "MBB: Khuyến nghị MUA với giá mục tiêu 25,950 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "MBB: Khuyến nghị MUA với giá mục tiêu 25,950 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "MBB: Khuyến nghị MUA với giá mục tiêu 25,950 đồng/cổ phiếu",
         "time": "20/09/2026 22:32",
         "cats_added": 6,
         "risks_added": 3
@@ -2338,7 +2461,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
   },
   "PVT": {
     "ticker": "PVT",
@@ -2426,6 +2549,34 @@
       {
         "source": "VCBS",
         "title": "BVS: Báo cáo Phân tích Kỹ thuật 18/09/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 1,
+        "risks_added": 0
+      },
+      {
+        "source": "VCBS",
+        "title": "BVS: Báo cáo Phân tích Kỹ thuật 18/09/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 1,
+        "risks_added": 0
+      },
+      {
+        "source": "VCBS",
+        "title": "BVS: Báo cáo Phân tích Kỹ thuật 18/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 1,
+        "risks_added": 0
+      },
+      {
+        "source": "VCBS",
+        "title": "BVS: Báo cáo Phân tích Kỹ thuật 18/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 1,
+        "risks_added": 0
+      },
+      {
+        "source": "VCBS",
+        "title": "BVS: Báo cáo Phân tích Kỹ thuật 18/09/2026",
         "time": "20/09/2026 22:32",
         "cats_added": 1,
         "risks_added": 0
@@ -2487,11 +2638,13 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
   },
   "VCG": {
     "ticker": "VCG",
     "catalysts": [
+      "Khoản người mua trả tiền trước ngắn hạn đạt 3,732.8 tỷ đồng, là 'của để dành' bảo đảm chắc chắn cho kế hoạch bàn giao và ghi nhận doanh thu trong các quý tới.",
+      "Chi phí xây dựng cơ bản dở dang (CIP) đạt 1,661.3 tỷ đồng (tăng +-75.0% YoY), phản ánh chu kỳ đầu tư mở rộng tài sản cố định đang tăng tốc để đón đầu chu kỳ tăng trưởng mới.",
       "Năng lực thi công tổng thầu quy mô lớn và sở hữu mỏ vật liệu xây dựng giúp Vinaconex tự chủ về nguồn cung đá, cát thi công.",
       "Ghi nhận doanh thu và lợi nhuận từ các dự án BĐS chất lượng cao như Green Diamond Láng Hạ và Cát Bà Amatina.",
       "Gói thầu 5.10 Nhà ga hành khách Sân bay Long Thành bước vào giai đoạn hoàn thiện lắp đặt thiết bị đem lại doanh thu đột biến.",
@@ -2513,6 +2666,34 @@
       "Tổng thầu xây lắp dẫn đầu với uy tín thi công các dự án phức tạp nhất về kỹ thuật và tiến độ"
     ],
     "history": [
+      {
+        "source": "FPTS",
+        "title": "VCG: Báo cáo Phân tích Kỹ thuật 11/09/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 8,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VCG: Báo cáo Phân tích Kỹ thuật 11/09/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VCG: Báo cáo Phân tích Kỹ thuật 11/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VCG: Báo cáo Phân tích Kỹ thuật 11/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 6,
+        "risks_added": 3
+      },
       {
         "source": "FPTS",
         "title": "VCG: Báo cáo Phân tích Kỹ thuật 11/09/2026",
@@ -2577,41 +2758,69 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
   },
   "BCM": {
     "ticker": "BCM",
     "catalysts": [
-      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
-      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
-      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
-      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
-      "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
-      "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
-      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
-      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
-      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
-      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
-      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
-      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
-      "Khoản người mua trả tiền trước ngắn hạn đạt 857.6 tỷ đồng, là 'của để dành' bảo đảm chắc chắn cho kế hoạch bàn giao và ghi nhận doanh thu trong các quý tới.",
-      "Chi phí xây dựng cơ bản dở dang (CIP) đạt 842.9 tỷ đồng (tăng +-1.5% YoY), phản ánh chu kỳ đầu tư mở rộng tài sản cố định đang tăng tốc để đón đầu chu kỳ tăng trưởng mới.",
-      "NHSV cập nhật KQKD 6T/2026 với doanh thu thuần đạt 1.650 tỷ đồng (-65% svck) và lợi nhuận ròng đạt 292 tỷ đồng (-84% svck), mới hoàn thành 8% kế hoạch lợi nhuận năm 2026."
+      "Ngoài ra, Tập đoàn cho biết sẽ trình cấp thẩm quyền phê duyệt các dự án đường sắt đô thị và đường sắt lưỡng dụng để triển khai.",
+      "Danh mục đầu tư ~127.297 tỷ đồng: trải rộng trên hạ tầng giao thông (cụm 4 công trình trọng điểm, đường sắt Chơn Thành – Cái Mép), KCN thế hệ mới (>3.000 ha phát triển thêm), công nghệ số, năng lượng tái tạo và phát triển đô thị – trong đó vốn chủ sở hữu BCM tham gia 12.234 tỷ đồng, vốn huy động khác 36.316 tỷ đồng.",
+      "ĐHĐCĐ 2026 VÀ CHIẾN LƯỢC 2026–2030: CÂU CHUYỆN TÁI CƠ CẤU VỐN NHÀ NƯỚC ĐHĐCĐ thường niên ngày 25/6/2026 thông qua chiến lược phát triển giai đoạn 2026–2030 (tầm nhìn 2035) với những định hướng quan trọng nhất kể từ khi cổ phần hóa:.",
+      "Tháng 7/2026, Đà Nẵng chấp thuận chủ trương đầu tư KCN VSIP Đà Nẵng quy mô ~250 ha, TMĐT 3.730 tỷ đồng, chuẩn bị đầu tư từ Q3/2026.",
+      "VSIP – động cơ tăng trưởng chính Ngày 29/5/2026, VSIP được trao Giấy chứng nhận đăng ký đầu tư cho 5 KCN mới tại Hải Phòng (VSIP II Hải Phòng/Tiên Lãng 2, ~416 ha), Hà Nam (mô hình khu công nghệ cao: AI, bán dẫn, công nghệ sinh học), Nghệ An (Thọ Lộc GĐ2, ~80 ha), Huế (467 ha) và TP.HCM (VSIP IV Bình Dương) với tổng diện tích hơn 2.300 ha, nâng danh mục lên 26 dự án – tiệm cận mục tiêu \"30 năm – 30 dự án\".",
+      "CÔNG TY LIÊN DOANH, LIÊN KẾT: TRỤ ĐỠ LỢI NHUẬN, VSIP TĂNG TỐC MỞ RỘNG Lãi từ công ty LDLK Q2/2026 đạt 524,5 tỷ đồng (-13% YoY), lũy kế 6T đạt 744,2 tỷ đồng (-8,6% YoY) – gấp 2,8 lần LNTT hợp nhất 6T của Tập đoàn.",
+      "Chi phí xây dựng cơ bản dở dang tiếp tục tăng khi BCM đẩy nhanh thi công hạ tầng Cây Trường và Bàu Bàng MR GĐ2 để kịp bàn giao đất từ cuối 2026.",
+      "Hàng tồn kho: 22.843 tỷ đồng tại 30/6/2026 (+3% YTD), chủ yếu là chi phí sản xuất kinh doanh dở dang tại các dự án KCN và khu đô thị – nguồn ghi nhận doanh thu cho giai đoạn 2026–2030 với giá vốn GPMB tích lũy thấp.",
+      "Chỉ tiêu (tỷ VND) Q2/2026 Q2/2025 %YoY 6T/2026 %YoY Doanh thu thuần 890,9 2.520,7 -64,7% 1.661,8 -65,0% Lợi nhuận gộp 544,2 1.809,0 -69,9% 1.003,0 -61,6% Biên LN gộp 61,1% 71,8% 60,4% Doanh thu tài chính 20,9 (31,3) n/a 84,0 -45,0% Chi phí tài chính 549,0 339,5 61,7% 893,5 29,2% Trong đó: chi phí lãi vay 539,0 318,9 69,0% 881,4 33,4% Chi phí BH & QLDN 339,9 338,1 0,5% 662,7 -16,1% Lãi từ công ty LDLK 524,5 603,0 -13,0% 744,2 -8,6% LNTT 201,2 1.676,6 -88,0% 266,2 -87,1% LNST 211,1 1.467,7 -85,6% 320,5 -82,6% LNST công ty mẹ 204,5 1.466,3 -86,1% 305,0 -83,4% EPS (đồng) 169 1.383 237 Trang 2 Báo cáo cập nhật doanh nghiệp  www.shs.com.vn  Nguồn: BCTC hợp nhất Q2/2026 của BCM So với kế hoạch năm 2026 (doanh thu hợp nhất 10.230 tỷ đồng, LNST 3.883 tỷ đồng được ĐHĐCĐ thông qua ngày 25/6/2026), BCM mới hoàn thành 16,2% chỉ tiêu doanh thu và 8,3% chỉ tiêu lợi nhuận sau nửa đầu năm.",
+      "TỔNG CÔNG TY ĐẦU TƯ & PHÁT TRIỂN CÔNG NGHIỆP (HSX: BCM) BÁO CÁO CẬP NHẬT - 10/08/2026 Trang 1.",
+      "Trong ngắn hạn, cổ phiếu đã có nhịp điều chỉnh mạnh 50% từ vùng đỉnh do điểm trũng của KQKD quý 2/2026, tuy nhiên điều này không phản ánh đúng tiềm năng tăng trưởng cũng như quỹ đất và vị thế BCM hiện đang sở hữu và chúng tôi cho rằng nhịp điều chỉnh này đã mở ra cơ hội đối với các nhà đầu tư dài hạn.",
+      "Động lực nửa cuối 2026: Cây Trường (700 ha) và Bàu Bàng mở rộng GĐ2 (380 ha) đang chờ xác định giá đất và thực hiện nghĩa vụ tài chính, dự kiến bắt đầu ghi nhận doanh thu trong giai đoạn 6 tháng cuối năm 2026.",
+      "Câu chuyện dài hạn được củng cố tại ĐHĐCĐ 25/6/2026: chiến lược 2026 – 2030 với tổng mức đầu tư ~127.297 tỷ đồng, lộ trình giảm sở hữu Nhà nước từ 95,44% xuống ~65%, kế hoạch IPO công ty thành viên và tăng vốn điều lệ.",
+      "VSIP nâng danh mục lên 26 dự án với 5 KCN mới được cấp phép tháng 5/2026.",
+      "Lũy kế 6T/2026, doanh thu 1.662 tỷ đồng (-65% YoY), LNST 320,5 tỷ đồng (-82,6% YoY), mới hoàn thành 16% kế hoạch doanh thu và 8,3% kế hoạch lợi nhuận năm."
     ],
     "risks": [
-      "Rủi ro thị trường chung và tiến độ giải ngân, đền bù giải phóng mặt bằng các dự án KCN mới sau Luật Đất đai 2024.",
-      "Tiến độ pháp lý và ghi nhận doanh thu tại KCN Cây Trường và Bàu Bàng mở rộng GĐ2 chậm hơn kỳ vọng.",
-      "Chi phí tài chính và áp lực trả nợ trái phiếu trong giai đoạn tập trung vốn đầu tư mở rộng hạ tầng các KCN.",
-      "Dòng vốn FDI vào Việt Nam chịu ảnh hưởng bởi biến động kinh tế toàn cầu và chính sách thuế tối thiểu toàn cầu.",
-      "Cạnh tranh thu hút đầu tư KCN từ các địa phương lân cận có quỹ đất sạch và chính sách ưu đãi linh hoạt.",
-      "Rủi ro thanh khoản thị trường bất động sản dân dụng ảnh hưởng đến tiến độ bán hàng tại Thành phố mới Bình Dương.",
-      "Biến động lãi suất vay ngân hàng tác động đến chi phí vốn của các dự án liên doanh hạ tầng quy mô lớn.",
-      "Tiến độ kết nối hạ tầng giao thông liên vùng (Vành đai 3, Vành đai 4 TP.HCM, cao tốc TP.HCM - Thủ Dầu Một - Chơn Thành).",
-      "Biến động chi phí bồi thường giải phóng mặt bằng thực tế cao hơn dự toán ban đầu.",
-      "Phụ thuộc vào chu kỳ phê duyệt quy hoạch và định giá đất của cơ quan quản lý nhà nước."
+      "Lợi thế cạnh tranh về giá thuê: giá chào thuê dự kiến của Cây Trường ~160 USD/m²/chu kỳ và Bàu Bàng MR GĐ2 ~155 USD/m², thấp hơn ~10% mặt bằng chung khu vực (~180 USD/m²), trong bối cảnh tỷ lệ lấp đầy KCN toàn khu vực Bình Dương cũ đã đạt ~93,4% và chi phí GPMB các dự án mới sau Luật Đất đai 2024 tăng 150–300%.",
+      "Rủi ro Rủi ro chính sách thuế quan Mỹ – Việt Nam vẫn là yếu tố bất định lớn nhất Tiến độ pháp lý và ghi nhận doanh thu tại Cây Trường và Bàu Bàng mở rộng GĐ2 chậm hơn kỳ vọng sẽ ảnh hưởng đến KQKD năm 2026 của doanh nghiệp.",
+      "Việc phát hành cổ phiếu mới có thể gây ra hiệu ứng pha loãng EPS ngắn hạn (~10-15%).",
+      "TIẾN ĐỘ PHÁT HÀNH TĂNG VỐN VÀ PHA LOÃNG — Kế hoạch phát hành cổ phiếu tăng vốn điều lệ nhằm bổ sung vốn lưu động và giảm tỷ lệ đòn bẩy cần sự phê duyệt đồng bộ từ các cơ quan quản lý.",
+      "Rủi ro này được đánh giá ở mức trung bình do phần lớn các hợp đồng chuyển nhượng đã hoàn tất ký kết và ghi nhận khoản tiền trả trước dài hạn tăng mạnh (đạt 2.148,2 tỷ đồng trong Q2/2026).",
+      "RỦI RO TIẾN ĐỘ BÀN GIAO VÀ HẠCH TOÁN BẤT ĐỘNG SẢN — Doanh thu của BCM phụ thuộc lớn vào thời điểm ghi nhận các thương vụ chuyển nhượng quỹ đất đô thị quy mô lớn và bàn giao hạ tầng KCN.",
+      "Tuy nhiên, rủi ro này được tiết giảm nhờ dòng tiền thu hồi từ bàn giao quỹ đất KCN Cây Trường và các đợt phát hành trái phiếu dài hạn có lãi suất cố định.",
+      "RỦI RO ĐỐI VỚI DOANH NGHIỆP ÁP LỰC ĐÒN BẨY TÀI CHÍNH VÀ CƠ CẤU NỢ VAY — Tổng dư nợ vay ngắn và dài hạn tính đến Q2/2026 đạt 26.333,9 tỷ đồng (chiếm 42,1% tổng tài sản và D/E ở mức 1,17x), tạo chi phí lãi vay lớn (~539 tỷ đồng riêng trong Q2/2026).",
+      "CATALYST TĂNG TRƯỞNG CỤ THỂ VÀ ĐO LƯỜNG ĐƯỢC — Ba động lực chính dự kiến bứt phá trong H2/2026: (1) Hạch toán doanh thu từ thương mại chuyển nhượng các lô đất nền/đô thị quy mô lớn tại Thành phố Mới Bình Dương (đặc biệt là các hợp đồng đã ký với đối tác nước ngoài); (2) Bàn giao quỹ đất KCN Cây Trường (700 ha) bắt đầu đi vào vận hành commercial, đáp ứng nguồn cầu FDI đang phục hồi mạnh tại thủ phủ công nghiệp phía Nam; (3) Kế hoạch tăng vốn điều lệ và phát hành cổ phiếu riêng lẻ/ra công chúng giúp giảm áp lực đòn bẩy tài chính, tối ưu hóa chi phí lãi vay trong các quý tới.",
+      "VỊ THẾ ĐẦU NGÀNH KCN KHÔNG THỂ SAO CHÉP — BCM sở hữu lợi thế cạnh tranh vượt trội nhờ: (1) Quỹ đất sạch KCN lớn nhất cả nước với hơn 15.000 ha tập trung tại các thủ phủ công nghiệp Bình Dương, Bình Định và hệ sinh thái VSIP trải dài toàn quốc; (2) Mô hình tích hợp Khu công nghiệp - Đô thị - Dịch vụ độc quyền giúp tối ưu hóa biên lợi nhuận gộp mảng BĐS ở mức cao (>60%); (3) Liên doanh chiến lược VSIP mang lại nguồn lợi nhuận chia đều đặn (đóng góp 500-1.000 tỷ đồng/năm), tạo moat cạnh tranh bền vững và đảm bảo dòng tiền cổ tức ổn định cho doanh nghiệp."
     ],
     "theses": [],
     "history": [
+      {
+        "source": "SHS Research",
+        "title": "Báo cáo phân tích BCM",
+        "time": "21/09/2026 20:12",
+        "cats_added": 15,
+        "risks_added": 2
+      },
+      {
+        "source": "Vietinbank Securities Research",
+        "title": "Báo cáo phân tích BCM",
+        "time": "21/09/2026 20:12",
+        "cats_added": 15,
+        "risks_added": 10
+      },
+      {
+        "source": "NHSV",
+        "title": "BCM: Khuyến nghị MUA với giá mục tiêu 70,200 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "NHSV",
+        "title": "BCM: Khuyến nghị MUA với giá mục tiêu 70,200 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
       {
         "source": "NHSV",
         "title": "BCM: Khuyến nghị MUA với giá mục tiêu 70,200 đồng/cổ phiếu",
@@ -2711,7 +2920,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 20:12"
   },
   "HHV": {
     "ticker": "HHV",
@@ -2916,39 +3125,74 @@
   "PVS": {
     "ticker": "PVS",
     "catalysts": [
-      "Các đại dự án dầu khí trọng điểm ngoài khơi bước vào chu kỳ triển khai: Chuỗi dự án Khí Lô B - Ô Môn, Lạc Đà Vàng và Sư Tử Trắng 2B đảm bảo khối lượng công việc EPCI khổng lồ giai đoạn 2026-2030.",
-      "Được QatarEnergy lựa chọn cho các gói thầu cơ khí dầu khí quy mô lớn quốc tế, khẳng định năng lực tổng thầu EPCI và củng cố giá trị hợp đồng gối đầu (backlog) vững chắc.",
-      "Mở rộng đột phá sang mảng năng lượng tái tạo ngoài khơi với các hợp đồng chế tạo chân đế điện gió siêu trường siêu trọng (dự án Hải Long, Fengmiao tại Đài Loan và châu Âu).",
-      "Mảng dịch vụ tàu kỹ thuật dầu khí, căn cứ cảng và FSO/FPSO duy trì tỷ lệ lấp đầy và giá thuê cao, đem lại dòng tiền hoạt động (CFO) thặng dư và ổn định.",
-      "Doanh nghiệp sở hữu hệ thống căn cứ cảng nước sâu và bãi chế tạo cơ khí hàng hải quy mô lớn nhất Việt Nam tại Vũng Tàu, đáp ứng tiêu chuẩn khắt khe của các nhà thầu năng lượng toàn cầu.",
-      "Kế hoạch nâng vốn điều lệ thông qua chia cổ tức bằng cổ phiếu tỷ lệ 20% cùng chính sách cổ tức tiền mặt đều đặn củng cố cấu trúc tài chính vững mạnh.",
-      "Lợi thế dẫn đầu trong liên danh triển khai chuỗi dự án điện gió ngoài khơi xuất khẩu điện sang Singapore hợp tác cùng Sembcorp.",
-      "Dự phóng doanh thu thuần và LNST mảng M&C xây lắp dầu khí tăng trưởng mạnh 2 chữ số khi các phân kỳ đầu tư ngoài khơi được cấp quyết định FID.",
-      "Doanh thu dịch vụ chế tạo cơ khí ngoài khơi chiếm trên 50% tổng doanh thu và tiếp tục mở rộng công suất bãi chế tạo để đón sóng đầu tư năng lượng mới.",
-      "Quy mô tiền và tương đương tiền, tiền gửi ngân hàng dồi dào trên 10.000 tỷ đồng mang lại nguồn thu tài chính thặng dư và giảm thiểu rủi ro biến động lãi suất.",
-      "Chuỗi cung ứng khép kín từ khảo sát địa chấn, cung ứng tàu dịch vụ đến lắp đặt, vận hành và bảo dưỡng các công trình biển.",
-      "Biên lợi nhuận gộp mảng khảo sát địa chất, tàu kỹ thuật và dịch vụ cảng biển hồi phục mạnh theo đà tăng nhiệt của hoạt động E&P khu vực Đông Nam Á.",
-      "Kỳ vọng hoàn thành và vượt kế hoạch kinh doanh cả năm nhờ đóng góp tích cực từ các hợp đồng xuất khẩu cơ khí chế tạo.",
-      "Vị thế độc tôn về dịch vụ kỹ thuật dầu khí thượng nguồn tại Việt Nam, sẵn sàng đón đầu kế hoạch phát triển điện gió ngoài khơi theo Quy hoạch điện VIII.",
-      "Khoản người mua trả tiền trước và doanh thu chưa thực hiện từ các chủ đầu tư quốc tế đảm bảo dòng tiền thi công cho các đại dự án."
+      "PVS ghi nhận thu nhập một lần ròng 460 tỷ đồng  2Q26 từ khoản bồi thường chấm dứt hợp đồng        Nguồn: Dữ liệu công ty, KIS Research.",
+      "Doanh thu h ợp nhất 2Q26 tăng 16% n/n, ch ủ yếu nhờ mảng dịch vụ ngoài M&C (+55% n/n), trong khi doanh thu M&C giảm nhẹ 5% n/n Nguồn: Dữ liệu công ty, KIS Research Hình.",
+      "Tóm tắt lợi nhuận theo quý (Tỷ đồng, %, %p)   2Q25 3Q25 4Q25 1Q26 2Q26 q/q n/n  Doanh thu 7,359 9,630 9,716 8,699 8,589 (1.3) 16.7  Lợi nhuận hoạt động 22 (23) 621 232 (84) (136.4) (484.6)  Biên LN hoạt động 0.3 (0.2) 6.4 2.7 (1.0) (3.7) (1.3)  LN từ liên doanh liên kết 230 214 168 157 183 16.8 (20.4)  LNTT 453 380 987 528 756 43.1 66.9  LNST 315 334 972 435 563 29.2 78.4  Nguồn: Dữ liệu công ty, KIS Research.",
+      "Mức tăng trưởng mạnh chủ yếu phản ánh nhu  cầu E&P trong nước cao.   Lợi nhuận từ các liên doanh FSO/FPSO: Nhìn chung phù hợp với dự  phóng, đạt 158 tỷ đồng (-31% n/n).",
+      "KQKD các mảng kinh doanh cốt lõi như sau:   Cơ khí và xây lắp (M&C): Doanh thu giảm nhẹ 5% n/n, xuống 4.6 nghìn  tỷ đồng.",
+      "Dịch vụ Kỹ thuật Dầu khí (PVS)    Lợi nhuận thúc đẩy bởi thu nhập bất thường  ∙ Doanh thu 2Q26 tăng 17% n/n, LNST tăng 78% n/n  ∙ Khoản thu nhập một lần thúc đẩy KQKD  ∙ 2H26F: Triển vọng cốt lõi tích cực, tiềm năng thu nhập một lần  Thực tế: Lợi nhuận thúc đẩy bởi thu nhập bất thường  Trong 2Q26, PVS ghi nh ận doanh thu và LNST l ần lượt đạt 8.6 nghìn t ỷ đồng  (+17% n/n, ~88% d ự phóng KIS) và 563 t ỷ đồng (+78% n/n, ~118% dự phóng  KIS).",
+      "Quyết định đầu tư cuối cùng phải dựa trên các đánh giá cá  nhân của khách hàng, và báo cáo phân tích này và các tài li ệu marketing không thể được sử dụng như là chứng cứ cho các tranh chấp pháp  lý liên quan đến các quyết định đầu tư.",
+      "KIS Vietnam Securities Corp. không đảm bảo nhà đầu tư sẽ  đạt được lợi nhuận hoặc được chia sẻ lợi nhuận từ các khoản đầu tư.",
+      "Cho nên khi đưa ra các quyết định đầu tư cho riêng mình  các nhà đầu tư nên dựa vào đánh giá cá nhân hoặc tư vấn của chuyên gia tư vấn tài chính độc lập của mình và tùy theo tình hình tài chính cá  nhân, mục tiêu đầu tư và các quan đi ểm thích hợp khác trong t ừng hoàn cảnh.",
+      "Khi xây d ựng bản báo cáo này, chúng tôi hoàn toàn đã không cân nh ắc về  các mục tiêu đầu tư, tình hình tài chính hoặc các nhu cầu cụ thể của các nhà đầu tư.",
+      "Bản báo cáo này không nên và không được diễn giải như một đề nghị mua hoặc  bán hoặc khuyến khích mua hoặc bán bất cứ khoản đầu tư nào.",
+      "Người thực hiện: Phòng Phân tích                                               5  Dịch vụ Kỹ thuật Dầu khí (PVS)  Miễn Trừ Trách Nhiệm    Báo cáo phân tích này và các tại liệu marketing cho chứng khoán Việt Nam được thực hiện và phát hành bởi phòng phân tích của KIS Vietnam  Securities Corp., công ty được cấp giấy phép đầu tư của Ủy ban Chứng khoán Nhà nước Việt Nam.",
+      "KIS Vietnam Securities Corp. hoặc các bên liên quan không nh ận được khoản lợi ích nào từ dịch vụ ngân hàng đầu tư từ công ty được phân tích trong báo cáo  trong 12 tháng qua;.",
+      "Trong 2H26, chúng tôi duy trì quan điểm  tích cực với triển vọng lợi nhuận của PVS, được hỗ trợ bởi tiềm năng ghi nhận  lợi nhuận cao của mảng M&C và khả năng hoàn nhập dự phòng bảo hành liên  quan đến dự án Sao Vàng – Đại Nguyệt (số dư khoảng 684 tỷ đồng).",
+      "Tăng trưởng LNST mạnh chủ yếu được thúc đẩy bởi khoản thu nhập một  lần 460 tỷ đồng từ phí bồi thường chấm dứt hợp đồng của một dự án điện gió  ngoài khơi."
     ],
     "risks": [
-      "Tiến độ trao thầu chính thức và phê duyệt quyết định đầu tư cuối cùng (FID) các đại dự án chậm hơn kỳ vọng.",
-      "Biến động giá thép và chi phí nguyên vật liệu cơ khí có thể ảnh hưởng đến biên lợi nhuận của các hợp đồng EPC trọn gói.",
-      "Rủi ro tỷ giá và chi phí vận chuyển logistics quốc tế đối với các hợp đồng xuất khẩu kết cấu điện gió ngoài khơi.",
-      "Giá dầu thô thế giới biến động mạnh làm ảnh hưởng tới kế hoạch giải ngân thăm dò và khai thác của các nhà điều hành dầu khí.",
-      "Thời tiết ngoài khơi và mùa mưa bão có thể ảnh hưởng tới tiến độ hạ thủy và lắp đặt các khối kết cấu chân đế.",
-      "Rủi ro địa chính trị và tranh chấp chủ quyền tại các vùng biển khai thác dầu khí.",
-      "Cạnh tranh từ các nhà thầu cơ khí hàng hải trong khu vực Đông Nam Á và Trung Quốc đối với các gói thầu quốc tế.",
-      "Yêu cầu khắt khe về tỷ lệ nội địa hóa và chứng chỉ phát thải carbon trong chuỗi cung ứng thiết bị điện gió toàn cầu.",
-      "Áp lực tuyển dụng và duy trì đội ngũ kỹ sư, thợ hàn cơ khí bậc cao trong giai đoạn đồng loạt thi công nhiều đại dự án.",
-      "Rủi ro chậm thanh quyết toán các khối lượng công việc phát sinh ngoài hợp đồng cơ sở từ phía chủ đầu tư."
+      "(3) 15  49  7  78  (10) 0 10 20 30 40 50 60 70 80 90 0 100 200 300 400 500 600 Chi phí BH&QL (loại trừ dự phòng bảo  hành và dự phòng nợ xấu) yoy growth (tỷ đồng) (%) 34  (11) 34  140  (2) 51  73  38 45  78  (20) 0 20 40 60 80 100 120 140 160 0 200 400 600 800 1,000 1,200 LNST Tăng trưởng n/n(tỷ đồng) (%)        4  Dịch vụ Kỹ thuật Dầu khí (PVS)    ■ Nguyên tắc đánh giá của KIS Vietnam Securities Corp. với cổ phiếu dựa trên lợi nhuận kỳ vọng trong 12 tháng tới   MUA: Tổng lợi nhuận kỳ vọng là 15% hoặc hơn.   Nắm giữ: Tổng lợi nhuận kỳ vọng từ -5% đến 15%.   Bán: Tổng lợi nhuận kỳ vọng là -5% hoặc thấp hơn.   KIS Vietnam Securities Corp. không cung cấp giá mục tiêu với cổ phiếu khuyến nghị Nắm giữ hoặc Bán.    ■ Nguyên tắc đánh giá của KIS Vietnam Securities Corp. với ngành trong 12 tháng tới   Nâng tỷ trọng: Khuyến nghị tăng tỷ trọng của ngành trong danh mục so với tỷ trọng dựa trên vốn hóa của ngành trong VNIndex.   Trung lập: Khuyến nghị giữ tỷ trọng của ngành trong danh mục bằng với tỷ trọng dựa trên vốn hóa của ngành trong VNIndex.   Giảm tỷ trọng: Khuyến nghị giảm tỷ trọng của ngành trong danh mục so với tỷ trọng dựa trên vốn hóa của ngành trong VNIndex.    ■ Xác nhận của chuyên viên phân tích  Chúng tôi, chuyên viên phân tích thực hiện báo cáo này, xác nhận rằng báo cáo phản ánh chính xác quan điểm cá nhân của chúng tôi về công ty được phân tích  trong báo cáo.",
+      "Cơ hội và thách thức: triển vọng vẫn tích cực trong 2H26  Chúng tôi cho rằng doanh thu và LN g ộp mảng M&C thấp trong 2Q26 ch ủ yếu  phản ánh sự thận trọng của PVS trong vi ệc ghi nhận lợi nhuận trong bối cảnh  ghi nhận khoản thu nhập một lần lớn.",
+      "Chúng tôi lưu ý trong 2Q25, PVS trích l ập 101 t ỷ  đồng dự phòng nợ xấu liên quan đến Sao Mai – Bến Đình, trong khi 2Q26, PVS  ghi nhận hoàn nhập 16 tỷ đồng.",
+      "Loại trừ dự phòng bảo hành M&C và dự phòng nợ xấu, chi phí BH&QLDN  đạt 568 t ỷ đồng (+78% n/n).",
+      "Chúng tôi cho rằng KQKD  kém tích c ực chủ yếu phản ánh s ự thận trọng của PVS trong vi ệc ghi  nhận lợi nhuận hơn là điều kiện kinh doanh suy yếu.   Dịch vụ kỹ thuật ngoài M&C: Doanh thu và LN g ộp từ các dịch vụ kỹ  thuật khác ghi nhận tăng trưởng mạnh lần lượt 55% và 64%, đạt 4,009  tỷ đồng và 445 tỷ đồng.",
+      "Rủi ro tỷ giá và chi phí vận chuyển quốc tế đối với các hợp đồng xuất khẩu chân đế điện gió.",
+      "Biên lợi nhuận các dự án EPCI có thể bị ảnh hưởng bởi biến động giá thép và vật liệu chế tạo kết cấu ngoài khơi.",
+      "Tiến độ trao thầu chính thức các gói thầu FIDs của đại dự án Khí Lô B có thể chậm hơn kỳ vọng.",
+      "Phương pháp Định giá Tỷ trọng  DCF 39.882 80%  P/E 49.465 20%  Giá trị hợp lý 41.759 đồng/cp    Định giá bằng FCFE:  FCFE: tỷ đồng 2026F 2027F 2028F 2029F 2030F  Lợi nhuận sau thuế 2.209 1.986 2.369 2.345 2.320  Chi phí phi tiền mặt 512 392 398 449 440  Đầu tư TSCĐ -236 -266 -242 -241 -249  Đầu tư Vốn lưu động 781 -398 0 1.375 -803  Vay nợ ròng 100 -19 -93 -88 -137  FCFE 3.366 1.696 2.432 3.840 1.571   TỔNG CTCP DỊCH VỤ KỸ THUẬT DẦU KHÍ VIỆT NAM – PVS (HNX)  GIÁ MỤC TIÊU – 41.759 VND/CP (+21%)  vcbs.com.vn | 4    NPV giai đoạn 2026-2030F 9.218  NPV giai đoạn tăng trưởng vĩnh viễn (g = 2%) 7.120  Tiền mặt và tiền gửi ngân hàng 7.866  Giá trị VCSH 24.204  Số lượng CPLH (tr.cp) 614  Định giá 39.439    Định giá bằng FCFF:  FCFF: tỷ đồng 2026F 2027F 2028F 2029F 2030F  Lợi nhuận sau thuế 2.209 1.986 2.369 2.345 2.320  Chi phí phi tiền mặt 512 392 398 449 440  Lãi vay sau thuế 61 61 63 57 52  Đầu tư TSCĐ -236 -266 -242 -241 -249  Đầu tư V ốn lưu  động 781 -398 0 1.375 -803  FCFF 3.327 1.776 2.588 3.985 1.760  NPV giai đoạn 2026-2030F 9.633  NPV giai đoạn tăng trưởng vĩnh viễn (g = 2%) 8.316  Tổng giá trị doanh nghiệp 17.949  Tiền mặt và tiền gửi ngân hàng 7.866  Vay nợ ròng 1.067  Giá trị VCSH 24.748  Số lượng CPLH (tr.cp) 614  Định giá 40.326           PHỤ LỤC 1  TỔNG HỢP TÀI CHÍNH  vcbs.com.vn | 5    BÁO CÁO TÀI CHÍNH DỰ PHÓNG – Đơn vị: triệu đồng  Kết quả kinh doanh 2022 2023 2024 2025F 2026F Cân đối kế toán 2022 2023 2024 2025F 2026F  Doanh thu thuần 16.373 19.374 23.770 32.556 39.102 Tài sản   - Giá vốn hàng bán 15.458 18.335 22.705 30.747 37.164 + Tiền 5.219 5.757 11.422 11.585 14.157  Lợi nhuận gộp 915 1.039 1.065 1.809 1.939 + ĐTTC ngắn hạn 4.837 4.329 3.886 4.275 4.275   - Chi phí bán hàng 657 651 864 834 961 + Phải thu 5.047 4.185 6.244 7.303 8.562   - Chi phí quản lí DN 79 85 95 110 133 + Hàng tồn kho 1.090 1.470 1.830 3.234 3.035  Lợi nhuận HĐKD 828 967 1.235 1.275 1.339 + Khác 276 548 500 621 840   - (Lỗ) / lại tỷ giá 1 2 3 4 4 Tài sản ngắn hạn 16.470 16.290 23.882 27.018 30.868   - Lợi nhuận khác - - - - - + Tài sản dài hạn 124 123 97 31 31  EBIT 233 139 667 167 868 + Khấu hao lũy kế 3.048 3.391 3.588 4.777 4.953   - Chi phí lãi vay 51 73 64 68 69 + Tài sản dài hạn 9.549 10.009 10.567 11.279 11.800  LNTT 183 66 603 98 798 + ĐTTC dài hạn  4.918    4.945    4.730    4.873    4.873   - Thuế TNDN 1.174 1.277 1.553 2.156 2.683 + Khác 1.023 1.130 1.190 1.250 1.250  LNST 944 1.060 1.255 1.899 2.364 Tài sản dài hạn 9.454 10.126 10.195 11.548 11.293   - Lợi ích CĐTS 61 34 185 79 155 Tổng Tài sản 25.924 26.416 34.077 38.566 42.161  LNST CĐ CT Mẹ 884 1.026 1.070 1.821 2.209  EPS (đ) 1.279 1.513 1.492 2.664 3.232 Nợ & VCSH  EBITDA 705 632 1.268 963 1.380 + Phải trả (ngắn) 7.764 7.215 12.009 15.213 16.935  Tăng trưởng 2022 2023 2024 2025F 2026F + Vay ngắn hạn 752 1.176 869 189 276  Doanh thu 15% 18% 23% 37% 20% + Khác 676 668 1.060 933 1.436  LN HĐKD 16% 17% 28% 3% 5% Nợ ngắn hạn 9.192 9.060 13.938 16.335 18.647  LN Hợp nhất -15% -64% 813% -84% 711% + Vay dài hạn 624 564 790 777 790  LNST 39% 12% 18% 51% 24% + Phải trả dài hạn 3.678 3.812 5.399 6.022 6.035  EBIT -10% -40% 380% -75% 420% Nợ dài hạn 3.678 3.812 5.399 6.022 6.035  EPS 184% 18% -1% 79% 21% Tổng nợ 12.869 12.872 19.337 22.357 24.681  Tổng tài sản 4% 2% 29% 13% 9% + Vốn điều lệ 4.780 4.780 4.780 5.114 6.137  Nợ vay 11% 26% -5% -42% 10% + Cổ phiếu ưu đãi 1 2 3 4 4  VCSH 4% 4% 6% 11% 7% + Thặng dư 40 40 40 40 40  Khả năng sinh lời 2022 2023 2024 2025F 2026F + LN giữ lại 3.897 4.048 4.082 4.927 4.346  Tỷ suất LNG 6% 5% 4% 6% 5% + Lợi ích CĐTS 730 710 1.171 1.186 1.342  Tỷ suất LNST 6% 5% 5% 6% 6% Vốn chủ sở hữu 12.324 12.834 13.569 15.023 16.138  ROE DuPont 8% 8% 9% 13% 15% Tổng nguồn vốn 25.924 26.416 34.077 38.566 42.161  ROA DuPont 4% 4% 4% 5% 6%  Tỷ suất EBIT 1% 1% 3% 1% 2% Lưu chuyển tiền 2022 2023 2024 2025F 2026F  LNTT / LNST 19% 6% 48% 5% 34% Tiền đầu năm 5.747 5.219 5.757 11.422 11.585  LNTT / EBIT 78% 47% 90% 59% 92% LNST 1.276 1.277 1.553 2.156 2.209  Vòng quay TTS 63% 73% 70% 84% 93% + Khấu hao lũy kế 471 493 601 796 512  Đòn bẩy tài chính 104% 100% 143% 149% 153% + Điều chỉnh -1.307 -1.427 -850 -1.557 -364  ROIC 7% 7% 8% 12% 14% + Thay đổi VLĐ 1.057 -627 3.038 249 781  Hiệu quả hoạt động 2022 2023 2024 2025F 2026F Tiền từ HĐKD -1.727 818 1.062 -973 -236  Số ngày tồn kho 26 29 29 38 30 + Thanh lý TSCĐ 63 5 4 3 0  Số ngày phải thu 115 81 97 82 80 + Mua sắm TSCĐ -498 -899 -885 -1.621 -236  Số ngày phải trả 255 208 267 238 214 + Đầu tư ròng -1.292 1.712 1.943 645 0  Luân chuyển tiền (114) (97) (141) (117) (104) + Khác 0 0 0 0 0  COGS/Hàng tồn kho 14 12 12 10 12 Tiền từ HĐĐT -1.727 818 1.062 -973 -236  An toàn tài chính 2022 2023 2024 2025F 2026F + Cổ tức đã trả -430 -378 -379 -39 -430  TT hiện hành 1,8 1,8 1,7 1,7 1,7 + Tăng (giảm) vốn 0 0 0 0 0  TT nhanh 1,7 1,6 1,6 1,5 1,5 + Nợ ngắn hạn 0 0 0 0 87  TT tiền mặt 1,1 1,1 1,1 1,0 1,0 + Nợ dài hạn 0 0 0 0 13  Nợ / Tài sản 0,1 0,1 0,0 0,0 0,0 + Khác 108 345 577 -544 0  Nợ / Vốn sử dụng 0,1 0,1 0,1 0,1 0,1 Tiền từ HĐTC -321 -32 198 -583 -330  Nợ / Vốn CSH 0,1 0,1 0,1 0,1 0,1 Lưu chuyển tiền -551 501 5.603 87 2.573  Khả năng TT lãi vay 4,6 1,9 10,4 2,4 12,5 Tiền cuối năm 5.219 5.757 11.422 11.585 14.157       ĐIỀU KHOẢN SỬ DỤNG VÀ LIÊN HỆ  vcbs.com.vn | 6    ĐIỀU KHOẢN SỬ DỤNG  Báo cáo này và/ho ặc bất kỳ nhận định, thông tin nào trong báo cáo này không ph ải là các l ời chào mua hay bán b ất kỳ một sản  phẩm tài chính. chứng khoán nào được phân tích trong báo cáo và cũng không là sản phẩm tư vấn đầu tư hay ý kiến tư vấn đầu tư  nào của VCBS hay các đơn vị/thành viên liên quan đến VCBS.",
+      "Việc được QatarEnergy l ựa chọn cho gói th ầu quy mô l ớn này là yếu tố tích cực đối với  PVS, qua đó củng cố backlog, hỗ trợ triển vọng doanh thu mảng M&C và tiếp tục khẳng định  năng lực cạnh tranh của doanh nghiệp tại thị trường quốc tế."
     ],
     "theses": [
       "Năng lực thi công các kết cấu cơ khí dầu khí và chân đế điện gió siêu trường siêu trọng đạt chuẩn châu Âu",
       "Doanh nghiệp độc quyền cung cấp dịch vụ giàn khoan tự nâng và dịch vụ kỹ thuật giếng khoan ngoài khơi"
     ],
     "history": [
+      {
+        "source": "KIS Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "21/09/2026 20:08",
+        "cats_added": 15,
+        "risks_added": 8
+      },
+      {
+        "source": "VCBS Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "21/09/2026 20:08",
+        "cats_added": 15,
+        "risks_added": 5
+      },
+      {
+        "source": "KIS Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "21/09/2026 10:17",
+        "cats_added": 15,
+        "risks_added": 8
+      },
+      {
+        "source": "VPX Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "21/09/2026 10:17",
+        "cats_added": 15,
+        "risks_added": 3
+      },
+      {
+        "source": "VCBS Research",
+        "title": "Báo cáo phân tích PVS",
+        "time": "21/09/2026 10:17",
+        "cats_added": 15,
+        "risks_added": 5
+      },
       {
         "source": "VPX Research",
         "title": "Báo cáo phân tích PVS",
@@ -2999,7 +3243,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:44"
+    "last_updated": "21/09/2026 20:08"
   },
   "SIP": {
     "ticker": "SIP",
@@ -3177,6 +3421,62 @@
       {
         "source": "VNDS",
         "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 12:14",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 10:10",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
         "time": "20/09/2026 22:32",
         "cats_added": 7,
         "risks_added": 3
@@ -3210,7 +3510,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "22/09/2026 07:27"
   },
   "BAF": {
     "ticker": "BAF",
@@ -3234,6 +3534,62 @@
     "risks": [],
     "theses": [],
     "history": [
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "22/09/2026 07:27",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 20:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 19:46",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 15:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VNDS",
+        "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
       {
         "source": "VNDS",
         "title": "BAF: Báo cáo cập nhật KQKD Q2/2026",
@@ -3270,20 +3626,86 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "22/09/2026 07:27"
   },
   "GDA": {
     "ticker": "GDA",
     "catalysts": [
-      "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 511.4 tỷ đồng (vượt LNST 271.9 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào.",
-      "Chi phí xây dựng cơ bản dở dang (CIP) đạt 188.9 tỷ đồng (tăng +371.1% YoY), phản ánh chu kỳ đầu tư mở rộng tài sản cố định đang tăng tốc để đón đầu chu kỳ tăng trưởng mới.",
       "Dự phóng năm 2026, GDA đạt doanh thu thuần 15.662 tỷ đồng (+2,3% YoY) và LNST 311 tỷ đồng (LNST-CĐM 199 tỷ đồng), P/E dự phóng 2026F ở mức 7,4 lần và P/B dự phóng ở mức 0,5 lần.",
+      "GDA dự kiến hoàn thành chi trả cổ tức tiền mặt trong Q4/2026 với tỷ lệ 10% (1.000 đồng/cp, tỷ suất ~7,1%).",
       "Lũy kế 6T2026, doanh thu thuần đạt 6.655 tỷ đồng (-19% YoY) và LNST-CĐM đạt 143 tỷ đồng (-5% YoY), hoàn thành 42% kế hoạch doanh thu và 57% kế hoạch lợi nhuận năm.",
-      "GDA dự kiến hoàn thành chi trả cổ tức tiền mặt trong Q4/2026 với tỷ lệ 10% (1.000 đồng/cp, tỷ suất ~7,1%)."
+      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+      "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+      "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
     ],
     "risks": [],
     "theses": [],
     "history": [
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 12:14",
+        "cats_added": 5,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 10:10",
+        "cats_added": 5,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 5,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 5,
+        "risks_added": 0
+      },
       {
         "source": "VDS",
         "title": "GDA: Khuyến nghị MUA với giá mục tiêu 21,000 đồng/cổ phiếu",
@@ -3313,7 +3735,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "22/09/2026 07:27"
   },
   "MCH": {
     "ticker": "MCH",
@@ -3337,6 +3759,62 @@
     "risks": [],
     "theses": [],
     "history": [
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "22/09/2026 07:27",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 20:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 19:46",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 15:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 12:14",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 10:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "TCBS",
+        "title": "MCH: Báo cáo cập nhật 18/09/2026",
+        "time": "21/09/2026 08:06",
+        "cats_added": 15,
+        "risks_added": 0
+      },
       {
         "source": "TCBS",
         "title": "MCH: Báo cáo cập nhật 18/09/2026",
@@ -3366,7 +3844,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "22/09/2026 07:27"
   },
   "IDC": {
     "ticker": "IDC",
@@ -3396,6 +3874,34 @@
       {
         "source": "SSV",
         "title": "IDC: Khuyến nghị MUA với giá mục tiêu 44,100 đồng/cổ phiếu",
+        "time": "21/09/2026 12:14",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "SSV",
+        "title": "IDC: Khuyến nghị MUA với giá mục tiêu 44,100 đồng/cổ phiếu",
+        "time": "21/09/2026 10:10",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "SSV",
+        "title": "IDC: Khuyến nghị MUA với giá mục tiêu 44,100 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "SSV",
+        "title": "IDC: Khuyến nghị MUA với giá mục tiêu 44,100 đồng/cổ phiếu",
+        "time": "21/09/2026 08:06",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "SSV",
+        "title": "IDC: Khuyến nghị MUA với giá mục tiêu 44,100 đồng/cổ phiếu",
         "time": "20/09/2026 22:32",
         "cats_added": 7,
         "risks_added": 3
@@ -3422,6 +3928,254 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "20/09/2026 22:32"
+    "last_updated": "21/09/2026 12:14"
+  },
+  "BID": {
+    "ticker": "BID",
+    "catalysts": [
+      "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở",
+      "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
+      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+      "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+      "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
+      "Định giá P/E dự phóng 2026F ở mức 9,29x và P/B ở mức 1,28x với EPS đạt 3.911 đồng, BVPS đạt 28.368 đồng và ROE đạt 17,1%. Tỷ suất cổ tức dự phóng đạt 1,2%."
+    ],
+    "risks": [],
+    "theses": [],
+    "history": [
+      {
+        "source": "VDS",
+        "title": "BID: Khuyến nghị MUA với giá mục tiêu 45,500 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "BID: Khuyến nghị MUA với giá mục tiêu 45,500 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "BID: Khuyến nghị MUA với giá mục tiêu 45,500 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VDS",
+        "title": "BID: Khuyến nghị MUA với giá mục tiêu 45,500 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 15,
+        "risks_added": 0
+      }
+    ],
+    "last_updated": "22/09/2026 07:27"
+  },
+  "VPB": {
+    "ticker": "VPB",
+    "catalysts": [
+      "Hưởng lợi từ nguồn vốn ngoại chi phí thấp từ SMBC để tài trợ các dự án năng lượng xanh và chuỗi cung ứng FDI.",
+      "Công ty tài chính tiêu dùng FE Credit hoàn thành tái cơ cấu, vượt qua đáy chu kỳ và bắt đầu đóng góp lợi nhuận dương trở lại.",
+      "Nền tảng vốn chủ sở hữu vững chắc thuộc Top 2 hệ thống sau khi hoàn tất thương vụ bán vốn chiến lược cho SMBC Nhật Bản.",
+      "Ngân hàng có kế hoạch tăng vốn kỷ lục từ H2/2026 nhằm gia tăng dư địa tăng trưởng tín dụng."
+    ],
+    "risks": [
+      "Biên lãi thuần NIM nhạy cảm với biến động lãi suất huy động đầu vào.",
+      "Chi phí trích lập dự phòng rủi ro tín dụng duy trì ở mức cao trong các quý tới.",
+      "Tỷ lệ nợ xấu hợp nhất vẫn cần thời gian để xử lý triệt để tại công ty con FE Credit."
+    ],
+    "theses": [],
+    "history": [
+      {
+        "source": "FPTS",
+        "title": "VPB: Khuyến nghị MUA với giá mục tiêu 33,500 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VPB: Khuyến nghị MUA với giá mục tiêu 33,500 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VPB: Khuyến nghị MUA với giá mục tiêu 33,500 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "FPTS",
+        "title": "VPB: Khuyến nghị MUA với giá mục tiêu 33,500 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 5,
+        "risks_added": 3
+      }
+    ],
+    "last_updated": "22/09/2026 07:27"
+  },
+  "REE": {
+    "ticker": "REE",
+    "catalysts": [
+      "Cơ cấu tài chính an toàn với dòng tiền mặt dồi dào từ cổ tức các công ty liên kết điện, nước sạch.",
+      "Mảng cơ điện lạnh (M&E) ghi nhận các hợp đồng thi công cơ điện tại các đại công trình như Sân bay Long Thành và các nhà ga metro.",
+      "Pha thủy văn La Nina mưa nhiều tạo điều kiện thuận lợi cho các nhà máy thủy điện thuộc hệ thống REE vận hành hết công suất.",
+      "Tòa nhà văn phòng xanh E-Town 6 (chuẩn LEED Platinum) đi vào vận hành giúp gia tăng doanh thu mảng cho thuê văn phòng lên trên 1,000 tỷ đ/năm.",
+      "Định giá cổ phiếu REE năm 2026F tương ứng P/E ở mức 12,2x và P/B ở mức 1,6x với EPS dự phóng 4.766 đồng và ROE đạt 12,4%. Tỷ suất cổ tức tiền mặt dự phóng duy trì ở mức 1,5%.",
+      "Qua 2Q2026, REE đã hoàn thành lần lượt 40% kế hoạch doanh thu và 47,8% kế hoạch lợi nhuận sau thuế cả năm 2026."
+    ],
+    "risks": [
+      "Biến động chính sách giá điện và hợp đồng PPA đối với các dự án điện gió mới.",
+      "Tiến độ lấp đầy diện tích sàn văn phòng tòa nhà E-Town 6 có thể chậm lại trong bối cảnh nguồn cung văn phòng TP.HCM dồi dào.",
+      "Hiện tượng thời tiết chuyển từ La Nina sang El Nino có thể làm giảm sản lượng phát điện của các hồ thủy điện."
+    ],
+    "theses": [],
+    "history": [
+      {
+        "source": "KBSV",
+        "title": "REE: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "REE: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "REE: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "REE: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 6,
+        "risks_added": 3
+      }
+    ],
+    "last_updated": "22/09/2026 07:27"
+  },
+  "POW": {
+    "ticker": "POW",
+    "catalysts": [
+      "Là doanh nghiệp phát điện quy mô lớn nhất trên sàn chứng khoán, đóng vai trò sống còn trong an ninh năng lượng quốc gia.",
+      "Nhà máy Nhiệt điện Vũng Áng 1 hoạt động ổn định toàn bộ 2 tổ máy sau khi khắc phục xong sự cố kỹ thuật.",
+      "Nhu cầu tiêu thụ điện năng toàn quốc tăng trưởng trên 10%/năm đảm bảo sản lượng huy động tối đa cho các nhà máy điện khí và nhiệt điện than.",
+      "Hai nhà máy điện khí LNG Nhơn Trạch 3 & 4 (công suất 1,624 MW) hoàn thành và phát điện thương phẩm từ 2026, tăng doanh thu thêm 15,000 tỷ đ/năm.",
+      "Định giá P/E dự phóng 2026F ở mức 9,9x và P/B ở mức 1,2x với EPS đạt 1.821 đồng và ROE cải thiện lên 12,7%. Tỷ suất cổ tức dự phóng đạt 0,5%.",
+      "Kết quả kinh doanh 2Q2026 bứt phá giúp POW hoàn thành lần lượt 65% kế hoạch doanh thu và 420% kế hoạch lợi nhuận cả năm."
+    ],
+    "risks": [
+      "Rủi ro chậm thanh toán tiền điện từ Tập đoàn Điện lực Việt Nam (EVN).",
+      "Tiến độ hoàn thiện đường dây đấu nối và hạ tầng kho cảng LNG ảnh hưởng tới sản lượng phát điện của Nhơn Trạch 3 & 4.",
+      "Giá nguyên liệu khí LNG nhập khẩu thế giới neo cao ảnh hưởng tới khả năng cạnh tranh giá chào trên thị trường điện (CGM)."
+    ],
+    "theses": [],
+    "history": [
+      {
+        "source": "KBSV",
+        "title": "POW: Khuyến nghị MUA với giá mục tiêu 18,100 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "POW: Khuyến nghị MUA với giá mục tiêu 18,100 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "POW: Khuyến nghị MUA với giá mục tiêu 18,100 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "KBSV",
+        "title": "POW: Khuyến nghị MUA với giá mục tiêu 18,100 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 6,
+        "risks_added": 3
+      }
+    ],
+    "last_updated": "22/09/2026 07:27"
+  },
+  "DMX": {
+    "ticker": "DMX",
+    "catalysts": [
+      "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở",
+      "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
+      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+      "Kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+      "Kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
+      "Doanh nghiệp cam kết chính sách chi trả cổ tức bằng tiền mặt tối thiểu 50% lợi nhuận sau thuế hàng năm trong giai đoạn 2026F-2030F, với giá trị cổ tức dự kiến 4.000 đồng/cổ phần."
+    ],
+    "risks": [],
+    "theses": [],
+    "history": [
+      {
+        "source": "BVS",
+        "title": "DMX: Khuyến nghị OUTPERFORM với giá mục tiêu 96,000 đồng/cổ phiếu",
+        "time": "22/09/2026 07:27",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "BVS",
+        "title": "DMX: Khuyến nghị OUTPERFORM với giá mục tiêu 96,000 đồng/cổ phiếu",
+        "time": "21/09/2026 20:10",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "BVS",
+        "title": "DMX: Khuyến nghị OUTPERFORM với giá mục tiêu 96,000 đồng/cổ phiếu",
+        "time": "21/09/2026 19:46",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "BVS",
+        "title": "DMX: Khuyến nghị OUTPERFORM với giá mục tiêu 96,000 đồng/cổ phiếu",
+        "time": "21/09/2026 15:06",
+        "cats_added": 15,
+        "risks_added": 0
+      }
+    ],
+    "last_updated": "22/09/2026 07:27"
   }
 }
