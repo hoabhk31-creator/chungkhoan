@@ -123,9 +123,30 @@ def fetch_cafef_report_raw(ticker: str, report_type: str, year: int, quarter: in
                                 row_vals.append(0.0)
                         items[title] = row_vals
 
+            # 3. Phát hiện và loại bỏ dữ liệu bị nhân bản (tất cả cột cùng giá trị)
+            # Đây là nguyên nhân chính gây trùng lặp dữ liệu nhiều năm liên tiếp
+            if len(periods) >= 3:
+                items_cleaned = {}
+                for title, vals in items.items():
+                    if len(vals) >= 3:
+                        non_zero_vals = [v for v in vals if v != 0.0]
+                        # Nếu tất cả giá trị khác 0 đều giống nhau → dữ liệu bị nhân bản, bỏ qua
+                        if len(non_zero_vals) >= 2 and len(set(non_zero_vals)) == 1:
+                            # Chỉ giữ lại cột cuối cùng (mới nhất), các cột trước để 0.0
+                            last_idx = len(vals) - 1
+                            cleaned = [0.0] * len(vals)
+                            cleaned[last_idx] = vals[last_idx]
+                            items_cleaned[title] = cleaned
+                        else:
+                            items_cleaned[title] = vals
+                    else:
+                        items_cleaned[title] = vals
+                items = items_cleaned
+
             return periods, items
     except Exception:
         return [], {}
+
 
 
 # ----------------------------------------------------------------------
@@ -587,34 +608,35 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
     """
     raw_inc = res.get("raw_inc", {})
     if raw_inc:
-        for i in range(n_periods):
-            zero_count = sum(1 for vals in raw_inc.values() if i < len(vals) and vals[i] == 0)
-            if len(raw_inc) > 0 and zero_count >= len(raw_inc) * 0.75:
-                for key, vals in raw_inc.items():
-                    while len(vals) < n_periods:
-                        vals.append(0.0)
-                    if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
-                        vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
-                    elif i > 0 and vals[i-1] != 0:
-                        vals[i] = round(vals[i-1] * 1.05, 1)
-                    elif i < n_periods - 1 and vals[i+1] != 0:
-                        vals[i] = round(vals[i+1] * 0.95, 1)
+        # Đồng bộ các dòng tổng hợp quan trọng: chỉ fill kỳ có giá trị = 0
+        # KHÔNG ghi đè dữ liệu thực tế từ CafeF bằng dữ liệu aggregate SSI
         for key in list(raw_inc.keys()):
             kl = key.lower()
-            if "doanh thu thuần" in kl:
-                raw_inc[key] = list(res["revenue"][:n_periods])
-            elif "doanh thu bán hàng" in kl:
-                raw_inc[key] = [round(r * 1.01, 1) for r in res["revenue"][:n_periods]]
+            agg_vals = None
+            if "doanh thu thuần" in kl and "bán hàng" in kl:
+                agg_vals = res["revenue"][:n_periods]
+            elif "doanh thu bán hàng" in kl and "1." in kl:
+                agg_vals = [round(r * 1.005, 1) for r in res["revenue"][:n_periods]]
             elif "lợi nhuận sau thuế" in kl or "lnst" in kl or "công ty mẹ" in kl:
-                raw_inc[key] = list(res["net_profit"][:n_periods])
+                agg_vals = res["net_profit"][:n_periods]
             elif "lợi nhuận gộp" in kl:
-                raw_inc[key] = list(res["gross_profit"][:n_periods])
+                agg_vals = res["gross_profit"][:n_periods]
             elif "giá vốn" in kl:
-                raw_inc[key] = list(res["cogs"][:n_periods])
-            elif "chi phí tài chính" in kl or "chi phí lãi vay" in kl:
-                raw_inc[key] = list(res["financial_expense"][:n_periods])
+                agg_vals = res["cogs"][:n_periods]
+            elif "chi phí tài chính" in kl and "trong đó" not in kl:
+                agg_vals = res["financial_expense"][:n_periods]
             elif "lợi nhuận thuần từ hoạt động kinh doanh" in kl:
-                raw_inc[key] = list(res["operating_profit"][:n_periods])
+                agg_vals = res["operating_profit"][:n_periods]
+            
+            if agg_vals is not None:
+                cur = raw_inc[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    # Chỉ fill từ aggregate nếu kỳ đó thiếu data (= 0)
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_inc[key] = merged
 
         key_gp = next((k for k in raw_inc if "lợi nhuận gộp" in k.lower()), None)
         key_fr = next((k for k in raw_inc if "doanh thu hoạt động tài chính" in k.lower()), None)
@@ -669,6 +691,8 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
 
         res["raw_inc"] = raw_inc
     else:
+        # Khi không lấy được raw_inc từ CafeF, chỉ điền các dòng tổng hợp đã có thực tế
+        # KHÔNG tự suy diễn bằng hệ số ước tính để tránh dữ liệu giả
         rev_l = res["revenue"][:n_periods]
         np_l = res["net_profit"][:n_periods]
         cg_l = res["cogs"][:n_periods]
@@ -677,23 +701,13 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
         fe_l = res["financial_expense"][:n_periods]
         eps_l = _calc_eps_list(np_l, shares_mil)
         res["raw_inc"] = {
-            "1. Doanh thu bán hàng và cung cấp dịch vụ": [round(r * 1.01, 1) for r in rev_l],
-            "2. Các khoản giảm trừ doanh thu": [round(r * 0.01, 1) for r in rev_l],
             "3. Doanh thu thuần về bán hàng và cung cấp dịch vụ": list(rev_l),
             "4. Giá vốn hàng bán": list(cg_l),
             "5. Lợi nhuận gộp về bán hàng và cung cấp dịch vụ": list(gp_l),
-            "6. Doanh thu hoạt động tài chính": [round(r * 0.03, 1) for r in rev_l],
             "7. Chi phí tài chính": list(fe_l),
-            "- Trong đó: Chi phí lãi vay": [round(f * 0.9, 1) for f in fe_l],
-            "8. Chi phí bán hàng": [round(r * 0.04, 1) for r in rev_l],
-            "9. Chi phí quản lý doanh nghiệp": [round(r * 0.03, 1) for r in rev_l],
             "10. Lợi nhuận thuần từ hoạt động kinh doanh": list(op_l),
-            "11. Lợi nhuận khác": [round(r * 0.005, 1) for r in rev_l],
-            "12. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_l],
-            "13. Chi phí thuế TNDN hiện hành": [round(p * 0.25, 1) for p in np_l],
             "14. Lợi nhuận sau thuế của cổ đông công ty mẹ": list(np_l),
             "21. Lãi cơ bản trên cổ phiếu (*)": eps_l,
-            "22. Lãi suy giảm trên cổ phiếu (*)": eps_l
         }
 
     raw_bs = res.get("raw_bs", {})
@@ -949,18 +963,101 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     clean_ticker = ticker.upper().strip()
 
     # 0. Khử triệt để outlier ngoại lai do lỗi nhập liệu của nguồn cấp
+    # Đồng thời phát hiện và xóa dữ liệu bị fill trùng cho các năm trước niêm yết
+    from collections import Counter as _Counter
     for metric_key in ["revenue", "net_profit", "cogs", "gross_profit", "operating_profit", "financial_expense",
                        "total_assets", "short_term_assets", "cash_and_equivalents", "inventories",
                        "total_liabilities", "short_term_debt", "long_term_debt", "owner_equity",
                        "cfo", "cfi", "cff", "free_cash_flow"]:
         if metric_key in res and isinstance(res[metric_key], list):
-            res[metric_key] = _sanitize_series_outliers(res[metric_key])
+            vals = _sanitize_series_outliers(res[metric_key])
+            # Phát hiện block repetition: CafeF trả 4 cột/chunk, tất cả cùng giá trị
+            # Pattern: [A,A,A,A, B,B,B,B, C,C,C,C] → giữ lại chỉ [0,0,0,A, 0,0,0,B, 0,0,0,C]
+            if len(vals) >= 6 and mode == "year":
+                # Detect block size: tìm N sao cho vals[i]==vals[i+1]==...==vals[i+N-1] nhưng vals[i+N] khác
+                # Scan lên đến 5 chunks
+                for block_size in [4, 3, 2]:
+                    non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
+                    if len(non_zero_pos) < block_size * 2:
+                        continue
+                    # Kiểm tra xem có pattern block_size: mỗi cụm block_size kỳ liên tiếp có cùng giá trị
+                    blocks_found = 0
+                    i = 0
+                    non_z_vals = [vals[p] for p in non_zero_pos]
+                    while i + block_size <= len(non_z_vals):
+                        block = non_z_vals[i:i+block_size]
+                        if len(set(block)) == 1:
+                            blocks_found += 1
+                        i += block_size
+                    # Nếu >= 3 block đều có cùng giá trị nội tại → đây là block repetition từ CafeF
+                    total_complete_blocks = len(non_z_vals) // block_size
+                    if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
+                        # Xóa tất cả trừ kỳ cuối trong mỗi block
+                        i = 0
+                        while i + block_size <= len(non_zero_pos):
+                            block_indices = non_zero_pos[i:i+block_size]
+                            block_vals = [vals[bi] for bi in block_indices]
+                            if len(set(block_vals)) == 1:
+                                # Giữ lại kỳ cuối của block, reset các kỳ trước
+                                for bi in block_indices[:-1]:
+                                    vals[bi] = 0.0
+                            i += block_size
+                        break  # Đã xử lý xong
+            res[metric_key] = vals
 
+
+    # Phát hiện và xóa dữ liệu bị nhân bản trong raw_inc/raw_bs/raw_cf
+    # Nếu >= 3 kỳ liên tiếp có cùng giá trị khác 0 → đó là dữ liệu bị copy → reset về 0.0
     for raw_sec in ["raw_inc", "raw_bs", "raw_cf"]:
         if raw_sec in res and isinstance(res[raw_sec], dict):
             for row_k in list(res[raw_sec].keys()):
                 if isinstance(res[raw_sec][row_k], list):
-                    res[raw_sec][row_k] = _sanitize_series_outliers(res[raw_sec][row_k])
+                    vals = res[raw_sec][row_k]
+                    # Sanitize outliers
+                    vals = _sanitize_series_outliers(vals)
+                    # Phát hiện block repetition pattern (giống aggregate metrics)
+                    if len(vals) >= 6 and mode == "year":
+                        for block_size in [4, 3, 2]:
+                            non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
+                            if len(non_zero_pos) < block_size * 2:
+                                continue
+                            blocks_found = 0
+                            idx = 0
+                            non_z_vals = [vals[p] for p in non_zero_pos]
+                            while idx + block_size <= len(non_z_vals):
+                                block = non_z_vals[idx:idx+block_size]
+                                if len(set(block)) == 1:
+                                    blocks_found += 1
+                                idx += block_size
+                            total_complete_blocks = len(non_z_vals) // block_size
+                            if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
+                                idx = 0
+                                while idx + block_size <= len(non_zero_pos):
+                                    block_indices = non_zero_pos[idx:idx+block_size]
+                                    block_vals = [vals[bi] for bi in block_indices]
+                                    if len(set(block_vals)) == 1:
+                                        for bi in block_indices[:-1]:
+                                            vals[bi] = 0.0
+                                    idx += block_size
+                                break
+                    # Phát hiện chuỗi liên tiếp cùng giá trị (>= 3)
+                    elif len(vals) >= 3:
+                        i = 0
+                        while i < len(vals):
+                            if vals[i] != 0.0:
+                                run_len = 1
+                                j = i + 1
+                                while j < len(vals) and vals[j] == vals[i]:
+                                    run_len += 1
+                                    j += 1
+                                if run_len >= 3:
+                                    for k in range(i, j - 1):
+                                        vals[k] = 0.0
+                                i = j
+                            else:
+                                i += 1
+
+                    res[raw_sec][row_k] = vals
 
     # 1. Nạp dữ liệu kiểm toán chuẩn xác nếu mã nằm trong danh sách đặc thù
     if mode == "quarter" and clean_ticker in CURATED_QUARTERLY_DATA:
@@ -1224,9 +1321,43 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     elif ind_model == "insurance":
         return _build_insurance_statements(res, clean_ticker, n_periods, shares_mil)
     elif ind_model == "real_estate":
-        return _build_real_estate_statements(res, clean_ticker, n_periods, shares_mil)
+        res = _build_real_estate_statements(res, clean_ticker, n_periods, shares_mil)
     else:
-        return _build_general_statements(res, clean_ticker, n_periods, shares_mil)
+        res = _build_general_statements(res, clean_ticker, n_periods, shares_mil)
+
+    # Post-build: Apply block dedup lại sau khi builder có thể đã rebuild raw_inc từ aggregate
+    if mode == "year":
+        for raw_sec in ["raw_inc", "raw_bs", "raw_cf"]:
+            if raw_sec in res and isinstance(res[raw_sec], dict):
+                for row_k in list(res[raw_sec].keys()):
+                    if isinstance(res[raw_sec][row_k], list):
+                        vals = res[raw_sec][row_k]
+                        for block_size in [4, 3, 2]:
+                            non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
+                            if len(non_zero_pos) < block_size * 2:
+                                continue
+                            blocks_found = 0
+                            idx = 0
+                            non_z_vals = [vals[p] for p in non_zero_pos]
+                            while idx + block_size <= len(non_z_vals):
+                                block = non_z_vals[idx:idx+block_size]
+                                if len(set(block)) == 1:
+                                    blocks_found += 1
+                                idx += block_size
+                            total_complete_blocks = len(non_z_vals) // block_size
+                            if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
+                                idx = 0
+                                while idx + block_size <= len(non_zero_pos):
+                                    block_indices = non_zero_pos[idx:idx+block_size]
+                                    block_vals = [vals[bi] for bi in block_indices]
+                                    if len(set(block_vals)) == 1:
+                                        for bi in block_indices[:-1]:
+                                            vals[bi] = 0.0
+                                    idx += block_size
+                                break
+                        res[raw_sec][row_k] = vals
+
+    return res
 
 
 def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Union[int, str] = 24) -> Dict[str, Any]:

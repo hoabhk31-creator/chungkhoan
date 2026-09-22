@@ -1632,9 +1632,13 @@ function renderMatrixTable(report) {
             </div>
         </td>`;
     });
+    // Tổng hợp dự phóng LNST từ các báo cáo hợp lệ
+    const validNpats = reports.filter(r => r.npat_forecast && r.npat_forecast !== '—' && r.npat_forecast !== 'N/A');
+    const npatsStr = validNpats.length > 0 
+        ? validNpats.map(r => `${r.institution ? r.institution.split(' ')[0] : 'CTCK'}: ${r.npat_forecast}`).join(' | ')
+        : 'Chưa có đủ số liệu dự phóng';
     tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[210px]">
-        <div class="text-emerald-400 font-bold">Đồng thuận tăng trưởng cao</div>
-        <div class="text-slate-400 text-[10px]">Chênh lệch LNST giữa bên cao nhất và thấp nhất là 31.7%</div>
+        <div class="text-slate-400 text-[10px]">${npatsStr}</div>
     </td></tr>`;
 
     // 4. Luận điểm tăng trưởng then chốt (Key Catalysts)
@@ -1664,17 +1668,22 @@ function renderMatrixTable(report) {
                 validCats.push(cClean);
             }
         });
-        if (validCats.length === 0) validCats.push("Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành.");
-        r.key_catalysts = validCats.slice(0, 15);
-
-        r.key_catalysts.forEach((c, idx) => {
-            catHtml += `<li class="flex items-start gap-1.5">
-                <span class="text-cyan-400 font-mono font-bold shrink-0">${idx + 1}.</span>
-                <span>${c}</span>
-            </li>`;
-        });
-        catHtml += `</ul>`;
-        tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
+        if (validCats.length === 0) {
+            // KHÔNG dùng text mặc định chung — hiển thị trống để tránh trùng lặp nội dung giữa CTCK
+            catHtml += `<li class="text-slate-500 text-[10px] italic text-center py-2">Chưa trích xuất được luận điểm từ báo cáo này</li>`;
+            catHtml += `</ul>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
+        } else {
+            r.key_catalysts = validCats.slice(0, 15);
+            r.key_catalysts.forEach((c, idx) => {
+                catHtml += `<li class="flex items-start gap-1.5">
+                    <span class="text-cyan-400 font-mono font-bold shrink-0">${idx + 1}.</span>
+                    <span>${c}</span>
+                </li>`;
+            });
+            catHtml += `</ul>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
+        }
     });
     
     // Cột đồng thuận Catalysts (tối đa 15 catalysts từ kho AI và CTCK)
@@ -1684,19 +1693,18 @@ function renderMatrixTable(report) {
     </div>`;
     const cCats = (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0)
         ? report.consensus_summary.consensual_catalysts.slice(0, 15)
-        : [
-            "Đại dự án mở rộng công suất vận hành thương mại",
-            "Bảo hộ thương mại & chiếm lĩnh thị phần nội địa",
-            "Tự chủ chuỗi giá trị và tối ưu chi phí biên",
-            "Cơ cấu tài chính an toàn & dòng tiền CFO thặng dư"
-        ];
+        : [];
     consensualCatsHtml += `<ul class="space-y-1 text-slate-300 text-[10px]">`;
-    cCats.forEach(c => {
-        consensualCatsHtml += `<li class="flex items-start gap-1">
-            <span class="text-cyan-400 font-bold shrink-0">•</span>
-            <span>${c}</span>
-        </li>`;
-    });
+    if (cCats.length === 0) {
+        consensualCatsHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
+    } else {
+        cCats.forEach(c => {
+            consensualCatsHtml += `<li class="flex items-start gap-1">
+                <span class="text-cyan-400 font-bold shrink-0">•</span>
+                <span>${c}</span>
+            </li>`;
+        });
+    }
     consensualCatsHtml += `</ul>`;
     tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 min-w-[240px] align-top">${consensualCatsHtml}</td></tr>`;
 
@@ -1727,17 +1735,22 @@ function renderMatrixTable(report) {
                 validRisks.push(kClean);
             }
         });
-        if (validRisks.length === 0) validRisks.push("Biến động chi phí nguyên vật liệu đầu vào và lãi suất.");
-        r.key_risks = validRisks.slice(0, 10);
-
-        r.key_risks.forEach((k, idx) => {
-            riskHtml += `<li class="flex items-start gap-1.5">
-                <span class="text-rose-500 shrink-0 font-bold">•</span>
-                <span>${k}</span>
-            </li>`;
-        });
-        riskHtml += `</ul>`;
-        tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${riskHtml}</td>`;
+        if (validRisks.length === 0) {
+            // KHÔNG dùng text rủi ro mặc định chung — hiển thị trống để tránh trùng lặp
+            riskHtml += `<li class="text-slate-500 text-[10px] italic text-center py-2">Chưa trích xuất được rủi ro từ báo cáo này</li>`;
+            riskHtml += `</ul>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${riskHtml}</td>`;
+        } else {
+            r.key_risks = validRisks.slice(0, 10);
+            r.key_risks.forEach((k, idx) => {
+                riskHtml += `<li class="flex items-start gap-1.5">
+                    <span class="text-rose-500 shrink-0 font-bold">•</span>
+                    <span>${k}</span>
+                </li>`;
+            });
+            riskHtml += `</ul>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${riskHtml}</td>`;
+        }
     });
     
     // Cột đồng thuận Risks
@@ -1747,18 +1760,18 @@ function renderMatrixTable(report) {
     </div>`;
     const cRisks = (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0)
         ? report.consensus_summary.consensual_risks.slice(0, 10)
-        : [
-            "Biến động giá nguyên liệu thế giới và tỷ giá USD/VND",
-            "Sức cầu thị trường trong nước phục hồi chậm hơn kỳ vọng",
-            "Rào cản kỹ thuật và các vụ kiện phòng vệ thương mại quốc tế"
-        ];
+        : [];
     consensualRisksHtml += `<ul class="space-y-1 text-rose-300/90 text-[10px]">`;
-    cRisks.forEach(k => {
-        consensualRisksHtml += `<li class="flex items-start gap-1">
-            <span class="text-rose-500 font-bold shrink-0">•</span>
-            <span>${k}</span>
-        </li>`;
-    });
+    if (cRisks.length === 0) {
+        consensualRisksHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
+    } else {
+        cRisks.forEach(k => {
+            consensualRisksHtml += `<li class="flex items-start gap-1">
+                <span class="text-rose-500 font-bold shrink-0">•</span>
+                <span>${k}</span>
+            </li>`;
+        });
+    }
     consensualRisksHtml += `</ul>`;
     tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 min-w-[240px] align-top">${consensualRisksHtml}</td></tr>`;
 
@@ -4898,26 +4911,18 @@ function renderBctcTable(stm, subtab) {
                 rows += formatBctcRow(title, vals);
             }
         } else {
+            // Khi không có raw_inc từ backend: chỉ hiển thị các dòng tổng hợp thực tế
+            // KHÔNG tự suy diễn bằng hệ số ước tính (vi phạm nguyên tắc Fact & Data First)
             if (indModel === "bank") {
                 rows += renderRowFallback("1. Thu nhập lãi thuần (NII)", activeStm.revenue, true, true);
-                rows += renderRowFallback("2. Thu nhập ngoài lãi & dịch vụ", (activeStm.revenue || []).map(v => Math.round(v * 0.25)));
-                rows += renderRowFallback("3. Tổng thu nhập hoạt động (TOI)", (activeStm.revenue || []).map(v => Math.round(v * 1.25)), true, true);
-                rows += renderRowFallback("4. Chi phí hoạt động (OPEX)", (activeStm.revenue || []).map(v => Math.round(v * 0.4)));
-                rows += renderRowFallback("5. Chi phí trích lập dự phòng RRTD", (activeStm.revenue || []).map(v => Math.round(v * 0.15)));
-                rows += renderRowFallback("6. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
+                rows += renderRowFallback("2. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
             } else if (indModel === "securities") {
                 rows += renderRowFallback("1. Tổng doanh thu hoạt động", activeStm.revenue, true, true);
-                rows += renderRowFallback("   • Lãi từ TSTC FVTPL (Tự doanh)", (activeStm.revenue || []).map(v => Math.round(v * 0.42)));
-                rows += renderRowFallback("   • Lãi từ cho vay & margin", (activeStm.revenue || []).map(v => Math.round(v * 0.35)));
-                rows += renderRowFallback("   • Doanh thu nghiệp vụ môi giới", (activeStm.revenue || []).map(v => Math.round(v * 0.18)));
-                rows += renderRowFallback("2. Chi phí hoạt động", (activeStm.revenue || []).map(v => Math.round(v * 0.38)));
-                rows += renderRowFallback("3. Chi phí tài chính (lãi vay margin)", activeStm.financial_expense);
-                rows += renderRowFallback("4. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
+                rows += renderRowFallback("2. Chi phí tài chính (lãi vay margin)", activeStm.financial_expense);
+                rows += renderRowFallback("3. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
             } else if (indModel === "insurance") {
                 rows += renderRowFallback("1. Doanh thu thuần hoạt động bảo hiểm", activeStm.revenue, true, true);
-                rows += renderRowFallback("2. Chi bồi thường & hoa hồng bảo hiểm", activeStm.cogs);
-                rows += renderRowFallback("3. Doanh thu hoạt động tài chính", (activeStm.revenue || []).map(v => Math.round(v * 0.3)));
-                rows += renderRowFallback("4. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
+                rows += renderRowFallback("2. Lợi nhuận sau thuế (LNST)", activeStm.net_profit, true, true);
             } else if (indModel === "real_estate") {
                 rows += renderRowFallback("1. Doanh thu thuần (Bàn giao BĐS)", activeStm.revenue, true, true);
                 rows += renderRowFallback("2. Giá vốn bàn giao dự án", activeStm.cogs);
@@ -4940,31 +4945,24 @@ function renderBctcTable(stm, subtab) {
                 rows += formatBctcRow(title, vals);
             }
         } else {
+            // Khi không có raw_bs: chỉ hiển thị các dòng tổng hợp thực tế
+            // KHÔNG tự suy diễn các dòng chi tiết bằng hệ số tỷ lệ ngành
             if (indModel === "bank") {
                 rows += renderRowFallback("TỔNG CỘNG TÀI SẢN", activeStm.total_assets, true, true);
-                rows += renderRowFallback("   • Tiền gửi và cho vay TCTD khác", (activeStm.total_assets || []).map(v => Math.round(v * 0.15)));
-                rows += renderRowFallback("   • Cho vay khách hàng (Dư nợ tín dụng)", (activeStm.total_assets || []).map(v => Math.round(v * 0.65)), true);
-                rows += renderRowFallback("   • Chứng khoán đầu tư", (activeStm.total_assets || []).map(v => Math.round(v * 0.14)));
-                rows += renderRowFallback("TỔNG CỘNG NGUỒN VỐN", activeStm.total_assets, true, true);
-                rows += renderRowFallback("   • Tiền gửi của khách hàng (Huy động)", (activeStm.total_liabilities || []).map(v => Math.round(v * 0.78)), true);
-                rows += renderRowFallback("   • Tiền gửi và vay các TCTD khác", (activeStm.total_liabilities || []).map(v => Math.round(v * 0.12)));
-                rows += renderRowFallback("   • Phát hành giấy tờ có giá", (activeStm.total_liabilities || []).map(v => Math.round(v * 0.06)));
-                rows += renderRowFallback("   • Vốn chủ sở hữu (VCSH)", activeStm.owner_equity, true, true);
+                rows += renderRowFallback("   • Tiền mặt & gửi NHNN", activeStm.cash_and_equivalents);
+                rows += renderRowFallback("NỢ PHẢI TRẢ", activeStm.total_liabilities, true);
+                rows += renderRowFallback("VỐN CHỦ SỞ HỮU", activeStm.owner_equity, true, true);
             } else if (indModel === "securities") {
                 rows += renderRowFallback("TỔNG CỘNG TÀI SẢN", activeStm.total_assets, true, true);
-                rows += renderRowFallback("   • Tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL)", (activeStm.total_assets || []).map(v => Math.round(v * 0.38)), true);
-                rows += renderRowFallback("   • Các khoản cho vay (Dư nợ Margin)", (activeStm.total_assets || []).map(v => Math.round(v * 0.36)), true);
-                rows += renderRowFallback("   • Tiền và các khoản tương đương tiền", activeStm.cash_and_equivalents);
+                rows += renderRowFallback("   • Tiền & tương đương tiền", activeStm.cash_and_equivalents);
                 rows += renderRowFallback("NỢ PHẢI TRẢ", activeStm.total_liabilities, true);
                 rows += renderRowFallback("   • Vay ngắn hạn (Tài trợ Margin)", activeStm.short_term_debt, true);
                 rows += renderRowFallback("VỐN CHỦ SỞ HỮU", activeStm.owner_equity, true, true);
             } else if (indModel === "real_estate") {
                 rows += renderRowFallback("1. Tổng tài sản", activeStm.total_assets, true, true);
                 rows += renderRowFallback("   • Tiền & tương đương tiền", activeStm.cash_and_equivalents);
-                rows += renderRowFallback("   • Chi phí SXKD dở dang (Dự án BĐS dở dang)", activeStm.inventories, true);
-                rows += renderRowFallback("   • Phải thu ngắn hạn của khách hàng", (activeStm.short_term_assets || []).map(v => Math.round(v * 0.3)));
+                rows += renderRowFallback("   • Chi phí SXKD dở dang (Dự án BĐS)", activeStm.inventories, true);
                 rows += renderRowFallback("2. Nợ phải trả", activeStm.total_liabilities, true);
-                rows += renderRowFallback("   • Người mua trả tiền trước ngắn hạn (Cọc dự án)", (activeStm.total_liabilities || []).map(v => Math.round(v * 0.35)), true);
                 rows += renderRowFallback("   • Vay & nợ thuê tài chính", (activeStm.short_term_debt || []).map((v, idx) => v + (activeStm.long_term_debt?.[idx] || 0)));
                 rows += renderRowFallback("3. Vốn chủ sở hữu (VCSH)", activeStm.owner_equity, true, true);
             } else {

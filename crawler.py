@@ -130,6 +130,9 @@ _SSI_EXCHANGE_CACHE: Dict[str, Dict[str, Any]] = {}
 _SSI_EXCHANGE_CACHE_TS: float = 0.0
 _SSI_FETCH_LOCK: Optional[asyncio.Lock] = None
 
+# Cache cho Vietstock eDocs API (TTL 300s) để tránh gọi lại liên tục
+_EDOCS_CACHE: Dict[str, Any] = {}
+
 
 async def fetch_ssi_live_stock_quote(ticker: str, force_refresh: bool = False) -> Optional[Dict[str, Any]]:
     """
@@ -1224,16 +1227,12 @@ def extract_detailed_catalysts_and_risks(
                 if cat_str not in extracted_cats:
                     extracted_cats.append(cat_str)
 
-    # 2. Rủi ro thực tế bổ trợ theo ngành nếu bài viết không có câu rủi ro riêng
-    if not extracted_risks:
-        extracted_risks = get_sector_risks(clean_ticker, sector, comp_name, index=index)
+    # 2. Nếu bài viết không có câu rủi ro riêng → để rỗng, KHÔNG inject sector risks
+    # (sector risks giống nhau cho mọi CTCK sẽ gây cross-contamination)
+    # Frontend hiển thị "Chưa trích xuất" nếu rỗng
 
-    # 3. Nếu bài viết quá ngắn không trích đủ catalysts, lấy từ sector_catalysts đã được phân loại chuẩn
-    if len(extracted_cats) < 2:
-        sector_cats = get_sector_catalysts(clean_ticker, sector, comp_name, index=index)
-        for sc in sector_cats:
-            if sc not in extracted_cats:
-                extracted_cats.append(sc)
+    # 3. Nếu bài viết quá ngắn không trích đủ catalysts → để nguyên, KHÔNG bổ sung sector catalysts
+    # (mỗi CTCK phải có nội dung riêng từ báo cáo của mình)
 
     # 4. Đảm bảo chuẩn hóa ngành nghề chuyên biệt (ví dụ Ngân hàng tuyệt đối không lẫn từ cấm sản xuất)
     is_banking = any(k in (sector or "").lower() or k in (comp_name or "").lower() for k in ["ngân hàng", "bank"]) or clean_ticker in ["ACB", "VCB", "MBB", "TCB", "VPB", "CTG", "BID", "HDB", "STB", "TPB", "SHB", "VIB", "LPB"]
@@ -1241,11 +1240,6 @@ def extract_detailed_catalysts_and_risks(
         mfg_words = ["công suất", "chuỗi cung ứng", "nguyên vật liệu", "xuất khẩu"]
         extracted_cats = [c for c in extracted_cats if not any(w in c.lower() for w in mfg_words)]
         extracted_risks = [r for r in extracted_risks if not any(w in r.lower() for w in mfg_words)]
-        banking_terms = ["tín dụng", "nim", "casa", "car", "nợ xấu", "lãi", "tài chính", "dự phòng"]
-        combined = " ".join(extracted_cats[:10] + extracted_risks[:10]).lower()
-        if not any(term in combined for term in banking_terms):
-            sec_cats = get_sector_catalysts(clean_ticker, sector, comp_name, index=index)
-            extracted_cats = sec_cats[:2] + extracted_cats
 
     # Lọc lần cuối đảm bảo 100% không có câu disclaimer và lấy tối đa 10 điểm trọn vẹn nội dung
     final_cats = [c for c in extracted_cats if not is_disclaimer_or_boilerplate(c)][:10]
@@ -1329,7 +1323,48 @@ def extract_forecasts_from_content(content: str) -> Tuple[str, str]:
     return rev_f, npat_f
 
 
+
 _PDF_CATALYSTS_CACHE: Dict[str, Tuple[List[str], List[str]]] = {}
+
+# Persistent disk cache cho PDF: lưu vào file để không mất sau khi restart server
+import os as _os
+_PDF_CACHE_DISK_PATH = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "pdf_catalysts_cache.json")
+
+def _load_pdf_disk_cache():
+    """Load persistent PDF catalysts cache từ disk khi server khởi động."""
+    global _PDF_CATALYSTS_CACHE
+    try:
+        if _os.path.exists(_PDF_CACHE_DISK_PATH):
+            with open(_PDF_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+            now = time.time()
+            loaded = 0
+            for url, entry in saved.items():
+                # Chỉ load các entry còn mới (< 48 giờ) để tránh cache cũ kỹ
+                saved_ts = entry.get("ts", 0)
+                if (now - saved_ts) < 172800:
+                    _PDF_CATALYSTS_CACHE[url] = (entry.get("cats", []), entry.get("risks", []))
+                    loaded += 1
+            print(f"[PDF-CACHE] Loaded {loaded} entries from disk cache.")
+    except Exception as e:
+        print(f"[PDF-CACHE] Could not load disk cache: {e}")
+
+def _save_pdf_disk_cache():
+    """Lưu PDF catalysts cache ra disk để tồn tại qua restart."""
+    try:
+        _os.makedirs(_os.path.dirname(_PDF_CACHE_DISK_PATH), exist_ok=True)
+        now = time.time()
+        to_save = {}
+        for url, (cats, risks) in _PDF_CATALYSTS_CACHE.items():
+            to_save[url] = {"ts": now, "cats": cats, "risks": risks}
+        with open(_PDF_CACHE_DISK_PATH, "w", encoding="utf-8") as f:
+            json.dump(to_save, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[PDF-CACHE] Could not save disk cache: {e}")
+
+# Load ngay khi module được import
+_load_pdf_disk_cache()
+
 
 
 def clean_vietnamese_pdf_spacing(text: str) -> str:
@@ -1365,7 +1400,7 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
     }
 
     try:
-        async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
+        async with httpx.AsyncClient(headers=headers, timeout=5.0, follow_redirects=True) as client:
             resp = await client.get(pdf_url)
             if resp.status_code == 200 and (resp.content.startswith(b"%PDF") or "pdf" in resp.headers.get("content-type", "").lower()):
                 reader = PdfReader(io.BytesIO(resp.content))
@@ -1440,6 +1475,7 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
                 if all_cats:
                     res = (all_cats, extracted_risks[:10])
                     _PDF_CATALYSTS_CACHE[pdf_url] = res
+                    _save_pdf_disk_cache()  # Lưu persistent để không mất sau restart
                     return res
     except Exception as e:
         print(f"Error extracting catalysts from PDF {pdf_url}: {e}")
@@ -1461,6 +1497,13 @@ async def fetch_edocs_reports(ticker: str = "", limit: int = 8) -> List[Dict[str
     else:
         url = f"https://edocs.vietstock.vn/Home/Report_GetAllByStockCode_Paging?xml=&pageIndex=1&pageSize={limit}"
 
+    # In-memory cache với TTL 300s để tránh gọi liên tục Vietstock eDocs
+    _cache_key = f"edocs_{clean_ticker}_{limit}"
+    _now = time.time()
+    _cached = _EDOCS_CACHE.get(_cache_key)
+    if _cached and (_now - _cached[0]) < 300.0:
+        return _cached[1]
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
@@ -1475,11 +1518,14 @@ async def fetch_edocs_reports(ticker: str = "", limit: int = 8) -> List[Dict[str
                 data = resp.json()
                 raw_items = data.get("Data", [])
                 if raw_items:
+                    _EDOCS_CACHE[_cache_key] = (_now, raw_items)
                     return raw_items
     except Exception as e:
         print(f"Error fetching Vietstock eDocs for {clean_ticker or 'ALL'}: {e}")
 
     return []
+
+
 
 
 def parse_edocs_item_to_report(
@@ -1655,10 +1701,7 @@ def parse_edocs_item_to_report(
 
     # 4. Dự phóng Doanh thu & LNST chuẩn xác từ nội dung toàn văn
     rev_f, npat_f = extract_forecasts_from_content(content)
-    if not rev_f:
-        rev_f = f"Doanh thu thuần dự phóng tăng {14.0 + (index % 5) * 2.5:.1f}% YoY"
-    if not npat_f:
-        npat_f = f"LNST công ty mẹ dự phóng tăng {18.0 + (index % 5) * 3.0:.1f}% YoY"
+    # Nếu không extract được dự phóng thực tế: để "—", không tự suy diễn bằng hệ số
 
     # Bóc tách sâu các yếu tố kỳ vọng then chốt và rủi ro từ nội dung báo cáo thực tế
     cat_list, risk_list = extract_detailed_catalysts_and_risks(
@@ -1791,7 +1834,7 @@ async def get_synchronized_matrix_reports(
     now = time.time()
     if cache_key in _SYNCED_MATRIX_REPORTS_CACHE:
         cached_time, cached_items = _SYNCED_MATRIX_REPORTS_CACHE[cache_key]
-        if (now - cached_time) < 180.0 and cached_items:
+        if (now - cached_time) < 600.0 and cached_items:
             return cached_items
 
     inst_map: Dict[str, ReportItem] = {}
@@ -1813,7 +1856,10 @@ async def get_synchronized_matrix_reports(
             # Bảo đảm tính toàn vẹn (Ticker Integrity): Báo cáo bắt buộc phải thuộc về mã đang xem
             title_upper = title.upper()
             url_upper = file_url.upper()
-            if clean_ticker not in title_upper and clean_ticker not in url_upper:
+            content_upper = (raw.get("Content") or "").upper()
+            if (clean_ticker not in title_upper and 
+                clean_ticker not in url_upper and 
+                clean_ticker not in content_upper[:500]):
                 continue
 
             key = normalize_institution_name(source)
@@ -1834,11 +1880,19 @@ async def get_synchronized_matrix_reports(
                 inst_map[key] = parsed
             else:
                 curr_ts = parse_date_to_timestamp(inst_map[key].report_date)
-                # Ưu tiên báo cáo có giá mục tiêu hợp lệ (>0)
-                if inst_map[key].target_price <= 0 and parsed.target_price > 0:
+                # Luôn ưu tiên báo cáo mới hơn theo ngày phát hành
+                if parsed_ts > curr_ts:
+                    # Giữ lại target_price từ báo cáo cũ nếu báo cáo mới chưa có
+                    if parsed.target_price <= 0 and inst_map[key].target_price > 0:
+                        parsed.target_price = inst_map[key].target_price
+                        parsed.recommendation = inst_map[key].recommendation
+                        parsed.upside_percent = inst_map[key].upside_percent
                     inst_map[key] = parsed
-                elif parsed.target_price > 0 and parsed_ts > curr_ts:
-                    inst_map[key] = parsed
+                elif parsed.target_price > 0 and inst_map[key].target_price <= 0:
+                    # Cùng ngày hoặc cũ hơn nhưng có target_price → chỉ bổ sung target_price
+                    inst_map[key].target_price = parsed.target_price
+                    inst_map[key].recommendation = parsed.recommendation
+                    inst_map[key].upside_percent = parsed.upside_percent
     except Exception as err:
         print(f"Error syncing matrix reports for {clean_ticker}: {err}")
 
@@ -1887,10 +1941,7 @@ async def get_synchronized_matrix_reports(
                     curr.target_price = r_base.target_price
                     curr.recommendation = r_base.recommendation
                     curr.upside_percent = r_base.upside_percent
-                if not curr.key_catalysts and r_base.key_catalysts:
-                    curr.key_catalysts = r_base.key_catalysts
-                if not curr.key_risks and r_base.key_risks:
-                    curr.key_risks = r_base.key_risks
+                # KHÔNG copy key_catalysts và key_risks từ CTCK khác — mỗi CTCK phải có nội dung riêng
 
     merged = list(inst_map.values())
     if not merged and not base_reports:
@@ -1901,9 +1952,10 @@ async def get_synchronized_matrix_reports(
     res = merged[:max_reports]
 
     # Tự động tải và bóc tách trực tiếp luận điểm từ file PDF gốc của các CTCK hàng đầu
+    # Giới hạn 3 PDF đầu tiên để tăng tốc độ phản hồi (top-3 là mới nhất và quan trọng nhất)
     pdf_tasks = []
     target_reports = []
-    for r in res[:6]:
+    for r in res[:3]:
         src_url = getattr(r, "source_url", "") or ""
         if ".pdf" in src_url.lower() and src_url.startswith("http"):
             pdf_tasks.append(extract_catalysts_from_pdf_url(src_url, clean_ticker))
@@ -1972,8 +2024,10 @@ async def get_synchronized_matrix_reports(
                     if sc_str not in clean_cats:
                         clean_cats.append(sc_str)
 
-        r.key_catalysts = clean_cats[:15] if clean_cats else [f"Báo cáo phân tích và cập nhật triển vọng kinh doanh {clean_ticker} từ {r.institution}."]
-        r.key_risks = clean_risks[:10] if clean_risks else ["Biến động chi phí nguyên vật liệu đầu vào và lãi suất thị trường."]
+        # KHÔNG inject fallback text chung — CTCK không có data để danh sách rỗng
+        # Frontend sẽ hiển thị thông báo "Chưa trích xuất" thay vì dùng text mặc định
+        r.key_catalysts = clean_cats[:15] if clean_cats else []
+        r.key_risks = clean_risks[:10] if clean_risks else []
 
     _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, res)
     return res

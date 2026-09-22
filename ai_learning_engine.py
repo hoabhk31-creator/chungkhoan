@@ -856,10 +856,11 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
                         final_cats.append(p_clean)
 
             if not final_cats:
-                inst_name = getattr(r, "institution", "") or (r.get("institution", "") if isinstance(r, dict) else "CTCK")
-                final_cats = [f"Báo cáo phân tích và triển vọng kinh doanh {ticker} phát hành bởi {inst_name}."]
+                # KHÔNG inject text mặc định — để rỗng, frontend sẽ hiển thị thông báo "Chưa trích xuất"
+                pass
             if not final_risks:
-                final_risks = ["Biến động chi phí nguyên vật liệu đầu vào và mặt bằng lãi suất."]
+                # KHÔNG inject text mặc định — để rỗng, frontend sẽ hiển thị thông báo "Chưa trích xuất"
+                pass
 
             if isinstance(r, dict):
                 r["key_catalysts"] = final_cats[:15]

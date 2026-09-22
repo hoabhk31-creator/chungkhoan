@@ -168,6 +168,30 @@ async def startup_event():
     except Exception as e:
         print(f"AI Learning Scheduler startup exception: {e}")
 
+    # Pre-warm cache cho top 20 mã phổ biến nhất để giảm latency lần đầu
+    async def _prewarm_top_tickers():
+        top_tickers = [
+            "HPG", "VHM", "VIC", "VNM", "MWG", "FPT", "TCB", "VCB", "BID", "CTG",
+            "STB", "MSN", "GVR", "SAB", "ACB", "MBB", "VPB", "HDB", "EIB", "PLX"
+        ]
+        await asyncio.sleep(5)  # Đợi server sẵn sàng hoàn toàn
+        for tkr in top_tickers:
+            try:
+                await asyncio.wait_for(
+                    get_synchronized_matrix_reports(
+                        ticker=tkr, base_reports=[], comp_name="", sector_name="", market_p=25000.0
+                    ),
+                    timeout=15.0
+                )
+                await asyncio.sleep(2)  # Throttle để tránh DDoS Vietstock
+            except Exception:
+                pass
+
+    try:
+        asyncio.create_task(_prewarm_top_tickers())
+    except Exception as e:
+        print(f"Pre-warm startup exception: {e}")
+
 
 
 ADMIN_AUTH_FILE = os.path.join(ROOT_DIR, "data", "admin_auth.json")
@@ -526,7 +550,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
     # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (120s TTL)
     cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
     cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-    if cached_rep and (now_ts - cached_time) < 120.0 and cached_rep.ticker == clean_ticker:
+    if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
         return cached_rep
 
     # 2. Khóa concurrency để tránh gọi đúp song song nhiều crawler cùng 1 mã
@@ -537,7 +561,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
         now_ts = time.time()
         cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
         cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-        if cached_rep and (now_ts - cached_time) < 120.0 and cached_rep.ticker == clean_ticker:
+        if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
             return cached_rep
 
         stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
