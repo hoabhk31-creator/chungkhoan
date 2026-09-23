@@ -411,12 +411,20 @@ class TemplateStore:
 
 def is_generic_boilerplate(sentence: str) -> bool:
     """
-    Kiểm tra xem một câu có phải là văn mẫu khuôn mẫu ngành rỗng không.
-    Văn mẫu rỗng là câu không chứa bất kỳ danh từ riêng thực thể, tên dự án,
-    hoặc con số định lượng (%) nào, chỉ toàn các từ ngữ vĩ mô chung chung.
+    Kiểm tra xem một câu có phải là văn mẫu khuôn mẫu ngành rỗng,
+    hoặc là bảng số liệu BCTC dự phóng, model DCF, disclaimer hay không.
     """
     if not sentence or len(sentence) < 15:
         return True
+
+    # Loại bỏ triệt để bảng BCTC, model định giá DCF và disclaimer
+    try:
+        from crawler import is_table_or_valuation_or_disclaimer_dump
+        if is_table_or_valuation_or_disclaimer_dump(sentence):
+            return True
+    except Exception:
+        pass
+
     s_clean = sentence.lower()
     
     # Những mẫu câu khuôn mẫu kinh điển
@@ -654,6 +662,19 @@ def extract_advanced_knowledge(
     if tp_m:
         confidence += 0.03
     confidence = min(0.98, round(confidence, 2))
+
+    try:
+        from crawler import clean_vietnamese_pdf_spacing, is_table_or_valuation_or_disclaimer_dump
+        flat_catalysts = [
+            clean_vietnamese_pdf_spacing(c) for c in flat_catalysts
+            if c and not is_table_or_valuation_or_disclaimer_dump(c)
+        ]
+        extracted_risks = [
+            clean_vietnamese_pdf_spacing(r) for r in extracted_risks
+            if r and not is_table_or_valuation_or_disclaimer_dump(r)
+        ]
+    except Exception:
+        pass
 
     return {
         "ticker": clean_ticker,
@@ -1175,6 +1196,32 @@ class AutonomousLearningScheduler:
                         if clean_ticker not in updated_tickers:
                             updated_tickers.append(clean_ticker)
 
+                        # TỰ ĐỘNG BÓC TÁCH ĐƯA VÀO BẢNG MA TRẬN NGANG THEO CẤU HÌNH
+                        if self.config.get("auto_ingest_matrix", True):
+                            try:
+                                from crawler import ingest_report_item_to_matrix_cache, parse_edocs_item_to_report
+                                parsed_rep = parse_edocs_item_to_report(
+                                    item={
+                                        "Title": title,
+                                        "Content": content,
+                                        "SourceName": source,
+                                        "ReleaseDate": item.get("ReleaseDate") or datetime.now().strftime("%d/%m/%Y"),
+                                        "Url": item.get("Url", "")
+                                    },
+                                    clean_ticker=clean_ticker,
+                                    comp_name=f"Doanh nghiệp {clean_ticker}",
+                                    sector_name="",
+                                    market_p=market_p
+                                )
+                                if parsed_rep:
+                                    if knowledge.get("key_catalysts"):
+                                        parsed_rep.key_catalysts = knowledge["key_catalysts"]
+                                    if knowledge.get("key_risks"):
+                                        parsed_rep.key_risks = knowledge["key_risks"]
+                                    ingest_report_item_to_matrix_cache(clean_ticker, parsed_rep, market_p)
+                            except Exception as ing_err:
+                                print(f"[LearningScheduler] Error auto ingesting to matrix for {clean_ticker}: {ing_err}")
+
                     log_entry = {
                         "id": f"log-{uuid.uuid4().hex[:8]}",
                         "ticker": clean_ticker,
@@ -1305,6 +1352,32 @@ class AutonomousLearningScheduler:
                             )
                             if clean_ticker not in updated_tickers:
                                 updated_tickers.append(clean_ticker)
+
+                            # TỰ ĐỘNG BÓC TÁCH ĐƯA VÀO BẢNG MA TRẬN NGANG THEO CẤU HÌNH
+                            if self.config.get("auto_ingest_matrix", True):
+                                try:
+                                    from crawler import ingest_report_item_to_matrix_cache, parse_edocs_item_to_report
+                                    parsed_rep = parse_edocs_item_to_report(
+                                        item={
+                                            "Title": title,
+                                            "Content": content,
+                                            "SourceName": source,
+                                            "ReleaseDate": item.get("ReleaseDate") or datetime.now().strftime("%d/%m/%Y"),
+                                            "Url": item.get("Url", "")
+                                        },
+                                        clean_ticker=clean_ticker,
+                                        comp_name=f"Doanh nghiệp {clean_ticker}",
+                                        sector_name="",
+                                        market_p=market_p
+                                    )
+                                    if parsed_rep:
+                                        if knowledge.get("key_catalysts"):
+                                            parsed_rep.key_catalysts = knowledge["key_catalysts"]
+                                        if knowledge.get("key_risks"):
+                                            parsed_rep.key_risks = knowledge["key_risks"]
+                                        ingest_report_item_to_matrix_cache(clean_ticker, parsed_rep, market_p)
+                                except Exception as ing_err:
+                                    print(f"[LearningScheduler] Error auto ingesting to matrix for {clean_ticker}: {ing_err}")
 
                         log_entry = {
                             "id": f"log-{uuid.uuid4().hex[:8]}",

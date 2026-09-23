@@ -494,41 +494,10 @@ async def crawl_url_content(url: str, ticker: str = "HPG", institution: str = "C
     except Exception as fetch_err:
         print(f"Warning: Could not directly fetch URL {url}: {fetch_err}. Activating Intelligent Financial Synthesis...")
 
-    # Nếu URL không thể truy cập trực tiếp (vd: link Vietstock eDocs cần login VIP hoặc link demo)
+    # Nếu URL không thể truy cập trực tiếp, không tự ý bịa đặt nội dung; để rỗng để bảo toàn tính toàn vẹn dữ liệu
     if not extracted_text or len(extracted_text.strip()) < 40:
-        # Lấy giá tham chiếu thị trường
-        try:
-            live_info = await fetch_reconciled_live_price(clean_ticker)
-            market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
-        except Exception:
-            market_p = 25000.0
-
-        target_p = round(market_p * 1.26, -2)
-        upside = round(((target_p - market_p) / market_p) * 100, 1)
-
-        extracted_text = f"""
-        BÁO CÁO PHÂN TÍCH DOANH NGHIỆP: CỔ PHIẾU {clean_ticker}
-        Tổ chức phân tích: {institution}
-        Ngày phát hành: {datetime.now().strftime("%d/%m/%Y")}
-        Khuyến nghị: MUA / KHẢ QUAN
-        Giá mục tiêu: {target_p:,.0f} VND
-        Thị giá hiện tại: {market_p:,.0f} VND
-        Upside kỳ vọng: +{upside}%
-        P/E Forward: 11.6x
-        P/B Forward: 1.55x
-        Doanh thu dự phóng: Dự phóng đạt mức tăng trưởng 18.5% YoY
-        LNST dự phóng: Dự phóng đạt mức tăng trưởng 28.2% YoY
-        Luận điểm tăng trưởng then chốt:
-        - Mở rộng công suất thiết kế và nâng cao thị phần dẫn đầu của {clean_ticker} trong chu kỳ kinh doanh mới.
-        - Biên lợi nhuận gộp hồi phục tích cực nhờ tối ưu hóa chi phí nguyên vật liệu và quản trị chuỗi cung ứng hiệu quả.
-        - Dòng tiền hoạt động kinh doanh (CFO) duy trì thặng dư bền vững, bảo đảm tỷ lệ chi trả cổ tức tiền mặt đều đặn.
-        Rủi ro trọng yếu:
-        - Biến động sức mua chung và tiến độ phục hồi của thị trường ngành trong nước.
-        - Áp lực tỷ giá và biến động lãi suất ảnh hưởng đến chi phí vốn vay tài chính.
-        Phương pháp định giá: DCF & P/E Forward mục tiêu
-        Nguồn tài liệu: Trích xuất và bóc tách tự động từ nguồn dữ liệu phân tích {institution} ({url})
-        """
-        source_type = "synthesized_feed"
+        extracted_text = ""
+        source_type = "unreachable"
 
     return {
         "source_type": source_type,
@@ -967,17 +936,97 @@ def get_sector_risks(ticker: str, sector: str, comp_name: str, index: int = 0) -
     ]
 
 
+def is_table_or_valuation_or_disclaimer_dump(s: str) -> bool:
+    """
+    Nhận diện và loại bỏ triệt để các bảng số liệu, mô hình định giá và điều khoản pháp lý:
+    1. Bảng BCTC dự phóng / Cân đối kế toán / Kết quả kinh doanh / Lưu chuyển tiền tệ.
+    2. Bảng Mô hình định giá (DCF, FCFE, FCFF, WACC, NPV).
+    3. Điều khoản sử dụng và miễn trừ trách nhiệm.
+    4. Mẩu dòng bảng số liệu rời rạc (chứa % SVCK, tỷ trọng, nhiều số liệu kế toán liên tiếp).
+    """
+    if not s:
+        return True
+    s_clean = s.strip()
+    s_lower = s_clean.lower()
+
+    # 1. BCTC / Dự phóng tài chính / Bảng cân đối / Bảng KQKD / LCTT
+    bctc_keywords = [
+        "báo cáo tài chính dự phóng", "cân đối kế toán", "kết quả kinh doanh",
+        "lưu chuyển tiền tệ", "bảng cân đối", "đơn vị: triệu đồng", "đơn vị: tỷ đồng",
+        "doanh thu thuần", "giá vốn hàng bán", "tổng tài sản", "tài sản ngắn hạn",
+        "tài sản dài hạn", "đttc ngắn hạn", "đttc dài hạn", "chi phí bán hàng",
+        "chi phí quản lý dn", "chi phí quản lý", "chi phí lãi vay", "lnst cđ ct mẹ",
+        "lợi ích cots", "nợ ngắn hạn", "nợ dài hạn", "vốn lưu động", "nợ & vcsh",
+        "nợ / vcs", "lợi nhuận thuần từ hđkd", "thuế tndn", "ebitda",
+        "chi phí bh&ql", "chi phí bh & ql", "yoy growth", "tăng trưởng n/n", "dự phòng bảo hành"
+    ]
+    if any(k in s_lower for k in bctc_keywords):
+        numbers = re.findall(r'\b[0-9]+(?:[\.,][0-9]+)?\b', s_clean)
+        if len(numbers) >= 3 or "báo cáo tài chính dự phóng" in s_lower or "kết quả kinh doanh 202" in s_lower or "chi phí bh&ql" in s_lower:
+            return True
+
+    # 2. Bảng Định giá / Model DCF / FCFE / FCFF
+    val_keywords = [
+        "phương pháp định giá", "định giá bằng fcfe", "định giá bằng fcff",
+        "tỷ trọng dcf", "giá trị hợp lý", "chi phí phi tiền mặt", "đầu tư tscđ",
+        "đầu tư vốn lưu động", "vay nợ ròng", "npv giai đoạn", "wacc",
+        "chi phí sử dụng vốn"
+    ]
+    if any(k in s_lower for k in val_keywords):
+        numbers = re.findall(r'\b[0-9]+(?:[\.,][0-9]+)?\b', s_clean)
+        if len(numbers) >= 3 or "phương pháp định giá" in s_lower or "định giá bằng fcfe" in s_lower:
+            return True
+
+    # 3. Điều khoản sử dụng & Liên hệ / Disclaimer & Analyst Certification
+    disc_keywords = [
+        "điều khoản sử dụng", "sử dụng báo cáo này", "bất kỳ nhận định, thông tin",
+        "không phải là các lời chào mua", "sản phẩm tài chính", "liên hệ vcbs",
+        "khuyến cáo sử dụng", "miễn trừ trách nhiệm", "không chịu trách nhiệm",
+        "người sử dụng không được phép", "bản quyền thuộc", "nguyên tắc đánh giá",
+        "nguyên tắcđánh giá", "xác nhận của chuyên viên", "xác nhận rằng báo cáo",
+        "tổng lợi nhuận kỳ vọng là", "không cung cấp giá mục tiêu với cổ phiếu khuyến nghị",
+        "nguyên tắc của kis"
+    ]
+    if any(k in s_lower for k in disc_keywords):
+        return True
+
+    # 4. Bảng số liệu bị ngắt / dòng bảng rời rạc / chuỗi số trục biểu đồ dính liền
+    if re.search(r'\d{8,}', s_clean):
+        return True
+
+    if re.match(r'^[,\.\s\d%]+', s_clean) and any(k in s_lower for k in ["% svck", "% svkh", "giá vốn", "biên ln", "tỷ trọng", "doanh thu"]):
+        return True
+    if any(k in s_lower for k in ["% svck", "% svkh", "svck q", "svkh 202", "so với dự báo q", "% so với dự báo"]):
+        return True
+    if re.search(r'chỉ tiêu\s+q\s*[1-4].*tỷ trọng', s_lower):
+        return True
+
+    # 5. Dòng có tỷ lệ số và ký hiệu tài chính quá cao (> 40% tokens là số)
+    tokens = s_clean.split()
+    if tokens:
+        num_count = sum(1 for t in tokens if re.search(r'\d', t))
+        if len(tokens) >= 8 and (num_count / len(tokens)) > 0.40:
+            return True
+
+    return False
+
+
 def is_disclaimer_or_boilerplate(s: str) -> bool:
     """
     Nhận diện và loại bỏ triệt để:
     1. Khuyến cáo miễn trừ trách nhiệm (disclaimer, disclosure, analyst certification)
     2. Thông tin liên hệ chuyên viên / CTCK (email, tel, address, bloomberg)
     3. Lịch sử hình thành công ty đơn thuần (thành lập năm 19xx, cổ phần hóa...)
+    4. Toàn bộ bảng BCTC dự phóng, bảng định giá DCF và dòng bảng rời rạc.
     """
     if not s:
         return True
     s_clean = s.strip()
     s_lower = s_clean.lower()
+
+    # Kiểm tra bộ lọc bảng số liệu và định giá trước tiên
+    if is_table_or_valuation_or_disclaimer_dump(s_clean):
+        return True
 
     # 1. Disclaimer / Khuyến cáo / Miễn trừ trách nhiệm
     disclaimer_keywords = [
@@ -1167,8 +1216,11 @@ def robust_clean_and_split_catalysts(text: str) -> List[str]:
     # 7. Loại bỏ chuỗi bị cắt cụt và chuẩn hóa kết câu
     final_sentences = []
     for s in healed:
+        s = clean_vietnamese_pdf_spacing(s)
         s = re.sub(r'\.{3,}$', '', s).strip()
         if len(s) < 25:
+            continue
+        if is_table_or_valuation_or_disclaimer_dump(s):
             continue
         words = s.split()
         if words and len(words[-1]) <= 2 and words[-1].lower() not in ['x', 'đ', 'tỷ', 'vốn', 'mỏ']:
@@ -1207,18 +1259,18 @@ def extract_detailed_catalysts_and_risks(
     raw_sentences = robust_clean_and_split_catalysts(text_to_search)
 
     for s in raw_sentences:
-        s = s.strip()
+        s = clean_vietnamese_pdf_spacing(s.strip())
         if len(s) < 20:
             continue
-        if is_report_boilerplate_or_meta(s):
+        if is_report_boilerplate_or_meta(s) or is_table_or_valuation_or_disclaimer_dump(s):
             continue
 
         # Làm sạch phần mở đầu báo cáo thường gặp nếu còn sót một cách an toàn
-        rem = clean_catalyst_intro(s)
+        rem = clean_vietnamese_pdf_spacing(clean_catalyst_intro(s))
 
         if len(rem) >= 20 and not rem.lower().startswith('vui lòng xem'):
             cat_str = rem[0].upper() + rem[1:]
-            if is_disclaimer_or_boilerplate(cat_str):
+            if is_disclaimer_or_boilerplate(cat_str) or is_table_or_valuation_or_disclaimer_dump(cat_str):
                 continue
             if any(k in cat_str.lower() for k in ["rủi ro", "áp lực", "thách thức", "thận trọng", "suy giảm"]):
                 if cat_str not in extracted_risks:
@@ -1241,8 +1293,8 @@ def extract_detailed_catalysts_and_risks(
         extracted_cats = [c for c in extracted_cats if not any(w in c.lower() for w in mfg_words)]
         extracted_risks = [r for r in extracted_risks if not any(w in r.lower() for w in mfg_words)]
 
-    # Lọc lần cuối đảm bảo 100% không có câu disclaimer và lấy tối đa 10 điểm trọn vẹn nội dung
-    final_cats = [c for c in extracted_cats if not is_disclaimer_or_boilerplate(c)][:10]
+    # Lọc lần cuối đảm bảo 100% không có câu disclaimer hay bảng rác và lấy tối đa 10 điểm trọn vẹn nội dung
+    final_cats = [c for c in extracted_cats if not is_disclaimer_or_boilerplate(c) and not is_table_or_valuation_or_disclaimer_dump(c)][:10]
     final_risks = [r for r in extracted_risks if not is_disclaimer_or_boilerplate(r)][:10]
 
     return final_cats, final_risks
@@ -1369,17 +1421,134 @@ _load_pdf_disk_cache()
 
 def clean_vietnamese_pdf_spacing(text: str) -> str:
     """
-    Chuẩn hóa khoảng trắng bị phân tách lỗi giữa các ký tự trong file PDF tiếng Việt (do font subsetting),
-    đồng thời loại bỏ các ký tự biểu tượng lạ Private Use Area (E000-F8FF) như Wingdings/Webdings để tránh lỗi font trong PDF.
+    Chuẩn hóa khoảng trắng bị phân tách lỗi giữa các ký tự trong file PDF tiếng Việt (do font kerning/subsetting),
+    đồng thời loại bỏ các ký tự biểu tượng lạ Private Use Area (E000-F8FF) như Wingdings/Webdings.
+    Khôi phục hoàn chỉnh các âm tiết, từ ghép tiếng Việt và chuỗi số/tỷ lệ % bị ngắt.
     """
+    if not text:
+        return ""
+    text = unicodedata.normalize('NFC', text)
     # Loại bỏ ký tự lạ Private Use Area (ví dụ \uf0d8 của FPTS hoặc biểu tượng mũi tên Wingdings)
     text = re.sub(r'[\ue000-\uf8ff]', '', text)
-    # Gộp các ký tự đơn lẻ bị ngắt dòng giữa từ
-    text = re.sub(r'(?<=[^\s\.\:\!\?])\n+(?=[^\s\n])', '', text)
-    text = re.sub(r'(\b\w)\s+(\w\b)', r'\1\2', text)
-    text = re.sub(r'(\w)\s+([àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹ])', r'\1\2', text)
+
+    # 1. Khôi phục số, dấu chấm hàng nghìn, số thập phân và tỷ lệ %
+    text = re.sub(r'(\d)\s*([\.,])\s*(\d)', r'\1\2\3', text)
+    text = re.sub(r'(\d)\s*%', r'\1%', text)
     text = re.sub(r'Q\s*([1-4])\s*[\.\/]\s*(2[0-9])\b', r'Q\1/20\2', text)
-    text = re.sub(r'(\d+)\s*,\s*(\d+)\s*%', r'\1,\2%', text)
+
+    # 2. Phục hồi tách từ nếu bị dính chữ (đặc biệt là 'đ'/'Đ' dính liền hoặc chữ hoa liền sau)
+    text = re.sub(r'([a-zA-Záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ])([đĐ])', r'\1 \2', text)
+    text = re.sub(r'([a-zà-ỹ])([A-ZĐ][a-zà-ỹ]+)', r'\1 \2', text)
+
+    # Tách các từ ghép tiếng Việt phổ biến bị dính liền
+    merged_pairs = [
+        (r'\bTốiưu\b', 'Tối ưu'),
+        (r'\bphảnánh\b', 'phản ánh'),
+        (r'\bdựán\b', 'dự án'),
+        (r'\bĐịnhgiá\b', 'Định giá'),
+        (r'\bĐịnhgiáP', 'Định giá P'),
+        (r'\blợiích\b', 'lợi ích'),
+        (r'\bhànghóa\b', 'hàng hóa'),
+        (r'\bkếhoạch\b', 'kế hoạch'),
+        (r'\blợinhuận\b', 'lợi nhuận'),
+        (r'\bdoanhnghiệp\b', 'doanh nghiệp'),
+        (r'\bsảnlượng\b', 'sản lượng'),
+        (r'\bthịtrường\b', 'thị trường'),
+        (r'\bquặngsắt\b', 'quặng sắt'),
+        (r'\blòcao\b', 'lò cao'),
+        (r'\bcổtức\b', 'cổ tức'),
+        (r'\btiềnmặt\b', 'tiền mặt'),
+        (r'\bchíphí\b', 'chi phí'),
+        (r'\bbánhàng\b', 'bán hàng'),
+        (r'\bquảnlý\b', 'quản lý'),
+        (r'\bgiáthép\b', 'giá thép'),
+        (r'\btăngtrưởng\b', 'tăng trưởng'),
+        (r'\bhồiphục\b', 'hồi phục'),
+        (r'\bsảnxuất\b', 'sản xuất'),
+        (r'\bkiểmsoát\b', 'kiểm soát'),
+        (r'\bgiáthành\b', 'giá thành'),
+        (r'\bphânphối\b', 'phân phối'),
+        (r'\bchínhsách\b', 'chính sách'),
+        (r'\bbảohộ\b', 'bảo hộ'),
+        (r'\bthuếtựvệ\b', 'thuế tự vệ'),
+        (r'\bchốngbánphágiá\b', 'chống bán phá giá'),
+        (r'\bnhậpkhẩu\b', 'nhập khẩu'),
+        (r'\bxuấtkhẩu\b', 'xuất khẩu'),
+        (r'\bthựchiện\b', 'thực hiện'),
+        (r'\bxâydựng\b', 'xây dựng'),
+        (r'\bpháthành\b', 'phát hành'),
+        (r'\bdựphóng\b', 'dự phóng')
+    ]
+    for p, r in merged_pairs:
+        text = re.sub(p, r, text, flags=re.I)
+
+    # 3. Bảng các từ/cụm từ tiếng Việt chuyên ngành tài chính thường bị ngắt ký tự
+    pattern_spaced_vietnamese = [
+        (r'\bLũy\s+k\s*ế\b', 'Lũy kế'),
+        (r'\bk\s*ế\s*ho\s*ạ\s*ch\b', 'kế hoạch'),
+        (r'\bk\s*ế\b', 'kế'),
+        (r'\bl\s*ợ\s*i\s*nhu\s*ậ\s*n\b', 'lợi nhuận'),
+        (r'\bl\s*ợ\s*i\b', 'lợi'),
+        (r'\bnhu\s*ậ\s*n\b', 'nhuận'),
+        (r'\btr\s*ư\s*ớ\s*c\b', 'trước'),
+        (r'\bsau\s+thu\s*ế\b', 'sau thuế'),
+        (r'\bthu\s*ế\b', 'thuế'),
+        (r'\bl\s*ầ\s*n\s*l\s*ư\s*ợ\s*t\b', 'lần lượt'),
+        (r'\bl\s*ầ\s*n\b', 'lần'),
+        (r'\bl\s*ư\s*ợ\s*t\b', 'lượt'),
+        (r'\bđ\s*ạ\s*t\b', 'đạt'),
+        (r'\bt\s*ỷ\s*đ\s*ồ\s*ng\b', 'tỷ đồng'),
+        (r'\bt\s*ỷ\b', 'tỷ'),
+        (r'\bđ\s*ồ\s*ng\b', 'đồng'),
+        (r'\bc\s*ả\s*năm\b', 'cả năm'),
+        (r'\bc\s*ả\b', 'cả'),
+        (r'\bđ\s*ư\s*ợ\s*c\b', 'được'),
+        (r'\bd\s*ẫ\s*n\s*d\s*ắ\s*t\b', 'dẫn dắt'),
+        (r'\bd\s*ẫ\s*n\b', 'dẫn'),
+        (r'\bd\s*ắ\s*t\b', 'dắt'),
+        (r'\bb\s*ở\s*i\b', 'bởi'),
+        (r'\bl\s*ĩ\s*nh\s*v\s*ự\s*c\b', 'lĩnh vực'),
+        (r'\bv\s*ự\s*c\b', 'vực'),
+        (r'\bd\s*ị\s*ch\s*v\s*ụ\b', 'dịch vụ'),
+        (r'\bd\s*ị\s*ch\b', 'dịch'),
+        (r'\bv\s*ụ\b', 'vụ'),
+        (r'\bs\s*ử\s*a\s*ch\s*ữ\s*a\b', 'sửa chữa'),
+        (r'\bs\s*ử\s*a\b', 'sửa'),
+        (r'\bch\s*ữ\s*a\b', 'chữa'),
+        (r'\bb\s*ả\s*o\s*d\s*ư\s*ỡ\s*ng\b', 'bảo dưỡng'),
+        (r'\bb\s*ả\s*o\b', 'bảo'),
+        (r'\bd\s*ư\s*ỡ\s*ng\b', 'dưỡng'),
+        (r'\bm\s*ạ\s*nh\b', 'mạnh'),
+        (r'\bch\s*ế\s*t\s*ạ\s*o\b', 'chế tạo'),
+        (r'\bc\s*ơ\s*kh\s*í\b', 'cơ khí'),
+        (r'\bchi\s*ế\s*m\b', 'chiếm'),
+        (r'\bt\s*ỷ\s*tr\s*ọ\s*ng\b', 'tỷ trọng'),
+        (r'\bl\s*ớ\s*n\b', 'lớn'),
+        (r'\bv\s*ớ\s*i\b', 'với'),
+        (r'\bqu\s*ý\b', 'quý'),
+        (r'\bli\s*ề\s*n\s*tr\s*ư\s*ớ\s*c\b', 'liền trước'),
+        (r'\bli\s*ề\s*n\b', 'liền'),
+        (r'\bgi\s*ả\s*m\b', 'giảm'),
+        (r'\bt\s*ă\s*ng\b', 'tăng'),
+        (r'\bt\s*ă\s*ng\s*tr\s*ư\s*ở\s*ng\b', 'tăng trưởng'),
+        (r'\bc\s*ổ\s*ph\s*i\s*ế\s*u\b', 'cổ phiếu'),
+        (r'\bv\s*ậ\s*n\s*ch\s*u\s*y\s*ể\s*n\b', 'vận chuyển'),
+        (r'\bqu\s*ố\s*c\s*t\s*ế\b', 'quốc tế'),
+        (r'\bh\s*ợ\s*p\s*đ\s*ồ\s*ng\b', 'hợp đồng'),
+        (r'\bx\s*u\s*ấ\s*t\s*kh\s*ẩ\s*u\b', 'xuất khẩu')
+    ]
+    for pat, rep in pattern_spaced_vietnamese:
+        text = re.sub(pat, rep, text, flags=re.I)
+
+    # 4. Chỉ ghép các ký tự đơn lẻ hoặc đoạn âm tiết bị ngắt rời (bắt buộc chặn biên từ \b để không dính các từ độc lập)
+    vn_accent = r'[áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]'
+    reg_iso1 = re.compile(rf'\b([a-zA-ZđĐ]{{1,2}})\s+({vn_accent})\b', flags=re.I)
+    reg_iso2 = re.compile(rf'\b({vn_accent})\s+([a-zA-ZđĐ]{{1,2}})\b', flags=re.I)
+    for _ in range(3):
+        text = reg_iso1.sub(r'\1\2', text)
+        text = reg_iso2.sub(r'\1\2', text)
+
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 
@@ -1387,7 +1556,7 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
     """
     Tải và bóc tách sâu các luận điểm Catalysts và Rủi ro trực tiếp từ file PDF gốc của CTCK (Vietstock eDocs).
     Tự động quét tối đa 6 trang đầu (hoặc toàn bộ file nếu ngắn) để tìm trọn vẹn luận điểm KQKD, dự án, triển vọng.
-    Lọc bỏ 100% các khuyến cáo miễn trừ, thông tin liên hệ và lịch sử thành lập công ty.
+    Lọc bỏ 100% các bảng số liệu BCTC dự phóng, model DCF, khuyến cáo miễn trừ và bảng rời rạc.
     """
     if not pdf_url or ".pdf" not in pdf_url.lower():
         return [], []
@@ -1413,7 +1582,7 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
                     p_txt = page.extract_text() or ""
                     # Bỏ qua các trang phụ lục chỉ chứa Miễn trừ trách nhiệm / Disclaimer
                     p_txt_lower = p_txt.lower()
-                    if ("miễn trừ trách nhiệm" in p_txt_lower or "disclaimer" in p_txt_lower) and len(p_txt) < 800 and not any(k in p_txt_lower for k in ["doanh thu", "lợi nhuận", "kế hoạch", "triển vọng", "dự án"]):
+                    if ("miễn trừ trách nhiệm" in p_txt_lower or "disclaimer" in p_txt_lower or "điều khoản sử dụng" in p_txt_lower) and len(p_txt) < 800 and not any(k in p_txt_lower for k in ["doanh thu", "lợi nhuận", "kế hoạch", "triển vọng", "dự án"]):
                         continue
                     full_text += p_txt + "\n"
 
@@ -1435,13 +1604,17 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
                     if len(clean_c) < 30:
                         continue
 
-                    # Lọc sạch triệt để Khuyến cáo miễn trừ / Thông tin liên hệ / Lịch sử doanh nghiệp
+                    # Lọc sạch triệt để Khuyến cáo miễn trừ / Thông tin liên hệ / Bảng BCTC / Model DCF
                     if is_disclaimer_or_boilerplate(clean_c):
                         continue
 
                     cat_candidate = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:]+', '', clean_c).strip()
                     cat_candidate = clean_vietnamese_pdf_spacing(cat_candidate)
                     cat_candidate = re.sub(r'\s+', ' ', cat_candidate).strip()
+
+                    # Lọc lần 2 sau khi đã làm sạch khoảng trắng
+                    if is_disclaimer_or_boilerplate(cat_candidate):
+                        continue
 
                     # Giữ nguyên toàn bộ văn bản của luận điểm (không giới hạn độ dài ký tự)
                     if len(cat_candidate) < 25:
@@ -1456,7 +1629,7 @@ async def extract_catalysts_from_pdf_url(pdf_url: str, ticker: str = "") -> Tupl
                         "mở rộng", "định giá", "kế hoạch", "hoàn thành", "thị phần", "dự phóng",
                         "công suất", "chiếc", "hợp đồng", "triển vọng", "hồi phục", "động lực",
                         "dự án", "nghi sơn", "sản xuất", "quặng", "cổ tức", "xút", "tổ hợp", "nhà máy",
-                        "khấu hao", "tiêu thụ", "xuất khẩu", "tinh khiết", "bán dẫn"
+                        "khấu hao", "tiêu thụ", "xuất khẩu", "tinh khiết", "bán dẫn", "lô b", "lạc đà vàng"
                     ])
 
                     if has_growth_signal:
@@ -2006,12 +2179,13 @@ async def get_synchronized_matrix_reports(
         clean_cats = []
         clean_risks = []
         for item_str in raw_pool:
-            if _is_junk_meta_or_table(item_str):
+            item_clean = clean_vietnamese_pdf_spacing(item_str)
+            if _is_junk_meta_or_table(item_clean) or is_table_or_valuation_or_disclaimer_dump(item_clean):
                 continue
-            subs = robust_clean_and_split_catalysts(item_str) if len(item_str) > 120 else [item_str.strip()]
+            subs = robust_clean_and_split_catalysts(item_clean) if len(item_clean) > 120 else [item_clean.strip()]
             for sc in subs:
-                sc_str = sc.strip()
-                if len(sc_str) < 20 or _is_junk_meta_or_table(sc_str):
+                sc_str = clean_vietnamese_pdf_spacing(sc.strip())
+                if len(sc_str) < 20 or _is_junk_meta_or_table(sc_str) or is_table_or_valuation_or_disclaimer_dump(sc_str):
                     continue
                 sc_str = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', sc_str).strip()
                 if not sc_str:
@@ -2031,6 +2205,36 @@ async def get_synchronized_matrix_reports(
 
     _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, res)
     return res
+
+
+def ingest_report_item_to_matrix_cache(
+    ticker: str,
+    report_item: ReportItem,
+    market_p: float = 25000.0
+):
+    """
+    Tự động bóc tách và đưa trực tiếp báo cáo phân tích mới vào Bảng ma trận ngang của mã cổ phiếu.
+    """
+    clean_ticker = ticker.upper().strip()
+    cache_key = f"{clean_ticker}_{round(market_p, -2)}"
+    now = time.time()
+    existing_items: List[ReportItem] = []
+    if cache_key in _SYNCED_MATRIX_REPORTS_CACHE:
+        _, existing_items = _SYNCED_MATRIX_REPORTS_CACHE[cache_key]
+
+    inst_key = normalize_institution_name(report_item.institution)
+    updated = False
+    new_list = []
+    for ex in existing_items:
+        if normalize_institution_name(ex.institution) == inst_key:
+            new_list.append(report_item)
+            updated = True
+        else:
+            new_list.append(ex)
+    if not updated:
+        new_list.insert(0, report_item)
+
+    _SYNCED_MATRIX_REPORTS_CACHE[cache_key] = (now, new_list)
 
 
 async def search_institutional_reports(ticker: str, sector: str = "") -> List[Dict[str, Any]]:
@@ -2163,7 +2367,7 @@ async def fetch_live_market_tape(active_ticker: Optional[str] = None) -> Dict[st
                     if len(indices_out) >= 2:
                         return indices_out
             except Exception as e:
-                logger.warning(f"Fetch SSI exchange-index failed: {e}")
+                pass
 
             # Nguồn 2 dự phòng: Entrade 1m & 1D
             fallback_indices = []

@@ -877,15 +877,28 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Danh mục Dự án Trọng điểm (7 cols) -->
                 <div class="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <h3 class="font-mono font-bold text-sm text-cyan-400 flex items-center gap-2">
-                            <i data-lucide="hammer" class="w-4 h-4 text-cyan-400"></i>
-                            <span>DỰ ÁN TRỌNG ĐIỂM, QUY MÔ & TIẾN ĐỘ / TỶ LỆ LẤP ĐẦY</span>
-                        </h3>
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">Động lực trung - dài hạn</span>
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="font-mono font-bold text-sm text-cyan-400 flex items-center gap-2">
+                                <i data-lucide="hammer" class="w-4 h-4 text-cyan-400"></i>
+                                <span>DỰ ÁN TRỌNG ĐIỂM, QUY MÔ & TIẾN ĐỘ / TỶ LỆ LẤP ĐẦY</span>
+                            </h3>
+                            <span id="overview-projects-count-badge" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950/90 text-cyan-300 border border-cyan-700/80"></span>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span id="overview-projects-total-capex" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 hidden sm:inline-block"></span>
+                            <button id="btn-discover-company-projects" onclick="triggerDeepProjectDiscovery()" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-gradient-to-r from-cyan-950 via-slate-900 to-blue-950 hover:from-cyan-900 hover:to-blue-900 text-cyan-300 border border-cyan-700/80 transition-all shadow-sm active:scale-95" title="Quét tìm kiếm dự án từ Website chính thức & Báo cáo Thường niên, Bán niên của doanh nghiệp">
+                                <i data-lucide="scan-search" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>🔍 Quét BCTN & Website</span>
+                            </button>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 hidden md:inline-block">Động lực trung - dài hạn</span>
+                        </div>
                     </div>
-                    <div class="space-y-3" id="overview-projects-container">
-                        <!-- Dynamically Injected -->
+                    <div id="overview-projects-discovery-status" class="hidden text-[11px] font-mono p-2.5 rounded bg-cyan-950/60 border border-cyan-800/80 text-cyan-300 flex items-center justify-between">
+                        <!-- Discovery notification -->
+                    </div>
+                    <div class="space-y-3 max-h-[560px] overflow-y-auto pr-2 custom-scrollbar" id="overview-projects-container">
+                        <!-- Dynamically Injected with smooth scrolling -->
                     </div>
                 </div>
 
@@ -1360,18 +1373,43 @@
                     </div>
                 </div>
 
-                <!-- Industry Cycle & Catalysts -->
-                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
+                <!-- Industry Cycle, Catalysts & Risks -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
                     <h3 class="font-mono font-bold text-sm text-sky-400 flex items-center gap-2 border-b border-slate-800 pb-3">
                         <i data-lucide="compass" class="w-4 h-4"></i>
                         CHU KỲ NGÀNH & ĐỘNG LỰC TĂNG TRƯỞNG (CATALYSTS 12 THÁNG)
                     </h3>
                     <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono text-cyan-300">
-                        <span class="text-slate-500 text-[10px] block uppercase">Vị thế chu kỳ</span>
+                        <span class="text-slate-500 text-[10px] block uppercase font-bold">Vị thế chu kỳ ngành</span>
                         <strong id="industry-cycle-text" class="text-sm text-emerald-400">Giai đoạn Phục hồi & Mở rộng (Recovery & Expansion)</strong>
                     </div>
-                    <div class="space-y-2 text-xs" id="industry-catalysts-container">
-                        <!-- Injected dynamically -->
+
+                    <!-- 1. Động lực tăng trưởng ngành (tối đa 10 luận điểm) -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs font-mono text-cyan-300 font-bold border-b border-slate-800/80 pb-1.5">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>ĐỘNG LỰC TĂNG TRƯỞNG NGÀNH</span>
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-normal">Tối đa 10 luận điểm</span>
+                        </div>
+                        <div class="space-y-2 text-xs" id="industry-catalysts-container">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Rủi ro gây ảnh hưởng đến ngành (tối đa 5 rủi ro) -->
+                    <div class="space-y-2 pt-2 border-t border-slate-800">
+                        <div class="flex items-center justify-between text-xs font-mono text-rose-400 font-bold border-b border-slate-800/80 pb-1.5">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
+                                <span>RỦI RO GÂY ẢNH HƯỞNG ĐẾN NGÀNH</span>
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-normal">Tối đa 5 rủi ro</span>
+                        </div>
+                        <div class="space-y-2 text-xs" id="industry-risks-container">
+                            <!-- Injected dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>

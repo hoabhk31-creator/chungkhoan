@@ -543,15 +543,16 @@ _TECH_SIGNALS_CACHE_TS: Dict[str, float] = {}
 
 
 @app.get("/api/preset/{ticker}")
-async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
+async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refresh: bool = False):
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
 
-    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (120s TTL)
-    cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
-    cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-    if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
-        return cached_rep
+    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (300s TTL)
+    if not refresh:
+        cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
+        cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
+        if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
+            return cached_rep
 
     # 2. Khóa concurrency để tránh gọi đúp song song nhiều crawler cùng 1 mã
     if clean_ticker not in _PRESET_LOCKS:
@@ -559,10 +560,11 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
 
     async with _PRESET_LOCKS[clean_ticker]:
         now_ts = time.time()
-        cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
-        cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-        if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
-            return cached_rep
+        if not refresh:
+            cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
+            cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
+            if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
+                return cached_rep
 
         stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
         cached_name = stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
@@ -583,8 +585,9 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True):
 
         async def _safe_ca():
             try:
-                from corporate_actions import sync_ticker_corporate_actions_online
-                await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=1.5)
+                from corporate_actions import sync_ticker_corporate_actions_online, load_corporate_actions_cache
+                load_corporate_actions_cache()
+                await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=3.5)
             except Exception:
                 pass
 
@@ -961,6 +964,17 @@ async def get_overview_mini_chart_series(ticker: str):
     except Exception as e:
         print(f"Fetch live price for mini-chart-series failed ({clean_ticker}): {e}")
 
+    capital_info = None
+    if clean_ticker in _FIN_OVERVIEW_CACHE:
+        prof = _FIN_OVERVIEW_CACHE[clean_ticker].get("company_profile", {})
+        if prof.get("shares_outstanding_mil"):
+            capital_info = {"shares_outstanding_mil": prof["shares_outstanding_mil"]}
+    if not capital_info:
+        try:
+            capital_info = await asyncio.wait_for(fetch_stock_corporate_capital(clean_ticker), timeout=1.5)
+        except Exception:
+            pass
+
     return get_mini_chart_series(
         clean_ticker,
         live_price=live_price,
@@ -973,7 +987,8 @@ async def get_overview_mini_chart_series(ticker: str):
         live_pct=live_pct,
         live_foreign_buy=live_f_buy,
         live_bid_vol=live_bid,
-        live_ask_vol=live_ask
+        live_ask_vol=live_ask,
+        corporate_capital=capital_info
     )
 
 
@@ -984,7 +999,36 @@ async def get_catalysts_and_insights(ticker: str):
     và phân tích AI chuyên sâu.
     """
     clean_ticker = ticker.upper().strip()
-    return get_company_catalysts_and_projects(clean_ticker)
+    data = get_company_catalysts_and_projects(clean_ticker)
+
+    # Tích hợp thêm các dự án quét từ Website chính thức & BCTN/BCTCSN (nếu đã khám phá)
+    try:
+        from project_discovery_engine import _load_discovered_cache
+        d_cache = _load_discovered_cache()
+        if clean_ticker in d_cache:
+            entry = d_cache[clean_ticker]
+            if entry.get("projects"):
+                data["projects"] = entry["projects"]
+                data["total_projects"] = len(entry["projects"])
+                data["total_investment_bil"] = entry.get("total_investment_bil", data.get("total_investment_bil", 0))
+                data["official_website"] = entry.get("official_website")
+                data["scan_sources"] = entry.get("scan_sources")
+    except Exception:
+        pass
+
+    return data
+
+
+@app.post("/api/discover-company-projects/{ticker}")
+@app.get("/api/discover-company-projects/{ticker}")
+async def discover_company_projects_route(ticker: str, force_refresh: bool = False):
+    """
+    Kích hoạt quét và bóc tách thông tin dự án mở rộng trực tiếp từ
+    Website chính thức của doanh nghiệp và Báo cáo Thường niên (BCTN), Báo cáo Bán niên (BCTCSN).
+    """
+    clean_ticker = ticker.upper().strip()
+    from project_discovery_engine import discover_company_projects_master
+    return await discover_company_projects_master(clean_ticker, force_refresh=force_refresh)
 
 
 @app.post("/api/valuation/dcf")

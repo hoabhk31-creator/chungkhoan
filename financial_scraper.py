@@ -289,95 +289,150 @@ def _build_bank_statements(res: Dict[str, Any], clean_ticker: str, n_periods: in
     np_list = res["net_profit"][:n_periods]
     eps_list = _calc_eps_list(np_list, shares_mil)
 
-    raw_inc = {
-        "1. Thu nhập từ lãi và các khoản thu nhập tương tự": [round(n * 1.85, 1) for n in nii_list],
-        "2. Chi phí lãi và các chi phí tương tự": [round(-n * 0.85, 1) for n in nii_list],
-        "I. Thu nhập lãi thuần": list(nii_list),
-        "II. Lãi/lỗ thuần từ hoạt động dịch vụ": [round(n * 0.14, 1) for n in nii_list],
-        "III. Lãi/lỗ thuần từ hoạt động kinh doanh ngoại hối và vàng": [round(n * 0.055, 1) for n in nii_list],
-        "IV. Lãi/lỗ thuần từ mua bán chứng khoán kinh doanh": [round(n * 0.025, 1) for n in nii_list],
-        "V. Lãi/lỗ thuần từ mua bán chứng khoán đầu tư": [round(n * 0.035, 1) for n in nii_list],
-        "VI. Lãi/lỗ thuần từ hoạt động khác": [round(n * 0.045, 1) for n in nii_list],
-        "VII. Thu nhập từ góp vốn, mua cổ phần": [round(n * 0.008, 1) for n in nii_list],
-        "VIII. Tổng thu nhập hoạt động (TOI)": [round(n * 1.308, 1) for n in nii_list],
-        "IX. Chi phí hoạt động (OPEX)": [round(-n * 1.308 * 0.33, 1) for n in nii_list],
-        "X. Lợi nhuận thuần trước chi phí dự phòng rủi ro tín dụng (PPOP)": list(res["operating_profit"]),
-        "XI. Chi phí dự phòng rủi ro tín dụng": [round(-fe, 1) for fe in res["financial_expense"]],
-        "XII. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
-        "XIII. Chi phí thuế TNDN hiện hành": [round(-p * 0.25, 1) for p in np_list],
-        "XIV. Lợi nhuận sau thuế của ngân hàng": list(np_list),
-        "XV. Lợi nhuận sau thuế của cổ đông ngân hàng mẹ": list(np_list),
-        "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
-        "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
-    }
+    cur_raw_inc = res.get("raw_inc", {})
+    is_gen_inc = any("giá vốn" in k.lower() or "bán hàng và cung cấp dịch vụ" in k.lower() or "chi phí bán hàng" in k.lower() for k in cur_raw_inc.keys()) if cur_raw_inc else False
+    has_bank_inc = any("thu nhập từ lãi" in k.lower() or "thu nhập lãi thuần" in k.lower() or "dự phòng rủi ro tín dụng" in k.lower() for k in cur_raw_inc.keys()) if cur_raw_inc else False
+
+    if cur_raw_inc and has_bank_inc and not is_gen_inc:
+        raw_inc = cur_raw_inc
+        for key in list(raw_inc.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "thu nhập lãi thuần" in kl or ("thu nhập lãi" in kl and "thuần" in kl) or "doanh thu thuần" in kl:
+                agg_vals = nii_list
+            elif "lợi nhuận sau thuế" in kl or "lnst" in kl:
+                agg_vals = np_list
+            elif "lợi nhuận kế toán trước thuế" in kl or "lợi nhuận trước thuế" in kl:
+                agg_vals = [round(p * 1.25, 1) for p in np_list]
+            if agg_vals is not None:
+                cur = raw_inc[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_inc[key] = merged
+    else:
+        raw_inc = {
+            "1. Thu nhập từ lãi và các khoản thu nhập tương tự": [round(n * 1.85, 1) for n in nii_list],
+            "2. Chi phí lãi và các chi phí tương tự": [round(-n * 0.85, 1) for n in nii_list],
+            "I. Thu nhập lãi thuần": list(nii_list),
+            "II. Lãi/lỗ thuần từ hoạt động dịch vụ": [round(n * 0.14, 1) for n in nii_list],
+            "III. Lãi/lỗ thuần từ hoạt động kinh doanh ngoại hối và vàng": [round(n * 0.055, 1) for n in nii_list],
+            "IV. Lãi/lỗ thuần từ mua bán chứng khoán kinh doanh": [round(n * 0.025, 1) for n in nii_list],
+            "V. Lãi/lỗ thuần từ mua bán chứng khoán đầu tư": [round(n * 0.035, 1) for n in nii_list],
+            "VI. Lãi/lỗ thuần từ hoạt động khác": [round(n * 0.045, 1) for n in nii_list],
+            "VII. Thu nhập từ góp vốn, mua cổ phần": [round(n * 0.008, 1) for n in nii_list],
+            "VIII. Tổng thu nhập hoạt động (TOI)": [round(n * 1.308, 1) for n in nii_list],
+            "IX. Chi phí hoạt động (OPEX)": [round(-n * 1.308 * 0.33, 1) for n in nii_list],
+            "X. Lợi nhuận thuần trước chi phí dự phòng rủi ro tín dụng (PPOP)": list(res["operating_profit"]),
+            "XI. Chi phí dự phòng rủi ro tín dụng": [round(-fe, 1) for fe in res["financial_expense"]],
+            "XII. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
+            "XIII. Chi phí thuế TNDN hiện hành": [round(-p * 0.25, 1) for p in np_list],
+            "XIV. Lợi nhuận sau thuế của ngân hàng": list(np_list),
+            "XV. Lợi nhuận sau thuế của cổ đông ngân hàng mẹ": list(np_list),
+            "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
+            "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
+        }
     res["raw_inc"] = raw_inc
 
     assets = res["total_assets"][:n_periods]
     liab = res["total_liabilities"][:n_periods]
     equity = res["owner_equity"][:n_periods]
 
-    raw_bs = {
-        "A. TÀI SẢN CÓ": list(assets),
-        "I. Tiền mặt, vàng bạc, đá quý": [round(a * 0.015, 1) for a in assets],
-        "II. Tiền gửi tại Ngân hàng Nhà nước": [round(a * 0.045, 1) for a in assets],
-        "III. Tiền, vàng gửi tại các TCTD khác và cho vay các TCTD khác": [round(a * 0.085, 1) for a in assets],
-        "IV. Chứng khoán kinh doanh": [round(a * 0.015, 1) for a in assets],
-        "V. Cho vay khách hàng": [round(a * 0.68, 1) for a in assets],
-        "VI. Dự phòng rủi ro cho vay khách hàng": [round(-a * 0.012, 1) for a in assets],
-        "VII. Chứng khoán đầu tư (HTM & AFS)": [round(a * 0.155, 1) for a in assets],
-        "VIII. Góp vốn, đầu tư dài hạn": [round(a * 0.008, 1) for a in assets],
-        "IX. Tài sản cố định": [round(a * 0.007, 1) for a in assets],
-        "X. Tài sản Có khác": [round(a * 0.022, 1) for a in assets],
-        "TỔNG CỘNG TÀI SẢN CÓ": list(assets),
-        "B. NỢ PHẢI TRẢ": list(liab),
-        "I. Nợ chính phủ và Ngân hàng Nhà nước": [round(l * 0.025, 1) for l in liab],
-        "II. Tiền gửi và vay các TCTD khác": [round(l * 0.075, 1) for l in liab],
-        "III. Tiền gửi của khách hàng (CASA & Tiết kiệm)": [round(l * 0.77, 1) for l in liab],
-        "IV. Phát hành giấy tờ có giá (Trái phiếu & CD)": [round(l * 0.105, 1) for l in liab],
-        "V. Các khoản nợ khác": [round(l * 0.025, 1) for l in liab],
-        "TỔNG NỢ PHẢI TRẢ": list(liab),
-        "C. VỐN CHỦ SỞ HỮU": list(equity),
-        "I. Vốn của tổ chức tín dụng (Vốn điều lệ)": [round(e * 0.62, 1) for e in equity],
-        "II. Quỹ của tổ chức tín dụng": [round(e * 0.12, 1) for e in equity],
-        "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.26, 1) for e in equity],
-        "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
-        "TỔNG CỘNG NGUỒN VỐN": list(assets)
-    }
+    cur_raw_bs = res.get("raw_bs", {})
+    is_gen_bs = any("hàng tồn kho" in k.lower() or "phải thu ngắn hạn của khách hàng" in k.lower() for k in cur_raw_bs.keys()) if cur_raw_bs else False
+    has_bank_bs = any("cho vay khách hàng" in k.lower() or "tiền gửi của khách hàng" in k.lower() or "tài sản có" in k.lower() for k in cur_raw_bs.keys()) if cur_raw_bs else False
+
+    if cur_raw_bs and has_bank_bs and not is_gen_bs:
+        raw_bs = cur_raw_bs
+        for key in list(raw_bs.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "tổng cộng tài sản" in kl or "tổng tài sản" in kl or "tài sản có" in kl:
+                agg_vals = assets
+            elif "nợ phải trả" in kl and "không kể" not in kl:
+                agg_vals = liab
+            elif "vốn chủ sở hữu" in kl:
+                agg_vals = equity
+            if agg_vals is not None:
+                cur = raw_bs[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_bs[key] = merged
+    else:
+        raw_bs = {
+            "A. TÀI SẢN CÓ": list(assets),
+            "I. Tiền mặt, vàng bạc, đá quý": [round(a * 0.015, 1) for a in assets],
+            "II. Tiền gửi tại Ngân hàng Nhà nước": [round(a * 0.045, 1) for a in assets],
+            "III. Tiền, vàng gửi tại các TCTD khác và cho vay các TCTD khác": [round(a * 0.085, 1) for a in assets],
+            "IV. Chứng khoán kinh doanh": [round(a * 0.015, 1) for a in assets],
+            "V. Cho vay khách hàng": [round(a * 0.68, 1) for a in assets],
+            "VI. Dự phòng rủi ro cho vay khách hàng": [round(-a * 0.012, 1) for a in assets],
+            "VII. Chứng khoán đầu tư (HTM & AFS)": [round(a * 0.155, 1) for a in assets],
+            "VIII. Góp vốn, đầu tư dài hạn": [round(a * 0.008, 1) for a in assets],
+            "IX. Tài sản cố định": [round(a * 0.007, 1) for a in assets],
+            "X. Tài sản Có khác": [round(a * 0.022, 1) for a in assets],
+            "TỔNG CỘNG TÀI SẢN CÓ": list(assets),
+            "B. NỢ PHẢI TRẢ": list(liab),
+            "I. Nợ chính phủ và Ngân hàng Nhà nước": [round(l * 0.025, 1) for l in liab],
+            "II. Tiền gửi và vay các TCTD khác": [round(l * 0.075, 1) for l in liab],
+            "III. Tiền gửi của khách hàng (CASA & Tiết kiệm)": [round(l * 0.77, 1) for l in liab],
+            "IV. Phát hành giấy tờ có giá (Trái phiếu & CD)": [round(l * 0.105, 1) for l in liab],
+            "V. Các khoản nợ khác": [round(l * 0.025, 1) for l in liab],
+            "TỔNG NỢ PHẢI TRẢ": list(liab),
+            "C. VỐN CHỦ SỞ HỮU": list(equity),
+            "I. Vốn của tổ chức tín dụng (Vốn điều lệ)": [round(e * 0.62, 1) for e in equity],
+            "II. Quỹ của tổ chức tín dụng": [round(e * 0.12, 1) for e in equity],
+            "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.26, 1) for e in equity],
+            "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
+            "TỔNG CỘNG NGUỒN VỐN": list(assets)
+        }
     res["raw_bs"] = raw_bs
 
-    cfo = res["cfo"][:n_periods]
-    cfi = res["cfi"][:n_periods]
-    cff = res["cff"][:n_periods]
-    cash = res["cash_and_equivalents"][:n_periods]
+    cur_raw_cf = res.get("raw_cf", {})
+    is_gen_cf = any("hàng tồn kho" in k.lower() or "tiền thu từ bán hàng" in k.lower() or "mua sắm, xây dựng tscđ" in k.lower() for k in cur_raw_cf.keys()) if cur_raw_cf else False
+    has_bank_cf = any("thu nhập từ lãi" in k.lower() or "tiền gửi của khách hàng" in k.lower() or "cho vay khách hàng" in k.lower() for k in cur_raw_cf.keys()) if cur_raw_cf else False
 
-    raw_cf = {
-        "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
-        "1. Thu nhập từ lãi và các khoản tương tự thực thu": [round(n * 1.82, 1) for n in nii_list],
-        "2. Chi phí lãi và các chi phí tương tự thực chi": [round(-n * 0.82, 1) for n in nii_list],
-        "3. Thu nhập từ hoạt động dịch vụ thực thu": [round(n * 0.14, 1) for n in nii_list],
-        "4. Chênh lệch tiền thu/chi từ kinh doanh ngoại tệ, chứng khoán": [round(n * 0.08, 1) for n in nii_list],
-        "5. Tiền chi cho nhân viên và hoạt động quản lý": [round(-n * 0.40, 1) for n in nii_list],
-        "6. Tiền thuế thu nhập thực nộp": [round(-p * 0.20, 1) for p in np_list],
-        "Lưu chuyển tiền thuần từ HĐKD trước thay đổi tài sản và công nợ": [round(p * 1.35, 1) for p in np_list],
-        "- Tăng, giảm tiền gửi và cho vay các TCTD khác": [round(c * 0.15, 1) for c in cfo],
-        "- Tăng, giảm chứng khoán kinh doanh": [round(-c * 0.05, 1) for c in cfo],
-        "- Tăng, giảm cho vay khách hàng": [round(-abs(c * 0.82), 1) for c in cfo],
-        "- Tăng, giảm tiền gửi của khách hàng": [round(abs(c * 0.88), 1) for c in cfo],
-        "- Tăng, giảm phát hành giấy tờ có giá": [round(c * 0.12, 1) for c in cfo],
-        "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
-        "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
-        "1. Tiền chi mua sắm, xây dựng TSCĐ": [round(cf * 0.65, 1) for cf in cfi],
-        "2. Tiền thu từ thanh lý, nhượng bán TSCĐ": [round(-cf * 0.05, 1) for cf in cfi],
-        "3. Tiền thu cổ tức và lợi nhuận được chia": [round(-cf * 0.40, 1) for cf in cfi],
-        "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
-        "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
-        "1. Tăng vốn điều lệ từ phát hành cổ phiếu": [round(max(0, cf * 1.5), 1) for cf in cff],
-        "2. Cổ tức trả cho cổ đông": [round(-abs(cf), 1) for cf in cff],
-        "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
-        "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
-        "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.92, 1) for cs in cash],
-        "Tiền và tương đương tiền cuối kỳ": list(cash)
-    }
+    if cur_raw_cf and has_bank_cf and not is_gen_cf:
+        raw_cf = cur_raw_cf
+    else:
+        cfo = res["cfo"][:n_periods]
+        cfi = res["cfi"][:n_periods]
+        cff = res["cff"][:n_periods]
+        cash = res["cash_and_equivalents"][:n_periods]
+
+        raw_cf = {
+            "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
+            "1. Thu nhập từ lãi và các khoản tương tự thực thu": [round(n * 1.82, 1) for n in nii_list],
+            "2. Chi phí lãi và các chi phí tương tự thực chi": [round(-n * 0.82, 1) for n in nii_list],
+            "3. Thu nhập từ hoạt động dịch vụ thực thu": [round(n * 0.14, 1) for n in nii_list],
+            "4. Chênh lệch tiền thu/chi từ kinh doanh ngoại tệ, chứng khoán": [round(n * 0.08, 1) for n in nii_list],
+            "5. Tiền chi cho nhân viên và hoạt động quản lý": [round(-n * 0.40, 1) for n in nii_list],
+            "6. Tiền thuế thu nhập thực nộp": [round(-p * 0.20, 1) for p in np_list],
+            "Lưu chuyển tiền thuần từ HĐKD trước thay đổi tài sản và công nợ": [round(p * 1.35, 1) for p in np_list],
+            "- Tăng, giảm tiền gửi và cho vay các TCTD khác": [round(c * 0.15, 1) for c in cfo],
+            "- Tăng, giảm chứng khoán kinh doanh": [round(-c * 0.05, 1) for c in cfo],
+            "- Tăng, giảm cho vay khách hàng": [round(-abs(c * 0.82), 1) for c in cfo],
+            "- Tăng, giảm tiền gửi của khách hàng": [round(abs(c * 0.88), 1) for c in cfo],
+            "- Tăng, giảm phát hành giấy tờ có giá": [round(c * 0.12, 1) for c in cfo],
+            "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
+            "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
+            "1. Tiền chi mua sắm, xây dựng TSCĐ": [round(cf * 0.65, 1) for cf in cfi],
+            "2. Tiền thu từ thanh lý, nhượng bán TSCĐ": [round(-cf * 0.05, 1) for cf in cfi],
+            "3. Tiền thu cổ tức và lợi nhuận được chia": [round(-cf * 0.40, 1) for cf in cfi],
+            "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
+            "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
+            "1. Tăng vốn điều lệ từ phát hành cổ phiếu": [round(max(0, cf * 1.5), 1) for cf in cff],
+            "2. Cổ tức trả cho cổ đông": [round(-abs(cf), 1) for cf in cff],
+            "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
+            "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
+            "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.92, 1) for cs in cash],
+            "Tiền và tương đương tiền cuối kỳ": list(cash)
+        }
     res["raw_cf"] = raw_cf
     return res
 
@@ -403,97 +458,154 @@ def _build_securities_statements(res: Dict[str, Any], clean_ticker: str, n_perio
     equity = res["owner_equity"][:n_periods]
     liab = res["total_liabilities"][:n_periods]
 
-    raw_inc = {
-        "I. Doanh thu hoạt động": list(rev),
-        "1.1 Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL)": [round(r * 0.42, 1) for r in rev],
-        "1.2 Lãi từ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM)": [round(r * 0.08, 1) for r in rev],
-        "1.3 Lãi từ các khoản cho vay và phải thu (Margin & Ứng trước)": [round(r * 0.35, 1) for r in rev],
-        "1.4 Lãi từ các tài sản tài chính sẵn sàng để bán (AFS)": [round(r * 0.03, 1) for r in rev],
-        "1.5 Doanh thu nghiệp vụ môi giới chứng khoán": [round(r * 0.18, 1) for r in rev],
-        "1.6 Doanh thu nghiệp vụ bảo lãnh phát hành chứng khoán": [round(r * 0.015, 1) for r in rev],
-        "1.7 Doanh thu nghiệp vụ tư vấn đầu tư chứng khoán": [round(r * 0.01, 1) for r in rev],
-        "1.8 Doanh thu nghiệp vụ lưu ký chứng khoán": [round(r * 0.008, 1) for r in rev],
-        "1.9 Doanh thu hoạt động tư vấn tài chính (IB)": [round(r * 0.02, 1) for r in rev],
-        "Cộng Doanh thu hoạt động": list(rev),
-        "II. Chi phí hoạt động": [round(-c, 1) for c in res["cogs"]],
-        "2.1 Lỗ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL)": [round(-r * 0.18, 1) for r in rev],
-        "2.2 Chi phí nghiệp vụ môi giới chứng khoán": [round(-r * 0.14, 1) for r in rev],
-        "2.3 Chi phí nghiệp vụ tự doanh và tư vấn khác": [round(-r * 0.06, 1) for r in rev],
-        "Cộng Chi phí hoạt động": [round(-c, 1) for c in res["cogs"]],
-        "III. Doanh thu hoạt động tài chính": [round(r * 0.04, 1) for r in rev],
-        "IV. Chi phí tài chính (Chi phí lãi vay margin)": [round(-fe, 1) for fe in res["financial_expense"]],
-        "V. Chi phí quản lý công ty chứng khoán": [round(-r * 0.08, 1) for r in rev],
-        "VI. Lợi nhuận thuần từ hoạt động kinh doanh": [round(p * 1.25, 1) for p in np_list],
-        "VII. Lợi nhuận khác": [round(r * 0.005, 1) for r in rev],
-        "VIII. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
-        "IX. Chi phí thuế thu nhập doanh nghiệp": [round(-p * 0.25, 1) for p in np_list],
-        "X. Lợi nhuận sau thuế của cổ đông công ty mẹ": list(np_list),
-        "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
-        "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
-    }
+    cur_raw_inc = res.get("raw_inc", {})
+    is_gen_inc = any("giá vốn" in k.lower() or "bán hàng và cung cấp dịch vụ" in k.lower() or "chi phí bán hàng" in k.lower() for k in cur_raw_inc.keys()) if cur_raw_inc else False
+    has_sec_inc = any("fvtpl" in k.lower() or "môi giới" in k.lower() or "cho vay margin" in k.lower() or "lưu ký chứng khoán" in k.lower() for k in cur_raw_inc.keys()) if cur_raw_inc else False
+
+    if cur_raw_inc and has_sec_inc and not is_gen_inc:
+        raw_inc = cur_raw_inc
+        for key in list(raw_inc.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "doanh thu hoạt động" in kl or "doanh thu thuần" in kl:
+                agg_vals = rev
+            elif "lợi nhuận sau thuế" in kl or "lnst" in kl:
+                agg_vals = np_list
+            elif "lợi nhuận kế toán trước thuế" in kl or "lợi nhuận trước thuế" in kl:
+                agg_vals = [round(p * 1.25, 1) for p in np_list]
+            if agg_vals is not None:
+                cur = raw_inc[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_inc[key] = merged
+    else:
+        raw_inc = {
+            "I. Doanh thu hoạt động": list(rev),
+            "1.1 Lãi từ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL)": [round(r * 0.42, 1) for r in rev],
+            "1.2 Lãi từ các khoản đầu tư nắm giữ đến ngày đáo hạn (HTM)": [round(r * 0.08, 1) for r in rev],
+            "1.3 Lãi từ các khoản cho vay và phải thu (Margin & Ứng trước)": [round(r * 0.35, 1) for r in rev],
+            "1.4 Lãi từ các tài sản tài chính sẵn sàng để bán (AFS)": [round(r * 0.03, 1) for r in rev],
+            "1.5 Doanh thu nghiệp vụ môi giới chứng khoán": [round(r * 0.18, 1) for r in rev],
+            "1.6 Doanh thu nghiệp vụ bảo lãnh phát hành chứng khoán": [round(r * 0.015, 1) for r in rev],
+            "1.7 Doanh thu nghiệp vụ tư vấn đầu tư chứng khoán": [round(r * 0.01, 1) for r in rev],
+            "1.8 Doanh thu nghiệp vụ lưu ký chứng khoán": [round(r * 0.008, 1) for r in rev],
+            "1.9 Doanh thu hoạt động tư vấn tài chính (IB)": [round(r * 0.02, 1) for r in rev],
+            "Cộng Doanh thu hoạt động": list(rev),
+            "II. Chi phí hoạt động": [round(-c, 1) for c in res["cogs"]],
+            "2.1 Lỗ các tài sản tài chính ghi nhận thông qua lãi/lỗ (FVTPL)": [round(-r * 0.18, 1) for r in rev],
+            "2.2 Chi phí nghiệp vụ môi giới chứng khoán": [round(-r * 0.14, 1) for r in rev],
+            "2.3 Chi phí nghiệp vụ tự doanh và tư vấn khác": [round(-r * 0.06, 1) for r in rev],
+            "Cộng Chi phí hoạt động": [round(-c, 1) for c in res["cogs"]],
+            "III. Doanh thu hoạt động tài chính": [round(r * 0.04, 1) for r in rev],
+            "IV. Chi phí tài chính (Chi phí lãi vay margin)": [round(-fe, 1) for fe in res["financial_expense"]],
+            "V. Chi phí quản lý công ty chứng khoán": [round(-r * 0.08, 1) for r in rev],
+            "VI. Lợi nhuận thuần từ hoạt động kinh doanh": [round(p * 1.25, 1) for p in np_list],
+            "VII. Lợi nhuận khác": [round(r * 0.005, 1) for r in rev],
+            "VIII. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
+            "IX. Chi phí thuế thu nhập doanh nghiệp": [round(-p * 0.25, 1) for p in np_list],
+            "X. Lợi nhuận sau thuế của cổ đông công ty mẹ": list(np_list),
+            "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
+            "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
+        }
     res["raw_inc"] = raw_inc
 
-    raw_bs = {
-        "A. TÀI SẢN NGẮN HẠN": [round(a * 0.94, 1) for a in assets],
-        "I. Tài sản tài chính": [round(a * 0.91, 1) for a in assets],
-        "1. Tiền và các khoản tương đương tiền": list(res["cash_and_equivalents"][:n_periods]),
-        "2. Các tài sản tài chính FVTPL (Tự doanh)": [round(a * 0.32, 1) for a in assets],
-        "3. Các khoản đầu tư nắm giữ đến ngày đáo hạn HTM (Tiền gửi)": [round(a * 0.12, 1) for a in assets],
-        "4. Các khoản cho vay (Dư nợ Margin & Ứng trước tiền bán)": [round(a * 0.44, 1) for a in assets],
-        "5. Các tài sản tài chính sẵn sàng để bán AFS": [round(a * 0.04, 1) for a in assets],
-        "6. Dự phòng suy giảm giá trị tài sản tài chính": [round(-a * 0.005, 1) for a in assets],
-        "7. Các khoản phải thu hoạt động chứng khoán": [round(a * 0.02, 1) for a in assets],
-        "II. Tài sản ngắn hạn khác": [round(a * 0.03, 1) for a in assets],
-        "B. TÀI SẢN DÀI HẠN": [round(a * 0.06, 1) for a in assets],
-        "I. Tài sản cố định": [round(a * 0.015, 1) for a in assets],
-        "II. Tài sản dài hạn khác": [round(a * 0.045, 1) for a in assets],
-        "TỔNG CỘNG TÀI SẢN": list(assets),
-        "C. NỢ PHẢI TRẢ": list(liab),
-        "I. Nợ ngắn hạn": list(liab),
-        "1. Vay và nợ thuê tài chính ngắn hạn (Vay ngân hàng tài trợ margin)": list(res["short_term_debt"][:n_periods]),
-        "2. Phải trả hoạt động giao dịch chứng khoán": [round(l * 0.12, 1) for l in liab],
-        "3. Phải trả người bán và nợ ngắn hạn khác": [round(l * 0.08, 1) for l in liab],
-        "II. Nợ dài hạn": [0.0] * n_periods,
-        "TỔNG NỢ PHẢI TRẢ": list(liab),
-        "D. VỐN CHỦ SỞ HỮU": list(equity),
-        "I. Vốn góp của chủ sở hữu (Vốn điều lệ)": [round(e * 0.65, 1) for e in equity],
-        "II. Thặng dư vốn cổ phần & Quỹ dự phòng tài chính": [round(e * 0.15, 1) for e in equity],
-        "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.20, 1) for e in equity],
-        "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
-        "TỔNG CỘNG NGUỒN VỐN": list(assets)
-    }
+    cur_raw_bs = res.get("raw_bs", {})
+    is_gen_bs = any("hàng tồn kho" in k.lower() or "phải thu ngắn hạn của khách hàng" in k.lower() for k in cur_raw_bs.keys()) if cur_raw_bs else False
+    has_sec_bs = any("fvtpl" in k.lower() or "tài sản tài chính" in k.lower() or "dư nợ margin" in k.lower() or "hoạt động chứng khoán" in k.lower() for k in cur_raw_bs.keys()) if cur_raw_bs else False
+
+    if cur_raw_bs and has_sec_bs and not is_gen_bs:
+        raw_bs = cur_raw_bs
+        for key in list(raw_bs.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "tổng cộng tài sản" in kl or "tổng tài sản" in kl:
+                agg_vals = assets
+            elif "tài sản ngắn hạn" in kl:
+                agg_vals = res["short_term_assets"][:n_periods]
+            elif "nợ phải trả" in kl and "không kể" not in kl:
+                agg_vals = liab
+            elif "vốn chủ sở hữu" in kl:
+                agg_vals = equity
+            if agg_vals is not None:
+                cur = raw_bs[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_bs[key] = merged
+    else:
+        raw_bs = {
+            "A. TÀI SẢN NGẮN HẠN": [round(a * 0.94, 1) for a in assets],
+            "I. Tài sản tài chính": [round(a * 0.91, 1) for a in assets],
+            "1. Tiền và các khoản tương đương tiền": list(res["cash_and_equivalents"][:n_periods]),
+            "2. Các tài sản tài chính FVTPL (Tự doanh)": [round(a * 0.32, 1) for a in assets],
+            "3. Các khoản đầu tư nắm giữ đến ngày đáo hạn HTM (Tiền gửi)": [round(a * 0.12, 1) for a in assets],
+            "4. Các khoản cho vay (Dư nợ Margin & Ứng trước tiền bán)": [round(a * 0.44, 1) for a in assets],
+            "5. Các tài sản tài chính sẵn sàng để bán AFS": [round(a * 0.04, 1) for a in assets],
+            "6. Dự phòng suy giảm giá trị tài sản tài chính": [round(-a * 0.005, 1) for a in assets],
+            "7. Các khoản phải thu hoạt động chứng khoán": [round(a * 0.02, 1) for a in assets],
+            "II. Tài sản ngắn hạn khác": [round(a * 0.03, 1) for a in assets],
+            "B. TÀI SẢN DÀI HẠN": [round(a * 0.06, 1) for a in assets],
+            "I. Tài sản cố định": [round(a * 0.015, 1) for a in assets],
+            "II. Tài sản dài hạn khác": [round(a * 0.045, 1) for a in assets],
+            "TỔNG CỘNG TÀI SẢN": list(assets),
+            "C. NỢ PHẢI TRẢ": list(liab),
+            "I. Nợ ngắn hạn": list(liab),
+            "1. Vay và nợ thuê tài chính ngắn hạn (Vay ngân hàng tài trợ margin)": list(res["short_term_debt"][:n_periods]),
+            "2. Phải trả hoạt động giao dịch chứng khoán": [round(l * 0.12, 1) for l in liab],
+            "3. Phải trả người bán và nợ ngắn hạn khác": [round(l * 0.08, 1) for l in liab],
+            "II. Nợ dài hạn": [0.0] * n_periods,
+            "TỔNG NỢ PHẢI TRẢ": list(liab),
+            "D. VỐN CHỦ SỞ HỮU": list(equity),
+            "I. Vốn góp của chủ sở hữu (Vốn điều lệ)": [round(e * 0.65, 1) for e in equity],
+            "II. Thặng dư vốn cổ phần & Quỹ dự phòng tài chính": [round(e * 0.15, 1) for e in equity],
+            "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.20, 1) for e in equity],
+            "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
+            "TỔNG CỘNG NGUỒN VỐN": list(assets)
+        }
     res["raw_bs"] = raw_bs
 
-    cfo = res["cfo"][:n_periods]
-    cfi = res["cfi"][:n_periods]
-    cff = res["cff"][:n_periods]
-    cash = res["cash_and_equivalents"][:n_periods]
+    cur_raw_cf = res.get("raw_cf", {})
+    is_gen_cf = any("hàng tồn kho" in k.lower() or "tiền thu từ bán hàng" in k.lower() or "mua sắm, xây dựng tscđ" in k.lower() for k in cur_raw_cf.keys()) if cur_raw_cf else False
+    has_sec_cf = any("fvtpl" in k.lower() or "margin" in k.lower() or "ký quỹ" in k.lower() or "môi giới" in k.lower() or "tài sản tài chính" in k.lower() for k in cur_raw_cf.keys()) if cur_raw_cf else False
 
-    raw_cf = {
-        "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
-        "1. Tiền thu từ bán các tài sản tài chính FVTPL, thu hồi HTM": [round(abs(c) * 1.8, 1) for c in cfo],
-        "2. Tiền chi mua các tài sản tài chính FVTPL, gửi HTM": [round(-abs(c) * 1.7, 1) for c in cfo],
-        "3. Tiền thu hồi các khoản cho vay margin & ứng trước": [round(abs(c) * 2.2, 1) for c in cfo],
-        "4. Tiền chi cho vay hoạt động ký quỹ (Margin)": [round(-abs(c) * 2.3, 1) for c in cfo],
-        "5. Tiền thu từ nghiệp vụ môi giới và dịch vụ chứng khoán": [round(r * 0.18, 1) for r in rev],
-        "6. Tiền chi trả cho nghiệp vụ môi giới và dịch vụ": [round(-r * 0.14, 1) for r in rev],
-        "7. Tiền chi trả lãi vay": [round(-fe, 1) for fe in res["financial_expense"]],
-        "8. Tiền thuế TNDN đã nộp": [round(-p * 0.20, 1) for p in np_list],
-        "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
-        "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
-        "1. Tiền chi mua sắm TSCĐ": [round(cf * 0.70, 1) for cf in cfi],
-        "2. Tiền thu cổ tức và lợi nhuận được chia": [round(-cf * 0.30, 1) for cf in cfi],
-        "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
-        "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
-        "1. Tiền thu từ phát hành cổ phiếu, tăng vốn điều lệ": [round(max(0, cf * 1.5), 1) for cf in cff],
-        "2. Tiền thu từ đi vay ngắn hạn ngân hàng": [round(abs(cf) * 2.0, 1) for cf in cff],
-        "3. Tiền chi trả nợ gốc vay ngân hàng": [round(-abs(cf) * 1.8, 1) for cf in cff],
-        "4. Cổ tức đã trả cho chủ sở hữu": [round(-abs(cf) * 0.2, 1) for cf in cff],
-        "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
-        "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
-        "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.90, 1) for cs in cash],
-        "Tiền và tương đương tiền cuối kỳ": list(cash)
-    }
+    if cur_raw_cf and has_sec_cf and not is_gen_cf:
+        raw_cf = cur_raw_cf
+    else:
+        cfo = res["cfo"][:n_periods]
+        cfi = res["cfi"][:n_periods]
+        cff = res["cff"][:n_periods]
+        cash = res["cash_and_equivalents"][:n_periods]
+
+        raw_cf = {
+            "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
+            "1. Tiền thu từ bán các tài sản tài chính FVTPL, thu hồi HTM": [round(abs(c) * 1.8, 1) for c in cfo],
+            "2. Tiền chi mua các tài sản tài chính FVTPL, gửi HTM": [round(-abs(c) * 1.7, 1) for c in cfo],
+            "3. Tiền thu hồi các khoản cho vay margin & ứng trước": [round(abs(c) * 2.2, 1) for c in cfo],
+            "4. Tiền chi cho vay hoạt động ký quỹ (Margin)": [round(-abs(c) * 2.3, 1) for c in cfo],
+            "5. Tiền thu từ nghiệp vụ môi giới và dịch vụ chứng khoán": [round(r * 0.18, 1) for r in rev],
+            "6. Tiền chi trả cho nghiệp vụ môi giới và dịch vụ": [round(-r * 0.14, 1) for r in rev],
+            "7. Tiền chi trả lãi vay": [round(-fe, 1) for fe in res["financial_expense"]],
+            "8. Tiền thuế TNDN đã nộp": [round(-p * 0.20, 1) for p in np_list],
+            "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
+            "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
+            "1. Tiền chi mua sắm TSCĐ": [round(cf * 0.70, 1) for cf in cfi],
+            "2. Tiền thu cổ tức và lợi nhuận được chia": [round(-cf * 0.30, 1) for cf in cfi],
+            "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
+            "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
+            "1. Tiền thu từ phát hành cổ phiếu, tăng vốn điều lệ": [round(max(0, cf * 1.5), 1) for cf in cff],
+            "2. Tiền thu từ đi vay ngắn hạn ngân hàng": [round(abs(cf) * 2.0, 1) for cf in cff],
+            "3. Tiền chi trả nợ gốc vay ngân hàng": [round(-abs(cf) * 1.8, 1) for cf in cff],
+            "4. Cổ tức đã trả cho chủ sở hữu": [round(-abs(cf) * 0.2, 1) for cf in cff],
+            "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
+            "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
+            "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.90, 1) for cs in cash],
+            "Tiền và tương đương tiền cuối kỳ": list(cash)
+        }
     res["raw_cf"] = raw_cf
     return res
 
@@ -519,85 +631,133 @@ def _build_insurance_statements(res: Dict[str, Any], clean_ticker: str, n_period
     equity = res["owner_equity"][:n_periods]
     liab = res["total_liabilities"][:n_periods]
 
-    raw_inc = {
-        "I. Doanh thu hoạt động kinh doanh bảo hiểm": [round(r * 1.15, 1) for r in rev],
-        "1. Phí bảo hiểm gốc": [round(r * 1.12, 1) for r in rev],
-        "2. Phí nhận tái bảo hiểm": [round(r * 0.08, 1) for r in rev],
-        "3. Tăng/giảm dự phòng phí bảo hiểm": [round(-r * 0.05, 1) for r in rev],
-        "Doanh thu thuần hoạt động kinh doanh bảo hiểm": list(rev),
-        "II. Chi bồi thường và trả tiền bảo hiểm": [round(-r * 0.65, 1) for r in rev],
-        "1. Tổng chi bồi thường bảo hiểm gốc": [round(-r * 0.80, 1) for r in rev],
-        "2. Thu bồi thường nhượng tái bảo hiểm": [round(r * 0.20, 1) for r in rev],
-        "3. Tăng/giảm dự phòng bồi thường bảo hiểm": [round(-r * 0.05, 1) for r in rev],
-        "Chi bồi thường và trả tiền bảo hiểm thuần": [round(-r * 0.65, 1) for r in rev],
-        "III. Chi phí hoạt động kinh doanh bảo hiểm khác": [round(-r * 0.15, 1) for r in rev],
-        "IV. Lợi nhuận gộp hoạt động kinh doanh bảo hiểm": [round(r * 0.20, 1) for r in rev],
-        "V. Doanh thu hoạt động tài chính (Lãi đầu tư & tiền gửi)": [round(r * 0.25, 1) for r in rev],
-        "VI. Chi phí hoạt động tài chính": [round(-r * 0.04, 1) for r in rev],
-        "VII. Chi phí quản lý doanh nghiệp": [round(-r * 0.12, 1) for r in rev],
-        "VIII. Lợi nhuận thuần từ hoạt động kinh doanh": [round(p * 1.25, 1) for p in np_list],
-        "IX. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
-        "X. Chi phí thuế thu nhập doanh nghiệp": [round(-p * 0.25, 1) for p in np_list],
-        "XI. Lợi nhuận sau thuế của cổ đông công ty mẹ": list(np_list),
-        "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
-        "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
-    }
+    cur_raw_inc = res.get("raw_inc", {})
+    if cur_raw_inc:
+        raw_inc = cur_raw_inc
+        for key in list(raw_inc.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "doanh thu" in kl or "phí bảo hiểm" in kl:
+                agg_vals = rev
+            elif "lợi nhuận sau thuế" in kl or "lnst" in kl:
+                agg_vals = np_list
+            elif "lợi nhuận kế toán trước thuế" in kl or "lợi nhuận trước thuế" in kl:
+                agg_vals = [round(p * 1.25, 1) for p in np_list]
+            if agg_vals is not None:
+                cur = raw_inc[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_inc[key] = merged
+    else:
+        raw_inc = {
+            "I. Doanh thu hoạt động kinh doanh bảo hiểm": [round(r * 1.15, 1) for r in rev],
+            "1. Phí bảo hiểm gốc": [round(r * 1.12, 1) for r in rev],
+            "2. Phí nhận tái bảo hiểm": [round(r * 0.08, 1) for r in rev],
+            "3. Tăng/giảm dự phòng phí bảo hiểm": [round(-r * 0.05, 1) for r in rev],
+            "Doanh thu thuần hoạt động kinh doanh bảo hiểm": list(rev),
+            "II. Chi bồi thường và trả tiền bảo hiểm": [round(-r * 0.65, 1) for r in rev],
+            "1. Tổng chi bồi thường bảo hiểm gốc": [round(-r * 0.80, 1) for r in rev],
+            "2. Thu bồi thường nhượng tái bảo hiểm": [round(r * 0.20, 1) for r in rev],
+            "3. Tăng/giảm dự phòng bồi thường bảo hiểm": [round(-r * 0.05, 1) for r in rev],
+            "Chi bồi thường và trả tiền bảo hiểm thuần": [round(-r * 0.65, 1) for r in rev],
+            "III. Chi phí hoạt động kinh doanh bảo hiểm khác": [round(-r * 0.15, 1) for r in rev],
+            "IV. Lợi nhuận gộp hoạt động kinh doanh bảo hiểm": [round(r * 0.20, 1) for r in rev],
+            "V. Doanh thu hoạt động tài chính (Lãi đầu tư & tiền gửi)": [round(r * 0.25, 1) for r in rev],
+            "VI. Chi phí hoạt động tài chính": [round(-r * 0.04, 1) for r in rev],
+            "VII. Chi phí quản lý doanh nghiệp": [round(-r * 0.12, 1) for r in rev],
+            "VIII. Lợi nhuận thuần từ hoạt động kinh doanh": [round(p * 1.25, 1) for p in np_list],
+            "IX. Tổng lợi nhuận kế toán trước thuế": [round(p * 1.25, 1) for p in np_list],
+            "X. Chi phí thuế thu nhập doanh nghiệp": [round(-p * 0.25, 1) for p in np_list],
+            "XI. Lợi nhuận sau thuế của cổ đông công ty mẹ": list(np_list),
+            "21. Lãi cơ bản trên cổ phiếu (*)": eps_list,
+            "22. Lãi suy giảm trên cổ phiếu (*)": eps_list
+        }
     res["raw_inc"] = raw_inc
 
-    raw_bs = {
-        "A. TÀI SẢN NGẮN HẠN": [round(a * 0.65, 1) for a in assets],
-        "I. Tiền và các khoản tương đương tiền": list(res["cash_and_equivalents"][:n_periods]),
-        "II. Đầu tư tài chính ngắn hạn (Tiền gửi có kỳ hạn)": [round(a * 0.45, 1) for a in assets],
-        "III. Các khoản phải thu ngắn hạn": [round(a * 0.08, 1) for a in assets],
-        "IV. Tài sản tái bảo hiểm ngắn hạn": [round(a * 0.05, 1) for a in assets],
-        "V. Tài sản ngắn hạn khác": [round(a * 0.02, 1) for a in assets],
-        "B. TÀI SẢN DÀI HẠN": [round(a * 0.35, 1) for a in assets],
-        "I. Đầu tư tài chính dài hạn (Trái phiếu & Cổ phiếu)": [round(a * 0.28, 1) for a in assets],
-        "II. Tài sản tái bảo hiểm dài hạn": [round(a * 0.03, 1) for a in assets],
-        "III. Tài sản cố định và BĐS đầu tư": [round(a * 0.04, 1) for a in assets],
-        "TỔNG CỘNG TÀI SẢN": list(assets),
-        "C. NỢ PHẢI TRẢ": list(liab),
-        "I. Nợ ngắn hạn": [round(l * 0.15, 1) for l in liab],
-        "II. Dự phòng nghiệp vụ bảo hiểm": [round(l * 0.82, 1) for l in liab],
-        "1. Dự phòng phí bảo hiểm": [round(l * 0.38, 1) for l in liab],
-        "2. Dự phòng bồi thường": [round(l * 0.34, 1) for l in liab],
-        "3. Dự phòng dao động lớn": [round(l * 0.10, 1) for l in liab],
-        "III. Nợ dài hạn": [round(l * 0.03, 1) for l in liab],
-        "TỔNG NỢ PHẢI TRẢ": list(liab),
-        "D. VỐN CHỦ SỞ HỮU": list(equity),
-        "I. Vốn đầu tư của chủ sở hữu": [round(e * 0.65, 1) for e in equity],
-        "II. Các quỹ dự trữ nghiệp vụ": [round(e * 0.15, 1) for e in equity],
-        "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.20, 1) for e in equity],
-        "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
-        "TỔNG CỘNG NGUỒN VỐN": list(assets)
-    }
+    cur_raw_bs = res.get("raw_bs", {})
+    if cur_raw_bs:
+        raw_bs = cur_raw_bs
+        for key in list(raw_bs.keys()):
+            kl = key.lower()
+            agg_vals = None
+            if "tổng cộng tài sản" in kl or "tổng tài sản" in kl:
+                agg_vals = assets
+            elif "tài sản ngắn hạn" in kl:
+                agg_vals = res["short_term_assets"][:n_periods]
+            elif "nợ phải trả" in kl and "không kể" not in kl:
+                agg_vals = liab
+            elif "vốn chủ sở hữu" in kl:
+                agg_vals = equity
+            if agg_vals is not None:
+                cur = raw_bs[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_bs[key] = merged
+    else:
+        raw_bs = {
+            "A. TÀI SẢN NGẮN HẠN": [round(a * 0.65, 1) for a in assets],
+            "I. Tiền và các khoản tương đương tiền": list(res["cash_and_equivalents"][:n_periods]),
+            "II. Đầu tư tài chính ngắn hạn (Tiền gửi có kỳ hạn)": [round(a * 0.45, 1) for a in assets],
+            "III. Các khoản phải thu ngắn hạn": [round(a * 0.08, 1) for a in assets],
+            "IV. Tài sản tái bảo hiểm ngắn hạn": [round(a * 0.05, 1) for a in assets],
+            "V. Tài sản ngắn hạn khác": [round(a * 0.02, 1) for a in assets],
+            "B. TÀI SẢN DÀI HẠN": [round(a * 0.35, 1) for a in assets],
+            "I. Đầu tư tài chính dài hạn (Trái phiếu & Cổ phiếu)": [round(a * 0.28, 1) for a in assets],
+            "II. Tài sản tái bảo hiểm dài hạn": [round(a * 0.03, 1) for a in assets],
+            "III. Tài sản cố định và BĐS đầu tư": [round(a * 0.04, 1) for a in assets],
+            "TỔNG CỘNG TÀI SẢN": list(assets),
+            "C. NỢ PHẢI TRẢ": list(liab),
+            "I. Nợ ngắn hạn": [round(l * 0.15, 1) for l in liab],
+            "II. Dự phòng nghiệp vụ bảo hiểm": [round(l * 0.82, 1) for l in liab],
+            "1. Dự phòng phí bảo hiểm": [round(l * 0.38, 1) for l in liab],
+            "2. Dự phòng bồi thường": [round(l * 0.34, 1) for l in liab],
+            "3. Dự phòng dao động lớn": [round(l * 0.10, 1) for l in liab],
+            "III. Nợ dài hạn": [round(l * 0.03, 1) for l in liab],
+            "TỔNG NỢ PHẢI TRẢ": list(liab),
+            "D. VỐN CHỦ SỞ HỮU": list(equity),
+            "I. Vốn đầu tư của chủ sở hữu": [round(e * 0.65, 1) for e in equity],
+            "II. Các quỹ dự trữ nghiệp vụ": [round(e * 0.15, 1) for e in equity],
+            "III. Lợi nhuận sau thuế chưa phân phối": [round(e * 0.20, 1) for e in equity],
+            "TỔNG VỐN CHỦ SỞ HỮU": list(equity),
+            "TỔNG CỘNG NGUỒN VỐN": list(assets)
+        }
     res["raw_bs"] = raw_bs
 
-    cfo = res["cfo"][:n_periods]
-    cfi = res["cfi"][:n_periods]
-    cff = res["cff"][:n_periods]
-    cash = res["cash_and_equivalents"][:n_periods]
+    cur_raw_cf = res.get("raw_cf", {})
+    if cur_raw_cf:
+        raw_cf = cur_raw_cf
+    else:
+        cfo = res["cfo"][:n_periods]
+        cfi = res["cfi"][:n_periods]
+        cff = res["cff"][:n_periods]
+        cash = res["cash_and_equivalents"][:n_periods]
 
-    raw_cf = {
-        "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
-        "1. Tiền thu phí bảo hiểm và nhận tái bảo hiểm": [round(r * 1.14, 1) for r in rev],
-        "2. Tiền chi bồi thường và nhượng tái bảo hiểm": [round(-r * 0.64, 1) for r in rev],
-        "3. Tiền chi cho đại lý, môi giới và quản lý bảo hiểm": [round(-r * 0.25, 1) for r in rev],
-        "4. Tiền thu từ lãi tiền gửi, đầu tư tài chính": [round(r * 0.24, 1) for r in rev],
-        "5. Tiền thuế TNDN đã nộp": [round(-p * 0.20, 1) for p in np_list],
-        "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
-        "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
-        "1. Tiền chi gửi ngân hàng, mua công cụ nợ, trái phiếu": [round(-abs(cf) * 1.5, 1) for cf in cfi],
-        "2. Tiền thu hồi các khoản đầu tư tài chính": [round(abs(cf) * 1.3, 1) for cf in cfi],
-        "3. Tiền chi mua sắm TSCĐ": [round(cf * 0.1, 1) for cf in cfi],
-        "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
-        "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
-        "1. Cổ tức đã trả cho chủ sở hữu": [round(-abs(cf), 1) for cf in cff],
-        "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
-        "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
-        "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.90, 1) for cs in cash],
-        "Tiền và tương đương tiền cuối kỳ": list(cash)
-    }
+        raw_cf = {
+            "I. Lưu chuyển tiền từ hoạt động kinh doanh": list(cfo),
+            "1. Tiền thu phí bảo hiểm và nhận tái bảo hiểm": [round(r * 1.14, 1) for r in rev],
+            "2. Tiền chi bồi thường và nhượng tái bảo hiểm": [round(-r * 0.64, 1) for r in rev],
+            "3. Tiền chi cho đại lý, môi giới và quản lý bảo hiểm": [round(-r * 0.25, 1) for r in rev],
+            "4. Tiền thu từ lãi tiền gửi, đầu tư tài chính": [round(r * 0.24, 1) for r in rev],
+            "5. Tiền thuế TNDN đã nộp": [round(-p * 0.20, 1) for p in np_list],
+            "Lưu chuyển tiền thuần từ hoạt động kinh doanh (CFO)": list(cfo),
+            "II. Lưu chuyển tiền từ hoạt động đầu tư (CFI)": list(cfi),
+            "1. Tiền chi gửi ngân hàng, mua công cụ nợ, trái phiếu": [round(-abs(cf) * 1.5, 1) for cf in cfi],
+            "2. Tiền thu hồi các khoản đầu tư tài chính": [round(abs(cf) * 1.3, 1) for cf in cfi],
+            "3. Tiền chi mua sắm TSCĐ": [round(cf * 0.1, 1) for cf in cfi],
+            "Lưu chuyển tiền thuần từ hoạt động đầu tư (CFI)": list(cfi),
+            "III. Lưu chuyển tiền từ hoạt động tài chính (CFF)": list(cff),
+            "1. Cổ tức đã trả cho chủ sở hữu": [round(-abs(cf), 1) for cf in cff],
+            "Lưu chuyển tiền thuần từ hoạt động tài chính (CFF)": list(cff),
+            "Lưu chuyển tiền thuần trong kỳ": [round(o + i + f, 1) for o, i, f in zip(cfo, cfi, cff)],
+            "Tiền và tương đương tiền đầu kỳ": [round(cs * 0.90, 1) for cs in cash],
+            "Tiền và tương đương tiền cuối kỳ": list(cash)
+        }
     res["raw_cf"] = raw_cf
     return res
 
@@ -712,36 +872,36 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
 
     raw_bs = res.get("raw_bs", {})
     if raw_bs:
-        for i in range(n_periods):
-            zero_count = sum(1 for vals in raw_bs.values() if i < len(vals) and vals[i] == 0)
-            if len(raw_bs) > 0 and zero_count >= len(raw_bs) * 0.75:
-                for key, vals in raw_bs.items():
-                    while len(vals) < n_periods:
-                        vals.append(0.0)
-                    if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
-                        vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
-                    elif i > 0 and vals[i-1] != 0:
-                        vals[i] = round(vals[i-1] * 1.03, 1)
-                    elif i < n_periods - 1 and vals[i+1] != 0:
-                        vals[i] = round(vals[i+1] * 0.97, 1)
+        # Tuyệt đối KHÔNG tự ý suy diễn (imputation 1.03/0.97) cho raw_bs: kỳ thiếu để nguyên 0.0
+        # Chỉ đồng bộ các dòng tổng hợp nếu kỳ đó thiếu dữ liệu (= 0)
         for key in list(raw_bs.keys()):
             kl = key.lower()
+            agg_vals = None
             if "tổng cộng tài sản" in kl or "tổng tài sản" in kl:
-                raw_bs[key] = list(res["total_assets"][:n_periods])
+                agg_vals = res["total_assets"][:n_periods]
             elif "tài sản ngắn hạn" in kl:
-                raw_bs[key] = list(res["short_term_assets"][:n_periods])
+                agg_vals = res["short_term_assets"][:n_periods]
             elif "tiền và các khoản tương đương tiền" in kl:
-                raw_bs[key] = list(res["cash_and_equivalents"][:n_periods])
+                agg_vals = res["cash_and_equivalents"][:n_periods]
             elif "hàng tồn kho" in kl:
-                raw_bs[key] = list(res["inventories"][:n_periods])
+                agg_vals = res["inventories"][:n_periods]
             elif "nợ phải trả" in kl and "không kể" not in kl:
-                raw_bs[key] = list(res["total_liabilities"][:n_periods])
+                agg_vals = res["total_liabilities"][:n_periods]
             elif "vay và nợ thuê tài chính ngắn hạn" in kl or "vay ngắn hạn" in kl:
-                raw_bs[key] = list(res["short_term_debt"][:n_periods])
+                agg_vals = res["short_term_debt"][:n_periods]
             elif "vay và nợ thuê tài chính dài hạn" in kl or "vay dài hạn" in kl:
-                raw_bs[key] = list(res["long_term_debt"][:n_periods])
+                agg_vals = res["long_term_debt"][:n_periods]
             elif "vốn chủ sở hữu" in kl:
-                raw_bs[key] = list(res["owner_equity"][:n_periods])
+                agg_vals = res["owner_equity"][:n_periods]
+
+            if agg_vals is not None:
+                cur = raw_bs[key]
+                merged = []
+                for i in range(n_periods):
+                    cur_val = cur[i] if i < len(cur) else 0.0
+                    agg_val = agg_vals[i] if i < len(agg_vals) else 0.0
+                    merged.append(agg_val if (cur_val == 0.0 or cur_val is None) else cur_val)
+                raw_bs[key] = merged
         res["raw_bs"] = raw_bs
     else:
         tot_a = res["total_assets"][:n_periods]
@@ -826,18 +986,7 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
             "Tiền và tương đương tiền cuối kỳ (70 = 50+60+61)"
         ]}
 
-    for i in range(n_periods):
-        zero_count = sum(1 for vals in raw_cf.values() if i < len(vals) and vals[i] == 0)
-        if len(raw_cf) > 0 and zero_count >= len(raw_cf) * 0.70:
-            for key, vals in raw_cf.items():
-                while len(vals) < n_periods:
-                    vals.append(0.0)
-                if i > 0 and i < n_periods - 1 and vals[i-1] != 0 and vals[i+1] != 0:
-                    vals[i] = round((vals[i-1] + vals[i+1]) / 2.0, 1)
-                elif i > 0 and vals[i-1] != 0:
-                    vals[i] = round(vals[i-1] * 1.05, 1)
-                elif i < n_periods - 1 and vals[i+1] != 0:
-                    vals[i] = round(vals[i+1] * 0.95, 1)
+    # Tuyệt đối KHÔNG tự ý suy diễn (imputation 1.05/0.95) cho raw_cf: kỳ thiếu để nguyên 0.0
 
     for key in list(raw_cf.keys()):
         kl = key.lower().strip()
@@ -1252,16 +1401,25 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     res["total_liabilities"] = tot_liab
     res["owner_equity"] = eq_list
 
-    # Cập nhật ngay vào raw_bs nếu đã có sẵn
+    # Cập nhật ngay vào raw_bs nếu đã có sẵn (chỉ bổ sung nếu kỳ đó = 0)
     if "raw_bs" in res and isinstance(res["raw_bs"], dict):
         for bs_k in list(res["raw_bs"].keys()):
             bs_kl = bs_k.lower().strip()
+            agg_vals = None
             if "tổng cộng tài sản" in bs_kl or "tổng tài sản" in bs_kl or bs_kl == "tài sản" or "tổng cộng nguồn vốn" in bs_kl:
-                res["raw_bs"][bs_k] = list(tot_assets[:n])
+                agg_vals = tot_assets[:n]
             elif "nợ phải trả" in bs_kl and "không kể" not in bs_kl:
-                res["raw_bs"][bs_k] = list(tot_liab[:n])
+                agg_vals = tot_liab[:n]
             elif "vốn chủ sở hữu" in bs_kl and "nguồn" not in bs_kl:
-                res["raw_bs"][bs_k] = list(eq_list[:n])
+                agg_vals = eq_list[:n]
+            if agg_vals is not None:
+                cur = res["raw_bs"][bs_k]
+                merged = []
+                for idx in range(n):
+                    cur_v = cur[idx] if idx < len(cur) else 0.0
+                    agg_v = agg_vals[idx] if idx < len(agg_vals) else 0.0
+                    merged.append(agg_v if (cur_v == 0.0 or cur_v is None) else cur_v)
+                res["raw_bs"][bs_k] = merged
 
     # 7. Lưu chuyển tiền tệ
     cfo_list = res.get("cfo", [])
@@ -1305,8 +1463,30 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
 
     try:
         from financial_data import get_financial_statement_model, VIETNAM_STOCK_DIRECTORY
-        ind_model = get_financial_statement_model(clean_ticker)
+        sec_name = ""
+        comp_name = ""
+        try:
+            from company_database import get_company
+            c_data = get_company(clean_ticker)
+            if c_data:
+                comp_name = c_data.get("name") or ""
+                sec_name = c_data.get("icb4") or c_data.get("fiintrade_sector") or c_data.get("icb2") or ""
+        except Exception:
+            pass
+
         stock_info = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+        if not sec_name:
+            sec_name = stock_info.get("sector") or ""
+        if not comp_name:
+            comp_name = stock_info.get("name") or ""
+
+        raw_items = []
+        if res.get("raw_inc"):
+            raw_items.extend(list(res["raw_inc"].keys()))
+        if res.get("raw_bs"):
+            raw_items.extend(list(res["raw_bs"].keys()))
+
+        ind_model = get_financial_statement_model(clean_ticker, sector=sec_name, company_name=comp_name, raw_statement_items=raw_items)
     except Exception:
         ind_model = "general"
         stock_info = {}
@@ -1315,23 +1495,24 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     shares_mil = stock_info.get("shares") or 1000.0
 
     if ind_model == "bank":
-        return _build_bank_statements(res, clean_ticker, n_periods, shares_mil)
+        res = _build_bank_statements(res, clean_ticker, n_periods, shares_mil)
     elif ind_model == "securities":
-        return _build_securities_statements(res, clean_ticker, n_periods, shares_mil)
+        res = _build_securities_statements(res, clean_ticker, n_periods, shares_mil)
     elif ind_model == "insurance":
-        return _build_insurance_statements(res, clean_ticker, n_periods, shares_mil)
+        res = _build_insurance_statements(res, clean_ticker, n_periods, shares_mil)
     elif ind_model == "real_estate":
         res = _build_real_estate_statements(res, clean_ticker, n_periods, shares_mil)
     else:
         res = _build_general_statements(res, clean_ticker, n_periods, shares_mil)
 
-    # Post-build: Apply block dedup lại sau khi builder có thể đã rebuild raw_inc từ aggregate
+    # Post-build: Apply block dedup và run-length dedup cho toàn bộ các ngành
     if mode == "year":
         for raw_sec in ["raw_inc", "raw_bs", "raw_cf"]:
             if raw_sec in res and isinstance(res[raw_sec], dict):
                 for row_k in list(res[raw_sec].keys()):
                     if isinstance(res[raw_sec][row_k], list):
                         vals = res[raw_sec][row_k]
+                        # 1. Block repetition (size 4, 3, 2)
                         for block_size in [4, 3, 2]:
                             non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
                             if len(non_zero_pos) < block_size * 2:
@@ -1355,6 +1536,22 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
                                             vals[bi] = 0.0
                                     idx += block_size
                                 break
+
+                        # 2. Phát hiện chuỗi liên tiếp cùng giá trị (>= 3)
+                        i = 0
+                        while i < len(vals):
+                            if vals[i] != 0.0:
+                                run_len = 1
+                                j = i + 1
+                                while j < len(vals) and vals[j] == vals[i]:
+                                    run_len += 1
+                                    j += 1
+                                if run_len >= 3:
+                                    for k in range(i, j - 1):
+                                        vals[k] = 0.0
+                                i = j
+                            else:
+                                i += 1
                         res[raw_sec][row_k] = vals
 
     return res

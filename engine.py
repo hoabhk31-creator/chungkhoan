@@ -2078,15 +2078,22 @@ def extract_financial_data_from_text(
 
     try:
         from ai_learning_engine import extract_advanced_knowledge, is_generic_boilerplate
+        from crawler import clean_vietnamese_pdf_spacing, is_table_or_valuation_or_disclaimer_dump
         adv = extract_advanced_knowledge(
             raw_text=text,
             ticker=clean_ticker,
             current_market_price=ref_market_price
         )
         if adv.get("key_catalysts"):
-            catalysts = [c for c in adv["key_catalysts"] if not is_generic_boilerplate(c)]
+            catalysts = [
+                clean_vietnamese_pdf_spacing(c) for c in adv["key_catalysts"]
+                if not is_generic_boilerplate(c) and not is_table_or_valuation_or_disclaimer_dump(c)
+            ]
         if adv.get("key_risks"):
-            risks = [r for r in adv["key_risks"] if not is_generic_boilerplate(r)]
+            risks = [
+                clean_vietnamese_pdf_spacing(r) for r in adv["key_risks"]
+                if not is_generic_boilerplate(r) and not is_table_or_valuation_or_disclaimer_dump(r)
+            ]
         if rev_forecast == "Dự phóng tăng trưởng 18.0% YoY" and adv.get("revenue_forecast"):
             rev_forecast = adv["revenue_forecast"]
         if npat_forecast == "Dự phóng tăng trưởng 25.5% YoY" and adv.get("npat_forecast"):
@@ -2096,11 +2103,18 @@ def extract_financial_data_from_text(
 
     # Bóc tách trực tiếp từ các khối văn bản trong báo cáo nếu chưa đủ 15 catalysts
     if len(catalysts) < 15:
+        try:
+            from crawler import clean_vietnamese_pdf_spacing, is_table_or_valuation_or_disclaimer_dump
+        except Exception:
+            clean_vietnamese_pdf_spacing = lambda x: x
+            is_table_or_valuation_or_disclaimer_dump = lambda x: False
+
         cat_blocks = re.findall(r"(?:luận điểm|động lực|catalyst|triển vọng)[\s\S]{0,30}?:\s*([^\n\r]+)", text, re.IGNORECASE)
         if cat_blocks:
             for c in cat_blocks:
                 c_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', c).strip()
-                if len(c_clean) > 10 and c_clean not in catalysts:
+                c_clean = clean_vietnamese_pdf_spacing(c_clean)
+                if len(c_clean) > 10 and c_clean not in catalysts and not is_table_or_valuation_or_disclaimer_dump(c_clean):
                     try:
                         from ai_learning_engine import is_generic_boilerplate
                         if not is_generic_boilerplate(c_clean):
@@ -2114,7 +2128,8 @@ def extract_financial_data_from_text(
             bullets = re.findall(r"(?:^|\n)[-•*]\s*([^\n\r]{20,})", text)
             for b in bullets:
                 b_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', b).strip()
-                if b_clean not in catalysts and len(b_clean) > 15:
+                b_clean = clean_vietnamese_pdf_spacing(b_clean)
+                if b_clean not in catalysts and len(b_clean) > 15 and not is_table_or_valuation_or_disclaimer_dump(b_clean):
                     try:
                         from ai_learning_engine import is_generic_boilerplate
                         if not is_generic_boilerplate(b_clean):
@@ -2151,7 +2166,8 @@ def extract_financial_data_from_text(
         if risk_blocks:
             for r in risk_blocks:
                 r_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', r).strip()
-                if len(r_clean) > 10 and r_clean not in risks:
+                r_clean = clean_vietnamese_pdf_spacing(r_clean)
+                if len(r_clean) > 10 and r_clean not in risks and not is_table_or_valuation_or_disclaimer_dump(r_clean):
                     try:
                         from ai_learning_engine import is_generic_boilerplate
                         if not is_generic_boilerplate(r_clean):

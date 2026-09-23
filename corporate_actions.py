@@ -8,6 +8,7 @@ Nguồn tham chiếu: Vietstock (https://finance.vietstock.vn/lich-su-kien.htm),
 import os
 import json
 import re
+import time
 from datetime import datetime, date
 from typing import Dict, List, Any, Optional, Tuple
 
@@ -389,19 +390,101 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
     ],
     "CTG": [
         {
+            "id": "ctg-ca-2026",
+            "ex_date": "23/07/2026",
+            "record_date": "24/07/2026",
+            "execution_date": "23/07/2026",
+            "event_type": "dividend_cash",
+            "title": "Trả cổ tức năm 2025 bằng tiền, 450 đồng/CP",
+            "cash_amount": 450.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 35000.0,
+            "ref_price_after": 34550.0,
+            "adjustment_factor": 0.9871,
+            "description": "Chi trả cổ tức năm 2025 bằng tiền mặt với tỷ lệ 4.5% (450 đồng/cổ phiếu).",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "ctg-ca-2025-stock",
+            "ex_date": "17/12/2025",
+            "record_date": "18/12/2025",
+            "execution_date": "17/12/2025",
+            "event_type": "dividend_stock",
+            "title": "Trả cổ tức bằng cổ phiếu, tỷ lệ 100:44.63658403",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.4463658403,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 32000.0,
+            "ref_price_after": 22120.0,
+            "adjustment_factor": 0.6914,
+            "description": "Phát hành cổ phiếu để trả cổ tức theo tỷ lệ 100:44.63658403 (cổ đông sở hữu 100 cổ phiếu nhận thêm 44.64 cổ phiếu mới).",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "ctg-ca-2025-cash",
+            "ex_date": "14/10/2025",
+            "record_date": "15/10/2025",
+            "execution_date": "14/10/2025",
+            "event_type": "dividend_cash",
+            "title": "Trả cổ tức năm 2024 bằng tiền, 450 đồng/CP",
+            "cash_amount": 450.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 30000.0,
+            "ref_price_after": 29550.0,
+            "adjustment_factor": 0.9850,
+            "description": "Chi trả cổ tức năm 2024 bằng tiền mặt 450 đồng/cổ phiếu.",
+            "source": "HOSE & Vietstock"
+        },
+        {
             "id": "ctg-ca-2023",
             "ex_date": "30/11/2023",
             "record_date": "01/12/2023",
+            "execution_date": "30/11/2023",
             "event_type": "dividend_stock",
-            "title": "Chi trả cổ tức bằng cổ phiếu tỷ lệ 11.74%",
+            "title": "Chi trả cổ tức năm 2020 bằng cổ phiếu, tỷ lệ 100:11.7415",
             "cash_amount": 0.0,
-            "stock_ratio": 0.1174,
+            "stock_ratio": 0.117415,
             "rights_ratio": 0.0,
             "rights_price": 0.0,
             "ref_price_before": 29800.0,
             "ref_price_after": 26670.0,
             "adjustment_factor": 0.8950,
-            "description": "Tăng vốn điều lệ qua phát hành cổ phiếu trả cổ tức tỷ lệ 11.74%.",
+            "description": "Tăng vốn điều lệ qua phát hành cổ phiếu trả cổ tức tỷ lệ 100:11.7415.",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "ctg-ca-2021-cash",
+            "ex_date": "14/12/2021",
+            "record_date": "15/12/2021",
+            "execution_date": "14/12/2021",
+            "event_type": "dividend_cash",
+            "title": "Trả cổ tức năm 2020 bằng tiền, 800 đồng/CP",
+            "cash_amount": 800.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "adjustment_factor": 0.9750,
+            "description": "Chi trả cổ tức năm 2020 bằng tiền mặt 800 đồng/cổ phiếu.",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "ctg-ca-2021-stock",
+            "ex_date": "07/07/2021",
+            "record_date": "08/07/2021",
+            "execution_date": "07/07/2021",
+            "event_type": "dividend_stock",
+            "title": "Trả cổ tức bằng cổ phiếu, tỷ lệ 100:29.0695",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.290695,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "adjustment_factor": 0.7748,
+            "description": "Chi trả cổ tức bằng cổ phiếu tỷ lệ 100:29.0695.",
             "source": "HOSE & Vietstock"
         }
     ],
@@ -516,11 +599,12 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
 
 # Bộ nhớ tạm in-memory
 _CORPORATE_ACTIONS_CACHE: Dict[str, List[Dict[str, Any]]] = {}
+_SYNCED_TICKERS: Dict[str, float] = {}
 
 
 def load_corporate_actions_cache():
     """Tải bộ nhớ sự kiện quyền từ disk và bổ sung curated data."""
-    global _CORPORATE_ACTIONS_CACHE
+    global _CORPORATE_ACTIONS_CACHE, _SYNCED_TICKERS
     _ensure_cache_dir()
     _CORPORATE_ACTIONS_CACHE = {}
 
@@ -531,19 +615,31 @@ def load_corporate_actions_cache():
                 disk_data = json.load(f)
                 if isinstance(disk_data, dict):
                     _CORPORATE_ACTIONS_CACHE = disk_data
+                    now = time.time()
+                    for t, ev_list in disk_data.items():
+                        if ev_list:
+                            _SYNCED_TICKERS[t] = now
         except Exception:
             _CORPORATE_ACTIONS_CACHE = {}
 
-    # Nạp/Merge các sự kiện curated vào cache
+    # Nạp/Merge các sự kiện curated vào cache (Curated là nguồn chuẩn hóa cao nhất)
     for ticker, events in CURATED_CORPORATE_ACTIONS.items():
         if ticker not in _CORPORATE_ACTIONS_CACHE:
-            _CORPORATE_ACTIONS_CACHE[ticker] = events
+            _CORPORATE_ACTIONS_CACHE[ticker] = list(events)
         else:
-            existing_ids = {e.get("id") or f"{e.get('ex_date')}_{e.get('event_type')}" for e in _CORPORATE_ACTIONS_CACHE[ticker]}
+            existing_map = {
+                (e.get("id") or f"{e.get('ex_date')}_{e.get('event_type')}"): idx
+                for idx, e in enumerate(_CORPORATE_ACTIONS_CACHE[ticker])
+            }
             for ev in events:
                 ev_id = ev.get("id") or f"{ev.get('ex_date')}_{ev.get('event_type')}"
-                if ev_id not in existing_ids:
+                if ev_id in existing_map:
+                    _CORPORATE_ACTIONS_CACHE[ticker][existing_map[ev_id]].update(ev)
+                else:
                     _CORPORATE_ACTIONS_CACHE[ticker].append(ev)
+        _SYNCED_TICKERS[ticker] = time.time()
+
+    save_corporate_actions_cache()
 
 
 def save_corporate_actions_cache():
@@ -607,18 +703,42 @@ def calculate_vas_adjustment_factor(
     return round(k, 4)
 
 
-def get_ticker_corporate_actions(ticker: str) -> List[Dict[str, Any]]:
-    """Lấy danh sách tất cả các sự kiện quyền / ngày GDKHQ của 1 mã cổ phiếu, sắp xếp mới nhất lên đầu."""
+def get_ticker_corporate_actions(ticker: str, auto_sync: bool = True) -> List[Dict[str, Any]]:
+    """Lấy danh sách tất cả các sự kiện quyền / ngày GDKHQ của 1 mã cổ phiếu, sắp xếp mới nhất lên đầu (đã khử trùng lặp)."""
     clean_ticker = ticker.upper().strip()
     if not _CORPORATE_ACTIONS_CACHE:
         load_corporate_actions_cache()
-    events = _CORPORATE_ACTIONS_CACHE.get(clean_ticker, [])
-    # Sắp xếp giảm dần theo ngày GDKHQ
+
+    # Tự động đồng bộ hóa trực tuyến nếu mã chưa có trong cache hoặc chưa từng sync
+    if auto_sync and (clean_ticker not in _CORPORATE_ACTIONS_CACHE or clean_ticker not in _SYNCED_TICKERS):
+        sync_ticker_corporate_actions_sync(clean_ticker)
+
+    raw_events = _CORPORATE_ACTIONS_CACHE.get(clean_ticker, [])
+    
+    # Khử trùng lặp chuẩn xác theo ngày GDKHQ và loại sự kiện
+    dedup_events = []
+    seen_keys = set()
+    for ev in raw_events:
+        ex_d = str(ev.get("ex_date", "")).strip()
+        ev_type = str(ev.get("event_type", "")).strip()
+        key = f"{ex_d}_{ev_type}"
+        if key not in seen_keys:
+            seen_keys.add(key)
+            dedup_events.append(dict(ev))
+        else:
+            # Ưu tiên bản ghi curated nếu bản ghi trước là scraped
+            for idx, existing in enumerate(dedup_events):
+                ex_key = f"{str(existing.get('ex_date', '')).strip()}_{str(existing.get('event_type', '')).strip()}"
+                if ex_key == key:
+                    if str(ev.get("id", "")).startswith(f"{clean_ticker.lower()}-ca-"):
+                        dedup_events[idx] = dict(ev)
+                    break
+
     def _sort_key(ev):
         d = parse_action_date(ev.get("ex_date", ""))
         return d or date(2000, 1, 1)
 
-    return sorted(events, key=_sort_key, reverse=True)
+    return sorted(dedup_events, key=_sort_key, reverse=True)
 
 
 def adjust_target_price_for_corporate_actions(
@@ -669,7 +789,7 @@ def adjust_target_price_for_corporate_actions(
             "notes": ""
         }
 
-    actions = get_ticker_corporate_actions(clean_ticker)
+    actions = get_ticker_corporate_actions(clean_ticker, auto_sync=True)
     applied_events = []
     cumulative_factor = 1.0
     notes_list = []
@@ -725,7 +845,16 @@ def adjust_target_price_for_corporate_actions(
                     notes_list.append(f"GDKHQ {ex_str}: {title}")
 
     is_adjusted = len(applied_events) > 0
-    adj_price = round(curr_p, -2) if is_adjusted else raw_target_price
+    if is_adjusted:
+        # Bước giá chuẩn HOSE/HNX: 10.000 - 49.950 bước 50đ; >= 50.000 bước 100đ; < 10.000 bước 10đ
+        if 10000.0 <= curr_p < 50000.0:
+            adj_price = round(curr_p / 50.0) * 50.0
+        elif curr_p >= 50000.0:
+            adj_price = round(curr_p / 100.0) * 100.0
+        else:
+            adj_price = round(curr_p / 10.0) * 10.0
+    else:
+        adj_price = raw_target_price
 
     if is_adjusted:
         notes_str = (
@@ -754,121 +883,102 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
     """Bóc tách sự kiện tài chính từ API mở Simplize (nguồn chuẩn hóa từ HOSE/HNX/VSD & Vietstock)."""
     desc = item.get("description") or ""
     title = item.get("title") or ""
-    event_type_name = item.get("eventTypeName") or ""
-    text = f"{title} {desc} {event_type_name}"
-    text_lower = text.lower()
-    
+    ev_type_name = item.get("eventTypeName") or ""
     ex_date = item.get("exDividendDate")
-    record_date = item.get("recordDate")
-    exec_date = item.get("executionDate")
+    record_date = item.get("recordDate") or ""
+    exec_date = item.get("executionDate") or ""
     
     if not ex_date:
         return None
         
+    full_text = f"{title} | {desc} | {ev_type_name}"
+    desc_lower = f"{desc} {ev_type_name}".lower()
+    full_lower = full_text.lower()
+    
     cash_amount = 0.0
     stock_ratio = 0.0
     rights_ratio = 0.0
     rights_price = 0.0
     ev_type = "other"
-    
+
+    # Kiểm tra phân loại sự kiện dựa trên eventTypeName và mô tả
+    is_cash_type = "tiền" in ev_type_name.lower() or "tiền" in desc_lower
+    is_stock_type = (
+        "cổ phiếu" in ev_type_name.lower() or
+        "thưởng" in ev_type_name.lower() or
+        "thưởng" in desc_lower or
+        "bằng cổ phiếu" in desc_lower or
+        "nguồn vốn chủ sở hữu" in full_lower or
+        "nguồn vốn csh" in full_lower
+    )
+    is_rights_type = (
+        "phát hành" in ev_type_name.lower() or
+        "quyền mua" in ev_type_name.lower() or
+        "quyền mua" in desc_lower or
+        "chào bán" in desc_lower
+    )
+
     # 1. Cổ tức tiền mặt
-    if "tiền" in text_lower:
-        m_cash = re.search(r"([0-9]{1,3}(?:[.,][0-9]{3})*)\s*(?:đồng|đ|vnd|/cp)", text, re.IGNORECASE)
+    if is_cash_type and not is_rights_type:
+        m_cash = re.search(r"([0-9]{1,3}(?:[.,][0-9]{3})*)\s*(?:đồng|đ|vnd|/cp)", desc, re.IGNORECASE)
+        if not m_cash:
+            m_cash = re.search(r"([0-9]{1,3}(?:[.,][0-9]{3})*)\s*(?:đồng|đ|vnd|/cp)", full_text, re.IGNORECASE)
         if m_cash:
-            val_str = m_cash.group(1).replace(".", "").replace(",", "")
-            try:
-                cash_amount = float(val_str)
+            cash_amount = float(m_cash.group(1).replace(".", "").replace(",", ""))
+            ev_type = "dividend_cash"
+        else:
+            m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", desc)
+            if m_pct and float(m_pct.group(1)) <= 100:
+                cash_amount = float(m_pct.group(1)) * 100.0
                 ev_type = "dividend_cash"
-            except Exception:
-                pass
-        if cash_amount == 0:
-            m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
-            if m_pct:
-                pct = float(m_pct.group(1))
-                if pct <= 100:
-                    cash_amount = pct * 100.0
-                    ev_type = "dividend_cash"
 
-    # 2. Phát hành thêm / Quyền mua cổ phiếu (Phải kiểm tra để tránh nhầm từ 'cổ phiếu' thành cổ tức CP)
-    has_rights = "quyền mua" in text_lower or "chào bán cho cổ đông" in text_lower or "chào bán thêm" in text_lower or "phát hành thêm" in text_lower
-    if has_rights:
+    # 2. Quyền mua / Phát hành thêm
+    if is_rights_type:
         ev_type = "rights_issue"
-        m_price = re.search(r"giá\s*([0-9]{1,3}(?:[.,][0-9]{3})*)", text, re.IGNORECASE)
+        m_price = re.search(r"giá\s*([0-9]{1,3}(?:[.,][0-9]{3})*)", desc, re.IGNORECASE)
+        if not m_price:
+            m_price = re.search(r"giá\s*([0-9]{1,3}(?:[.,][0-9]{3})*)", full_text, re.IGNORECASE)
         if m_price:
-            try:
-                rights_price = float(m_price.group(1).replace(".", "").replace(",", ""))
-            except Exception:
-                pass
+            rights_price = float(m_price.group(1).replace(".", "").replace(",", ""))
 
-        # Tìm tỷ lệ quyền mua (ví dụ tỷ lệ 5:1, 10:1, 10%)
-        m_ratio = re.search(r"(?:quyền mua|chào bán|phát hành thêm)[^;.,]*?tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
-        if not m_ratio and not ("thưởng" in text_lower or "cổ tức" in text_lower):
-            m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+        m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", desc, re.IGNORECASE)
+        if not m_ratio:
+            m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", full_text, re.IGNORECASE)
         if m_ratio:
             a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            if a > 0 and b > 0:
-                rights_ratio = b / a if a >= b else a / b
+            rights_ratio = b / a if a >= b else a / b
         else:
-            m_pct = re.search(r"(?:quyền mua|chào bán|phát hành thêm)[^;.,]*?([0-9]+(?:\.[0-9]+)?)\s*%", text, re.IGNORECASE)
-            if not m_pct and not ("thưởng" in text_lower or "cổ tức" in text_lower):
-                m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
-            if m_pct and "tiền" not in text_lower:
+            m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", desc)
+            if m_pct:
                 rights_ratio = float(m_pct.group(1)) / 100.0
 
-    # 3. Cổ tức cổ phiếu / Cổ phiếu thưởng (Chỉ xét khi có từ khóa thưởng, cổ tức CP hoặc tăng vốn từ nguồn vốn CSH)
-    has_bonus = (
-        "thưởng" in text_lower or
-        ("cổ tức" in text_lower and "cổ phiếu" in text_lower and "tiền" not in text_lower) or
-        "nguồn vốn chủ sở hữu" in text_lower or
-        "nguồn vốn csh" in text_lower
-    )
-    if has_bonus:
-        # Tìm tỷ lệ thưởng / cổ tức cổ phiếu
-        m_ratio = re.search(r"(?:thưởng|cổ phiếu thưởng|bằng cổ phiếu|tăng vốn)[^;.,]*?tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
-        if not m_ratio and not has_rights:
-            m_ratio = re.search(r"tỷ lệ\s*([0-9]+)\s*:\s*([0-9]+)", text, re.IGNORECASE)
+    # 3. Cổ tức cổ phiếu / Cổ phiếu thưởng
+    if is_stock_type and not is_rights_type:
+        ev_type = "bonus_share" if "thưởng" in desc_lower else "dividend_stock"
+        m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", desc, re.IGNORECASE)
+        if not m_ratio:
+            m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", full_text, re.IGNORECASE)
         if m_ratio:
             a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            if a > 0 and b > 0:
-                stock_ratio = b / a if a >= b else a / b
-                ev_type = "bonus_share" if "thưởng" in text_lower else "dividend_stock"
+            stock_ratio = b / a if a >= b else a / b
         else:
-            # Tìm phần trăm cổ phiếu thưởng / cổ tức CP (tránh nhầm phần trăm cổ tức tiền)
-            for m_p in re.finditer(r"(?:cổ phiếu thưởng|thưởng cổ phiếu|bằng cổ phiếu|tăng vốn)[^;.,]*?([0-9]+(?:\.[0-9]+)?)\s*%", text, re.IGNORECASE):
-                span_text = m_p.group(0).lower()
-                if "tiền" not in span_text:
-                    stock_ratio = float(m_p.group(1)) / 100.0
-                    break
-            if stock_ratio == 0 and not has_rights and "tiền" not in text_lower:
-                m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
-                if m_pct:
-                    stock_ratio = float(m_pct.group(1)) / 100.0
-                    ev_type = "dividend_stock"
+            m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", desc)
+            if m_pct:
+                stock_ratio = float(m_pct.group(1)) / 100.0
 
-    # Phân loại event_type
+    # Hỗn hợp: cả tiền mặt và cổ phiếu/quyền
     if cash_amount > 0 and (stock_ratio > 0 or rights_ratio > 0):
         ev_type = "dividend_both"
     elif stock_ratio > 0 and rights_ratio > 0:
         ev_type = "dividend_and_rights"
-    elif rights_ratio > 0:
-        ev_type = "rights_issue"
-    elif stock_ratio > 0:
-        ev_type = "bonus_share" if "thưởng" in text_lower else "dividend_stock"
-    elif cash_amount > 0:
-        ev_type = "dividend_cash"
 
     if cash_amount == 0 and stock_ratio == 0 and rights_ratio == 0:
         return None
 
-    # Hệ số điều chỉnh:
-    # Nếu thuần là cổ phiếu thưởng hoặc cổ tức cổ phiếu (không có tiền mặt và không có quyền mua),
-    # hệ số pha loãng là hằng số toán học: 1 / (1 + beta)
+    # Hệ số điều chỉnh thuần túy cho cổ tức cổ phiếu / thưởng cổ phiếu
+    factor = None
     if cash_amount == 0 and rights_ratio == 0 and stock_ratio > 0:
         factor = round(1.0 / (1.0 + stock_ratio), 4)
-    else:
-        # Nếu có tiền mặt hoặc quyền mua, hệ số điều chỉnh bắt buộc phải phụ thuộc vào thị giá
-        # tại ngày GDKHQ (hoặc giá mục tiêu ban đầu của báo cáo), không được gán cứng giá 50.000 đ!
-        factor = None
 
     return {
         "id": f"{ticker.lower()}-ca-{ex_date.replace('/', '')}-{ev_type}",
@@ -887,57 +997,73 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
     }
 
 
-async def sync_ticker_corporate_actions_online(ticker: str) -> List[Dict[str, Any]]:
+def sync_ticker_corporate_actions_sync(ticker: str, timeout: float = 3.5) -> List[Dict[str, Any]]:
     """
-    Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API.
-    Giải quyết triệt để việc các trang web như Vietstock, CafeF chặn bot hoặc yêu cầu anti-forgery token.
-    Tự động nạp, khử trùng lặp và lưu trữ bền vững vào disk cache.
+    Đồng bộ hóa sự kiện quyền và ngày GDKHQ từ Simplize Open API (nguồn chuẩn hóa HOSE/HNX/VSD).
+    Chạy đồng bộ, an toàn, có timeout và fallback vào cache nếu mất kết nối hoặc timeout.
     """
-    import asyncio
     import urllib.request
-
     clean_ticker = ticker.upper().strip()
-    url = f"https://api.simplize.vn/api/company/events/list?ticker={clean_ticker}"
     
-    def _fetch_simplize():
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-        with urllib.request.urlopen(req, timeout=4) as response:
-            return json.loads(response.read().decode("utf-8"))
+    # Kiểm tra thời gian đã sync gần đây (tránh gọi lặp trong vòng 3600 giây = 1 giờ)
+    now_ts = time.time()
+    last_sync = _SYNCED_TICKERS.get(clean_ticker, 0.0)
+    if (now_ts - last_sync) < 3600.0 and clean_ticker in _CORPORATE_ACTIONS_CACHE:
+        return _CORPORATE_ACTIONS_CACHE.get(clean_ticker, [])
 
+    url = f"https://api.simplize.vn/api/company/events/list?ticker={clean_ticker}"
     try:
-        loop = asyncio.get_event_loop()
-        res_data = await loop.run_in_executor(None, _fetch_simplize)
-        raw_items = res_data.get("data", []) if isinstance(res_data, dict) else []
-        
-        parsed_events = []
-        for item in raw_items:
-            parsed = parse_simplize_event(item, clean_ticker)
-            if parsed:
-                parsed_events.append(parsed)
-                
-        if parsed_events:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            raw_items = data.get("data", []) if isinstance(data, dict) else []
+            
+            parsed_events = []
+            for item in raw_items:
+                parsed = parse_simplize_event(item, clean_ticker)
+                if parsed:
+                    parsed_events.append(parsed)
+                    
             if clean_ticker not in _CORPORATE_ACTIONS_CACHE:
                 _CORPORATE_ACTIONS_CACHE[clean_ticker] = []
-            
-            existing_ex_dates = {
-                f"{e.get('ex_date')}_{e.get('event_type')}" for e in _CORPORATE_ACTIONS_CACHE[clean_ticker]
-            }
+
+            # Tập hợp các khóa sự kiện đã tồn tại
+            existing_map = {}
+            for idx, e in enumerate(_CORPORATE_ACTIONS_CACHE[clean_ticker]):
+                k = f"{str(e.get('ex_date', '')).strip()}_{str(e.get('event_type', '')).strip()}"
+                existing_map[k] = idx
+
             new_added = 0
             for ev in parsed_events:
-                key = f"{ev.get('ex_date')}_{ev.get('event_type')}"
-                if key not in existing_ex_dates:
+                k = f"{str(ev.get('ex_date', '')).strip()}_{str(ev.get('event_type', '')).strip()}"
+                if k not in existing_map:
                     _CORPORATE_ACTIONS_CACHE[clean_ticker].append(ev)
-                    existing_ex_dates.add(key)
+                    existing_map[k] = len(_CORPORATE_ACTIONS_CACHE[clean_ticker]) - 1
                     new_added += 1
-                    
+                else:
+                    curr_idx = existing_map[k]
+                    existing_item = _CORPORATE_ACTIONS_CACHE[clean_ticker][curr_idx]
+                    # Nếu bản ghi trước đó không phải curated, cập nhật thông tin
+                    if not str(existing_item.get("id", "")).startswith(f"{clean_ticker.lower()}-ca-"):
+                        _CORPORATE_ACTIONS_CACHE[clean_ticker][curr_idx] = ev
+
+            _SYNCED_TICKERS[clean_ticker] = now_ts
             if new_added > 0:
                 save_corporate_actions_cache()
-                
-    except Exception as e:
-        # Fallback im lặng nếu offline hoặc timeout, dữ liệu curated vẫn bảo đảm hoạt động
-        pass
+    except Exception:
+        _SYNCED_TICKERS[clean_ticker] = now_ts
 
-    return get_ticker_corporate_actions(clean_ticker)
+    return _CORPORATE_ACTIONS_CACHE.get(clean_ticker, [])
+
+
+async def sync_ticker_corporate_actions_online(ticker: str) -> List[Dict[str, Any]]:
+    """
+    Tự động đồng bộ hóa lịch sự kiện quyền & ngày GDKHQ mới nhất từ Open Financial API (Async).
+    """
+    import asyncio
+    clean_ticker = ticker.upper().strip()
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, sync_ticker_corporate_actions_sync, clean_ticker)
 
 
 def add_custom_corporate_action(ticker: str, action_data: Dict[str, Any]) -> Dict[str, Any]:

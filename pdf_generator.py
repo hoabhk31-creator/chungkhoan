@@ -435,7 +435,7 @@ class MatrixTableLandscapePDF(FPDF):
 
 
 def sanitize_bullet_item(it: str) -> str:
-    """Làm sạch 1 điểm catalyst/risk, loại bỏ disclaimer, PUA và giữ trọn vẹn độ dài (không giới hạn ký tự)."""
+    """Làm sạch 1 điểm catalyst/risk, sửa lỗi font tiếng Việt, loại bỏ bảng BCTC, DCF, disclaimer và giữ trọn vẹn độ dài."""
     if not it or not isinstance(it, str):
         return ""
     it_clean = it.strip()
@@ -444,10 +444,21 @@ def sanitize_bullet_item(it: str) -> str:
     it_clean = re.sub(r'^[•\-\*\>\➢\★\►\▪\▫\s\d\.\/\:]+', '', it_clean).strip()
     if not it_clean:
         return ""
+
+    # Sửa lỗi font tiếng Việt bị dãn cách ký tự từ PDF
+    try:
+        from crawler import clean_vietnamese_pdf_spacing, is_table_or_valuation_or_disclaimer_dump
+        it_clean = clean_vietnamese_pdf_spacing(it_clean)
+        if is_table_or_valuation_or_disclaimer_dump(it_clean):
+            return ""
+    except Exception:
+        pass
+
     disclaimer_markers = [
         "khuyến cáo", "miễn trừ", "không chịu trách nhiệm", "không mang tính chất mời chào",
         "chỉ nhằm mục đích", "email:", "tel:", "điện thoại:", "disclaimer", "chuyên viên phân tích",
-        "thời gian lịch sử phát triển", "tiền thân là", "thành lập năm 19", "bản quyền thuộc"
+        "thời gian lịch sử phát triển", "tiền thân là", "thành lập năm 19", "bản quyền thuộc",
+        "điều khoản sử dụng", "sử dụng báo cáo này", "không phải là các lời chào mua"
     ]
     if any(m in it_clean.lower() for m in disclaimer_markers):
         return ""
@@ -765,12 +776,12 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                 raw_cats = [sanitize_bullet_item(c) for c in (r.get("key_catalysts", []) or [])]
                 cats = [c for c in raw_cats if c][:10]
                 if not cats:
-                    cats = ["Triển vọng duy trì tăng trưởng theo chu kỳ hồi phục của ngành."]
+                    cats = ["Chưa trích xuất được luận điểm từ báo cáo này"]
 
                 raw_risks = [sanitize_bullet_item(k) for k in (r.get("key_risks", []) or [])]
                 risks = [k for k in raw_risks if k][:10]
                 if not risks:
-                    risks = ["Rủi ro biến động nguyên vật liệu đầu vào và lãi suất."]
+                    risks = ["Chưa trích xuất được rủi ro từ báo cáo này"]
 
                 n_rows = max(len(cats), len(risks), 1)
 

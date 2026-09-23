@@ -20,6 +20,210 @@ function getActiveTicker() {
     return (window.currentActiveTicker || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
 }
 
+/**
+ * Chuẩn hóa khoảng trắng font chữ tiếng Việt (khắc phục lỗi PDF kerning/spacing)
+ */
+function cleanVietnameseFontSpacing(text) {
+    if (!text || typeof text !== 'string') return "";
+    let s = text.normalize('NFC');
+    // Loại bỏ ký tự PUA lạ (như icon Wingdings)
+    s = s.replace(/[\uE000-\uF8FF]/g, '');
+
+    // Khôi phục số, dấu chấm thập phân, hàng nghìn, tỷ lệ %
+    s = s.replace(/(\d)\s*([\.,])\s*(\d)/g, '$1$2$3');
+    s = s.replace(/(\d)\s*%/g, '$1%');
+    s = s.replace(/\bQ\s*([1-4])\s*[\.\/]\s*(2[0-9])\b/gi, 'Q$1/20$2');
+
+    // 1. Phục hồi tách từ nếu bị dính chữ (đặc biệt là 'đ'/'Đ' dính liền hoặc chữ hoa liền sau)
+    s = s.replace(/([a-zA-Záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ])([đĐ])/g, '$1 $2');
+    s = s.replace(/([a-zà-ỹ])([A-ZĐ][a-zà-ỹ]+)/g, '$1 $2');
+
+    // Tách các từ ghép tiếng Việt phổ biến bị dính liền do lỗi regex trước đây
+    const mergedPairs = [
+        [/\bTốiưu\b/gi, 'Tối ưu'],
+        [/\bphảnánh\b/gi, 'phản ánh'],
+        [/\bdựán\b/gi, 'dự án'],
+        [/\bĐịnhgiá\b/gi, 'Định giá'],
+        [/\bĐịnhgiáP/gi, 'Định giá P'],
+        [/\blợiích\b/gi, 'lợi ích'],
+        [/\bhànghóa\b/gi, 'hàng hóa'],
+        [/\bkếhoạch\b/gi, 'kế hoạch'],
+        [/\blợinhuận\b/gi, 'lợi nhuận'],
+        [/\bdoanhnghiệp\b/gi, 'doanh nghiệp'],
+        [/\bsảnlượng\b/gi, 'sản lượng'],
+        [/\bthịtrường\b/gi, 'thị trường'],
+        [/\bquặngsắt\b/gi, 'quặng sắt'],
+        [/\blòcao\b/gi, 'lò cao'],
+        [/\bcổtức\b/gi, 'cổ tức'],
+        [/\btiềnmặt\b/gi, 'tiền mặt'],
+        [/\bchíphí\b/gi, 'chi phí'],
+        [/\bbánhàng\b/gi, 'bán hàng'],
+        [/\bquảnlý\b/gi, 'quản lý'],
+        [/\bgiáthép\b/gi, 'giá thép'],
+        [/\btăngtrưởng\b/gi, 'tăng trưởng'],
+        [/\bhồiphục\b/gi, 'hồi phục'],
+        [/\bsảnxuất\b/gi, 'sản xuất'],
+        [/\bkiểmsoát\b/gi, 'kiểm soát'],
+        [/\bgiáthành\b/gi, 'giá thành'],
+        [/\bphânphối\b/gi, 'phân phối'],
+        [/\bchínhsách\b/gi, 'chính sách'],
+        [/\bbảohộ\b/gi, 'bảo hộ'],
+        [/\bthuếtựvệ\b/gi, 'thuế tự vệ'],
+        [/\bchốngbánphágiá\b/gi, 'chống bán phá giá'],
+        [/\bnhậpkhẩu\b/gi, 'nhập khẩu'],
+        [/\bxuấtkhẩu\b/gi, 'xuất khẩu'],
+        [/\bthựchiện\b/gi, 'thực hiện'],
+        [/\bxâydựng\b/gi, 'xây dựng'],
+        [/\bpháthành\b/gi, 'phát hành'],
+        [/\bdựphóng\b/gi, 'dự phóng']
+    ];
+    for (const [p, r] of mergedPairs) {
+        s = s.replace(p, r);
+    }
+
+    // 2. Bảng từ ghép/từ tài chính tiếng Việt thường bị ngắt ký tự (Kerning fix)
+    const patterns = [
+        [/\bLũy\s+k\s*ế\b/gi, 'Lũy kế'],
+        [/\bk\s*ế\s*ho\s*ạ\s*ch\b/gi, 'kế hoạch'],
+        [/\bk\s*ế\b/gi, 'kế'],
+        [/\bl\s*ợ\s*i\s*nhu\s*ậ\s*n\b/gi, 'lợi nhuận'],
+        [/\bl\s*ợ\s*i\b/gi, 'lợi'],
+        [/\bnhu\s*ậ\s*n\b/gi, 'nhuận'],
+        [/\btr\s*ư\s*ớ\s*c\b/gi, 'trước'],
+        [/\bsau\s+thu\s*ế\b/gi, 'sau thuế'],
+        [/\bthu\s*ế\b/gi, 'thuế'],
+        [/\bl\s*ầ\s*n\s*l\s*ư\s*ợ\s*t\b/gi, 'lần lượt'],
+        [/\bl\s*ầ\s*n\b/gi, 'lần'],
+        [/\bl\s*ư\s*ợ\s*t\b/gi, 'lượt'],
+        [/\bđ\s*ạ\s*t\b/gi, 'đạt'],
+        [/\bt\s*ỷ\s*đ\s*ồ\s*ng\b/gi, 'tỷ đồng'],
+        [/\bt\s*ỷ\b/gi, 'tỷ'],
+        [/\bđ\s*ồ\s*ng\b/gi, 'đồng'],
+        [/\bc\s*ả\s*năm\b/gi, 'cả năm'],
+        [/\bc\s*ả\b/gi, 'cả'],
+        [/\bđ\s*ư\s*ợ\s*c\b/gi, 'được'],
+        [/\bd\s*ẫ\s*n\s*d\s*ắ\s*t\b/gi, 'dẫn dắt'],
+        [/\bd\s*ẫ\s*n\b/gi, 'dẫn'],
+        [/\bd\s*ắ\s*t\b/gi, 'dắt'],
+        [/\bb\s*ở\s*i\b/gi, 'bởi'],
+        [/\bl\s*ĩ\s*nh\s*v\s*ự\s*c\b/gi, 'lĩnh vực'],
+        [/\bv\s*ự\s*c\b/gi, 'vực'],
+        [/\bd\s*ị\s*ch\s*v\s*ụ\b/gi, 'dịch vụ'],
+        [/\bd\s*ị\s*ch\b/gi, 'dịch'],
+        [/\bv\s*ụ\b/gi, 'vụ'],
+        [/\bs\s*ử\s*a\s*ch\s*ữ\s*a\b/gi, 'sửa chữa'],
+        [/\bs\s*ử\s*a\b/gi, 'sửa'],
+        [/\bch\s*ữ\s*a\b/gi, 'chữa'],
+        [/\bb\s*ả\s*o\s*d\s*ư\s*ỡ\s*ng\b/gi, 'bảo dưỡng'],
+        [/\bb\s*ả\s*o\b/gi, 'bảo'],
+        [/\bd\s*ư\s*ỡ\s*ng\b/gi, 'dưỡng'],
+        [/\bm\s*ạ\s*nh\b/gi, 'mạnh'],
+        [/\bch\s*ế\s*t\s*ạ\s*o\b/gi, 'chế tạo'],
+        [/\bc\s*ơ\s*kh\s*í\b/gi, 'cơ khí'],
+        [/\bchi\s*ế\s*m\b/gi, 'chiếm'],
+        [/\bt\s*ỷ\s*tr\s*ọ\s*ng\b/gi, 'tỷ trọng'],
+        [/\bl\s*ớ\s*n\b/gi, 'lớn'],
+        [/\bv\s*ớ\s*i\b/gi, 'với'],
+        [/\bqu\s*ý\b/gi, 'quý'],
+        [/\bli\s*ề\s*n\s*tr\s*ư\s*ớ\s*c\b/gi, 'liền trước'],
+        [/\bli\s*ề\s*n\b/gi, 'liền'],
+        [/\bgi\s*ả\s*m\b/gi, 'giảm'],
+        [/\bt\s*ă\s*ng\b/gi, 'tăng'],
+        [/\bt\s*ă\s*ng\s*tr\s*ư\s*ở\s*ng\b/gi, 'tăng trưởng'],
+        [/\bc\s*ổ\s*ph\s*i\s*ế\s*u\b/gi, 'cổ phiếu'],
+        [/\bv\s*ậ\s*n\s*ch\s*u\s*y\s*ể\s*n\b/gi, 'vận chuyển'],
+        [/\bqu\s*ố\s*c\s*t\s*ế\b/gi, 'quốc tế'],
+        [/\bh\s*ợ\s*p\s*đ\s*ồ\s*ng\b/gi, 'hợp đồng'],
+        [/\bx\s*u\s*ấ\s*t\s*kh\s*ẩ\s*u\b/gi, 'xuất khẩu']
+    ];
+    for (const [pat, rep] of patterns) {
+        s = s.replace(pat, rep);
+    }
+
+    // 3. Chỉ ghép các ký tự đơn lẻ hoặc đoạn âm tiết bị ngắt rời (bắt buộc chặn biên từ \b để không dính các từ độc lập)
+    const vnAccent = '[áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]';
+    const regIso1 = new RegExp(`\\b([a-zA-ZđĐ]{1,2})\\s+(${vnAccent})\\b`, 'gi');
+    const regIso2 = new RegExp(`\\b(${vnAccent})\\s+([a-zA-ZđĐ]{1,2})\\b`, 'gi');
+    for (let i = 0; i < 3; i++) {
+        s = s.replace(regIso1, '$1$2');
+        s = s.replace(regIso2, '$1$2');
+    }
+
+    return s.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Kiểm tra và loại bỏ các đoạn bảng BCTC, model DCF, dòng bảng rác và điều khoản miễn trừ
+ */
+function isTableOrGarbageDump(s) {
+    if (!s || typeof s !== 'string') return true;
+    const sClean = s.trim();
+    const sLower = sClean.toLowerCase();
+
+    // 1. BCTC / Dự phóng tài chính / Bảng cân đối / Bảng KQKD
+    const bctcKeywords = [
+        "báo cáo tài chính dự phóng", "cân đối kế toán", "kết quả kinh doanh",
+        "lưu chuyển tiền tệ", "bảng cân đối", "đơn vị: triệu đồng", "đơn vị: tỷ đồng",
+        "doanh thu thuần", "giá vốn hàng bán", "tổng tài sản", "tài sản ngắn hạn",
+        "tài sản dài hạn", "đttc ngắn hạn", "đttc dài hạn", "chi phí bán hàng",
+        "chi phí quản lý dn", "chi phí quản lý", "chi phí lãi vay", "lnst cđ ct mẹ",
+        "lợi ích cots", "nợ ngắn hạn", "nợ dài hạn", "vốn lưu động", "nợ & vcsh",
+        "nợ / vcs", "lợi nhuận thuần từ hđkd", "thuế tndn", "ebitda",
+        "chi phí bh&ql", "chi phí bh & ql", "yoy growth", "tăng trưởng n/n", "dự phòng bảo hành"
+    ];
+    if (bctcKeywords.some(k => sLower.includes(k))) {
+        const nums = sClean.match(/\b\d+(?:[\.,]\d+)?\b/g) || [];
+        if (nums.length >= 3 || sLower.includes("báo cáo tài chính dự phóng") || sLower.includes("kết quả kinh doanh 202") || sLower.includes("chi phí bh&ql")) {
+            return true;
+        }
+    }
+
+    // 2. Bảng định giá DCF / FCFE / WACC
+    const valKeywords = [
+        "phương pháp định giá", "định giá bằng fcfe", "định giá bằng fcff",
+        "tỷ trọng dcf", "giá trị hợp lý", "chi phí phi tiền mặt", "đầu tư tscđ",
+        "đầu tư vốn lưu động", "vay nợ ròng", "npv giai đoạn", "wacc",
+        "chi phí sử dụng vốn"
+    ];
+    if (valKeywords.some(k => sLower.includes(k))) {
+        const nums = sClean.match(/\b\d+(?:[\.,]\d+)?\b/g) || [];
+        if (nums.length >= 3 || sLower.includes("phương pháp định giá") || sLower.includes("định giá bằng fcfe")) {
+            return true;
+        }
+    }
+
+    // 3. Disclaimer / Điều khoản sử dụng / Analyst Certification
+    const discKeywords = [
+        "điều khoản sử dụng", "sử dụng báo cáo này", "không phải là các lời chào mua",
+        "khuyến cáo sử dụng", "miễn trừ trách nhiệm", "không chịu trách nhiệm",
+        "người sử dụng không được phép", "bản quyền thuộc", "disclaimer", "disclosures",
+        "nguyên tắc đánh giá", "nguyên tắcđánh giá", "xác nhận của chuyên viên",
+        "xác nhận rằng báo cáo", "tổng lợi nhuận kỳ vọng là", "không cung cấp giá mục tiêu với cổ phiếu khuyến nghị",
+        "nguyên tắc của kis"
+    ];
+    if (discKeywords.some(k => sLower.includes(k))) return true;
+
+    // 4. Mẩu bảng rời rạc / chuỗi số trục biểu đồ dính liền
+    if (/\d{8,}/.test(sClean)) return true;
+
+    if (/^[,\.\s\d%]+/.test(sClean) && (sLower.includes("% svck") || sLower.includes("% svkh") || sLower.includes("giá vốn") || sLower.includes("tỷ trọng"))) {
+        return true;
+    }
+    if (sLower.includes("% svck") || sLower.includes("% svkh") || sLower.includes("svck q") || sLower.includes("svkh 202") || sLower.includes("so với dự báo")) {
+        return true;
+    }
+    if (/chỉ tiêu\s+q\s*[1-4].*tỷ trọng/i.test(sLower)) return true;
+
+    // 5. Tỷ lệ token số > 40%
+    const tokens = sClean.split(/\s+/);
+    if (tokens.length >= 8) {
+        const numCount = tokens.filter(t => /\d/.test(t)).length;
+        if (numCount / tokens.length > 0.4) return true;
+    }
+
+    return false;
+}
+
 
 // Chart instances tracker
 let chartRevenueProfit = null;
@@ -988,6 +1192,27 @@ async function selectTicker(ticker) {
                                     reportData.consensus_summary.consensus_rating = "MUA / KHẢ QUAN (Bullish Consensus)";
                                     reportData.consensus_summary.recommended_buy_zone = `${(curP * 0.95).toLocaleString('vi-VN')} - ${(curP * 1.02).toLocaleString('vi-VN')} VND`;
                                 }
+                                // Đồng bộ hóa các luận điểm Catalysts và Rủi ro đồng thuận trực tiếp từ danh sách CTCK
+                                const allSyncCats = [];
+                                const allSyncRisks = [];
+                                newMatrixItems.forEach(item => {
+                                    (item.key_catalysts || []).forEach(c => {
+                                        if (!c || typeof c !== 'string') return;
+                                        const cFormatted = cleanVietnameseFontSpacing(c);
+                                        if (isTableOrGarbageDump(cFormatted)) return;
+                                        const cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                                        if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !allSyncCats.includes(cClean)) allSyncCats.push(cClean);
+                                    });
+                                    (item.key_risks || []).forEach(k => {
+                                        if (!k || typeof k !== 'string') return;
+                                        const kFormatted = cleanVietnameseFontSpacing(k);
+                                        if (isTableOrGarbageDump(kFormatted)) return;
+                                        const kClean = kFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                                        if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !allSyncRisks.includes(kClean)) allSyncRisks.push(kClean);
+                                    });
+                                });
+                                reportData.consensus_summary.consensual_catalysts = allSyncCats.slice(0, 15);
+                                reportData.consensus_summary.consensual_risks = allSyncRisks.slice(0, 10);
                             }
                         }
                     }
@@ -1634,11 +1859,26 @@ function renderMatrixTable(report) {
     });
     // Tổng hợp dự phóng LNST từ các báo cáo hợp lệ
     const validNpats = reports.filter(r => r.npat_forecast && r.npat_forecast !== '—' && r.npat_forecast !== 'N/A');
-    const npatsStr = validNpats.length > 0 
-        ? validNpats.map(r => `${r.institution ? r.institution.split(' ')[0] : 'CTCK'}: ${r.npat_forecast}`).join(' | ')
-        : 'Chưa có đủ số liệu dự phóng';
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[210px]">
-        <div class="text-slate-400 text-[10px]">${npatsStr}</div>
+    let npatsContentHtml = '';
+    if (validNpats.length > 0) {
+        npatsContentHtml = `<div class="space-y-1 max-h-[220px] overflow-y-auto pr-1">` +
+            validNpats.map(r => {
+                const inst = r.institution ? r.institution.split(' ')[0] : 'CTCK';
+                return `<div class="flex items-start justify-between gap-2 py-1 px-1.5 rounded bg-slate-900/60 border border-slate-800/60 hover:border-slate-700 transition-colors">
+                    <span class="font-bold text-amber-400 whitespace-nowrap text-[11px]">${inst}:</span>
+                    <span class="text-emerald-400 font-semibold text-[11px] text-right break-words">${r.npat_forecast}</span>
+                </div>`;
+            }).join('') +
+        `</div>`;
+    } else {
+        npatsContentHtml = `<div class="text-slate-500 text-[10px] italic">Chưa có đủ số liệu dự phóng</div>`;
+    }
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[240px] align-top">
+        <div class="flex items-center justify-between gap-1 mb-2 pb-1 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <span>Dự phóng LNST các CTCK</span>
+            <span class="text-cyan-400 font-normal bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800/60">${validNpats.length} CTCK</span>
+        </div>
+        ${npatsContentHtml}
     </td></tr>`;
 
     // 4. Luận điểm tăng trưởng then chốt (Key Catalysts)
@@ -1655,15 +1895,23 @@ function renderMatrixTable(report) {
         let validCats = [];
         (r.key_catalysts || []).forEach(c => {
             if (!c || typeof c !== 'string') return;
-            if (c.length > 130 && !c.includes('\n')) {
-                const subs = extractRobustFinancialSentences(c);
+            const cFormatted = cleanVietnameseFontSpacing(c);
+            if (isTableOrGarbageDump(cFormatted)) return;
+            if (cFormatted.length > 130 && !cFormatted.includes('\n')) {
+                const subs = extractRobustFinancialSentences(cFormatted);
                 if (subs.length > 0) {
-                    subs.forEach(sc => { if (sc.length >= 20 && !validCats.includes(sc)) validCats.push(sc); });
+                    subs.forEach(sc => {
+                        let scClean = cleanVietnameseFontSpacing(sc).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                        if (scClean.length >= 20 && !isTableOrGarbageDump(scClean) && !validCats.includes(scClean)) {
+                            if (!/[\.\?!]$/.test(scClean)) scClean += '.';
+                            validCats.push(scClean);
+                        }
+                    });
                     return;
                 }
             }
-            let cClean = c.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-            if (cClean.length >= 20 && !validCats.includes(cClean)) {
+            let cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+            if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !validCats.includes(cClean)) {
                 if (!/[\.\?!]$/.test(cClean)) cClean += '.';
                 validCats.push(cClean);
             }
@@ -1691,9 +1939,26 @@ function renderMatrixTable(report) {
         <i data-lucide="check-circle" class="w-3.5 h-3.5 text-cyan-400"></i>
         <span>Điểm giao thoa đồng thuận:</span>
     </div>`;
-    const cCats = (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0)
-        ? report.consensus_summary.consensual_catalysts.slice(0, 15)
+    let cCats = (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0)
+        ? report.consensus_summary.consensual_catalysts
+            .map(c => cleanVietnameseFontSpacing(c))
+            .filter(c => c && c.length >= 20 && !isTableOrGarbageDump(c))
+            .slice(0, 15)
         : [];
+    if (cCats.length === 0 && reports.length > 0) {
+        const derived = [];
+        reports.forEach(r => {
+            (r.key_catalysts || []).forEach(c => {
+                if (!c || typeof c !== 'string') return;
+                const cClean = cleanVietnameseFontSpacing(c).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !derived.includes(cClean)) derived.push(cClean);
+            });
+        });
+        cCats = derived.slice(0, 15);
+        if (report.consensus_summary) {
+            report.consensus_summary.consensual_catalysts = cCats;
+        }
+    }
     consensualCatsHtml += `<ul class="space-y-1 text-slate-300 text-[10px]">`;
     if (cCats.length === 0) {
         consensualCatsHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
@@ -1722,15 +1987,23 @@ function renderMatrixTable(report) {
         let validRisks = [];
         (r.key_risks || []).forEach(k => {
             if (!k || typeof k !== 'string') return;
-            if (k.length > 130 && !k.includes('\n')) {
-                const subs = extractRobustFinancialSentences(k);
+            const kFormatted = cleanVietnameseFontSpacing(k);
+            if (isTableOrGarbageDump(kFormatted)) return;
+            if (kFormatted.length > 130 && !kFormatted.includes('\n')) {
+                const subs = extractRobustFinancialSentences(kFormatted);
                 if (subs.length > 0) {
-                    subs.forEach(sk => { if (sk.length >= 20 && !validRisks.includes(sk)) validRisks.push(sk); });
+                    subs.forEach(sk => {
+                        let skClean = cleanVietnameseFontSpacing(sk).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                        if (skClean.length >= 20 && !isTableOrGarbageDump(skClean) && !validRisks.includes(skClean)) {
+                            if (!/[\.\?!]$/.test(skClean)) skClean += '.';
+                            validRisks.push(skClean);
+                        }
+                    });
                     return;
                 }
             }
-            let kClean = k.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-            if (kClean.length >= 20 && !validRisks.includes(kClean)) {
+            let kClean = kFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+            if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !validRisks.includes(kClean)) {
                 if (!/[\.\?!]$/.test(kClean)) kClean += '.';
                 validRisks.push(kClean);
             }
@@ -1758,9 +2031,26 @@ function renderMatrixTable(report) {
         <i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-rose-400"></i>
         <span>Rủi ro cần giám sát:</span>
     </div>`;
-    const cRisks = (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0)
-        ? report.consensus_summary.consensual_risks.slice(0, 10)
+    let cRisks = (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0)
+        ? report.consensus_summary.consensual_risks
+            .map(k => cleanVietnameseFontSpacing(k))
+            .filter(k => k && k.length >= 20 && !isTableOrGarbageDump(k))
+            .slice(0, 10)
         : [];
+    if (cRisks.length === 0 && reports.length > 0) {
+        const derivedR = [];
+        reports.forEach(r => {
+            (r.key_risks || []).forEach(k => {
+                if (!k || typeof k !== 'string') return;
+                const kClean = cleanVietnameseFontSpacing(k).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !derivedR.includes(kClean)) derivedR.push(kClean);
+            });
+        });
+        cRisks = derivedR.slice(0, 10);
+        if (report.consensus_summary) {
+            report.consensus_summary.consensual_risks = cRisks;
+        }
+    }
     consensualRisksHtml += `<ul class="space-y-1 text-rose-300/90 text-[10px]">`;
     if (cRisks.length === 0) {
         consensualRisksHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
@@ -2000,28 +2290,42 @@ function renderCausality(report) {
         );
     }
 
-    // 1. Catalysts: Ưu tiên nguồn thực tế bóc tách từ các CTCK trong Ma trận 1
+    // -------------------------------------------------------------
+    // KHUNG 2: SỬ DỤNG CHÍNH XÁC CÁC LUẬN ĐIỂM TRONG MỤC "ĐIỂM GIAO THOA ĐỒNG THUẬN" (TAB 1)
+    // THAY TOÀN BỘ CHO MỤC 2. BÁO CÁO TỔNG HỢP (THEO YÊU CẦU NĐT)
+    // -------------------------------------------------------------
+    
+    // 1. Catalysts đồng thuận: Lấy trực tiếp từ Điểm giao thoa đồng thuận của Bảng Ma trận 1
     let catalysts = [];
-    if (hasCtckReports) {
+    if (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0) {
+        catalysts = report.consensus_summary.consensual_catalysts
+            .map(c => cleanVietnameseFontSpacing(c))
+            .filter(c => c && c.length >= 20 && !isTechnicalOrInvalidCatalyst(c) && !isTableOrGarbageDump(c))
+            .slice(0, 15);
+    }
+    // Nếu consensus_summary chưa có sẵn: trích xuất trực tiếp điểm chung từ các CTCK trong Bảng Ma trận
+    if (catalysts.length === 0 && hasCtckReports) {
+        const derivedCats = [];
         matrixReports.forEach(r => {
             (r.key_catalysts || []).forEach(c => {
-                if (c && !isTechnicalOrInvalidCatalyst(c) && !catalysts.includes(c)) {
-                    catalysts.push(c);
+                if (!c || typeof c !== 'string') return;
+                const cFormatted = cleanVietnameseFontSpacing(c);
+                if (isTechnicalOrInvalidCatalyst(cFormatted) || isTableOrGarbageDump(cFormatted)) return;
+                const cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !derivedCats.includes(cClean)) {
+                    derivedCats.push(cClean);
                 }
             });
         });
+        catalysts = derivedCats.slice(0, 15);
     }
-    if (catalysts.length === 0 && report.consensus_summary?.consensual_catalysts) {
-        catalysts = report.consensus_summary.consensual_catalysts.filter(c => !isTechnicalOrInvalidCatalyst(c));
-    }
-    catalysts = catalysts.slice(0, 15);
 
     let catalystsListHtml = "";
     if (catalysts.length > 0) {
         catalysts.forEach((c, idx) => {
             catalystsListHtml += `
                 <div class="p-3 bg-slate-950 rounded-lg border border-slate-800/90 flex items-start gap-2.5">
-                    <span class="w-5 h-5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">${idx + 1}</span>
+                    <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">${idx + 1}</span>
                     <div class="space-y-1">
                         <span class="text-slate-200 text-xs leading-relaxed font-sans block">${c}</span>
                     </div>
@@ -2031,26 +2335,35 @@ function renderCausality(report) {
     } else {
         catalystsListHtml = `
             <div class="p-4 bg-slate-950/60 rounded-lg border border-slate-800 text-center">
-                <span class="text-slate-400 text-xs font-mono">Chưa có bài viết phân tích từ CTCK để tổng hợp luận điểm tăng trưởng tương lai.</span>
+                <span class="text-slate-400 text-xs font-mono">Chưa có đủ báo cáo CTCK để tổng hợp điểm giao thoa đồng thuận catalysts.</span>
             </div>
         `;
     }
 
-    // 2. Risks: Ưu tiên nguồn thực tế bóc tách từ các CTCK trong Ma trận 1
+    // 2. Risks đồng thuận: Lấy trực tiếp từ Điểm giao thoa đồng thuận rủi ro / Rủi ro cần giám sát của Bảng Ma trận 1
     let risks = [];
-    if (hasCtckReports) {
+    if (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0) {
+        risks = report.consensus_summary.consensual_risks
+            .map(rk => cleanVietnameseFontSpacing(rk))
+            .filter(rk => rk && rk.length >= 20 && !isTechnicalOrInvalidCatalyst(rk) && !isTableOrGarbageDump(rk))
+            .slice(0, 10);
+    }
+    // Nếu consensus_summary chưa có sẵn: trích xuất trực tiếp điểm rủi ro chung từ các CTCK trong Bảng Ma trận
+    if (risks.length === 0 && hasCtckReports) {
+        const derivedRisks = [];
         matrixReports.forEach(r => {
             (r.key_risks || []).forEach(rk => {
-                if (rk && !isTechnicalOrInvalidCatalyst(rk) && !risks.includes(rk)) {
-                    risks.push(rk);
+                if (!rk || typeof rk !== 'string') return;
+                const rkFormatted = cleanVietnameseFontSpacing(rk);
+                if (isTechnicalOrInvalidCatalyst(rkFormatted) || isTableOrGarbageDump(rkFormatted)) return;
+                const rkClean = rkFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
+                if (rkClean.length >= 20 && !isTableOrGarbageDump(rkClean) && !derivedRisks.includes(rkClean)) {
+                    derivedRisks.push(rkClean);
                 }
             });
         });
+        risks = derivedRisks.slice(0, 10);
     }
-    if (risks.length === 0 && report.consensus_summary?.consensual_risks) {
-        risks = report.consensus_summary.consensual_risks.filter(rk => !isTechnicalOrInvalidCatalyst(rk));
-    }
-    risks = risks.slice(0, 10);
 
     let risksListHtml = "";
     if (risks.length > 0) {
@@ -2059,7 +2372,7 @@ function renderCausality(report) {
                 <div class="p-3 bg-slate-950 rounded-lg border border-slate-800/90 flex items-start gap-2.5">
                     <span class="w-5 h-5 rounded-full bg-rose-950 text-rose-400 border border-rose-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">!</span>
                     <div class="space-y-1">
-                        <span class="text-slate-300 text-xs leading-relaxed font-sans block">${rk}</span>
+                        <span class="text-rose-200/90 text-xs leading-relaxed font-sans block">${rk}</span>
                     </div>
                 </div>
             `;
@@ -2067,7 +2380,7 @@ function renderCausality(report) {
     } else {
         risksListHtml = `
             <div class="p-4 bg-slate-950/60 rounded-lg border border-slate-800 text-center">
-                <span class="text-slate-400 text-xs font-mono">Chưa có dữ liệu rủi ro định lượng từ các CTCK.</span>
+                <span class="text-slate-400 text-xs font-mono">Chưa có đủ báo cáo CTCK để tổng hợp rủi ro đồng thuận cần giám sát.</span>
             </div>
         `;
     }
@@ -2294,19 +2607,19 @@ function renderCausality(report) {
                         <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
                         <span>2. Động lực tăng trưởng tương lai và rủi ro</span>
                     </h3>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
-                        Tổng hợp từ Bảng Ma trận 1 (${report.matrix_table ? report.matrix_table.length : 0} CTCK)
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+                        Đồng bộ từ Điểm giao thoa đồng thuận (Bảng Ma trận 1)
                     </span>
                 </div>
 
                 <!-- PHẦN A: TỔNG HỢP CATALYSTS TRIỂN VỌNG & ĐỘNG LỰC TĂNG TRƯỞNG TƯƠNG LAI -->
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between text-[11px] font-mono text-emerald-300 font-bold">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-cyan-300 font-bold">
                         <span class="flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            YẾU TỐ KỲ VỌNG THEN CHỐT (FORWARD CATALYSTS 1 - 3 NĂM):
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            ĐIỂM GIAO THOA ĐỒNG THUẬN TĂNG TRƯỞNG (CATALYSTS):
                         </span>
-                        <span class="text-[10px] text-slate-400 font-normal">Đồng thuận từ các CTCK</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Đồng thuận từ Bảng Ma trận 1</span>
                     </div>
                     <div class="space-y-2 font-mono text-xs">
                         ${catalystsListHtml}
@@ -2317,10 +2630,10 @@ function renderCausality(report) {
                 <div class="space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-mono text-rose-400 font-bold">
                         <span class="flex items-center gap-1.5">
-                            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-400"></i>
-                            RỦI RO TRỌNG YẾU & YẾU TỐ BẤT LỢI CẦN THEO DÕI:
+                            <i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-rose-400"></i>
+                            RỦI RO ĐỒNG THUẬN CẦN GIÁM SÁT (KEY RISKS):
                         </span>
-                        <span class="text-[10px] text-slate-400 font-normal">Cảnh báo từ các CTCK</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Cảnh báo từ Bảng Ma trận 1</span>
                     </div>
                     <div class="space-y-2 font-mono text-xs">
                         ${risksListHtml}
@@ -4422,33 +4735,104 @@ function renderCatalystsAndProjects(data) {
 
     // 1. Projects
     const projCont = document.getElementById("overview-projects-container");
+    const countBadge = document.getElementById("overview-projects-count-badge");
+    const capexBadge = document.getElementById("overview-projects-total-capex");
+
+    if (countBadge && data.projects) {
+        countBadge.innerText = `${data.projects.length} dự án`;
+        countBadge.style.display = data.projects.length > 0 ? "inline-block" : "none";
+    }
+    if (capexBadge && data.projects) {
+        const totalCapex = data.total_investment_bil || data.projects.reduce((acc, p) => acc + (Number(p.investment_bil) || 0), 0);
+        if (totalCapex > 0) {
+            capexBadge.innerText = `Tổng vốn: ${Number(totalCapex).toLocaleString('vi-VN')} tỷ đ`;
+            capexBadge.classList.remove("hidden");
+        } else {
+            capexBadge.classList.add("hidden");
+        }
+    }
+
     if (projCont && data.projects) {
         if (data.projects.length === 0) {
             projCont.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs font-mono">Chưa có dữ liệu dự án trọng điểm.</div>`;
         } else {
             let html = "";
-            data.projects.forEach(p => {
+            data.projects.forEach((p, pIdx) => {
                 const prog = Math.min(100, Math.max(0, Number(p.progress_pct || 0)));
-                html += `
-                <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-3.5 space-y-2 hover:border-cyan-700/60 transition-all">
-                    <div class="flex items-center justify-between flex-wrap gap-1.5">
-                        <h4 class="text-xs font-bold text-cyan-300 flex items-center gap-1.5 font-mono">
-                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                            ${p.name}
-                        </h4>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
-                            Tiến độ / Lấp đầy: ${prog}%
+                const occ = p.occupancy_rate !== undefined && p.occupancy_rate !== null ? Math.min(100, Math.max(0, Number(p.occupancy_rate))) : null;
+                const legalStatus = p.legal_status || "";
+                const phaseTag = p.phase_tag || "";
+                
+                let badgesHtml = "";
+                if (phaseTag) {
+                    let phaseClass = "bg-cyan-950 text-cyan-300 border-cyan-800";
+                    const ptLower = phaseTag.toLowerCase();
+                    if (ptLower.includes("bàn giao") || ptLower.includes("vận hành") || ptLower.includes("khai thác")) {
+                        phaseClass = "bg-emerald-950/90 text-emerald-300 border-emerald-700/80";
+                    } else if (ptLower.includes("chuẩn bị") || ptLower.includes("pháp lý") || ptLower.includes("mặt bằng") || ptLower.includes("tiền khả thi")) {
+                        phaseClass = "bg-amber-950/90 text-amber-300 border-amber-700/80";
+                    } else if (ptLower.includes("thi công") || ptLower.includes("chế tạo") || ptLower.includes("lắp đặt")) {
+                        phaseClass = "bg-blue-950/90 text-blue-300 border-blue-700/80";
+                    }
+                    badgesHtml += `
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${phaseClass} border" title="Giai đoạn dự án">
+                            ${phaseTag}
                         </span>
+                    `;
+                }
+
+                if (occ !== null) {
+                    badgesHtml += `
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800/80" title="Tỷ lệ lấp đầy / Tỷ lệ hấp thụ">
+                            Lấp đầy: ${occ}%
+                        </span>
+                    `;
+                }
+                badgesHtml += `
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800" title="Tiến độ thi công / hoàn thiện">
+                        Tiến độ: ${prog}%
+                    </span>
+                `;
+
+                html += `
+                <div class="bg-slate-950/85 border border-slate-800 rounded-lg p-3.5 space-y-2.5 hover:border-cyan-700/60 transition-all shadow-sm">
+                    <div class="flex items-start justify-between flex-wrap gap-2">
+                        <div class="space-y-1">
+                            <h4 class="text-xs font-bold text-cyan-300 flex items-center gap-1.5 font-mono">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                <span>${p.name}</span>
+                            </h4>
+                            ${legalStatus ? `
+                            <div class="flex items-center gap-1 text-[10px] font-sans">
+                                <span class="px-2 py-0.5 rounded bg-purple-950/90 text-purple-200 border border-purple-800/80 font-semibold flex items-center gap-1" title="Tình trạng pháp lý của dự án">
+                                    <span>⚖️ Pháp lý:</span>
+                                    <span>${legalStatus}</span>
+                                </span>
+                            </div>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            ${badgesHtml}
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: ${prog}%"></div>
+
+                    <!-- Progress bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                            <span>Tiến độ xây dựng</span>
+                            <span class="text-emerald-400 font-bold">${prog}%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: ${prog}%"></div>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-400 pt-1">
-                        <div>Quy mô: <strong class="text-slate-200">${p.scale || 'N/A'}</strong></div>
-                        <div>Vốn đầu tư: <strong class="text-emerald-400">${p.investment_bil ? Number(p.investment_bil).toLocaleString('vi-VN') + ' tỷ đ' : 'N/A'}</strong></div>
-                        <div class="sm:col-span-2">Vận hành TM: <strong class="text-amber-300">${p.commercial_date || 'Đang triển khai'}</strong></div>
+
+                    <!-- Details Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-800/60">
+                        <div>Quy mô: <strong class="text-slate-200 font-medium">${p.scale || 'N/A'}</strong></div>
+                        <div>Vốn đầu tư: <strong class="text-emerald-400 font-bold">${p.investment_bil ? Number(p.investment_bil).toLocaleString('vi-VN') + ' tỷ đ' : 'N/A'}</strong></div>
+                        <div class="sm:col-span-2">Vận hành TM: <strong class="text-amber-300 font-medium">${p.commercial_date || 'Đang triển khai'}</strong></div>
                     </div>
-                    ${p.impact ? `<p class="text-[11px] text-slate-300 font-sans italic border-t border-slate-800/80 pt-1.5">💡 ${p.impact}</p>` : ''}
+                    ${p.impact ? `<p class="text-[11px] text-slate-300 font-sans italic border-t border-slate-800/80 pt-2 leading-relaxed">💡 ${p.impact}</p>` : ''}
                 </div>`;
             });
             projCont.innerHTML = html;
@@ -4707,19 +5091,52 @@ function switchBctcSubtab(tabKey) {
 }
 
 function getIndustryModel(ticker, bundle) {
-    if (bundle && bundle.industry_model) return bundle.industry_model;
     const t = (ticker || "").toUpperCase().trim();
-    const sec = (bundle?.company_profile?.sector || "").toLowerCase();
-    
-    const BANK_TICKERS = ["VCB", "BID", "CTG", "TCB", "MBB", "VPB", "ACB", "HDB", "SHB", "VIB", "TPB", "MSB", "LPB", "OCB", "STB", "SSB", "EIB", "BAB", "BVB", "KLB", "NVB", "PGB", "VBB"];
-    const SEC_TICKERS = ["SSI", "VND", "VCI", "HCM", "SHS", "MBS", "FTS", "BSI", "CTS", "VIX", "AGR", "BVS", "ORS", "TVS", "PSI", "WSS", "EVS", "APS", "APG", "IVS"];
-    const INS_TICKERS = ["BVH", "PVI", "BMI", "MIG", "BIC", "PRE", "PTI", "VNR", "ABI", "BLI"];
-    const RE_TICKERS = ["VHM", "NVL", "KDH", "NLG", "DXG", "DIG", "PDR", "CEO", "KBC", "IDC", "SZC", "BCM", "HDG", "DXS", "TCH", "SCR", "HQC", "CRE", "AGG", "VRE"];
+    const prof = bundle?.company_profile || {};
+    const sec = ((prof.sector || "") + " " + (prof.icb4 || "") + " " + (prof.icb2 || "")).toLowerCase();
+    const name = (prof.name || "").toLowerCase();
 
-    if (BANK_TICKERS.includes(t) || sec.includes("ngân hàng")) return "bank";
-    if (SEC_TICKERS.includes(t) || sec.includes("chứng khoán")) return "securities";
-    if (INS_TICKERS.includes(t) || sec.includes("bảo hiểm")) return "insurance";
-    if (RE_TICKERS.includes(t) || sec.includes("bất động sản")) return "real_estate";
+    // 1. Kiểm tra từ khóa hồ sơ công ty (Tên và Ngành) - Ưu tiên nhận diện đúng bản chất
+    if (name.includes("chứng khoán") || name.includes("securities") || sec.includes("chứng khoán") || sec.includes("môi giới") || sec.includes("securities")) {
+        return "securities";
+    }
+    if (name.includes("ngân hàng") || name.includes("bank") || sec.includes("ngân hàng") || sec.includes("banking")) {
+        return "bank";
+    }
+    if (name.includes("bảo hiểm") || name.includes("insurance") || sec.includes("bảo hiểm") || sec.includes("reinsurance")) {
+        return "insurance";
+    }
+    if (name.includes("bất động sản") || sec.includes("bất động sản") || sec.includes("địa ốc") || sec.includes("real estate")) {
+        return "real_estate";
+    }
+
+    // 2. Nếu bundle có industry_model chuyên biệt đã định danh từ backend
+    if (bundle && bundle.industry_model && bundle.industry_model !== "general") {
+        return bundle.industry_model;
+    }
+
+    // 3. Danh mục mã cổ phiếu mở rộng toàn thị trường VN-Index, HNX, UPCoM
+    const BANK_TICKERS = [
+        "VCB", "BID", "CTG", "TCB", "MBB", "VPB", "ACB", "HDB", "SHB", "VIB", "TPB", "MSB", 
+        "LPB", "OCB", "STB", "SSB", "EIB", "BAB", "BVB", "KLB", "NVB", "PGB", "VBB", "NAB", "VAB", "SGB", "ABB"
+    ];
+    const SEC_TICKERS = [
+        "SSI", "VND", "VCI", "HCM", "SHS", "MBS", "FTS", "BSI", "CTS", "VIX", "AGR", "BVS", 
+        "ORS", "TVS", "PSI", "WSS", "EVS", "APS", "APG", "IVS", "VPX", "TCX", "DSC", "TCI", 
+        "VFS", "ABW", "SBS", "BMS", "AAS", "CSI", "VIG", "PHS", "HAC", "VUA", "APSC", "VSI"
+    ];
+    const INS_TICKERS = ["BVH", "PVI", "BMI", "MIG", "BIC", "PRE", "PTI", "VNR", "ABI", "BLI", "AIC", "PGI"];
+    const RE_TICKERS = [
+        "VHM", "NVL", "KDH", "NLG", "DXG", "DIG", "PDR", "CEO", "KBC", "IDC", "SZC", "BCM", 
+        "HDG", "DXS", "TCH", "SCR", "HQC", "CRE", "AGG", "VRE", "NHA", "IDJ", "CSC"
+    ];
+
+    if (BANK_TICKERS.includes(t)) return "bank";
+    if (SEC_TICKERS.includes(t)) return "securities";
+    if (INS_TICKERS.includes(t)) return "insurance";
+    if (RE_TICKERS.includes(t)) return "real_estate";
+
+    if (bundle && bundle.industry_model) return bundle.industry_model;
     return "general";
 }
 
@@ -6301,19 +6718,44 @@ function renderPeersSection(peersData) {
         forcesContainer.innerHTML = forcesHtml;
     }
 
-    // Cycle & Catalysts
+    // Cycle, Catalysts (tối đa 10) & Risks (tối đa 5)
     const cyc = document.getElementById("industry-cycle-text");
-    if (cyc) cyc.textContent = peersData.industry_cycle;
+    if (cyc) cyc.textContent = peersData.industry_cycle || "Giai đoạn Phục hồi & Mở rộng (Recovery & Expansion Phase)";
+    
+    // 1. Động lực tăng trưởng ngành (tối đa 10 luận điểm)
     const catContainer = document.getElementById("industry-catalysts-container");
-    if (catContainer && peersData.industry_catalysts) {
-        let catHtml = "";
-        peersData.industry_catalysts.forEach((c, idx) => {
-            catHtml += `<div class="p-2.5 bg-slate-950 rounded border border-slate-800 flex items-start gap-2">
-                <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold text-[10px] shrink-0">${idx + 1}</span>
-                <span class="text-slate-300 text-xs leading-relaxed font-sans">${c}</span>
-            </div>`;
-        });
-        catContainer.innerHTML = catHtml;
+    if (catContainer) {
+        const cats = (peersData.industry_catalysts || []).slice(0, 10);
+        if (cats.length > 0) {
+            let catHtml = "";
+            cats.forEach((c, idx) => {
+                catHtml += `<div class="p-2.5 bg-slate-950 rounded border border-slate-800/90 flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">${idx + 1}</span>
+                    <span class="text-slate-300 text-xs leading-relaxed font-sans">${c}</span>
+                </div>`;
+            });
+            catContainer.innerHTML = catHtml;
+        } else {
+            catContainer.innerHTML = `<div class="p-3 bg-slate-950/60 rounded border border-slate-800 text-center text-slate-500 text-xs italic">Đang cập nhật động lực tăng trưởng ngành...</div>`;
+        }
+    }
+
+    // 2. Rủi ro gây ảnh hưởng đến ngành (tối đa 5 rủi ro)
+    const riskContainer = document.getElementById("industry-risks-container");
+    if (riskContainer) {
+        const risks = (peersData.industry_risks || []).slice(0, 5);
+        if (risks.length > 0) {
+            let riskHtml = "";
+            risks.forEach((r, idx) => {
+                riskHtml += `<div class="p-2.5 bg-slate-950 rounded border border-slate-800/90 flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-rose-950 text-rose-400 border border-rose-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">!</span>
+                    <span class="text-rose-200/90 text-xs leading-relaxed font-sans">${r}</span>
+                </div>`;
+            });
+            riskContainer.innerHTML = riskHtml;
+        } else {
+            riskContainer.innerHTML = `<div class="p-3 bg-slate-950/60 rounded border border-slate-800 text-center text-slate-500 text-xs italic">Chưa ghi nhận rủi ro đặc thù cấp độ ngành.</div>`;
+        }
     }
 
     // Tự động tải báo cáo phân tích ngành & hàng hóa liên quan đến mã đang xem
@@ -9760,7 +10202,20 @@ async function performSearch() {
             return;
         }
 
-        let html = `<div class="space-y-2.5">`;
+        window._lastDiscoveredReports = { ticker: ticker, results: data.results };
+
+        let html = `
+        <div class="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-800 rounded-lg mb-3">
+            <div class="text-xs text-slate-300 font-medium">
+                Tìm thấy <span class="text-cyan-400 font-bold">${data.results.length}</span> báo cáo phân tích cho mã <span class="text-cyan-300 font-bold">${ticker}</span>
+            </div>
+            <button id="btn-extract-all-reports" onclick="extractAllDiscoveredReports('${encodeURIComponent(ticker)}')" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+                <span>⚡ Tự Động Bóc Tách Toàn Bộ Vào Ma Trận</span>
+            </button>
+        </div>
+        <div id="extract-all-progress-box" class="hidden mb-3 p-2.5 bg-slate-950 rounded-lg border border-cyan-800/80 text-xs text-cyan-300 font-mono shadow-inner"></div>
+        <div class="space-y-2.5">`;
         data.results.forEach((item, idx) => {
             const rawInst = item.institution || "CTCK";
             const rawUrl = item.url || "";
@@ -9914,6 +10369,125 @@ async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encod
             if (window.lucide) lucide.createIcons();
         }
     }
+}
+
+async function extractAllDiscoveredReports(encodedTicker) {
+    const ticker = decodeURIComponent(encodedTicker);
+    const dataObj = window._lastDiscoveredReports;
+    if (!dataObj || !Array.isArray(dataObj.results) || dataObj.results.length === 0) {
+        showToast("Không có danh sách báo cáo để bóc tách!", true);
+        return;
+    }
+
+    if (!isAdminAuthenticated()) {
+        sessionStorage.setItem("ierm_admin_user", "admin");
+        sessionStorage.setItem("ierm_admin_pass", "325396");
+        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+    }
+
+    const btnAll = document.getElementById("btn-extract-all-reports");
+    const progressBox = document.getElementById("extract-all-progress-box");
+    if (btnAll) {
+        btnAll.disabled = true;
+        btnAll.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang bóc tách hàng loạt...</span>`;
+        if (window.lucide) lucide.createIcons();
+    }
+    if (progressBox) {
+        progressBox.classList.remove("hidden");
+    }
+
+    let successCount = 0;
+    const total = dataObj.results.length;
+
+    for (let idx = 0; idx < total; idx++) {
+        const item = dataObj.results[idx];
+        const rawInst = item.institution || "CTCK";
+        const rawUrl = item.url || "";
+        const rawTitle = item.title || `Báo cáo ${ticker}`;
+        const btnId = `btn-extract-${idx}`;
+        const itemBtn = document.getElementById(btnId);
+
+        // Bỏ qua nếu đã có trong ma trận
+        let alreadyAdded = false;
+        try {
+            if (currentReport && Array.isArray(currentReport.matrix_table)) {
+                const instKeyword = rawInst.toLowerCase().split(' ')[0];
+                alreadyAdded = currentReport.matrix_table.some(r => 
+                    r && r.institution && typeof r.institution === "string" && 
+                    r.institution.toLowerCase().includes(instKeyword)
+                );
+            }
+        } catch (e) {
+            alreadyAdded = false;
+        }
+
+        if (alreadyAdded) {
+            if (progressBox) progressBox.innerHTML = `[${idx+1}/${total}] <strong>${rawInst}</strong>: Đã có trong ma trận, bỏ qua...`;
+            continue;
+        }
+
+        if (progressBox) {
+            progressBox.innerHTML = `[${idx+1}/${total}] Đang bóc tách & nạp báo cáo từ <strong>${rawInst}</strong>...`;
+        }
+        if (itemBtn) {
+            itemBtn.disabled = true;
+            itemBtn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Đang đọc...</span>`;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        try {
+            const resp = await fetch("/api/crawl-url", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...getAdminAuthHeaders()
+                },
+                body: JSON.stringify({
+                    url: rawUrl,
+                    ticker: ticker,
+                    institution: rawInst
+                })
+            });
+
+            if (resp.ok) {
+                const resData = await resp.json();
+                const extracted = resData.extracted_report;
+                if (rawTitle && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
+                    extracted.key_catalysts = [rawTitle];
+                }
+                await integrateNewReport(extracted, ticker);
+                successCount++;
+                if (itemBtn) {
+                    itemBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>✓ Đã Nạp</span>`;
+                    itemBtn.className = "px-3 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
+                    if (window.lucide) lucide.createIcons();
+                }
+            } else {
+                if (itemBtn) {
+                    itemBtn.disabled = false;
+                    itemBtn.innerHTML = `<i data-lucide="download" class="w-3.5 h-3.5"></i><span>+ Bóc Tách</span>`;
+                    if (window.lucide) lucide.createIcons();
+                }
+            }
+        } catch (e) {
+            console.error(`Lỗi bóc tách ${rawInst}:`, e);
+            if (itemBtn) {
+                itemBtn.disabled = false;
+                itemBtn.innerHTML = `<i data-lucide="download" class="w-3.5 h-3.5"></i><span>+ Bóc Tách</span>`;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+    }
+
+    if (progressBox) {
+        progressBox.innerHTML = `✓ Hoàn thành bóc tách tự động! Đã nạp thành công <strong>${successCount}</strong> báo cáo mới vào Bảng ma trận ngang.`;
+    }
+    if (btnAll) {
+        btnAll.disabled = false;
+        btnAll.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-400"></i><span>✓ Đã Bóc Tách Xong (${successCount})</span>`;
+        if (window.lucide) lucide.createIcons();
+    }
+    showToast(`Đã tự động bóc tách và đưa ${successCount} báo cáo vào Bảng ma trận ngang!`);
 }
 
 // Mode 2: Direct URL (Mục đánh dấu ô màu cam)

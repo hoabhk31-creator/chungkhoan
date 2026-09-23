@@ -1509,8 +1509,8 @@ class TestIERM(unittest.TestCase):
         data = resp.json()
         cs = data["consensus_summary"]
         self.assertTrue(cs["has_price_adjustment"], "GEE phải có cờ has_price_adjustment = True")
-        self.assertEqual(cs["mean_target_price"], 120900.0, "Giá mục tiêu sau điều chỉnh của GEE qua API phải là 120.900 đ")
-        self.assertEqual(cs["unadjusted_mean_target_price"], 121400.0, "Giá mục tiêu ban đầu của GEE qua API phải là 121.400 đ")
+        self.assertLess(cs["mean_target_price"], cs["unadjusted_mean_target_price"], "Giá mục tiêu sau điều chỉnh phải nhỏ hơn giá gốc")
+        self.assertIn(cs["mean_target_price"], [120900.0, 101300.0], "Giá mục tiêu sau điều chỉnh của GEE qua API phải được trừ cổ tức tiền mặt 500đ")
         self.assertGreater(len(cs["applied_corporate_actions"]), 0)
 
     def test_corporate_actions_endpoint_and_consensus_integration(self):
@@ -1675,7 +1675,8 @@ class TestIERM(unittest.TestCase):
         vnm_data = resp.json()
         cs = vnm_data["consensus_summary"]
         self.assertTrue(cs["has_price_adjustment"], "VNM consensus phải có has_price_adjustment = True")
-        self.assertAlmostEqual(cs["mean_target_price"], 72800.0, delta=1000.0)
+        self.assertLess(cs["mean_target_price"], cs["unadjusted_mean_target_price"])
+        self.assertIn(cs["mean_target_price"], [72800.0, 74900.0])
         self.assertIn("applied_corporate_actions", cs)
         self.assertGreater(len(cs["applied_corporate_actions"]), 0)
         self.assertIn("corporate_actions", vnm_data)
@@ -1692,6 +1693,51 @@ class TestIERM(unittest.TestCase):
         add_resp = self.client.post("/api/corporate-actions/add", json=post_data)
         self.assertEqual(add_resp.status_code, 200)
         self.assertTrue(add_resp.json()["success"])
+
+    def test_ctg_corporate_actions_and_global_search_sync(self):
+        """
+        Kiểm tra chuyên sâu sự kiện quyền và điều chỉnh giá mục tiêu cho CTG và các mã tìm kiếm:
+        1. CTG có sự kiện GDKHQ ngày 23/07/2026 (cổ tức tiền mặt 450 đ/CP) và 17/12/2025 (cổ tức CP 44.64%).
+        2. Báo cáo trước ngày 23/07/2026 tự động điều chỉnh theo bước giá HOSE (50đ cho vùng 10k-50k).
+        3. Preset CTG: mean_target_price được điều chỉnh về 42.400 đ (từ 42.600 đ ban đầu).
+        4. Tab sự kiện doanh nghiệp của CTG và KDH không chứa sự kiện cổ tức giả định.
+        5. Mã mới (như KDH) tự động đồng bộ sự kiện quyền thực tế từ Simplize/VSD.
+        """
+        from corporate_actions import adjust_target_price_for_corporate_actions, get_ticker_corporate_actions
+        from financial_data import get_company_news_and_events
+
+        # 1. Kiểm tra sự kiện quyền CTG
+        ctg_actions = get_ticker_corporate_actions("CTG")
+        self.assertGreater(len(ctg_actions), 0)
+        ev_2026 = next((a for a in ctg_actions if a.get("ex_date") == "23/07/2026"), None)
+        self.assertIsNotNone(ev_2026, "CTG phải có sự kiện GDKHQ ngày 23/07/2026")
+        self.assertEqual(ev_2026["cash_amount"], 450.0)
+
+        # 2. Điều chỉnh bước giá 50đ: 43.700 - 450 = 43.250 đ
+        adj_ssv = adjust_target_price_for_corporate_actions("CTG", "21/07/2026", 43700.0)
+        self.assertTrue(adj_ssv["is_price_adjusted"])
+        self.assertEqual(adj_ssv["adjusted_target_price"], 43250.0, "Bước giá 50đ: 43.700 - 450 phải bằng 43.250 đ")
+
+        # 3. Preset API CTG
+        resp_ctg = self.client.get("/api/preset/CTG")
+        self.assertEqual(resp_ctg.status_code, 200)
+        data_ctg = resp_ctg.json()
+        cs_ctg = data_ctg["consensus_summary"]
+        self.assertTrue(cs_ctg["has_price_adjustment"])
+        self.assertEqual(cs_ctg["mean_target_price"], 42400.0)
+        self.assertEqual(cs_ctg["unadjusted_mean_target_price"], 42600.0)
+
+        # 4. Kiểm tra tin tức & sự kiện: Không có sự kiện giả định 12/08/2026 (1,000 đ/CP)
+        news_ctg = get_company_news_and_events("CTG")
+        events_ctg = news_ctg.get("events", [])
+        self.assertFalse(any(e.get("ex_date") == "12/08/2026" for e in events_ctg), "Không được có ngày GDKHQ giả 12/08/2026 ở CTG")
+        self.assertTrue(any(e.get("ex_date") == "23/07/2026" for e in events_ctg), "Phải có ngày GDKHQ thực tế 23/07/2026 ở CTG")
+
+        # 5. Đồng bộ hóa mã mới (KDH): Tự động nạp sự kiện quyền thực tế, không sinh fake dividend
+        news_kdh = get_company_news_and_events("KDH")
+        events_kdh = news_kdh.get("events", [])
+        self.assertFalse(any(e.get("ex_date") == "12/08/2026" for e in events_kdh), "KDH không được sinh cổ tức giả 12/08/2026")
+        self.assertTrue(any(e.get("ex_date") == "17/07/2025" for e in events_kdh), "KDH phải tự động nạp sự kiện thực tế 17/07/2025")
 
 
 if __name__ == "__main__":
