@@ -1003,7 +1003,9 @@ async def get_catalysts_and_insights(ticker: str):
 
     # Tích hợp thêm các dự án quét từ Website chính thức & BCTN/BCTCSN (nếu đã khám phá)
     try:
-        from project_discovery_engine import _load_discovered_cache
+        from project_discovery_engine import _load_discovered_cache, SSC_COMPANY_PROFILES_SEARCH_URL, SSC_DISCLOSURE_PORTAL_NAME
+        data["ssc_portal_url"] = SSC_COMPANY_PROFILES_SEARCH_URL
+        data["ssc_portal_name"] = SSC_DISCLOSURE_PORTAL_NAME
         d_cache = _load_discovered_cache()
         if clean_ticker in d_cache:
             entry = d_cache[clean_ticker]
@@ -1029,6 +1031,18 @@ async def discover_company_projects_route(ticker: str, force_refresh: bool = Fal
     clean_ticker = ticker.upper().strip()
     from project_discovery_engine import discover_company_projects_master
     return await discover_company_projects_master(clean_ticker, force_refresh=force_refresh)
+
+
+@app.get("/api/ssc-company-profile/{ticker}")
+async def get_ssc_company_profile_endpoint(ticker: str):
+    """
+    Endpoint tra cứu liên kết hồ sơ doanh nghiệp niêm yết và website chính thức
+    được công bố trên Cổng UBCKNN (State Securities Commission - congbothongtin.ssc.gov.vn).
+    """
+    clean_ticker = ticker.upper().strip()
+    from project_discovery_engine import get_ssc_company_profile_info
+    return get_ssc_company_profile_info(clean_ticker)
+
 
 
 @app.post("/api/valuation/dcf")

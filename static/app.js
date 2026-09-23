@@ -17,7 +17,7 @@ let currentSelectedPeriodIdx = -1; // -1: kỳ mới nhất (mặc định)
 let currentBreakdownMode = "asset"; // "asset" (Cơ cấu Tài sản) hoặc "revenue" (Cơ cấu Doanh thu)
 
 function getActiveTicker() {
-    return (window.currentActiveTicker || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
+    return (window.currentActiveTicker || window.currentSymbol || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
 }
 
 /**
@@ -866,6 +866,7 @@ async function selectTicker(ticker) {
     if (!cleanTicker) return;
 
     window.currentActiveTicker = cleanTicker;
+    window.currentSymbol = cleanTicker;
     currentReport = null;
     currentFinancialBundle = null;
     currentTechnicalData = null;
@@ -4737,6 +4738,11 @@ function renderCatalystsAndProjects(data) {
     const projCont = document.getElementById("overview-projects-container");
     const countBadge = document.getElementById("overview-projects-count-badge");
     const capexBadge = document.getElementById("overview-projects-total-capex");
+    const sscBtn = document.getElementById("btn-ssc-portal-link");
+    const currentSym = getActiveTicker();
+    if (sscBtn) {
+        sscBtn.title = `Tra cứu Hồ sơ Niêm yết, Website chính thức & BCTC/BCTN của ${currentSym} trên Cổng UBCKNN (congbothongtin.ssc.gov.vn)`;
+    }
 
     if (countBadge && data.projects) {
         countBadge.innerText = `${data.projects.length} dự án`;
@@ -4754,7 +4760,24 @@ function renderCatalystsAndProjects(data) {
 
     if (projCont && data.projects) {
         if (data.projects.length === 0) {
-            projCont.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs font-mono">Chưa có dữ liệu dự án trọng điểm.</div>`;
+            const currSym = getActiveTicker();
+            projCont.innerHTML = `
+                <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center space-y-2.5 my-2">
+                    <div class="text-amber-400 font-mono text-xs font-semibold flex items-center justify-center gap-1.5">
+                        <span>ℹ️</span>
+                        <span>Doanh nghiệp không ghi nhận dự án XDCB dở dang trọng yếu trên BCTC kiểm toán gần nhất.</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed max-w-xl mx-auto font-sans">
+                        Để tra cứu thông tin đầy đủ về hồ sơ niêm yết, Báo cáo Thường niên (BCTN), Báo cáo Tài chính Bán niên và Website chính thức của <strong>${currSym}</strong>, bạn có thể tra cứu trên Cổng Công Bố Thông Tin UBCKNN:
+                    </p>
+                    <div class="pt-1 flex items-center justify-center gap-2">
+                        <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-600/80 transition-all shadow-sm active:scale-95">
+                            <span>🏛️</span>
+                            <span>Mở Cổng Tra Cứu UBCKNN (congbothongtin.ssc.gov.vn)</span>
+                        </a>
+                    </div>
+                </div>
+            `;
         } else {
             let html = "";
             data.projects.forEach((p, pIdx) => {
@@ -4807,6 +4830,13 @@ function renderCatalystsAndProjects(data) {
                                 <span class="px-2 py-0.5 rounded bg-purple-950/90 text-purple-200 border border-purple-800/80 font-semibold flex items-center gap-1" title="Tình trạng pháp lý của dự án">
                                     <span>⚖️ Pháp lý:</span>
                                     <span>${legalStatus}</span>
+                                </span>
+                            </div>` : ''}
+                            ${p.source ? `
+                            <div class="flex items-center gap-1 text-[10px] font-sans">
+                                <span class="px-2 py-0.5 rounded bg-slate-900/90 text-slate-300 border border-slate-700/80 font-medium flex items-center gap-1" title="Nguồn trích xuất thông tin">
+                                    <span class="text-cyan-400">📌 Nguồn:</span>
+                                    <span>${p.source}</span>
                                 </span>
                             </div>` : ''}
                         </div>
@@ -4867,6 +4897,88 @@ function renderCatalystsAndProjects(data) {
         risksEl.textContent = data.ai_insights.risks || data.ai_insights.key_risks || "Biến động thị trường chung, lãi suất và biến động tỷ giá.";
     }
 }
+window.renderOverviewInsights = renderCatalystsAndProjects;
+
+// Xử lý quét dự án từ Website chính thức & Báo cáo Thường niên, Bán niên
+window.triggerDeepProjectDiscovery = async function() {
+    const sym = getActiveTicker();
+    if (!sym) {
+        showToast("Vui lòng chọn hoặc nhập mã chứng khoán trước khi quét!", true);
+        return;
+    }
+    const btn = document.getElementById("btn-discover-company-projects");
+    const statusBox = document.getElementById("overview-projects-discovery-status");
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-spin inline-block mr-1">⏳</span><span>Đang quét Website & BCTN (${sym})...</span>`;
+    }
+
+    if (statusBox) {
+        statusBox.classList.remove("hidden");
+        statusBox.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>Đang truy cập Website chính thức và bóc tách Báo cáo Thường niên, Báo cáo Bán niên của <strong>${sym}</strong>...</span>
+            </div>
+        `;
+    }
+
+    try {
+        const resp = await fetch(`/api/discover-company-projects/${sym}?force_refresh=true`, { method: "POST" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const data = await resp.json();
+
+        // Integrity Guard: Nếu người dùng đã chuyển sang mã khác trong lúc quét thì bỏ qua
+        if (data.ticker && data.ticker.toUpperCase() !== getActiveTicker()) {
+            console.warn(`[Integrity Guard] Bỏ qua kết quả quét của ${data.ticker} vì mã hiện tại đã là ${getActiveTicker()}`);
+            return;
+        }
+
+        // Cập nhật lại giao diện panel dự án
+        if (typeof renderCatalystsAndProjects === "function") {
+            renderCatalystsAndProjects({
+                projects: data.projects,
+                total_projects: data.total_projects,
+                total_investment_bil: data.total_investment_bil
+            });
+        }
+
+        if (statusBox) {
+            const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
+            const webLinkHtml = hasRealDomain
+                ? `<a href="https://${data.official_website}" target="_blank" class="underline text-cyan-300 hover:text-cyan-200 font-mono">${data.official_website}</a>`
+                : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
+
+            statusBox.innerHTML = `
+                <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
+                    <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
+                        <span>✓ Đã quét thành công!</span>
+                        <span>Tìm thấy <strong>${data.total_projects}</strong> dự án (Website: ${webLinkHtml}, BCTN & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
+                    </div>
+                    <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'vừa xong'}</span>
+                </div>
+            `;
+            setTimeout(() => {
+                if (statusBox) statusBox.classList.add("hidden");
+            }, 15000);
+        }
+    } catch (err) {
+        console.error("Discovery error:", err);
+        if (statusBox) {
+            statusBox.innerHTML = `<span class="text-amber-400">⚠️ Không thể quét thêm từ website: ${err.message}. Đã giữ nguyên danh mục hiện tại.</span>`;
+            setTimeout(() => {
+                if (statusBox) statusBox.classList.add("hidden");
+            }, 6000);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="scan-search" class="w-3.5 h-3.5 text-cyan-400"></i><span>🔍 Quét BCTN & Website</span>`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
+};
 
 function renderDupont(d) {
     if (!d) return;

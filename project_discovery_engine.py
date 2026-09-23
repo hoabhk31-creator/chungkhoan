@@ -20,6 +20,15 @@ CACHE_FILE = os.path.join(DATA_DIR, "discovered_projects_cache.json")
 
 
 # =============================================================================
+# CỔNG CÔNG BỐ THÔNG TIN CHÍNH THỨC CỦA ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC (UBCKNN - SSC)
+# Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết (IDS - UBCKNN)
+# URL tra cứu hồ sơ: https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch
+# =============================================================================
+SSC_COMPANY_PROFILES_SEARCH_URL = "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+SSC_DISCLOSURE_PORTAL_NAME = "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)"
+
+
+# =============================================================================
 # 1. BẢN ĐỒ WEBSITE CHÍNH THỨC & TRANG DỰ ÁN CỦA CÁC DOANH NGHIỆP NIÊM YẾT
 # =============================================================================
 
@@ -177,6 +186,244 @@ CORPORATE_OFFICIAL_WEBSITES: Dict[str, Dict[str, str]] = {
         "projects_url": "https://ducgiangchem.vn",
         "ir_url": "https://ducgiangchem.vn/quan-he-co-dong",
         "keywords": ["Hóa chất Nghi Sơn", "Bauxit Đắk Nông", "Pin LFP Đức Giang", "Phốt pho vàng"]
+    },
+    "TLG": {
+        "name": "CTCP Tập đoàn Thiên Long",
+        "domain": "thienlonggroup.com",
+        "projects_url": "https://thienlonggroup.com/quan-he-co-dong",
+        "ir_url": "https://thienlonggroup.com/quan-he-co-dong",
+        "keywords": ["Nam Cẩm Bàng", "Long Thành", "Flexoffice", "Colokit", "Bút bi Thiên Long", "R&D", "DMS"]
+    },
+    "VNM": {
+        "name": "CTCP Sữa Việt Nam (Vinamilk)",
+        "domain": "vinamilk.com.vn",
+        "projects_url": "https://www.vinamilk.com.vn/vi/phat-trien-ben-vung",
+        "ir_url": "https://www.vinamilk.com.vn/vi/quan-he-co-dong",
+        "keywords": ["Lao - Jagro", "Trang trại bò sữa", "Nhà máy Sữa Hưng Yên", "Vinabeef Tam Đảo", "Green Farm", "Mộc Châu"]
+    },
+    "MSN": {
+        "name": "CTCP Tập đoàn Masan",
+        "domain": "masangroup.com",
+        "projects_url": "https://www.masangroup.com/vi/our-business",
+        "ir_url": "https://www.masangroup.com/vi/investor-relations",
+        "keywords": ["WinCommerce", "WinMart", "MEATDeli", "Masan High-Tech Materials", "Masan Consumer", "Phúc Long"]
+    },
+    "REE": {
+        "name": "CTCP Cơ Điện Lạnh",
+        "domain": "reecorp.com",
+        "projects_url": "https://reecorp.com/vi/linh-vuc-kinh-doanh",
+        "ir_url": "https://reecorp.com/vi/quan-he-co-dong",
+        "keywords": ["E-Town 6", "Điện gió Trà Vinh", "Thủy điện Vĩnh Sơn Sông Hinh", "Thác Bà 2", "M&E Long Thành"]
+    },
+    "VRE": {
+        "name": "CTCP Vincom Retail",
+        "domain": "vincom.com.vn",
+        "projects_url": "https://vincom.com.vn/trung-tam-thuong-mai",
+        "ir_url": "https://vincom.com.vn/quan-he-co-dong",
+        "keywords": ["Vincom Mega Mall", "Vincom Plaza", "Grand Park", "Ocean City", "Quang Trung", "Điện Biên Phủ"]
+    },
+    "DGW": {
+        "name": "CTCP Thế Giới Số (Digiworld)",
+        "domain": "digiworld.com.vn",
+        "projects_url": "https://digiworld.com.vn",
+        "ir_url": "https://digiworld.com.vn/quan-he-nha-dau-tu",
+        "keywords": ["Smart Warehousing", "Xiaomi", "Apple", "Whirlpool", "Healthcare", "Phân phối thiết bị"]
+    },
+    "VSC": {
+        "name": "CTCP Container Việt Nam (Viconship)",
+        "domain": "viconship.com",
+        "projects_url": "https://viconship.com",
+        "ir_url": "https://viconship.com/quan-he-co-dong",
+        "keywords": ["Nam Hải Đình Vũ", "VIP Green Port", "Green Port", "Lạch Huyện", "ICD Đình Vũ", "Cảng biển"]
+    },
+    "HAH": {
+        "name": "CTCP Vận tải và Xếp dỡ Hải An",
+        "domain": "haian.com.vn",
+        "projects_url": "https://haian.com.vn",
+        "ir_url": "https://haian.com.vn/quan-he-co-dong",
+        "keywords": ["Đội tàu Hải An", "Tàu container", "Cảng Hải An", "Haian East", "Haian City"]
+    },
+    "VOS": {
+        "name": "CTCP Vận tải Biển Việt Nam (Vosco)",
+        "domain": "vosco.vn",
+        "projects_url": "https://vosco.vn",
+        "ir_url": "https://vosco.vn/quan-he-co-dong",
+        "keywords": ["Đội tàu Vosco", "Tàu dầu sản phẩm", "Tàu hàng rời Supramax"]
+    },
+    "PVT": {
+        "name": "Tổng CTCP Vận tải Dầu khí (PV Trans)",
+        "domain": "pvtrans.com",
+        "projects_url": "https://pvtrans.com",
+        "ir_url": "https://pvtrans.com/quan-he-co-dong",
+        "keywords": ["Đội tàu chở dầu thô VLCC", "Tàu Aframax", "Tàu chở khí VLGC", "Tàu MR Tanker", "pvtrans.com"]
+    },
+    "PVD": {
+        "name": "Tổng CTCP Khoan và Dịch vụ Khoan Dầu khí (PV Drilling)",
+        "domain": "pvdrilling.com.vn",
+        "projects_url": "https://pvdrilling.com.vn/linh-vuc-hoat-dong/dich-vu-khoan",
+        "ir_url": "https://pvdrilling.com.vn/quan-he-co-dong",
+        "keywords": ["Giàn khoan tự nâng", "PV DRILLING I", "PV DRILLING II", "TAD PV DRILLING V"]
+    },
+    "BSR": {
+        "name": "CTCP Lọc Hóa dầu Bình Sơn",
+        "domain": "bsr.com.vn",
+        "projects_url": "https://bsr.com.vn/du-an",
+        "ir_url": "https://bsr.com.vn/quan-he-co-dong",
+        "keywords": ["Nâng cấp mở rộng Dung Quất", "Phao rót dầu SPM", "Lọc dầu Dung Quất"]
+    },
+    "POW": {
+        "name": "Tổng CTCP Điện lực Dầu khí Việt Nam (PV Power)",
+        "domain": "pvpower.vn",
+        "projects_url": "https://pvpower.vn/du-an",
+        "ir_url": "https://pvpower.vn/quan-he-co-dong",
+        "keywords": ["Nhơn Trạch 3 & 4", "LNG Quảng Ninh", "Điện khí LNG"]
+    },
+    "PC1": {
+        "name": "CTCP Tập đoàn PC1",
+        "domain": "pc1group.vn",
+        "projects_url": "https://pc1group.vn/du-an",
+        "ir_url": "https://pc1group.vn/quan-he-co-dong",
+        "keywords": ["Điện gió Liên Lập", "Mỏ Niken Hạ Trì", "KCN Yên Phong II-A"]
+    },
+    "PLX": {
+        "name": "Tập đoàn Xăng dầu Việt Nam (Petrolimex)",
+        "domain": "petrolimex.com.vn",
+        "projects_url": "https://petrolimex.com.vn",
+        "ir_url": "https://petrolimex.com.vn/quan-he-co-dong.html",
+        "keywords": ["Mạng lưới CHXD", "Kho xăng dầu Ngoại quan", "Petrolimex"]
+    },
+    "VCB": {
+        "name": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+        "domain": "vietcombank.com.vn",
+        "projects_url": "https://vietcombank.com.vn",
+        "ir_url": "https://vietcombank.com.vn/vi-VN/Nha-dau-tu",
+        "keywords": ["Ngân hàng số VCB Digibank", "Trụ sở Vietcombank Tower", "Chuyển đổi số"]
+    },
+    "TCB": {
+        "name": "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)",
+        "domain": "techcombank.com",
+        "projects_url": "https://techcombank.com",
+        "ir_url": "https://techcombank.com/nha-dau-tu",
+        "keywords": ["Techcombank Mobile", "Trụ sở Quang Trung & Lê Duẩn", "Hạ tầng Cloud AWS"]
+    },
+    "MBB": {
+        "name": "Ngân hàng TMCP Quân đội (MB)",
+        "domain": "mbbank.com.vn",
+        "projects_url": "https://mbbank.com.vn",
+        "ir_url": "https://mbbank.com.vn/investor-relations",
+        "keywords": ["App MBBank", "Tòa nhà MB Grand Tower", "Ngân hàng số"]
+    },
+    "CTG": {
+        "name": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
+        "domain": "vietinbank.vn",
+        "projects_url": "https://vietinbank.vn",
+        "ir_url": "https://investor.vietinbank.vn",
+        "keywords": ["VietinBank iPay", "VietinBank Tower", "Core Banking thế hệ mới"]
+    },
+    "BID": {
+        "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
+        "domain": "bidv.com.vn",
+        "projects_url": "https://bidv.com.vn",
+        "ir_url": "https://bidv.com.vn/vn/quan-he-nha-dau-tu",
+        "keywords": ["BIDV SmartBanking", "BIDV Tower", "Chuyển đổi số toàn diện"]
+    },
+    "ACB": {
+        "name": "Ngân hàng TMCP Á Châu (ACB)",
+        "domain": "acb.com.vn",
+        "projects_url": "https://acb.com.vn",
+        "ir_url": "https://acb.com.vn/quan-he-nha-dau-tu",
+        "keywords": ["ACB ONE", "Trung tâm Dữ liệu", "Chuyển đổi số"]
+    },
+    "VPB": {
+        "name": "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)",
+        "domain": "vpbank.com.vn",
+        "projects_url": "https://vpbank.com.vn",
+        "ir_url": "https://vpbank.com.vn/quan-he-nha-dau-tu",
+        "keywords": ["VPBank NEO", "Tòa nhà VPBank Tower", "Hệ sinh thái số"]
+    },
+    "SSI": {
+        "name": "CTCP Chứng khoán SSI",
+        "domain": "ssi.com.vn",
+        "projects_url": "https://ssi.com.vn",
+        "ir_url": "https://ssi.com.vn/quan-he-nha-dau-tu",
+        "keywords": ["Hệ thống KRX", "SSI iBoard", "Nâng cấp hạ tầng giao dịch"]
+    },
+    "HCM": {
+        "name": "CTCP Chứng khoán TP.HCM (HSC)",
+        "domain": "hsc.com.vn",
+        "projects_url": "https://hsc.com.vn",
+        "ir_url": "https://hsc.com.vn/quan-he-co-dong",
+        "keywords": ["HSC ONE", "Nâng cấp hệ thống giao dịch KRX", "Hạ tầng số"]
+    },
+    "VND": {
+        "name": "CTCP Chứng khoán VNDIRECT",
+        "domain": "vndirect.com.vn",
+        "projects_url": "https://vndirect.com.vn",
+        "ir_url": "https://vndirect.com.vn/quan-he-co-dong",
+        "keywords": ["D-Platform", "Hạ tầng an ninh mạng bảo mật", "Hệ thống KRX"]
+    },
+    "VCI": {
+        "name": "CTCP Chứng khoán Vietcap",
+        "domain": "vietcap.com.vn",
+        "projects_url": "https://vietcap.com.vn",
+        "ir_url": "https://vietcap.com.vn/quan-he-co-dong",
+        "keywords": ["Vietcap Mobile App", "Chuyển đổi số môi giới", "Hạ tầng KRX"]
+    },
+    "HSG": {
+        "name": "CTCP Tập đoàn Hoa Sen",
+        "domain": "hoasengroup.vn",
+        "projects_url": "https://hoasengroup.vn",
+        "ir_url": "https://hoasengroup.vn/vi/quan-he-co-dong",
+        "keywords": ["Hệ thống Siêu thị Hoa Sen Home", "Nhà máy Tôn Hoa Sen Phú Mỹ", "Ống thép Hoa Sen"]
+    },
+    "NKG": {
+        "name": "CTCP Thép Nam Kim",
+        "domain": "namkimgroup.vn",
+        "projects_url": "https://namkimgroup.vn",
+        "ir_url": "https://namkimgroup.vn/quan-he-co-dong",
+        "keywords": ["Nhà máy Nam Kim Phú Mỹ (1.2 triệu tấn/năm)", "Tôn mạ Nam Kim"]
+    },
+    "FRT": {
+        "name": "CTCP Bán lẻ Kỹ thuật số FPT (FPT Retail)",
+        "domain": "frt.vn",
+        "projects_url": "https://frt.vn",
+        "ir_url": "https://frt.vn/quan-he-co-dong",
+        "keywords": ["Chuỗi Dược phẩm Long Châu", "Trung tâm Tiêm chủng Long Châu", "Kho vận Logistics Dược phẩm"]
+    },
+    "PNJ": {
+        "name": "CTCP Vàng bạc Đá quý Phú Nhuận",
+        "domain": "pnj.com.vn",
+        "projects_url": "https://pnj.com.vn",
+        "ir_url": "https://pnj.com.vn/quan-he-co-dong",
+        "keywords": ["Nhà máy Chế tác Trang sức Long Hậu", "Mạng lưới cửa hàng Next-Gen PNJ"]
+    },
+    "DCM": {
+        "name": "CTCP Phân bón Dầu khí Cà Mau (PVCFC)",
+        "domain": "pvcfc.com.vn",
+        "projects_url": "https://pvcfc.com.vn",
+        "ir_url": "https://pvcfc.com.vn/quan-he-co-dong",
+        "keywords": ["Nhà máy Đạm Cà Mau", "Dự án NPK Cà Mau", "M&A Phân bón Hàn - Việt"]
+    },
+    "DPM": {
+        "name": "Tổng CTCP Phân bón và Hóa chất Dầu khí (PVFCCo)",
+        "domain": "dpm.vn",
+        "projects_url": "https://dpm.vn",
+        "ir_url": "https://dpm.vn/quan-he-co-dong",
+        "keywords": ["Nhà máy Đạm Phú Mỹ", "Xưởng NPK công nghệ hóa học", "Hóa chất DPM"]
+    },
+    "CTR": {
+        "name": "Tổng CTCP Công trình Viettel (Viettel Construction)",
+        "domain": "viettelconstruction.com.vn",
+        "projects_url": "https://viettelconstruction.com.vn",
+        "ir_url": "https://viettelconstruction.com.vn/quan-he-co-dong",
+        "keywords": ["Hạ tầng trạm BTS 5G TowerCo", "Dự án Điện mặt trời áp mái", "Xây dựng dân dụng AIO"]
+    },
+    "VIC": {
+        "name": "Tập đoàn Vingroup",
+        "domain": "vingroup.net",
+        "projects_url": "https://vingroup.net",
+        "ir_url": "https://ir.vingroup.net",
+        "keywords": ["Tổ hợp Nhà máy Xe điện VinFast Hải Phòng", "VinES", "Trung tâm Nghiên cứu AI"]
     }
 }
 
@@ -209,31 +456,99 @@ def _save_discovered_cache() -> None:
 
 
 # =============================================================================
-# 3. QUÉT THÔNG TIN DỰ ÁN TỪ WEBSITE CHÍNH THỨC CỦA DOANH NGHIỆP
+# 3. BỘ PHÂN GIẢI WEBSITE CHÍNH THỨC & QUÉT DỰ ÁN TỰ ĐỘNG
 # =============================================================================
+
+async def resolve_official_corporate_website(ticker: str) -> Dict[str, Any]:
+    """
+    Suy luận và tìm kiếm website chính thức còn hoạt động của doanh nghiệp niêm yết:
+    1. Tra cứu cấu hình chuẩn trong CORPORATE_OFFICIAL_WEBSITES.
+    2. Rút trích thương hiệu từ tên niêm yết (company_database & VIETNAM_STOCK_DIRECTORY).
+    3. Thử nghiệm kết nối danh sách domain tiềm năng (HEAD request với timeout 2.5s).
+    4. Trả về thông tin domain hoạt động thực tế hoặc chuyển hướng Cổng UBCKNN nếu không tìm thấy.
+    """
+    clean_ticker = (ticker or "").upper().strip()
+    if clean_ticker in CORPORATE_OFFICIAL_WEBSITES:
+        return dict(CORPORATE_OFFICIAL_WEBSITES[clean_ticker])
+
+    from company_database import get_company
+    from financial_data import VIETNAM_STOCK_DIRECTORY
+
+    comp_meta = get_company(clean_ticker) or {}
+    stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+    raw_name = comp_meta.get("name") or stock_meta.get("name") or f"CTCP {clean_ticker}"
+
+    brand_tokens = []
+    m = re.search(r'\((.*?)\)', raw_name)
+    if m:
+        brand_clean = re.sub(r'[^a-zA-Z0-9]', '', m.group(1)).lower()
+        if len(brand_clean) >= 3:
+            brand_tokens.append(brand_clean)
+
+    name_clean = re.sub(r'(CTCP|Tập đoàn|Tổng Công ty|Ngân hàng TMCP|Tổng CTCP|Việt Nam)', '', raw_name, flags=re.IGNORECASE)
+    words = [re.sub(r'[^a-zA-Z0-9]', '', w).lower() for w in name_clean.split() if len(w) >= 3]
+    if words:
+        brand_tokens.append("".join(words[:2]))
+        brand_tokens.append(words[0])
+
+    candidates = []
+    for b in brand_tokens:
+        if b and len(b) >= 3:
+            candidates.extend([f"{b}.com", f"{b}.com.vn", f"{b}.vn"])
+
+    t_lower = clean_ticker.lower()
+    candidates.extend([f"{t_lower}.com.vn", f"{t_lower}.vn", f"{t_lower}.com"])
+
+    seen_domains = []
+    for c in candidates:
+        if c not in seen_domains:
+            seen_domains.append(c)
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    try:
+        async with httpx.AsyncClient(headers=headers, timeout=2.5, follow_redirects=True, verify=False) as client:
+            for dom in seen_domains[:5]:
+                for proto in ["https", "http"]:
+                    test_url = f"{proto}://{dom}"
+                    try:
+                        r = await client.head(test_url)
+                        if r.status_code in [200, 301, 302, 307, 308, 403]:
+                            return {
+                                "name": raw_name,
+                                "domain": dom,
+                                "projects_url": f"{test_url}/du-an",
+                                "ir_url": f"{test_url}/quan-he-co-dong",
+                                "keywords": ["Dự án", "Công trình", "Nhà máy", "Cảng"]
+                            }
+                    except Exception:
+                        continue
+    except Exception:
+        pass
+
+    # Nếu không kết nối được domain nào: Trả về trạng thái cần tra cứu tại Cổng UBCKNN
+    return {
+        "name": raw_name,
+        "domain": "",
+        "projects_url": "",
+        "ir_url": SSC_COMPANY_PROFILES_SEARCH_URL,
+        "keywords": [],
+        "needs_ssc_lookup": True
+    }
+
 
 async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any]]:
     """
     Truy vấn và quét thông tin dự án trực tiếp từ Website chính thức của doanh nghiệp niêm yết.
     """
     clean_ticker = (ticker or "").upper().strip()
-    site_info = CORPORATE_OFFICIAL_WEBSITES.get(clean_ticker)
-    
-    # Nếu chưa có cấu hình riêng, tự động suy luận domain
-    if not site_info:
-        domain = f"{clean_ticker.lower()}.com.vn"
-        projects_url = f"https://{domain}/du-an"
-        site_info = {
-            "name": f"CTCP {clean_ticker}",
-            "domain": domain,
-            "projects_url": projects_url,
-            "ir_url": f"https://{domain}/quan-he-co-dong",
-            "keywords": ["Dự án", "Công trình", "Khu đô thị", "Nhà máy"]
-        }
+    site_info = await resolve_official_corporate_website(clean_ticker)
 
     domain = site_info.get("domain", "")
     projects_url = site_info.get("projects_url", "")
     discovered = []
+
+    if not projects_url or site_info.get("needs_ssc_lookup"):
+        return []
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -242,7 +557,7 @@ async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any
     }
 
     try:
-        async with httpx.AsyncClient(headers=headers, timeout=6.0, follow_redirects=True, verify=False) as client:
+        async with httpx.AsyncClient(headers=headers, timeout=5.0, follow_redirects=True, verify=False) as client:
             resp = await client.get(projects_url)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -254,10 +569,13 @@ async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any
                     if not text or len(text) < 8 or len(text) > 120:
                         continue
                     
+                    # Bỏ qua email, số điện thoại, liên hệ, footer
+                    if "@" in text or "tel:" in t_lower or "hotline" in t_lower or "copyright" in t_lower or "chính sách" in t_lower:
+                        continue
+
                     # Kiểm tra từ khóa dự án
-                    t_lower = text.lower()
                     if any(kw.lower() in t_lower for kw in site_info.get("keywords", [])) or any(w in t_lower for w in ["dự án", "khu đô thị", "đại đô thị", "tổ hợp", "nhà máy", "cảng"]):
-                        if not any(k in t_lower for k in ["tin tức", "xem thêm", "chi tiết", "menu", "trang chủ", "liên hệ"]):
+                        if not any(k in t_lower for k in ["tin tức", "xem thêm", "chi tiết", "menu", "trang chủ", "liên hệ", "giới thiệu", "sơ đồ"]):
                             if text not in candidates:
                                 candidates.append(text)
 
@@ -408,6 +726,10 @@ def merge_and_deduplicate_projects(base_projects: List[Dict[str, Any]], discover
                 is_duplicate = True
                 break
                 
+        # Bỏ qua email, số điện thoại, link bản quyền, liên hệ
+        if "@" in p_name or "tel:" in p_name.lower() or "hotline" in p_name.lower() or "copyright" in p_name.lower() or "liên hệ" in p_name.lower() or "chính sách" in p_name.lower():
+            continue
+
         if not is_duplicate and len(p_name) >= 10:
             seen_names.add(norm)
             merged.append(item)
@@ -474,20 +796,26 @@ async def discover_company_projects_master(ticker: str, force_refresh: bool = Fa
 
     total_capex = sum(p.get("investment_bil", 0) for p in all_projects if isinstance(p.get("investment_bil"), (int, float)))
 
-    site_info = CORPORATE_OFFICIAL_WEBSITES.get(clean_ticker, {})
+    site_info = await resolve_official_corporate_website(clean_ticker)
+    official_domain = site_info.get("domain", "")
+    projects_site_url = site_info.get("projects_url", f"https://{official_domain}" if official_domain else "")
+
     result = {
         "ticker": clean_ticker,
         "company_name": company_name,
-        "official_website": site_info.get("domain", f"{clean_ticker.lower()}.com.vn"),
-        "website_projects_url": site_info.get("projects_url", f"https://{clean_ticker.lower()}.com.vn"),
+        "official_website": official_domain or "UBCKNN (Cần tra cứu hồ sơ)",
+        "website_projects_url": projects_site_url,
         "total_projects": len(all_projects),
         "total_investment_bil": total_capex,
         "projects": all_projects,
         "newly_discovered_count": len(all_projects) - len(base_projects),
+        "ssc_portal_url": SSC_COMPANY_PROFILES_SEARCH_URL,
+        "ssc_portal_name": SSC_DISCLOSURE_PORTAL_NAME,
         "scan_sources": [
             f"Website chính thức: {site_info.get('domain', clean_ticker.lower() + '.com.vn')}",
             "Báo cáo Thường niên (Annual Report)",
             "Báo cáo Tài chính Bán niên Soát xét",
+            f"Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN ({SSC_COMPANY_PROFILES_SEARCH_URL})",
             "Công bố Thông tin Sở GDCK (HOSE/HNX)"
         ],
         "timestamp": now,
@@ -497,3 +825,22 @@ async def discover_company_projects_master(ticker: str, force_refresh: bool = Fa
     _DISCOVERED_CACHE[clean_ticker] = result
     _save_discovered_cache()
     return result
+
+
+def get_ssc_company_profile_info(ticker: str) -> Dict[str, Any]:
+    """
+    Trả về đường dẫn tra cứu thông tin doanh nghiệp, website chính thức và báo cáo
+    được công bố trên Cổng UBCKNN (State Securities Commission - congbothongtin.ssc.gov.vn).
+    """
+    clean_ticker = (ticker or "").upper().strip()
+    site_info = CORPORATE_OFFICIAL_WEBSITES.get(clean_ticker, {})
+    return {
+        "ticker": clean_ticker,
+        "company_name": site_info.get("name", f"CTCP {clean_ticker}"),
+        "official_website": site_info.get("domain", f"{clean_ticker.lower()}.com.vn"),
+        "website_projects_url": site_info.get("projects_url", f"https://{clean_ticker.lower()}.com.vn"),
+        "ssc_portal_url": SSC_COMPANY_PROFILES_SEARCH_URL,
+        "ssc_portal_name": SSC_DISCLOSURE_PORTAL_NAME,
+        "instruction": f"Nhập mã chứng khoán '{clean_ticker}' vào ô tra cứu trên Cổng UBCKNN để xem toàn bộ hồ sơ niêm yết, website chính thức, BCTN và BCTC bán niên được xác thực pháp lý."
+    }
+
