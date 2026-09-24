@@ -3079,5 +3079,52 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "DBC": [
+    {
+      "id": "dbc-ca-05062026-dividend_stock",
+      "ex_date": "05/06/2026",
+      "record_date": "08/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "DBC: Thông báo ngày ĐKCC chi trả cổ tức năm 2025 bằng tiền và cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:12",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.12,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8929,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dbc-ca-05062026-dividend_cash",
+      "ex_date": "05/06/2026",
+      "record_date": "08/06/2026",
+      "execution_date": "24/06/2026",
+      "event_type": "dividend_cash",
+      "title": "DBC: Thông báo ngày ĐKCC chi trả cổ tức năm 2025 bằng tiền và cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 300 đồng/CP",
+      "cash_amount": 300.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dbc-ca-07082025-dividend_stock",
+      "ex_date": "07/08/2025",
+      "record_date": "08/08/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "DBC: Thông báo ngày ĐKCC chi trả cổ tức năm 2024 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:15",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.15,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8696,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
