@@ -3126,5 +3126,52 @@
       "adjustment_factor": 0.8696,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "TRC": [
+    {
+      "id": "trc-ca-15092026-bonus_share",
+      "ex_date": "15/09/2026",
+      "record_date": "16/09/2026",
+      "execution_date": "15/09/2026",
+      "event_type": "bonus_share",
+      "title": "TRC: Thông báo ngày ĐKCC phát hành cổ phiếu để tăng vốn cổ phần từ NVCSH",
+      "description": "Thưởng cổ phiếu, tỷ lệ 1:3 (1 cổ phiếu được thêm 3 cổ phiếu mới)",
+      "cash_amount": 0.0,
+      "stock_ratio": 3.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.25,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "trc-ca-31072026-dividend_cash",
+      "ex_date": "31/07/2026",
+      "record_date": "03/08/2026",
+      "execution_date": "25/09/2026",
+      "event_type": "dividend_cash",
+      "title": "TRC: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức năm 2025 bằng tiền mặt",
+      "description": "Trả cổ tức năm 2025 bằng tiền, 3,000 đồng/CP",
+      "cash_amount": 3000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "trc-ca-30072025-dividend_cash",
+      "ex_date": "30/07/2025",
+      "record_date": "31/07/2025",
+      "execution_date": "19/12/2025",
+      "event_type": "dividend_cash",
+      "title": "TRC: Thông báo ngày ĐKCC trả cổ tức năm 2024 bằng tiền mặt",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 2,500 đồng/CP",
+      "cash_amount": 2500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
