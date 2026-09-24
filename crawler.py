@@ -1300,79 +1300,224 @@ def extract_detailed_catalysts_and_risks(
     return final_cats, final_risks
 
 
+def _parse_ty_number(s: str) -> Optional[float]:
+    if not s or s == "—":
+        return None
+    m_nghin = re.search(r'([0-9]+(?:[.,][0-9]+)?)\s*(?:nghìn|ngàn)\s*tỷ', s, re.I)
+    if m_nghin:
+        return float(m_nghin.group(1).replace(',', '.')) * 1000
+    m_ty = re.search(r'([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]+)?)\s*tỷ', s, re.I)
+    if m_ty:
+        v = m_ty.group(1).replace('.', '').replace(',', '.')
+        try:
+            return float(v)
+        except Exception:
+            return None
+    return None
+
+
+def _normalize_forecast_str(s: str) -> str:
+    if not s or s == "—":
+        return "—"
+    s = s.strip()
+    # Loại bỏ các mệnh đề giải thích dài dòng đằng sau
+    s = re.split(r'\s+(?:nhờ|do|bởi|vì|khi|hoàn thành|tương ứng|kéo biên)\s+', s, flags=re.I)[0].strip()
+    m = re.search(r'([0-9]+(?:[.,][0-9]+)?)\s*(?:nghìn|ngàn)\s*tỷ(?:\s*đồng|\s*đ)?', s, re.I)
+    if m:
+        val = float(m.group(1).replace(',', '.')) * 1000
+        val_str = f"{val:,.0f}".replace(',', '.')
+        s = re.sub(r'[0-9]+(?:[.,][0-9]+)?\s*(?:nghìn|ngàn)\s*tỷ(?:\s*đồng|\s*đ)?', f"{val_str} tỷ đ", s, flags=re.I)
+    if "tỷ" not in s.lower() and "triệu" not in s.lower() and "đ" not in s.lower() and "%" not in s:
+        s += " tỷ đ"
+    s = re.sub(r'[\s,;]+$', '', s)
+    return s
+
+
 def extract_forecasts_from_content(content: str) -> Tuple[str, str]:
     """
     Bóc tách chuẩn xác Dự phóng Doanh thu và Lợi nhuận sau thuế (LNST) cả năm từ nội dung báo cáo.
-    Tránh lỗi cắt cụt phân cách hàng nghìn (ví dụ 24.710 tỷ thành 24 hoặc 3).
+    Ưu tiên tuyệt đối số liệu dự phóng Cả Năm / FY / Niên độ / 12 tháng so với số kết quả Quý / Bán niên.
+    Nếu bài viết chỉ có số Quý hoặc 6 Tháng, gắn nhãn rõ ràng (ví dụ '6T: 34.996 tỷ đ' hoặc 'Q2: 18.847 tỷ đ')
+    và đồng bộ cùng một kỳ, tránh râu ông nọ cắm cằm bà kia.
     """
+    if not content:
+        return "—", "—"
+
+    clean_txt = content.replace('\r', ' ').replace('\n', ' ')
     rev_f = ""
     npat_f = ""
 
-    # 1. Pattern cặp lần lượt: "dự phóng doanh thu và lợi nhuận sau thuế năm 2026 ... lần lượt đạt X ... và Y ..."
-    m_lan_luot = re.search(
-        r'(?:doanh thu[^\d]*và\s*lợi nhuận[^\d]*)(?:năm\s*202[0-9]|niên độ[^\d]*)?[^\d]*lần lượt[^\d]*(?:đạt|ước đạt)\s*([0-9]{1,3}(?:[.,][0-9]{3})+(?:\s*tỷ(?:\s*đồng)?)?(?:\s*,\s*tăng\s*[0-9]+%)?)[^\d]+(?:và\s*)?([0-9]{1,3}(?:[.,][0-9]{3})+(?:\s*tỷ(?:\s*đồng)?)?(?:[^\.\n;]+)?)',
-        content, re.I
+    # --- TIER 1: Annual/FY Pairs (Cặp Doanh thu & LNST cả năm trong cùng 1 câu/mệnh đề) ---
+    # Pattern 1a: 'năm 2026 ... doanh thu ... đạt X ... LNST đạt Y'
+    p1a = re.search(
+        r'(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch|triển vọng)[^.\n;]*?)?(?:năm\s*202[0-9]F?|FY\s*202[0-9]F?|cả năm\s*202[0-9]F?)[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)[^.\n;]*?(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+        clean_txt, re.I
     )
-    if m_lan_luot:
-        rev_part = m_lan_luot.group(1).strip()
-        npat_part = m_lan_luot.group(2).strip()
-        if "tỷ" not in rev_part:
-            rev_part += " tỷ đ"
-        npat_clean = re.split(r'\s+(?:nhờ|do|bởi)\s+', npat_part, flags=re.I)[0].strip()
-        if "tỷ" not in npat_clean and "đồng" not in npat_clean:
-            npat_clean += " tỷ đ"
-        return rev_part, npat_clean
+    if p1a:
+        return _normalize_forecast_str(p1a.group(1)), _normalize_forecast_str(p1a.group(2))
 
-    # 2. Ưu tiên tìm Dự phóng LNST tương lai (dự phóng/kỳ vọng/ước tính LNST ... đạt khoảng X tỷ)
-    m_fwd = re.search(
-        r'(?:dự phóng|kỳ vọng|ước tính|dự báo)[^\d]*(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^\d]*(?:đạt|khoảng|ước đạt|đạt khoảng)\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*-\s*[0-9]{1,3}(?:[.,][0-9]{3})*)?\s*tỷ(?:\s*(?:đồng|VND))?)',
-        content, re.I
+    # Pattern 1b: 'doanh thu ... và lợi nhuận ... năm 2026 lần lượt đạt X và Y'
+    p1b = re.search(
+        r'(?:doanh thu[^\d]*và\s*lợi nhuận[^\d]*)(?:năm\s*202[0-9]|FY\s*202[0-9]|cả năm|niên độ[^\d]*)?[^\d]*lần lượt[^\d]*(?:đạt|ước đạt)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng)?(?:\s*,\s*tăng\s*[0-9]+%)?)[^\d]+(?:và\s*)?([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng)?(?:[^\.\n;]+)?)',
+        clean_txt, re.I
     )
-    if m_fwd:
-        np_val = m_fwd.group(1).strip()
-        if "tỷ" not in np_val and "đồng" not in np_val and "vnd" not in np_val.lower():
-            np_val += " tỷ đ"
-        npat_f = np_val
+    if p1b:
+        return _normalize_forecast_str(p1b.group(1)), _normalize_forecast_str(p1b.group(2))
 
-    # 3. Tìm Doanh thu cả năm / dự phóng
-    m_r = re.search(
-        r'(?:(?:đạt|ghi nhận|ước đạt|kỳ vọng đạt)\s+)?(?:doanh thu[^\d]*(?:thuần\s*)?(?:cả năm|năm\s*202[0-9]|niên độ|202[0-9]|kỷ lục)?[^\d]*(?:đạt|ước đạt|ghi nhận|kỳ vọng đạt)?\s*([0-9]{1,3}(?:[.,][0-9]{3})+(?:\s*tỷ(?:\s*(?:đồng|VND))?)?))',
-        content, re.I
+    # Pattern 1c: 'đặt kế hoạch 2026 với doanh thu X tỷ và LNST Y tỷ'
+    p1c = re.search(
+        r'(?:kế hoạch|dự phóng|mục tiêu)\s*(?:năm\s*)?202[0-9]F?[^.\n;]*?(?:doanh thu)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng|\s*đ|\s*vnd)?)[^.\n;]*?(?:và\s*)?(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng|\s*đ|\s*vnd)?[^.\n;]*)',
+        clean_txt, re.I
     )
-    if m_r:
-        rev_f = m_r.group(1).strip()
-        if "tỷ" not in rev_f:
-            rev_f += " tỷ đ"
+    if p1c:
+        return _normalize_forecast_str(p1c.group(1)), _normalize_forecast_str(p1c.group(2))
 
-    # 4. Nếu chưa có LNST, tìm LNST ghi nhận / cả năm
-    if not npat_f:
-        m_npat_yr = re.search(
-            r'(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^\d]*(?:cả năm|năm\s*202[0-9]|niên độ\s*(?:tiếp theo|202[0-9])|202[0-9]|năm tài chính)?[^\d]*(?:đạt|ước đạt|đạt khoảng|khoảng|ghi nhận)\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*-\s*[0-9]{1,3}(?:[.,][0-9]{3})*)?\s*tỷ(?:\s*(?:đồng|VND))?(?:\s*\([^\)]+\))?)',
-            content, re.I
+    # Pattern 1d: 'dự báo doanh thu thuần năm 2026 lên X và lợi nhuận ròng lên Y'
+    p1d = re.search(
+        r'(?:dự báo|dự phóng|kỳ vọng|ước tính)[^.\n;]*?(?:doanh thu)[^.\n;]*?(?:năm\s*202[0-9]|cả năm|FY\s*202[0-9])[^.\n;]*?(?:lên|đạt|khoảng)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng|\s*đ|\s*vnd)?)[^.\n;]*?(?:và\s*)?(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^.\n;]*?(?:lên|đạt|khoảng)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*đồng|\s*đ|\s*vnd)?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+        clean_txt, re.I
+    )
+    if p1d:
+        return _normalize_forecast_str(p1d.group(1)), _normalize_forecast_str(p1d.group(2))
+
+    # Pattern 1e: 'doanh thu và lợi nhuận ròng cả năm 2026 đạt X tỷ và Y tỷ' (Chủ ngữ kép)
+    p1e = re.search(
+        r'(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)[^.\n;]*?)?(?:năm\s*202[0-9]F?|FY\s*202[0-9]F?|cả năm\s*202[0-9]F?)?[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:và|\+)\s*(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|lần lượt đạt|dự kiến đạt|khoảng|lần lượt)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)[^.\n;]*?(?:và|\+)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+        clean_txt, re.I
+    )
+    if p1e:
+        return _normalize_forecast_str(p1e.group(1)), _normalize_forecast_str(p1e.group(2))
+
+    # --- TIER 2: Separate FY / Annual Forecasts ---
+    # 2a. Annual Revenue
+    m_r_fy = re.search(
+        r'(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)\s+(?:cả năm|năm\s*202[0-9]|FY\s*202[0-9])|(?:năm\s*202[0-9]F?|FY\s*202[0-9]F?|cả năm)[^.\n;]*?(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch|đạt))[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+        clean_txt, re.I
+    )
+    if not m_r_fy:
+        m_r_fy = re.search(
+            r'(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:năm\s*202[0-9]|FY\s*202[0-9]|cả năm)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|dự kiến)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+            clean_txt, re.I
         )
-        if m_npat_yr:
-            np_val = m_npat_yr.group(1).strip()
-            if "tỷ" not in np_val and "đồng" not in np_val and "vnd" not in np_val.lower():
-                np_val += " tỷ đ"
-            npat_f = np_val
+    if m_r_fy:
+        rev_f = _normalize_forecast_str(m_r_fy.group(1))
 
-    # 5. Fallback Backlog hoặc Biên LNST nếu không có số tuyệt đối
+    # 2b. Annual LNST
+    m_np_fy = re.search(
+        r'(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)\s+(?:cả năm|năm\s*202[0-9]|FY\s*202[0-9])|(?:năm\s*202[0-9]F?|FY\s*202[0-9]F?|cả năm)[^.\n;]*?(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch|đạt))[^.\n;]*?(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+        clean_txt, re.I
+    )
+    if not m_np_fy:
+        m_np_fy = re.search(
+            r'(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:năm\s*202[0-9]|FY\s*202[0-9]|cả năm)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|dự kiến)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+            clean_txt, re.I
+        )
+    if m_np_fy:
+        npat_f = _normalize_forecast_str(m_np_fy.group(1))
+
+    # If both FY found, return
+    if rev_f and npat_f:
+        return rev_f, npat_f
+
+    # --- TIER 3: General Forecast without explicit 'năm 202x' ---
+    if not npat_f:
+        m_np_gen = re.search(
+            r'(?:dự phóng|kỳ vọng|ước tính|dự báo)[^.\n;]*?(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^.\n;]*?(?:đạt|khoảng|ước đạt)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|vnd|đ))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+            clean_txt, re.I
+        )
+        if m_np_gen:
+            npat_f = _normalize_forecast_str(m_np_gen.group(1))
+
     if not rev_f:
-        m_bl = re.search(r'(?:backlog[s]?[^\d]*(?:đạt|kỷ lục|lũy kế)[^\d]*([0-9]{1,3}(?:[.,][0-9]{3})+\s*tỷ(?:\s*đồng)?))', content, re.I)
+        m_r_gen = re.search(
+            r'(?:dự phóng|kỳ vọng|ước tính|dự báo)[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|khoảng|ước đạt)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|vnd|đ))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+            clean_txt, re.I
+        )
+        if m_r_gen:
+            rev_f = _normalize_forecast_str(m_r_gen.group(1))
+
+    # If both found now, return
+    if rev_f and npat_f:
+        return rev_f, npat_f
+
+    # --- TIER 4: Fallback to Quarters / 6M if NO annual forecast found ---
+    # First: 6T / 6 Tháng
+    m_6m = re.search(
+        r'(?:lũy kế\s*)?(?:6T(?:202[0-9])?|6\s*tháng(?:[^\d]+202[0-9])?|bán niên)[^.\n;]*?(?:doanh thu)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*đồng|\s*đ)?)[^.\n;]*?(?:và\s*)?(?:lợi nhuận|lnst)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*đồng|\s*đ)?(?:[^\.\n;]+)?)',
+        clean_txt, re.I
+    )
+    if m_6m:
+        if not rev_f:
+            rev_f = f"6T: {_normalize_forecast_str(m_6m.group(1))}"
+        if not npat_f:
+            npat_f = f"6T: {_normalize_forecast_str(m_6m.group(2))}"
+
+    # Second: Quarter Q1/Q2/Q3/Q4
+    if not rev_f or not npat_f:
+        m_q = re.search(
+            r'(?:KQKD\s*)?(?:Q[1-4]|quý\s*[1-4])(?:/202[0-9])?[^.\n;]*?(?:doanh thu)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*đồng|\s*đ)?)[^.\n;]*?(?:và\s*)?(?:lợi nhuận|lnst)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*đồng|\s*đ)?(?:[^\.\n;]+)?)',
+            clean_txt, re.I
+        )
+        if m_q:
+            q_label = re.search(r'Q[1-4]|quý\s*[1-4]', m_q.group(0), re.I).group(0).upper().replace('QUÝ ', 'Q')
+            if not rev_f:
+                rev_f = f"{q_label}: {_normalize_forecast_str(m_q.group(1))}"
+            if not npat_f:
+                npat_f = f"{q_label}: {_normalize_forecast_str(m_q.group(2))}"
+
+    # Third: individual quarter / 6T / single values
+    if not rev_f:
+        m_r_any = re.search(
+            r'(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|ước đạt|ghi nhận)\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*(?:đồng|đ))?)',
+            clean_txt, re.I
+        )
+        if m_r_any:
+            rev_f = _normalize_forecast_str(m_r_any.group(1))
+
+    if not npat_f:
+        m_np_any = re.search(
+            r'(?:lợi nhuận sau thuế|lợi nhuận ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|ghi nhận)\s*([0-9]+(?:[.,][0-9]+)*\s*tỷ(?:\s*(?:đồng|đ))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)',
+            clean_txt, re.I
+        )
+        if m_np_any:
+            npat_f = _normalize_forecast_str(m_np_any.group(1))
+
+    # --- TIER 5: Fallback Backlog hoặc Biên LNST nếu không có số tuyệt đối ---
+    if not rev_f:
+        m_bl = re.search(r'(?:backlog[s]?[^\d]*(?:đạt|kỷ lục|lũy kế)[^\d]*([0-9]{1,3}(?:[.,][0-9]{3})+\s*tỷ(?:\s*đồng)?))', clean_txt, re.I)
         if m_bl:
             rev_f = f"Backlog {m_bl.group(1).strip()}"
 
     if not npat_f:
-        m_npm = re.search(r'(biên lợi nhuận sau thuế[^\.\n;]+)', content, re.I)
+        m_npm = re.search(r'(biên lợi nhuận sau thuế[^\.\n;]+)', clean_txt, re.I)
         if m_npm:
             npat_f = m_npm.group(1).strip()
 
-    if not rev_f:
-        rev_f = "—"
-    if not npat_f:
-        npat_f = "—"
+    # --- TIER 6: Sanity Check for Period Mismatches ---
+    v_rev = _parse_ty_number(rev_f)
+    v_npat = _parse_ty_number(npat_f)
+    if v_rev and v_npat:
+        npm = v_npat / v_rev
+        if npm > 0.45:
+            # Doanh thu có thể bị gán nhầm số Quý/6T trong khi LNST là Cả năm -> Quét tìm Doanh thu cả năm
+            m_fy_rev_fallback = re.search(r'(?:năm\s*202[0-9]|FY\s*202[0-9]|cả năm)[^.\n;]*?(?:doanh thu)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ))?)', clean_txt, re.I)
+            if m_fy_rev_fallback:
+                rev_f = _normalize_forecast_str(m_fy_rev_fallback.group(1))
+        elif npm < 0.015:
+            # Doanh thu Cả năm nhưng LNST Quý -> Quét tìm LNST cả năm
+            m_fy_np_fallback = re.search(r'(?:năm\s*202[0-9]|FY\s*202[0-9]|cả năm)[^.\n;]*?(?:lợi nhuận|lnst)[^.\n;]*?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ))?)', clean_txt, re.I)
+            if m_fy_np_fallback:
+                npat_f = _normalize_forecast_str(m_fy_np_fallback.group(1))
 
-    return rev_f, npat_f
+    # Tránh trùng lặp hoàn toàn giữa Doanh thu và LNST (không thể bằng nhau)
+    if rev_f and npat_f and rev_f == npat_f:
+        m_real_np = re.search(r'(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)', clean_txt, re.I)
+        if m_real_np and _normalize_forecast_str(m_real_np.group(1)) != rev_f:
+            npat_f = _normalize_forecast_str(m_real_np.group(1))
+        else:
+            npat_f = "—"
+
+    return rev_f or "—", npat_f or "—"
 
 
 
@@ -1873,7 +2018,7 @@ def parse_edocs_item_to_report(
                 pass
 
     # 4. Dự phóng Doanh thu & LNST chuẩn xác từ nội dung toàn văn
-    rev_f, npat_f = extract_forecasts_from_content(content)
+    rev_f, npat_f = extract_forecasts_from_content(f"{title}. {content}")
     # Nếu không extract được dự phóng thực tế: để "—", không tự suy diễn bằng hệ số
 
     # Bóc tách sâu các yếu tố kỳ vọng then chốt và rủi ro từ nội dung báo cáo thực tế
@@ -1904,6 +2049,7 @@ def parse_edocs_item_to_report(
         pb_forward=pb,
         revenue_forecast=rev_f,
         npat_forecast=npat_f,
+        npat_forecast_value=_parse_ty_number(npat_f),
         key_catalysts=cat_list,
         key_risks=risk_list,
         valuation_method=val_method,

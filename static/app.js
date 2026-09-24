@@ -1071,33 +1071,70 @@ async function selectTicker(ticker) {
                                 const curP = reportData.current_price || 25000;
                                 const upPct = (tp > 0 && curP > 0) ? Math.round(((tp - curP) / curP) * 1000) / 10 : null;
 
-                                // 2. Bóc tách Doanh thu dự phóng thực tế từ bài viết
-                                let revForecast = "";
-                                const revMatch = sourceText.match(/(?:dự phóng|kỳ vọng|kế hoạch|dự báo)?\s*(?:doanh thu|dtt)(?: thuần)?(?:\s*năm|\s*FY|\s*năm\s*\d{4})?\s*(?:đạt|ước đạt|khoảng|dự kiến)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*[.,]\d+)?\s*(?:nghìn\s*tỷ|ngàn\s*tỷ|tỷ\s*đồng|tỷ\s*đ|tỷ)?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy)?\))?)/i);
-                                if (revMatch && revMatch[1] && revMatch[1].length > 2) {
-                                    revForecast = revMatch[1].trim();
-                                    if (!revForecast.includes("tỷ") && !revForecast.includes("triệu")) revForecast += " tỷ đ";
-                                } else {
-                                    const curRev = (currentFinancialBundle && currentFinancialBundle.valuation && currentFinancialBundle.valuation.revenue_ttm) || 0;
-                                    if (curRev > 0) {
-                                        revForecast = `Kỳ vọng ~${Math.round(curRev * 1.15).toLocaleString('vi-VN')} tỷ đ (+15% YoY)`;
-                                    } else {
-                                        revForecast = `Kỳ vọng mở rộng doanh thu chu kỳ mới cho ${cleanTicker}`;
+                                // 2. Bóc tách Doanh thu & LNST dự phóng thực tế từ bài viết (Ưu tiên số cả năm / FY)
+                                let revForecast = (rep.revenue_forecast && rep.revenue_forecast !== "—") ? rep.revenue_forecast : "";
+                                let npatForecast = (rep.npat_forecast && rep.npat_forecast !== "—") ? rep.npat_forecast : "";
+
+                                function normalizeTyJS(s) {
+                                    if (!s) return "";
+                                    let str = s.trim().replace(/\s+(?:nhờ|do|bởi|vì|khi|hoàn thành|tương ứng|kéo biên)\s+.*/i, "");
+                                    const mNghin = str.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:nghìn|ngàn)\s*tỷ(?:\s*đồng|\s*đ)?/i);
+                                    if (mNghin) {
+                                        const v = parseFloat(mNghin[1].replace(',', '.')) * 1000;
+                                        str = str.replace(/[0-9]+(?:[.,][0-9]+)?\s*(?:nghìn|ngàn)\s*tỷ(?:\s*đồng|\s*đ)?/i, `${v.toLocaleString('vi-VN')} tỷ đ`);
+                                    }
+                                    if (!str.toLowerCase().includes("tỷ") && !str.toLowerCase().includes("triệu") && !str.includes("%")) {
+                                        str += " tỷ đ";
+                                    }
+                                    return str.replace(/[\s,;]+$/, '');
+                                }
+
+                                if (!revForecast || !npatForecast) {
+                                    const cleanSrc = sourceText.replace(/[\r\n]+/g, " ");
+                                    // Pair cả năm
+                                    const pairMatch = cleanSrc.match(/(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)[^.\n;]*?)?(?:năm\s*202\d|FY\s*202\d|cả năm\s*202\d)[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)[^.\n;]*?(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|là)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)/i);
+                                    if (pairMatch) {
+                                        if (!revForecast) revForecast = normalizeTyJS(pairMatch[1]);
+                                        if (!npatForecast) npatForecast = normalizeTyJS(pairMatch[2]);
+                                    }
+
+                                    // Compound subject cả năm: 'doanh thu và LNST cả năm 2026 đạt X tỷ và Y tỷ'
+                                    if (!revForecast || !npatForecast) {
+                                        const compoundMatch = cleanSrc.match(/(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)[^.\n;]*?)?(?:năm\s*202\d|FY\s*202\d|cả năm\s*202\d)?[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:và|\+)\s*(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|lần lượt đạt|dự kiến đạt|khoảng|lần lượt)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)[^.\n;]*?(?:và|\+)\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)/i);
+                                        if (compoundMatch) {
+                                            if (!revForecast) revForecast = normalizeTyJS(compoundMatch[1]);
+                                            if (!npatForecast) npatForecast = normalizeTyJS(compoundMatch[2]);
+                                        }
                                     }
                                 }
 
-                                // 3. Bóc tách Lợi nhuận sau thuế dự phóng thực tế từ bài viết
-                                let npatForecast = "";
-                                const npatMatch = sourceText.match(/(?:dự phóng|kỳ vọng|kế hoạch|dự báo)?\s*(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)(?:\s*năm|\s*FY|\s*năm\s*\d{4})?\s*(?:đạt|ước đạt|khoảng|dự kiến)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*[.,]\d+)?\s*(?:nghìn\s*tỷ|ngàn\s*tỷ|tỷ\s*đồng|tỷ\s*đ|tỷ)?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy)?\))?)/i);
-                                if (npatMatch && npatMatch[1] && npatMatch[1].length > 2) {
-                                    npatForecast = npatMatch[1].trim();
-                                    if (!npatForecast.includes("tỷ") && !npatForecast.includes("triệu")) npatForecast += " tỷ đ";
-                                } else {
-                                    const curNp = (currentFinancialBundle && currentFinancialBundle.valuation && currentFinancialBundle.valuation.net_profit_ttm) || 0;
-                                    if (curNp > 0) {
-                                        npatForecast = `Kỳ vọng ~${Math.round(curNp * 1.20).toLocaleString('vi-VN')} tỷ đ (+20% YoY)`;
+                                if (!revForecast) {
+                                    const revFyMatch = sourceText.match(/(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)\s+(?:cả năm|năm\s*202\d|FY\s*202\d)|(?:năm\s*202\d|FY\s*202\d|cả năm))[^.\n;]*?(?:doanh thu|dtt)(?: thuần)?[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|dự kiến)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)/i)
+                                        || sourceText.match(/(?:dự phóng|kỳ vọng|kế hoạch|dự báo)?\s*(?:doanh thu|dtt)(?: thuần)?(?:\s*năm|\s*FY|\s*năm\s*\d{4})?\s*(?:đạt|ước đạt|khoảng|dự kiến)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*[.,]\d+)?\s*(?:nghìn\s*tỷ|ngàn\s*tỷ|tỷ\s*đồng|tỷ\s*đ|tỷ)?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy)?\))?)/i);
+                                    if (revFyMatch && revFyMatch[1] && revFyMatch[1].length > 2) {
+                                        revForecast = normalizeTyJS(revFyMatch[1]);
                                     } else {
-                                        npatForecast = `Triển vọng lợi nhuận ròng tăng trưởng khả quan`;
+                                        const curRev = (currentFinancialBundle && currentFinancialBundle.valuation && currentFinancialBundle.valuation.revenue_ttm) || 0;
+                                        if (curRev > 0) {
+                                            revForecast = `Kỳ vọng ~${Math.round(curRev * 1.15).toLocaleString('vi-VN')} tỷ đ (+15% YoY)`;
+                                        } else {
+                                            revForecast = `Kỳ vọng mở rộng doanh thu chu kỳ mới cho ${cleanTicker}`;
+                                        }
+                                    }
+                                }
+
+                                if (!npatForecast) {
+                                    const npFyMatch = sourceText.match(/(?:(?:dự phóng|kỳ vọng|ước tính|dự báo|kế hoạch)\s+(?:cả năm|năm\s*202\d|FY\s*202\d)|(?:năm\s*202\d|FY\s*202\d|cả năm))[^.\n;]*?(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)[^.\n;]*?(?:đạt|ước đạt|khoảng|lên|dự kiến)?\s*([0-9]+(?:[.,][0-9]+)*(?:\s*(?:nghìn|ngàn))?\s*tỷ(?:\s*(?:đồng|đ|vnd))?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy|svck)?\))?)/i)
+                                        || sourceText.match(/(?:dự phóng|kỳ vọng|kế hoạch|dự báo)?\s*(?:lợi nhuận sau thuế|lợi nhuận ròng|lãi ròng|lnst)(?:\s*năm|\s*FY|\s*năm\s*\d{4})?\s*(?:đạt|ước đạt|khoảng|dự kiến)?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:\s*[.,]\d+)?\s*(?:nghìn\s*tỷ|ngàn\s*tỷ|tỷ\s*đồng|tỷ\s*đ|tỷ)?(?:\s*\([+-]?[0-9.,]+%\s*(?:yoy)?\))?)/i);
+                                    if (npFyMatch && npFyMatch[1] && npFyMatch[1].length > 2) {
+                                        npatForecast = normalizeTyJS(npFyMatch[1]);
+                                    } else {
+                                        const curNp = (currentFinancialBundle && currentFinancialBundle.valuation && currentFinancialBundle.valuation.net_profit_ttm) || 0;
+                                        if (curNp > 0) {
+                                            npatForecast = `Kỳ vọng ~${Math.round(curNp * 1.20).toLocaleString('vi-VN')} tỷ đ (+20% YoY)`;
+                                        } else {
+                                            npatForecast = `Triển vọng lợi nhuận ròng tăng trưởng khả quan`;
+                                        }
                                     }
                                 }
 
