@@ -1028,5 +1028,51 @@
     ],
     "timestamp": 1790223426.8338373,
     "scan_time_str": "11:17:06 24/09/2026"
+  },
+  "TRC": {
+    "ticker": "TRC",
+    "company_name": "Cao su Tây Ninh",
+    "official_website": "UBCKNN (Cần tra cứu hồ sơ)",
+    "website_projects_url": "",
+    "total_projects": 2,
+    "total_investment_bil": 1609.0,
+    "projects": [
+      {
+        "name": "Tổ hợp Cơ sở Hạ tầng & Tài sản Cố định Hoạt động Cốt lõi (TRC)",
+        "scale": "Nguyên giá và giá trị còn lại của tài sản cố định hữu hình phục vụ SXKD đạt 1,418.2 tỷ VNĐ",
+        "investment_bil": 1418.0,
+        "progress_pct": 95,
+        "commercial_date": "Đang vận hành khai thác",
+        "impact": "Nền tảng tài sản cố định cốt lõi tạo ra doanh thu và dòng tiền hoạt động kinh doanh bền vững.",
+        "legal_status": "100% tài sản sở hữu hợp pháp & nghiệm thu an toàn",
+        "occupancy_rate": 90,
+        "phase_tag": "Đang vận hành",
+        "source": "Báo cáo Tài chính Soát xét / BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (TRC)",
+        "scale": "Giá trị công trình dở dang lũy kế 152.6 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 191.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: ",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790224345.1689484,
+    "scan_time_str": "11:32:25 24/09/2026"
   }
 }
