@@ -280,5 +280,451 @@
     ],
     "timestamp": 1790182145.602076,
     "scan_time_str": "23:49:05 23/09/2026"
+  },
+  "CEO": {
+    "ticker": "CEO",
+    "company_name": "CTCP CEO",
+    "official_website": "ceogroup.com.vn",
+    "website_projects_url": "https://ceogroup.com.vn/du-an",
+    "total_projects": 3,
+    "total_investment_bil": 6846.0,
+    "projects": [
+      {
+        "name": "Hạng mục Quỹ đất & Dự án Bất động sản Thương mại Dở dang (CEO)",
+        "scale": "Giá trị tồn kho dự án dở dang và chi phí dở dang đạt 3,681.8 tỷ VNĐ trên BCTC",
+        "investment_bil": 3682.0,
+        "progress_pct": 75,
+        "commercial_date": "Mở bán & Bàn giao 2025 - 2027",
+        "impact": "Bảo đảm nguồn doanh thu và dòng tiền bán hàng gối đầu dồi dào cho CEO.",
+        "legal_status": "Đầy đủ hồ sơ quy hoạch & ghi nhận thực tế trên BCTC",
+        "occupancy_rate": 78,
+        "phase_tag": "Đang mở bán & bàn giao",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      },
+      {
+        "name": "Khoản Đầu tư Dự án Trọng điểm / Công ty Liên kết M&A (CEO)",
+        "scale": "Giá trị vốn góp đầu tư dự án và công ty liên doanh liên kết đạt 1,497.6 tỷ VNĐ",
+        "investment_bil": 1498.0,
+        "progress_pct": 90,
+        "commercial_date": "Đang vận hành & Khai thác",
+        "impact": "Đóng góp lợi nhuận từ công ty liên kết và mở rộng hệ sinh thái kinh doanh của CEO.",
+        "legal_status": "Đã hoàn tất thủ tục pháp lý góp vốn & phê duyệt theo quy định",
+        "occupancy_rate": 88,
+        "phase_tag": "Đang khai thác",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (CEO)",
+        "scale": "Giá trị công trình dở dang lũy kế 1,332.9 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 1666.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: ceogroup.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790212081.6325204,
+    "scan_time_str": "08:08:01 24/09/2026"
+  },
+  "HPG": {
+    "ticker": "HPG",
+    "company_name": "Hòa Phát",
+    "official_website": "hoaphat.com.vn",
+    "website_projects_url": "https://hoaphat.com.vn/linh-vuc-hoat-dong",
+    "total_projects": 11,
+    "total_investment_bil": 202134.0,
+    "projects": [
+      {
+        "name": "Khu liên hợp Gang thép Dung Quất 2 (Quảng Ngãi)",
+        "scale": "Công suất 5.6 triệu tấn thép cuộn cán nóng HRC chất lượng cao/năm",
+        "investment_bil": 85000,
+        "progress_pct": 85,
+        "commercial_date": "Giai đoạn 1: Q1/2026 • Giai đoạn 2: Q4/2026",
+        "impact": "Nâng tổng công suất thép Hòa Phát lên trên 14 triệu tấn/năm, đưa HPG vào Top 30 doanh nghiệp thép lớn nhất toàn cầu.",
+        "legal_status": "Đầy đủ GPXD & ĐTM, đang lắp đặt thiết bị lò cao và chạy thử nghiệm thu phân kỳ 1",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công lắp đặt",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Khu liên hợp Gang thép Dung Quất 1 (Quảng Ngãi)",
+        "scale": "Công suất 6.0 triệu tấn thép xây dựng và HRC/năm",
+        "investment_bil": 60000,
+        "progress_pct": 100,
+        "commercial_date": "Đang vận hành 100% công suất",
+        "impact": "Cỗ máy in tiền chủ lực duy trì biên lợi nhuận gộp dẫn đầu ngành nhờ quy trình lò cao khép kín BOF.",
+        "legal_status": "Đã quyết toán toàn bộ dự án, hoàn tất nghiệm thu kỹ thuật và bảo vệ môi trường",
+        "occupancy_rate": 98,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Nhà máy Sản xuất Vỏ Container Hòa Phát (Bà Rịa - Vũng Tàu)",
+        "scale": "Công suất 500,000 TEU/năm, nhà máy sản xuất container lớn nhất Đông Nam Á",
+        "investment_bil": 3000,
+        "progress_pct": 92,
+        "commercial_date": "Đang vận hành thương mại",
+        "impact": "Tự chủ 100% nguyên liệu thép cuộn HRC đặc chủng, cung cấp cho các hãng tàu biển quốc tế lớn.",
+        "legal_status": "Đã đạt chứng chỉ kiểm định chất lượng quốc tế IICL và hoàn công công trình",
+        "occupancy_rate": 90,
+        "phase_tag": "Đang vận hành",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Dự án Cảng Tổng hợp Quốc tế Dung Quất",
+        "scale": "Công suất bốc dỡ 30 triệu tấn hàng rời/năm, tiếp nhận tàu tải trọng đến 200,000 DWT",
+        "investment_bil": 4500,
+        "progress_pct": 90,
+        "commercial_date": "Đang khai thác",
+        "impact": "Tối ưu hóa chi phí vận chuyển nguyên vật liệu quặng sắt, than mỡ nhập khẩu và xuất khẩu thép.",
+        "legal_status": "Đầy đủ chứng nhận luồng hàng hải quốc tế và công bố mở cảng biển",
+        "occupancy_rate": 92,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Dự án Khu công nghiệp Yên Mỹ II & Hoàng Diệu (Hưng Yên / Hải Dương)",
+        "scale": "Tổng diện tích quy hoạch 500 ha",
+        "investment_bil": 4500,
+        "progress_pct": 80,
+        "commercial_date": "Cho thuê 2025 - 2026",
+        "impact": "Tỷ lệ lấp đầy cao, mang lại dòng tiền tiền thuê đất đều đặn 800 - 1,200 tỷ đ/năm.",
+        "legal_status": "Quy hoạch 1/500 phê duyệt & hoàn thành đền bù GPMB 100%",
+        "occupancy_rate": 82,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Dự án Tổ hợp Khai thác Quặng Bauxit & Nhôm Đắk Nông",
+        "scale": "Công suất thiết kế 2 triệu tấn alumin và 0.5 triệu tấn nhôm điện phân/năm",
+        "investment_bil": 45000,
+        "progress_pct": 35,
+        "commercial_date": "Triển khai giai đoạn 2026 - 2030",
+        "impact": "Chiến lược mở rộng chuỗi giá trị kim loại màu quy mô lớn của Tập đoàn Hòa Phát.",
+        "legal_status": "Đang hoàn thiện hồ sơ báo cáo nghiên cứu tiền khả thi trình Thủ tướng Chính phủ",
+        "occupancy_rate": 30,
+        "phase_tag": "Nghiên cứu tiền khả thi",
+        "source": "Website chính thức (hoaphat.com.vn) & BCTN"
+      },
+      {
+        "name": "Động lực tăng trưởng chủ yếu đến từ: (1) tiến độ giải ngân đầu tư công được đẩy mạnh, (2) ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Động lực tăng trưởng chủ yếu đến từ: (1) tiến độ giải ngân đầu tư công được đẩy mạnh, (2) các dự án hạ tầng quy mô lớn bước vào giai đoạn thi công, (3) các biện pháp thuế quan giúp thu hẹp chênh lệch giá giữa HRC nội địa và nhập khẩu.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hòa Phát đang triển khai đầu tư các dự án lớn, trong đó bao gồm (1) các hạng mục thuộc Khu...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Hòa Phát đang triển khai đầu tư các dự án lớn, trong đó bao gồm (1) các hạng mục thuộc Khu liên hợp Dung Quất, (2) dự án nhà máy thép ray và thép đặc biệt công suất 700,000 tấn/năm, và (3) dự án container.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Nguồn: Báo cáo công ty, KBSV Điểm nhấn đầu tư Chú thích Nhu cầu thép nội địa sẽ là động lự...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Nguồn: Báo cáo công ty, KBSV Điểm nhấn đầu tư Chú thích Nhu cầu thép nội địa sẽ là động lực tăng trưởng chính nhờ (1) Việt Nam đẩy mạnh giải ngân đầu tư công và triển khai các dự án hạ tầng trọng điểm, (2) nguồn cung bất động sản dân dụng cải thiện, (3) HRC nội địa sẽ thay thế HRC nhập khẩu trong dài hạn.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Dự báo lợi nhuận giai đoạn 2028-30 cao hơn phản ánh đóng góp từ nhà máy thép xây dựng EAF ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Dự báo lợi nhuận giai đoạn 2028-30 cao hơn phản ánh đóng góp từ nhà máy thép xây dựng EAF mới tại Tây Ninh (công suất 700 nghìn tấn, dự kiến đóng góp từ năm 2028), qua đó nâng dự báo sản lượng bán thép xây dựng năm 2028/29/30 lần lượt thêm 6%/8%/10%.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (HPG)",
+        "scale": "Giá trị công trình dở dang lũy kế 107.2 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 134.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 5,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: hoaphat.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790212106.130764,
+    "scan_time_str": "08:08:26 24/09/2026"
+  },
+  "HDG": {
+    "ticker": "HDG",
+    "company_name": "Tập đoàn Hà Đô",
+    "official_website": "hdg.com.vn",
+    "website_projects_url": "https://hdg.com.vn/du-an",
+    "total_projects": 1,
+    "total_investment_bil": 2103.0,
+    "projects": [
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (HDG)",
+        "scale": "Giá trị công trình dở dang lũy kế 1,682.6 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 2103.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: hdg.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790212327.1740308,
+    "scan_time_str": "08:12:07 24/09/2026"
+  },
+  "CTD": {
+    "ticker": "CTD",
+    "company_name": "Xây dựng Coteccons",
+    "official_website": "coteccons.vn",
+    "website_projects_url": "https://coteccons.vn/du-an",
+    "total_projects": 8,
+    "total_investment_bil": 13700,
+    "projects": [
+      {
+        "name": "Tổng thầu Đại Nhà máy LEGO & Pandora (Bình Dương)",
+        "scale": "Dự án FDI tỷ USD trung hòa carbon tiêu chuẩn xanh quốc tế khắt khe nhất",
+        "investment_bil": 8000,
+        "progress_pct": 88,
+        "commercial_date": "Hoàn thiện bàn giao 2025 - 2026",
+        "impact": "Khẳng định năng lực thi công dự án công nghiệp chuẩn quốc tế, mở rộng tập khách hàng FDI tỷ USD.",
+        "legal_status": "Đạt chuẩn an toàn LEED Platinum quốc tế, đang nghiệm thu lắp đặt thiết bị",
+        "occupancy_rate": 90,
+        "phase_tag": "Đang thi công hoàn thiện",
+        "source": "Website chính thức (coteccons.vn) & BCTN"
+      },
+      {
+        "name": "Chiến lược Phát triển 'Repeat Sales' & Backlog Dân dụng Hạng sang",
+        "scale": "Giá trị hợp đồng ký mới (Backlog) chuyển tiếp đạt trên 26,000 tỷ VNĐ",
+        "investment_bil": 3500,
+        "progress_pct": 85,
+        "commercial_date": "2025 - 2027",
+        "impact": "Bảo đảm doanh thu xây lắp vững chắc trong 3 năm tới với biên lợi nhuận gộp cải thiện lên trên 4.5%.",
+        "legal_status": "Đầy đủ hợp đồng tổng thầu thi công ký kết với các chủ đầu tư lớn (Ecopark, Masterise, Sun Group)",
+        "occupancy_rate": 92,
+        "phase_tag": "Đang thi công",
+        "source": "Website chính thức (coteccons.vn) & BCTN"
+      },
+      {
+        "name": "Cụm Dự án Xây dựng Hạ tầng & Nhà xưởng Công nghiệp Công nghệ Cao",
+        "scale": "Thi công nhà xưởng sản xuất thiết bị bán dẫn và linh kiện điện tử tại Bắc Ninh, Hải Phòng",
+        "investment_bil": 2200,
+        "progress_pct": 80,
+        "commercial_date": "2025 - 2026",
+        "impact": "Đa dạng hóa danh mục thi công sang phân khúc xây dựng công nghiệp có biên lợi nhuận cao.",
+        "legal_status": "Đầy đủ giấy phép xây dựng và tiêu chuẩn phòng sạch công nghiệp",
+        "occupancy_rate": 88,
+        "phase_tag": "Đang thi công",
+        "source": "Website chính thức (coteccons.vn) & BCTN"
+      },
+      {
+        "name": "M ảng dân d ụng tiếp tục là phân khúc đóng góp chính với đa phần nguồn việc đến từ các dự ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CTD",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "M ảng dân d ụng tiếp tục là phân khúc đóng góp chính với đa phần nguồn việc đến từ các dự án nhà ở thương mại, kết hợp mở rộng sang nhóm công trình công cộng.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Mảng hạ tầng dự kiến tăng trưởng nhanh nhờ nhóm chủ đầu tư đối tác (Masterise, Sun Group,…...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CTD",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Mảng hạ tầng dự kiến tăng trưởng nhanh nhờ nhóm chủ đầu tư đối tác (Masterise, Sun Group,…) tham gia vào phân khúc dự án PPP.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Trong khi đó, mảng công nghiệp duy trì doanh thu ổn định từ các dự án đã ký kết trong giai...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CTD",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Trong khi đó, mảng công nghiệp duy trì doanh thu ổn định từ các dự án đã ký kết trong giai đoạn FY23-FY25.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Cơ cấu nợ vay tăng thêm chủ yếu tới từ các khoản vay ngắn hạn nhằm tài trợ chi phí thi côn...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CTD",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Cơ cấu nợ vay tăng thêm chủ yếu tới từ các khoản vay ngắn hạn nhằm tài trợ chi phí thi công khi doanh nghiệp đồng thời triển khai nhiều dự án lớn.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Chúng tôi nhậ n đị nh t ươ ng đố i tích cự c với tiề m nă ng củ a CTD nhờ backlog lớn và n...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CTD",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Chúng tôi nhậ n đị nh t ươ ng đố i tích cự c với tiề m nă ng củ a CTD nhờ backlog lớn và ngành xây dự ng đ ang bư ớc vào chu kỳ tăng trưởng mớ i với loạ t dự án trọ ng đ iể m quố c gia;.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 5,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: coteccons.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790212378.8444633,
+    "scan_time_str": "08:12:58 24/09/2026"
+  },
+  "VNM": {
+    "ticker": "VNM",
+    "company_name": "VINAMILK",
+    "official_website": "vinamilk.com.vn",
+    "website_projects_url": "https://www.vinamilk.com.vn/vi/phat-trien-ben-vung",
+    "total_projects": 5,
+    "total_investment_bil": 22690.0,
+    "projects": [
+      {
+        "name": "Siêu Tổ hợp Trang trại Bò sữa Hữu cơ Lao - Jagro (Xiengkhouang, Lào)",
+        "scale": "Quy mô 5.000 ha, đàn bò 24.000 con tiêu chuẩn Organic quốc tế, tổng đàn giai đoạn 2 lên tới 100.000 con",
+        "investment_bil": 11500,
+        "progress_pct": 85,
+        "commercial_date": "Đang khai thác & Vận hành giai đoạn 1",
+        "impact": "Cung cấp nguồn sữa tươi nguyên liệu hữu cơ chuẩn GlobalGAP dồi dào, nâng cao tính tự chủ vùng nguyên liệu.",
+        "legal_status": "Chính phủ Lào cấp phép đầu tư chiến lược, chứng nhận hữu cơ tiêu chuẩn châu Âu",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (vinamilk.com.vn) & BCTN"
+      },
+      {
+        "name": "Tổ hợp Nhà máy Sữa Hiện đại Hưng Yên (KCN Yên Mỹ II, Hưng Yên)",
+        "scale": "Diện tích 25 ha, công suất thiết kế 400 triệu lít sữa/năm, nhà máy sữa lớn nhất miền Bắc",
+        "investment_bil": 4600,
+        "progress_pct": 70,
+        "commercial_date": "Vận hành 2025 - 2026",
+        "impact": "Củng cố thị phần sữa nước tại miền Bắc, tối ưu hóa chi phí vận chuyển liên vùng.",
+        "legal_status": "Đầy đủ GPXD, đang lắp đặt dây chuyền đóng gói Tetra Pak tự động thông minh",
+        "occupancy_rate": 75,
+        "phase_tag": "Đang lắp đặt thiết bị",
+        "source": "Website chính thức (vinamilk.com.vn) & BCTN"
+      },
+      {
+        "name": "Dự án Chăn nuôi & Chế biến Thịt bò Vinabeef Tam Đảo (Vĩnh Phúc - Liên doanh Sojitz)",
+        "scale": "Quy mô 75 ha, tổ hợp khép kín chăn nuôi 10.000 con bò thịt công nghệ Nhật Bản và nhà máy chế biến mát",
+        "investment_bil": 3000,
+        "progress_pct": 80,
+        "commercial_date": "Đang mở bán sản phẩm thịt mát Vinabeef",
+        "impact": "Khai phá thị trường thịt bò mát chất lượng cao quy mô hàng tỷ USD tại Việt Nam.",
+        "legal_status": "Khánh thành giai đoạn 1, đạt chứng nhận ATTP và kiểm dịch quốc tế",
+        "occupancy_rate": 80,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (vinamilk.com.vn) & BCTN"
+      },
+      {
+        "name": "Chuỗi Trang trại Sinh thái Green Farm & Dự án Mộc Châu Eco-Paradise",
+        "scale": "Hệ thống trang trại sinh thái không phát thải tại Quảng Ngãi, Tây Ninh, Mộc Châu (Sơn La)",
+        "investment_bil": 2500,
+        "progress_pct": 90,
+        "commercial_date": "Đang khai thác",
+        "impact": "Nâng tầm giá trị thương hiệu Vinamilk theo định hướng phát triển bền vững Net Zero 2050.",
+        "legal_status": "Đạt chứng nhận Trung hòa Carbon PAS 2060 quốc tế",
+        "occupancy_rate": 95,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (vinamilk.com.vn) & BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (VNM)",
+        "scale": "Giá trị công trình dở dang lũy kế 871.8 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 1090.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: vinamilk.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790212420.2601244,
+    "scan_time_str": "08:13:40 24/09/2026"
   }
 }

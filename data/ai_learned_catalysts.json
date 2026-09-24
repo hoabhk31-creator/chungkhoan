@@ -1028,6 +1028,20 @@
       {
         "source": "Vietcap",
         "title": "VCB: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "VDS",
+        "title": "VCB: Khuyến nghị TÍCH LŨY với giá mục tiêu 69,000 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "Vietcap",
+        "title": "VCB: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 7,
         "risks_added": 3
@@ -1150,23 +1164,9 @@
         "time": "17/09/2026 15:06",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "BSC",
-        "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
-        "time": "17/09/2026 14:59",
-        "cats_added": 3,
-        "risks_added": 2
-      },
-      {
-        "source": "BSC",
-        "title": "VCB: Khuyến nghị MUA với giá mục tiêu 77,800 đồng/cổ phiếu",
-        "time": "17/09/2026 14:58",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "VSC": {
     "ticker": "VSC",
@@ -1613,6 +1613,13 @@
       {
         "source": "KBSV",
         "title": "BWE: Khuyến nghị  MUA với giá mục tiêu 59,000 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 1,
+        "risks_added": 0
+      },
+      {
+        "source": "KBSV",
+        "title": "BWE: Khuyến nghị  MUA với giá mục tiêu 59,000 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 1,
         "risks_added": 0
@@ -1742,16 +1749,9 @@
         "time": "17/09/2026 13:40",
         "cats_added": 3,
         "risks_added": 2
-      },
-      {
-        "source": "KIS",
-        "title": "BWE: Báo cáo cập nhật KQKD Q2/2026",
-        "time": "17/09/2026 11:18",
-        "cats_added": 3,
-        "risks_added": 2
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "VIX": {
     "ticker": "VIX",
@@ -2782,6 +2782,13 @@
       {
         "source": "Vietcap",
         "title": "CTG: Khuyến nghị MUA với giá mục tiêu 48,800 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 7,
+        "risks_added": 0
+      },
+      {
+        "source": "Vietcap",
+        "title": "CTG: Khuyến nghị MUA với giá mục tiêu 48,800 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 7,
         "risks_added": 0
@@ -2843,7 +2850,7 @@
         "risks_added": 2
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "BVS": {
     "ticker": "BVS",
@@ -3596,6 +3603,13 @@
       {
         "source": "VFS",
         "title": "SIP: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "24/09/2026 07:37",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "VFS",
+        "title": "SIP: Báo cáo cập nhật KQKD Q2/2026",
         "time": "23/09/2026 22:11",
         "cats_added": 15,
         "risks_added": 0
@@ -3678,7 +3692,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "IFS": {
     "ticker": "IFS",
@@ -3815,6 +3829,13 @@
       {
         "source": "Vietcap",
         "title": "FRT: Khuyến nghị MUA với giá mục tiêu 181,400 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 9,
+        "risks_added": 3
+      },
+      {
+        "source": "Vietcap",
+        "title": "FRT: Khuyến nghị MUA với giá mục tiêu 181,400 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 9,
         "risks_added": 3
@@ -3944,16 +3965,9 @@
         "time": "21/09/2026 08:06",
         "cats_added": 7,
         "risks_added": 3
-      },
-      {
-        "source": "VNDS",
-        "title": "FRT: Khuyến nghị KHẢ QUAN với giá mục tiêu 186,000 đồng/cổ phiếu",
-        "time": "21/09/2026 08:06",
-        "cats_added": 7,
-        "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "BAF": {
     "ticker": "BAF",
@@ -4995,6 +5009,13 @@
       {
         "source": "KAFI",
         "title": "ACB: Khuyến nghị KHẢ QUAN với giá mục tiêu 28,300 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
+        "source": "KAFI",
+        "title": "ACB: Khuyến nghị KHẢ QUAN với giá mục tiêu 28,300 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 7,
         "risks_added": 3
@@ -5049,7 +5070,7 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "AST": {
     "ticker": "AST",
@@ -5076,6 +5097,13 @@
       {
         "source": "KBSV",
         "title": "AST: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "KBSV",
+        "title": "AST: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 15,
         "risks_added": 0
@@ -5130,7 +5158,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "TCB": {
     "ticker": "TCB",
@@ -5154,6 +5182,13 @@
       {
         "source": "MBS",
         "title": "TCB: Khuyến nghị KHẢ QUAN với giá mục tiêu 44,300 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 8,
+        "risks_added": 3
+      },
+      {
+        "source": "MBS",
+        "title": "TCB: Khuyến nghị KHẢ QUAN với giá mục tiêu 44,300 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 8,
         "risks_added": 3
@@ -5208,7 +5243,7 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "HT1": {
     "ticker": "HT1",
@@ -5235,6 +5270,13 @@
       {
         "source": "SSI",
         "title": "HT1: Khuyến nghị MUA với giá mục tiêu 15,800 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 15,
+        "risks_added": 0
+      },
+      {
+        "source": "SSI",
+        "title": "HT1: Khuyến nghị MUA với giá mục tiêu 15,800 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 15,
         "risks_added": 0
@@ -5289,7 +5331,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "PNJ": {
     "ticker": "PNJ",
@@ -5313,6 +5355,13 @@
       {
         "source": "Vietcap",
         "title": "PNJ: Khuyến nghị KHẢ QUAN với giá mục tiêu 42,900 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 9,
+        "risks_added": 3
+      },
+      {
+        "source": "Vietcap",
+        "title": "PNJ: Khuyến nghị KHẢ QUAN với giá mục tiêu 42,900 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 9,
         "risks_added": 3
@@ -5367,11 +5416,12 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "DHC": {
     "ticker": "DHC",
     "catalysts": [
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
       "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
       "kế hoạch chi trả cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phiếu, tương ứng lợi suất cổ tức 5,6%.",
       "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 464.8 tỷ đồng (vượt LNST 393.1 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào.",
@@ -5385,12 +5435,18 @@
       "kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
       "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
       "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
-      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
-      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu"
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới"
     ],
     "risks": [],
     "theses": [],
     "history": [
+      {
+        "source": "Vietcap",
+        "title": "DHC: Khuyến nghị MUA với giá mục tiêu 45,800 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 15,
+        "risks_added": 0
+      },
       {
         "source": "Vietcap",
         "title": "DHC: Khuyến nghị MUA với giá mục tiêu 45,800 đồng/cổ phiếu",
@@ -5448,7 +5504,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "CTD": {
     "ticker": "CTD",
@@ -5469,6 +5525,13 @@
       {
         "source": "VDS",
         "title": "CTD: Khuyến nghị MUA với giá mục tiêu 79,400 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 6,
+        "risks_added": 3
+      },
+      {
+        "source": "VDS",
+        "title": "CTD: Khuyến nghị MUA với giá mục tiêu 79,400 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 6,
         "risks_added": 3
@@ -5516,7 +5579,7 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   },
   "DPG": {
     "ticker": "DPG",
@@ -5527,6 +5590,13 @@
       {
         "source": "BSC",
         "title": "DPG: Khuyến nghị MUA với giá mục tiêu 35,000 đồng/cổ phiếu",
+        "time": "24/09/2026 07:37",
+        "cats_added": 0,
+        "risks_added": 0
+      },
+      {
+        "source": "BSC",
+        "title": "DPG: Khuyến nghị MUA với giá mục tiêu 35,000 đồng/cổ phiếu",
         "time": "23/09/2026 22:11",
         "cats_added": 0,
         "risks_added": 0
@@ -5574,6 +5644,6 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 22:11"
+    "last_updated": "24/09/2026 07:37"
   }
 }
