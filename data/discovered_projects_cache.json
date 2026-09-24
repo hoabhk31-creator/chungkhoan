@@ -924,5 +924,109 @@
     ],
     "timestamp": 1790215640.4545684,
     "scan_time_str": "09:07:20 24/09/2026"
+  },
+  "GEL": {
+    "ticker": "GEL",
+    "company_name": "CTCP GEL",
+    "official_website": "tng.com",
+    "website_projects_url": "https://tng.com/du-an",
+    "total_projects": 3,
+    "total_investment_bil": 21724.0,
+    "projects": [
+      {
+        "name": "Hạng mục Quỹ đất & Dự án Bất động sản Thương mại Dở dang (GEL)",
+        "scale": "Giá trị tồn kho dự án dở dang và chi phí dở dang đạt 10,476.2 tỷ VNĐ trên BCTC",
+        "investment_bil": 10476.0,
+        "progress_pct": 75,
+        "commercial_date": "Mở bán & Bàn giao 2025 - 2027",
+        "impact": "Bảo đảm nguồn doanh thu và dòng tiền bán hàng gối đầu dồi dào cho GEL.",
+        "legal_status": "Đầy đủ hồ sơ quy hoạch & ghi nhận thực tế trên BCTC",
+        "occupancy_rate": 78,
+        "phase_tag": "Đang mở bán & bàn giao",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      },
+      {
+        "name": "Khoản Đầu tư Dự án Trọng điểm / Công ty Liên kết M&A (GEL)",
+        "scale": "Giá trị vốn góp đầu tư dự án và công ty liên doanh liên kết đạt 2,262.2 tỷ VNĐ",
+        "investment_bil": 2262.0,
+        "progress_pct": 90,
+        "commercial_date": "Đang vận hành & Khai thác",
+        "impact": "Đóng góp lợi nhuận từ công ty liên kết và mở rộng hệ sinh thái kinh doanh của GEL.",
+        "legal_status": "Đã hoàn tất thủ tục pháp lý góp vốn & phê duyệt theo quy định",
+        "occupancy_rate": 88,
+        "phase_tag": "Đang khai thác",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (GEL)",
+        "scale": "Giá trị công trình dở dang lũy kế 7,188.5 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 8986.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: tng.com",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790218921.8255336,
+    "scan_time_str": "10:02:01 24/09/2026"
+  },
+  "DBC": {
+    "ticker": "DBC",
+    "company_name": "Tập đoàn DABACO",
+    "official_website": "dabaco.com",
+    "website_projects_url": "https://dabaco.com/du-an",
+    "total_projects": 2,
+    "total_investment_bil": 3123.0,
+    "projects": [
+      {
+        "name": "Khoản Đầu tư Dự án Trọng điểm / Công ty Liên kết M&A (DBC)",
+        "scale": "Giá trị vốn góp đầu tư dự án và công ty liên doanh liên kết đạt 934.6 tỷ VNĐ",
+        "investment_bil": 935.0,
+        "progress_pct": 90,
+        "commercial_date": "Đang vận hành & Khai thác",
+        "impact": "Đóng góp lợi nhuận từ công ty liên kết và mở rộng hệ sinh thái kinh doanh của DBC.",
+        "legal_status": "Đã hoàn tất thủ tục pháp lý góp vốn & phê duyệt theo quy định",
+        "occupancy_rate": 88,
+        "phase_tag": "Đang khai thác",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (DBC)",
+        "scale": "Giá trị công trình dở dang lũy kế 1,750.0 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 2188.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: dabaco.com",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790223426.8338373,
+    "scan_time_str": "11:17:06 24/09/2026"
   }
 }
