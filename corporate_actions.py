@@ -593,6 +593,38 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
             "description": "Chi trả cổ tức tiền mặt 700 đồng/cổ phiếu.",
             "source": "HNX & Vietstock"
         }
+    ],
+    "TRC": [
+        {
+            "id": "trc-ca-15092026-bonus_share",
+            "ex_date": "15/09/2026",
+            "record_date": "16/09/2026",
+            "execution_date": "15/09/2026",
+            "event_type": "bonus_share",
+            "title": "TRC: Thông báo ngày ĐKCC phát hành cổ phiếu để tăng vốn cổ phần từ NVCSH",
+            "description": "Thưởng cổ phiếu, tỷ lệ 1:3 (1 cổ phiếu được thêm 3 cổ phiếu mới)",
+            "cash_amount": 0.0,
+            "stock_ratio": 3.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "adjustment_factor": 0.25,
+            "source": "Sở GDCK / Simplize Open API"
+        },
+        {
+            "id": "trc-ca-31072026-dividend_cash",
+            "ex_date": "31/07/2026",
+            "record_date": "03/08/2026",
+            "execution_date": "25/09/2026",
+            "event_type": "dividend_cash",
+            "title": "TRC: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức năm 2025 bằng tiền mặt",
+            "description": "Trả cổ tức năm 2025 bằng tiền, 3,000 đồng/CP",
+            "cash_amount": 3000.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "adjustment_factor": None,
+            "source": "Sở GDCK / Simplize Open API"
+        }
     ]
 }
 
@@ -879,6 +911,35 @@ def adjust_target_price_for_corporate_actions(
 # CƠ CHẾ ĐỒNG BỘ ONLINE TỰ ĐỘNG & BỔ SUNG SỰ KIỆN TÙY CHỈNH (FALLBACK ĐA TẦNG)
 # ---------------------------------------------------------------------------
 
+def parse_corporate_action_ratio(a: float, b: float) -> float:
+    """
+    Quy đổi tỷ lệ A : B trong sự kiện quyền (HOSE / HNX / VSD) thành hệ số thực hưởng.
+    Quy chuẩn TTCK Việt Nam:
+    'Tỷ lệ A : B' có nghĩa là: Sở hữu A cổ phiếu cũ được nhận/mua B cổ phiếu mới.
+    Do đó tỷ lệ thực hưởng là B / A.
+    
+    Ví dụ:
+    - 1:3 -> sở hữu 1 CP nhận 3 CP mới -> ratio = 3 / 1 = 3.0 (300%) [như TRC thưởng 1:3]
+    - 1:1 -> sở hữu 1 CP nhận 1 CP mới -> ratio = 1 / 1 = 1.0 (100%)
+    - 1:2 -> sở hữu 1 CP nhận 2 CP mới -> ratio = 2 / 1 = 2.0 (200%)
+    - 2:1 -> sở hữu 2 CP nhận 1 CP mới -> ratio = 1 / 2 = 0.5 (50%)
+    - 4:1 -> sở hữu 4 CP nhận 1 CP mới -> ratio = 1 / 4 = 0.25 (25%)
+    - 10:1 -> sở hữu 10 CP nhận 1 CP mới -> ratio = 1 / 10 = 0.1 (10%)
+    - 4:3 -> sở hữu 4 CP nhận 3 CP mới -> ratio = 3 / 4 = 0.75 (75%)
+    - 10:3 -> sở hữu 10 CP nhận 3 CP mới -> ratio = 3 / 10 = 0.3 (30%)
+    - 100:15 -> sở hữu 100 CP nhận 15 CP mới -> ratio = 15 / 100 = 0.15 (15%)
+    
+    Ngoại lệ gõ ngược (nếu A == 1 và B >= 10, ví dụ '1:10', '1:20'):
+    Trong thực tế không có DN nào thưởng 1000% mà không ghi 100:1000,
+    nên '1:10' là do người đăng tin gõ ngược từ '10:1' (10%).
+    """
+    if a <= 0:
+        return 0.0
+    if a == 1.0 and b >= 10.0:
+        return round(1.0 / b, 6)
+    return round(b / a, 6)
+
+
 def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str, Any]]:
     """Bóc tách sự kiện tài chính từ API mở Simplize (nguồn chuẩn hóa từ HOSE/HNX/VSD & Vietstock)."""
     desc = item.get("description") or ""
@@ -946,7 +1007,7 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
             m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", full_text, re.IGNORECASE)
         if m_ratio:
             a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            rights_ratio = b / a if a >= b else a / b
+            rights_ratio = parse_corporate_action_ratio(a, b)
         else:
             m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", desc)
             if m_pct:
@@ -960,7 +1021,7 @@ def parse_simplize_event(item: Dict[str, Any], ticker: str) -> Optional[Dict[str
             m_ratio = re.search(r"tỷ lệ\s*([0-9]+(?:\.[0-9]+)?)\s*:\s*([0-9]+(?:\.[0-9]+)?)", full_text, re.IGNORECASE)
         if m_ratio:
             a, b = float(m_ratio.group(1)), float(m_ratio.group(2))
-            stock_ratio = b / a if a >= b else a / b
+            stock_ratio = parse_corporate_action_ratio(a, b)
         else:
             m_pct = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", desc)
             if m_pct:

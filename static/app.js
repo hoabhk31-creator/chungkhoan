@@ -1499,16 +1499,32 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
             let eventsHtml = "";
             if (events && events.length > 0) {
                 eventsHtml = events.map(ev => {
+                    function formatCaRatio(r) {
+                        if (!r || r <= 0) return "";
+                        if (r >= 1 && Math.abs(Math.round(r) - r) < 0.001) {
+                            return `1:${Math.round(r)}`;
+                        }
+                        const inv = 1 / r;
+                        if (Math.abs(Math.round(inv) - inv) < 0.01) {
+                            return `${Math.round(inv)}:1`;
+                        }
+                        return `100:${Math.round(r * 100)}`;
+                    }
+
                     let ratioList = [];
                     if (ev.cash_amount > 0) {
                         ratioList.push(`Tiền mặt: <strong class="text-amber-300 font-bold">${ev.cash_amount.toLocaleString("vi-VN")} đ/CP</strong> (${(ev.cash_amount / 100).toFixed(0)}%)`);
                     }
                     if (ev.stock_ratio > 0) {
-                        ratioList.push(`Cổ phiếu: <strong class="text-emerald-300 font-bold">${(ev.stock_ratio * 100).toFixed(0)}%</strong> (${ev.stock_ratio >= 1 ? '1:1' : '100:' + Math.round(ev.stock_ratio * 100)})`);
+                        const sPct = (ev.stock_ratio * 100).toFixed(0);
+                        const sLabel = formatCaRatio(ev.stock_ratio);
+                        ratioList.push(`Cổ phiếu: <strong class="text-emerald-300 font-bold">${sPct}%</strong> (${sLabel})`);
                     }
                     if (ev.rights_ratio > 0) {
                         const rPrice = ev.rights_price ? ev.rights_price.toLocaleString("vi-VN") + " đ" : "10.000 đ";
-                        ratioList.push(`Quyền mua: <strong class="text-sky-300 font-bold">${(ev.rights_ratio * 100).toFixed(0)}%</strong> (Giá ${rPrice})`);
+                        const rPct = (ev.rights_ratio * 100).toFixed(0);
+                        const rLabel = formatCaRatio(ev.rights_ratio);
+                        ratioList.push(`Quyền mua: <strong class="text-sky-300 font-bold">${rPct}%</strong> (${rLabel}, Giá ${rPrice})`);
                     }
                     const ratioText = ratioList.length > 0 ? ratioList.join(" + ") : (ev.event_type || "Điều chỉnh vốn");
 
