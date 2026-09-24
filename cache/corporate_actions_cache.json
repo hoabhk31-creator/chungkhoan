@@ -2936,5 +2936,131 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "HHS": [
+    {
+      "id": "hhs-ca-01082024-dividend_cash",
+      "ex_date": "01/08/2024",
+      "record_date": "02/08/2024",
+      "execution_date": "",
+      "event_type": "dividend_cash",
+      "title": "HHS: Thông báo ngày ĐKCC trả cổ tức năm 2023 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2023  bằng tiền, 600 đồng/CP",
+      "cash_amount": 600.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "hhs-ca-30062023-dividend_stock",
+      "ex_date": "30/06/2023",
+      "record_date": "03/07/2023",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "HHS: Thông báo ngày ĐKCC trả cổ tức năm 2022 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2022  bằng cổ phiếu, tỷ lệ 25:2",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.08,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9259,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "CEO": [
+    {
+      "id": "ceo-ca-09062026-dividend_stock",
+      "ex_date": "09/06/2026",
+      "record_date": "10/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "CEO: Ngày đăng ký cuối cùng trả cổ tức bằng cổ phiếu cho cổ đông hiện hữu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:5",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.05,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9524,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ceo-ca-07082025-dividend_stock",
+      "ex_date": "07/08/2025",
+      "record_date": "08/08/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "CEO: Ngày đăng ký cuối cùng trả cổ tức bằng cổ phiếu cho cổ đông hiện hữu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:5",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.05,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9524,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ceo-ca-25072024-dividend_stock",
+      "ex_date": "25/07/2024",
+      "record_date": "26/07/2024",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "CEO: Ngày đăng ký cuối cùng trả cổ tức bằng cổ phiếu cho cổ đông hiện hữu",
+      "description": "Trả cổ tức  năm 2023  bằng cổ phiếu, tỷ lệ 100:5",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.05,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9524,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "HDG": [
+    {
+      "id": "hdg-ca-08062026-dividend_stock",
+      "ex_date": "08/06/2026",
+      "record_date": "09/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "HDG: Thông báo ngày ĐKCC chi trả cổ tức đợt 2 năm 2025 bằng cổ phiếu",
+      "description": "Trả cổ tức  đợt 2/2025 bằng cổ phiếu, tỷ lệ 10:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "hdg-ca-12032026-dividend_cash",
+      "ex_date": "12/03/2026",
+      "record_date": "13/03/2026",
+      "execution_date": "25/03/2026",
+      "event_type": "dividend_cash",
+      "title": "HDG: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức đợt 1 năm 2025 bằng tiền",
+      "description": "Trả cổ tức  đợt 1/2025 bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "hdg-ca-13062025-dividend_stock",
+      "ex_date": "13/06/2025",
+      "record_date": "16/06/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "HDG: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2024 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 100:10",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
