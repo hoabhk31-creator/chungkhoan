@@ -82,6 +82,13 @@ CORPORATE_OFFICIAL_WEBSITES: Dict[str, Dict[str, str]] = {
         "ir_url": "https://datxanh.vn/quan-he-co-dong",
         "keywords": ["Gem Sky World", "Gem Riverside", "Opal Skyline", "Opal Luxury", "Lux Star", "Datxanh Homes"]
     },
+    "CEO": {
+        "name": "CTCP Tập đoàn C.E.O",
+        "domain": "ceogroup.com.vn",
+        "projects_url": "https://ceogroup.com.vn/du-an",
+        "ir_url": "https://ceogroup.com.vn/quan-he-co-dong",
+        "keywords": ["Sonasea Vân Đồn Harbor City", "Sonasea Villas & Resort", "CEOHomes Hana Garden", "Sonasea Premier", "CEO Tower"]
+    },
     "KBC": {
         "name": "Tổng Công ty Phát triển Đô thị Kinh Bắc",
         "domain": "kinhbaccity.vn",

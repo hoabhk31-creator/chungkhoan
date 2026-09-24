@@ -997,26 +997,29 @@ async def get_catalysts_and_insights(ticker: str):
     """
     Truy xuất thông tin catalysts động lực tăng trưởng, dự án trọng yếu (quy mô, vốn, tiến độ/lấp đầy)
     và phân tích AI chuyên sâu.
+    Mặc định tự động Quét BCTN, BCTC và Website doanh nghiệp để luôn trả về danh mục dự án đầy đủ, đúng và mới nhất.
     """
     clean_ticker = ticker.upper().strip()
     data = get_company_catalysts_and_projects(clean_ticker)
 
-    # Tích hợp thêm các dự án quét từ Website chính thức & BCTN/BCTCSN (nếu đã khám phá)
+    # Mặc định tự động Quét BCTN & Website chính thức từ Project Discovery Engine
     try:
-        from project_discovery_engine import _load_discovered_cache, SSC_COMPANY_PROFILES_SEARCH_URL, SSC_DISCLOSURE_PORTAL_NAME
+        from project_discovery_engine import discover_company_projects_master, SSC_COMPANY_PROFILES_SEARCH_URL, SSC_DISCLOSURE_PORTAL_NAME
         data["ssc_portal_url"] = SSC_COMPANY_PROFILES_SEARCH_URL
         data["ssc_portal_name"] = SSC_DISCLOSURE_PORTAL_NAME
-        d_cache = _load_discovered_cache()
-        if clean_ticker in d_cache:
-            entry = d_cache[clean_ticker]
-            if entry.get("projects"):
-                data["projects"] = entry["projects"]
-                data["total_projects"] = len(entry["projects"])
-                data["total_investment_bil"] = entry.get("total_investment_bil", data.get("total_investment_bil", 0))
-                data["official_website"] = entry.get("official_website")
-                data["scan_sources"] = entry.get("scan_sources")
-    except Exception:
-        pass
+
+        # Tự động quét và lấy danh mục dự án mới nhất (sử dụng cache thông minh nếu vừa quét, hoặc quét tự động)
+        disc_entry = await discover_company_projects_master(clean_ticker, force_refresh=False)
+        if disc_entry and disc_entry.get("projects"):
+            data["projects"] = disc_entry["projects"]
+            data["total_projects"] = len(disc_entry["projects"])
+            data["total_investment_bil"] = disc_entry.get("total_investment_bil", data.get("total_investment_bil", 0))
+            data["official_website"] = disc_entry.get("official_website")
+            data["scan_sources"] = disc_entry.get("scan_sources")
+            data["scan_time_str"] = disc_entry.get("scan_time_str")
+            data["auto_discovered"] = True
+    except Exception as e:
+        print(f"[get_catalysts_and_insights] Auto discovery error for {clean_ticker}: {e}")
 
     return data
 

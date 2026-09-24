@@ -1155,8 +1155,13 @@
                         <p id="bctc-table-subtitle" class="text-xs text-slate-400 mt-1">Dữ liệu tài chính toàn bộ quý lịch sử (Tỷ VND)</p>
                     </div>
                     
-                    <!-- Sub-tabs for Statements -->
-                    <div class="flex space-x-1.5 font-mono text-xs">
+                    <!-- Sub-tabs for Statements & Sort Order Toggle -->
+                    <div class="flex items-center space-x-2 font-mono text-xs flex-wrap gap-y-1">
+                        <button onclick="togglePeriodSortOrder()" id="btn-toggle-sort-order" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-800/80 hover:border-cyan-500 font-bold transition-all flex items-center gap-1.5 shadow-sm" title="Đang hiển thị: Mới nhất bên trái (Mới → Cũ). Nhấp để đổi sang Cũ → Mới">
+                            <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            <span id="sort-order-btn-text">Mới → Cũ</span>
+                        </button>
+                        <div class="h-4 w-px bg-slate-700 hidden sm:block"></div>
                         <button onclick="switchBctcSubtab('kqkd')" id="btn-subtab-kqkd" class="subtab-btn active px-3 py-1.5 rounded bg-cyan-600 text-white font-bold">KQKD</button>
                         <button onclick="switchBctcSubtab('cdkt')" id="btn-subtab-cdkt" class="subtab-btn px-3 py-1.5 rounded bg-slate-800 text-slate-300 font-bold hover:bg-slate-700">CĐKT</button>
                         <button onclick="switchBctcSubtab('lctt')" id="btn-subtab-lctt" class="subtab-btn px-3 py-1.5 rounded bg-slate-800 text-slate-300 font-bold hover:bg-slate-700">LCTT</button>
@@ -4104,6 +4109,6 @@
     </footer>
 
     <script src="/static/vendor/pdf.min.js"></script>
-    <script src="/static/app.js?v=10.45-fix-dynamic-pvt-project-discovery"></script>
+    <script src="/static/app.js?v=10.47-auto-scan-projects-bctn"></script>
 </body>
 </html>

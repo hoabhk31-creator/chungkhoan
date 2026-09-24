@@ -15,6 +15,7 @@ let currentPeriodMode = "quarter"; // "year" hoặc "quarter" (Mặc định: Th
 let currentPeriodCount = "all"; // 4, 8, 10 hoặc "all" (Mặc định: Tất cả các kỳ)
 let currentSelectedPeriodIdx = -1; // -1: kỳ mới nhất (mặc định)
 let currentBreakdownMode = "asset"; // "asset" (Cơ cấu Tài sản) hoặc "revenue" (Cơ cấu Doanh thu)
+let currentPeriodSortOrder = "desc"; // "desc": Mới nhất ở cột đầu tiên bên trái (Mới → Cũ) [MẶC ĐỊNH], "asc": Cũ nhất bên trái (Cũ → Mới)
 
 function getActiveTicker() {
     return (window.currentActiveTicker || window.currentSymbol || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
@@ -4758,6 +4759,26 @@ function renderCatalystsAndProjects(data) {
         }
     }
 
+    // Tự động cập nhật thanh thông báo Quét BCTN & Website chính thức
+    const statusBox = document.getElementById("overview-projects-discovery-status");
+    if (statusBox && data.projects && data.projects.length > 0) {
+        statusBox.classList.remove("hidden");
+        const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
+        const webLinkHtml = hasRealDomain
+            ? `<a href="https://${data.official_website}" target="_blank" rel="noopener noreferrer" class="underline text-cyan-300 hover:text-cyan-200 font-mono font-bold">${data.official_website}</a>`
+            : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
+
+        statusBox.innerHTML = `
+            <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
+                <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
+                    <span>✓ Đã tự động quét BCTN & Website!</span>
+                    <span>Tìm thấy <strong>${data.total_projects || data.projects.length}</strong> dự án (Website: ${webLinkHtml}, BCTN & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
+                </div>
+                <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'mới nhất'}</span>
+            </div>
+        `;
+    }
+
     if (projCont && data.projects) {
         if (data.projects.length === 0) {
             const currSym = getActiveTicker();
@@ -4940,7 +4961,10 @@ window.triggerDeepProjectDiscovery = async function() {
             renderCatalystsAndProjects({
                 projects: data.projects,
                 total_projects: data.total_projects,
-                total_investment_bil: data.total_investment_bil
+                total_investment_bil: data.total_investment_bil,
+                official_website: data.official_website,
+                scan_sources: data.scan_sources,
+                scan_time_str: data.scan_time_str
             });
         }
 
@@ -5104,6 +5128,69 @@ function sliceStatements(stm, count) {
     });
     return res;
 }
+
+function orderStatementsForTable(stm, order = currentPeriodSortOrder) {
+    if (!stm || !stm.periods || stm.periods.length <= 1) return stm;
+    if (order !== "desc") return stm; // Nếu là "asc" thì giữ nguyên thứ tự gốc
+
+    const res = {
+        ...stm,
+        periods: [...stm.periods].reverse(),
+        revenue: stm.revenue ? [...stm.revenue].reverse() : [],
+        cogs: stm.cogs ? [...stm.cogs].reverse() : [],
+        gross_profit: stm.gross_profit ? [...stm.gross_profit].reverse() : [],
+        operating_profit: stm.operating_profit ? [...stm.operating_profit].reverse() : [],
+        financial_expense: stm.financial_expense ? [...stm.financial_expense].reverse() : [],
+        net_profit: stm.net_profit ? [...stm.net_profit].reverse() : [],
+        total_assets: stm.total_assets ? [...stm.total_assets].reverse() : [],
+        short_term_assets: stm.short_term_assets ? [...stm.short_term_assets].reverse() : [],
+        cash_and_equivalents: stm.cash_and_equivalents ? [...stm.cash_and_equivalents].reverse() : [],
+        inventories: stm.inventories ? [...stm.inventories].reverse() : [],
+        total_liabilities: stm.total_liabilities ? [...stm.total_liabilities].reverse() : [],
+        short_term_debt: stm.short_term_debt ? [...stm.short_term_debt].reverse() : [],
+        long_term_debt: stm.long_term_debt ? [...stm.long_term_debt].reverse() : [],
+        owner_equity: stm.owner_equity ? [...stm.owner_equity].reverse() : [],
+        cfo: stm.cfo ? [...stm.cfo].reverse() : [],
+        cfi: stm.cfi ? [...stm.cfi].reverse() : [],
+        cff: stm.cff ? [...stm.cff].reverse() : [],
+        free_cash_flow: stm.free_cash_flow ? [...stm.free_cash_flow].reverse() : [],
+    };
+
+    ['raw_inc', 'raw_bs', 'raw_cf'].forEach(key => {
+        if (stm[key] && typeof stm[key] === 'object') {
+            res[key] = {};
+            for (const [title, vals] of Object.entries(stm[key])) {
+                res[key][title] = Array.isArray(vals) ? [...vals].reverse() : vals;
+            }
+        }
+    });
+
+    return res;
+}
+
+function togglePeriodSortOrder() {
+    currentPeriodSortOrder = currentPeriodSortOrder === "desc" ? "asc" : "desc";
+    updatePeriodSortOrderBtn();
+    const stm = getActiveStatements();
+    if (stm) {
+        renderBctcTable(stm, currentBctcSubtab);
+    }
+    showToast(`Đã đổi sắp xếp BCTC: ${currentPeriodSortOrder === "desc" ? "Kỳ mới nhất trước (Mới → Cũ)" : "Kỳ cũ nhất trước (Cũ → Mới)"}`);
+}
+
+function updatePeriodSortOrderBtn() {
+    const btnText = document.getElementById("sort-order-btn-text");
+    const btn = document.getElementById("btn-toggle-sort-order");
+    if (btnText) {
+        btnText.textContent = currentPeriodSortOrder === "desc" ? "Mới → Cũ" : "Cũ → Mới";
+    }
+    if (btn) {
+        btn.title = currentPeriodSortOrder === "desc" 
+            ? "Đang hiển thị: Mới nhất bên trái (Mới → Cũ). Nhấp để đổi sang Cũ → Mới"
+            : "Đang hiển thị: Cũ nhất bên trái (Cũ → Mới). Nhấp để đổi sang Mới → Cũ";
+    }
+}
+
 
 function changePeriodCount(count) {
     currentPeriodCount = count;
@@ -5270,16 +5357,26 @@ function renderBctcTable(stm, subtab) {
         else if (indModel === "securities") modelDesc = "Thông tư 334/2016/TT-BTC (Công ty Chứng khoán)";
         else if (indModel === "insurance") modelDesc = "Thông tư 125/2018/TT-BTC (Bảo hiểm)";
         else if (indModel === "real_estate") modelDesc = "Mẫu Bất động sản (Dự án dở dang & Cọc tiến độ)";
-        subtitle.textContent = `Dữ liệu tài chính ${periodStr} (Tỷ VND) • ${modelDesc}`;
+        const sortText = currentPeriodSortOrder === "desc" ? "Mới nhất trước (Mới → Cũ)" : "Cũ nhất trước (Cũ → Mới)";
+        subtitle.textContent = `Dữ liệu tài chính ${periodStr} • ${sortText} (Tỷ VND) • ${modelDesc}`;
     }
 
     // Cắt số kỳ hiển thị theo currentPeriodCount (4, 8, 10 hoặc 'all')
-    const activeStm = sliceStatements(stm, currentPeriodCount);
+    const slicedStm = sliceStatements(stm, currentPeriodCount);
+    // Sắp xếp thứ tự các kỳ (Mặc định: Mới nhất bên trái Mới → Cũ theo chiều mũi tên)
+    const activeStm = orderStatementsForTable(slicedStm, currentPeriodSortOrder);
     if (!activeStm || !activeStm.periods) return;
 
-    let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[280px] max-w-[380px] shadow-sm whitespace-normal">CHỈ TIÊU (TỶ VND)</th>`;
+    let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[280px] max-w-[380px] shadow-sm whitespace-normal">
+        <div class="flex items-center justify-between gap-1">
+            <span>CHỈ TIÊU (TỶ VND)</span>
+            <button onclick="togglePeriodSortOrder()" class="text-[10px] text-cyan-300 bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-700/80 px-1.5 py-0.5 rounded font-normal transition-all flex items-center gap-1 shadow-sm cursor-pointer" title="Nhấp để đổi thứ tự sắp xếp thời gian (Mới → Cũ hoặc Cũ → Mới)">
+                <span>${currentPeriodSortOrder === 'desc' ? 'Mới → Cũ ◄' : 'Cũ → Mới ►'}</span>
+            </button>
+        </div>
+    </th>`;
     activeStm.periods.forEach(p => {
-        headers += `<th class="p-2.5 text-right border-b-2 border-cyan-800/80 whitespace-nowrap min-w-[110px] sticky top-0 z-30">${p}</th>`;
+        headers += `<th class="p-2.5 text-right border-b-2 border-cyan-800/80 whitespace-nowrap min-w-[110px] sticky top-0 z-30 font-bold text-slate-100">${p}</th>`;
     });
     headers += `</tr>`;
 
@@ -5523,11 +5620,15 @@ function renderBctcTable(stm, subtab) {
     // Khởi tạo tính năng click chuột giữ kéo 4 hướng (drag-to-scroll)
     initBctcDragToScroll();
 
-    // Màn hình mặc định thể hiện dữ liệu mới nhất (cuộn tự động hết sang phải)
+    // Màn hình mặc định thể hiện dữ liệu mới nhất (nếu desc thì nằm ngay cột đầu tiên bên trái)
     requestAnimationFrame(() => {
         const container = document.getElementById("bctc-table-container");
         if (container) {
-            container.scrollLeft = container.scrollWidth - container.clientWidth;
+            if (currentPeriodSortOrder === "desc") {
+                container.scrollLeft = 0;
+            } else {
+                container.scrollLeft = container.scrollWidth - container.clientWidth;
+            }
         }
     });
 }
@@ -5704,7 +5805,8 @@ function exportBctcThreeSheetsExcel() {
             return;
         }
 
-        const activeStm = sliceStatements(stm, currentPeriodCount);
+        const slicedStm = sliceStatements(stm, currentPeriodCount);
+        const activeStm = orderStatementsForTable(slicedStm, currentPeriodSortOrder);
         if (!activeStm || !activeStm.periods || activeStm.periods.length === 0) {
             showToast("⚠️ Không tìm thấy dữ liệu kỳ tài chính phù hợp để xuất!");
             return;
