@@ -726,5 +726,203 @@
     ],
     "timestamp": 1790212420.2601244,
     "scan_time_str": "08:13:40 24/09/2026"
+  },
+  "MSR": {
+    "ticker": "MSR",
+    "company_name": "Masan High-Tech Materials",
+    "official_website": "UBCKNN (Cần tra cứu hồ sơ)",
+    "website_projects_url": "",
+    "total_projects": 2,
+    "total_investment_bil": 13465.0,
+    "projects": [
+      {
+        "name": "Tổ hợp Cơ sở Hạ tầng & Tài sản Cố định Hoạt động Cốt lõi (MSR)",
+        "scale": "Nguyên giá và giá trị còn lại của tài sản cố định hữu hình phục vụ SXKD đạt 13,259.8 tỷ VNĐ",
+        "investment_bil": 13260.0,
+        "progress_pct": 95,
+        "commercial_date": "Đang vận hành khai thác",
+        "impact": "Nền tảng tài sản cố định cốt lõi tạo ra doanh thu và dòng tiền hoạt động kinh doanh bền vững.",
+        "legal_status": "100% tài sản sở hữu hợp pháp & nghiệm thu an toàn",
+        "occupancy_rate": 90,
+        "phase_tag": "Đang vận hành",
+        "source": "Báo cáo Tài chính Soát xét / BCTN"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (MSR)",
+        "scale": "Giá trị công trình dở dang lũy kế 163.8 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 205.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 1,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: ",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790213861.2021484,
+    "scan_time_str": "08:37:41 24/09/2026"
+  },
+  "TCB": {
+    "ticker": "TCB",
+    "company_name": "Techcombank",
+    "official_website": "techcombank.com",
+    "website_projects_url": "https://techcombank.com",
+    "total_projects": 6,
+    "total_investment_bil": 20000.0,
+    "projects": [
+      {
+        "name": "Đây là thông lệ phổ biến trên thế giới và Việt Nam đã ghi nhận các thương vụ tương tự tron...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Đây là thông lệ phổ biến trên thế giới và Việt Nam đã ghi nhận các thương vụ tương tự trong quá khứ như Nhà máy Nhiệt điện Mông Dương II hay Nhà máy Thủy điện Đắk đrinh.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "lợi suất tài sản sinh lãi (IEA) 6,66% 7,18% 7,73% 107 đcb Chi phí huy động vốn (COF) 3,34%...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "lợi suất tài sản sinh lãi (IEA) 6,66% 7,18% 7,73% 107 đcb Chi phí huy động vốn (COF) 3,34% 4,05% 4,64% 130 đcb * Chúng tôi nâng dự báo COF năm 2026 sau kết quả nửa đầu năm 2026 cao hơn dự kiến (4,42%). tỷ lệ CASA** 35,9% 36,4% 34,9% -100 đcb tỷ lệ chi phí/thu nhập (CIR) 30,8% 30,8% 30,4% -41 đcb tỷ lệ nợ xấu (NPL) 1,13% 1,13% 1,13% 0 đcb Tổng dư nợ cho vay 767.617875.084921.14120% * Chúng tôi nâng giả định tăng trưởng tín dụng năm 2026 lên 20% từ mức 14% sau kết quả tăng trưởng tín dụng nửa đầu năm 2026 cao hơn đáng kể so với kỳ vọng (+15,2%) khi TCB tham gia tài trợ các dự án hạ tầng được miễn hạn mức tín dụng.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Dự báo tổng lợi nhuận giai đoạn 2026-2030 cao hơn của chúng tôi chủ yếu được thúc đẩy bởi ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Dự báo tổng lợi nhuận giai đoạn 2026-2030 cao hơn của chúng tôi chủ yếu được thúc đẩy bởi mức tăng 6,3% trong tổng NII khi chúng tôi nâng giả định CAGR tín dụng giai đoạn 2026-2028 từ 16,0% lên 20,0% nhằm phản ánh kết quả nửa đầu năm 2026 tốt hơn kỳ vọng và việc TCB tham gia các dự án hạ tầng được miễn tính vào hạn mức tín dụng.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "tăng trưởng tín dụng đến cuối Q2/2026 đạt 15.2% so với đầu năm trong đó dư nợ cho vay các ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 20000.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "tăng trưởng tín dụng đến cuối Q2/2026 đạt 15.2% so với đầu năm trong đó dư nợ cho vay các đại dự án hạ tầng đạt khoảng 20 nghìn tỷ đồng, loại trừ khoản này, tăng trưởng tín dụng đạt xấp xỉ 10% so với đầu năm.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "lợi thế về chi phí vốn giúp nâng cao năng lực cạnh tranh của TCB trong các mảng kinh doanh...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "lợi thế về chi phí vốn giúp nâng cao năng lực cạnh tranh của TCB trong các mảng kinh doanh ngoài lãi như bảo hiểm, chứng khoán cùng với việc bổ sung vào động lực tăng trưởng mảng cho vay dự án hạ tầng cho thấy khả năng duy trì vị thế hàng đầu của ngân hàng.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Chúng tôi vẫn duy trì khuyến nghị KHẢ QUAN cho TCB nhờ: ▪ Độ dày vốn, CASA v ẫn nằm trong ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của TCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Chúng tôi vẫn duy trì khuyến nghị KHẢ QUAN cho TCB nhờ: ▪ Độ dày vốn, CASA v ẫn nằm trong nhóm cao nh ất giúp TCB có thể thích nghi tốt với môi trường vĩ mô khó khăn. ▪ Hưởng lợi lớn từ việc chính sách tài khoá mở rộng khi các dự án lớn được đẩy vào các tập đoàn cùng hệ sinh thái như Masterise, Vingroup,… ▪ Định giá hi ện tại với P/B 1.1x, th ấp hơn nhi ều so với toàn ngành và th ấp hơn đáng kể so với P/B mục tiêu.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 6,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: techcombank.com",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790215263.5849588,
+    "scan_time_str": "09:01:03 24/09/2026"
+  },
+  "VCB": {
+    "ticker": "VCB",
+    "company_name": "Vietcombank",
+    "official_website": "vietcombank.com.vn",
+    "website_projects_url": "https://vietcombank.com.vn",
+    "total_projects": 3,
+    "total_investment_bil": 0,
+    "projects": [
+      {
+        "name": "Thứ ba, về phía tín dụng, nhiều dự án cơ sở hạ tầng qui mô lớn đã được NHNN áp dụng cơ chế...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của VCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Thứ ba, về phía tín dụng, nhiều dự án cơ sở hạ tầng qui mô lớn đã được NHNN áp dụng cơ chế hạn mức tín dụng đặc thù.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Tài trợ dự án là lĩnh vực mà VCB từ lâu đã dẫn đầu thị trường nhờ quy mô, vị thế vốn vững ...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của VCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Tài trợ dự án là lĩnh vực mà VCB từ lâu đã dẫn đầu thị trường nhờ quy mô, vị thế vốn vững chắc, mức chi phí huy động (COF) thấp nhất ngành, quan hệ chặt chẽ với các tập đoàn lớn thuộc sở hữu Nhà nước và tư nhân (vốn thường là chủ đầu tư của các dự án lớn) cùng năng lực thẩm định chuyên sâu.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hiện tại, chúng tôi dự báo CAGR tín dụng của VCB đạt 16,2% trong giai đoạn 2026-2030, nhưn...",
+        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của VCB",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Hiện tại, chúng tôi dự báo CAGR tín dụng của VCB đạt 16,2% trong giai đoạn 2026-2030, nhưng chúng tôi cho rằng dự báo này có khả năng được điều chỉnh tăng n ếu ngân hàng quy ết định tham gia vào nhiều dự án cơ sở hạ tầng ngoài hạn mức.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 3,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: vietcombank.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790215640.4545684,
+    "scan_time_str": "09:07:20 24/09/2026"
   }
 }
