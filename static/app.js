@@ -7336,6 +7336,27 @@ function renderMultiModelValuation(val) {
     const tbody = document.getElementById("body-multi-valuation");
     const sliderBox = document.getElementById("valuation-weights-sliders-container");
 
+    // Sector metadata & rationale
+    const sectorName = val.applied_sector_name || (val.sector_profile && val.sector_profile.sector_name) || "Chuẩn ngành";
+    const sectorBadge = document.getElementById("val-sector-name-display");
+    if (sectorBadge) sectorBadge.textContent = sectorName;
+
+    const rationaleText = val.applied_sector_description || (val.sector_profile && val.sector_profile.description) || "Áp dụng ma trận trọng số tối ưu theo đặc thù chu kỳ kinh doanh và cấu trúc tài sản của ngành.";
+    const rationaleEl = document.getElementById("val-sector-rationale-text");
+    if (rationaleEl) {
+        rationaleEl.innerHTML = `<strong>Nhóm ngành ${escapeHtml(sectorName)}:</strong> ${escapeHtml(rationaleText)}`;
+    }
+
+    const primaryBox = document.getElementById("val-primary-models-container");
+    const primaryModels = val.primary_models || (val.sector_profile && val.sector_profile.primary_models) || [];
+    if (primaryBox) {
+        if (primaryModels.length) {
+            primaryBox.innerHTML = primaryModels.map(pm => `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold flex items-center gap-0.5">★ ${escapeHtml(pm)}</span>`).join("");
+        } else {
+            primaryBox.innerHTML = "";
+        }
+    }
+
     // Ensure models list exists
     let models = val.models || [];
     if (!models.length && val.pe_fair_value) {
@@ -7348,12 +7369,12 @@ function renderMultiModelValuation(val) {
         const g2 = Math.round((eps * (8.5 + 1.5 * 12.0) * 4.4 / 4.8) / 100) * 100;
         const g3 = Math.round(Math.sqrt(22.5 * eps * bvps) / 100) * 100;
         models = [
-            { id: "dcf", name: "DCF", description: "Chiết khấu dòng tiền tự do doanh nghiệp (FCFF)", formula_desc: "FCF 5 năm + TV (WACC 11.5%, g 2.5%)", fair_value: dcf, fair_value_k: dcf/1000, weight_percent: 12.70 },
-            { id: "graham_1", name: "Graham 1 (sử dụng EPS)", description: "Công thức định giá Benjamin Graham cổ điển", formula_desc: "V = EPS × (8.5 + 1.5g)", fair_value: g1, fair_value_k: g1/1000, weight_percent: 6.04 },
-            { id: "graham_2", name: "Graham 2 (sử dụng EPS và ls phi rủi ro)", description: "Công thức Graham điều chỉnh theo lãi suất TPCP 10Y", formula_desc: "V = [EPS × (8.5 + 1.5g) × 4.4] / Y [Y = 4.8%]", fair_value: g2, fair_value_k: g2/1000, weight_percent: 18.91 },
-            { id: "graham_3", name: "Graham 3 (sử dụng EPS và giá trị sổ sách)", description: "Số Graham (Graham Number) cân bằng P/E 15x và P/B 1.5x", formula_desc: "V = √(22.5 × EPS × BVPS)", fair_value: g3, fair_value_k: g3/1000, weight_percent: 4.94 },
-            { id: "pe", name: "P/E", description: "Định giá theo P/E mục tiêu / P/E trung vị ngành", formula_desc: `V = EPS × P/E mục tiêu [${val.industry_pe || 13.0}x]`, fair_value: peF, fair_value_k: peF/1000, weight_percent: 54.81 },
-            { id: "pb", name: "P/B", description: "Định giá theo P/B mục tiêu / P/B chu kỳ ngành", formula_desc: `V = BVPS × P/B mục tiêu [${val.industry_pb || 1.6}x]`, fair_value: pbF, fair_value_k: pbF/1000, weight_percent: 2.60 }
+            { id: "dcf", name: "DCF", description: "Chiết khấu dòng tiền tự do doanh nghiệp (FCFF)", formula_desc: "FCF 5 năm + TV (WACC 11.5%, g 2.5%)", fair_value: dcf, fair_value_k: dcf/1000, weight_percent: 25.0 },
+            { id: "graham_1", name: "Graham 1 (sử dụng EPS)", description: "Công thức định giá Benjamin Graham cổ điển", formula_desc: "V = EPS × (8.5 + 1.5g)", fair_value: g1, fair_value_k: g1/1000, weight_percent: 5.0 },
+            { id: "graham_2", name: "Graham 2 (sử dụng EPS và ls phi rủi ro)", description: "Công thức Graham điều chỉnh theo lãi suất TPCP 10Y", formula_desc: "V = [EPS × (8.5 + 1.5g) × 4.4] / Y [Y = 4.8%]", fair_value: g2, fair_value_k: g2/1000, weight_percent: 20.0 },
+            { id: "graham_3", name: "Graham 3 (sử dụng EPS và giá trị sổ sách)", description: "Số Graham (Graham Number) cân bằng P/E 15x và P/B 1.5x", formula_desc: "V = √(22.5 × EPS × BVPS)", fair_value: g3, fair_value_k: g3/1000, weight_percent: 10.0 },
+            { id: "pe", name: "P/E", description: "Định giá theo P/E mục tiêu / P/E trung vị ngành", formula_desc: `V = EPS × P/E mục tiêu [${val.industry_pe || 13.0}x]`, fair_value: peF, fair_value_k: peF/1000, weight_percent: 25.0 },
+            { id: "pb", name: "P/B", description: "Định giá theo P/B mục tiêu / P/B chu kỳ ngành", formula_desc: `V = BVPS × P/B mục tiêu [${val.industry_pb || 1.6}x]`, fair_value: pbF, fair_value_k: pbF/1000, weight_percent: 15.0 }
         ];
         val.models = models;
     }
@@ -7363,12 +7384,19 @@ function renderMultiModelValuation(val) {
         tbody.innerHTML = models.map((m, idx) => {
             const fairVND = Math.round(m.fair_value || 0).toLocaleString("vi-VN");
             const fairK = Number(m.fair_value_k || (m.fair_value / 1000) || 0).toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const weightStr = `${Number(m.weight_percent || m.weight || 0).toFixed(2)}%`;
+            const weightVal = Number(m.weight_percent !== undefined ? m.weight_percent : (m.weight || 0));
+            const weightStr = `${weightVal.toFixed(2)}%`;
+            
+            // Check if primary model for this sector
+            const isPrimary = primaryModels.some(pm => m.name.toLowerCase().includes(pm.toLowerCase()) || (pm.toLowerCase().includes("graham") && m.id === "graham_3"));
+            const primaryBadge = isPrimary ? `<span class="ml-1.5 px-1.5 py-0.2 rounded text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">Trọng yếu</span>` : "";
+
             return `
                 <tr class="hover:bg-slate-800/40 transition-colors border-b border-slate-800/50">
                     <td class="py-2.5 px-3 text-center font-mono text-slate-400 font-bold text-xs">${idx + 1}</td>
-                    <td class="py-2.5 px-4 font-mono font-semibold text-slate-100 text-xs">
-                        ${escapeHtml(m.name)}
+                    <td class="py-2.5 px-4 font-mono font-semibold text-slate-100 text-xs flex items-center">
+                        <span>${escapeHtml(m.name)}</span>
+                        ${primaryBadge}
                     </td>
                     <td class="py-2.5 px-4 text-right font-mono font-bold text-slate-100 text-xs">${fairVND} đ</td>
                     <td class="py-2.5 px-4 text-right font-mono font-bold text-cyan-300 text-xs">${fairK}</td>
@@ -7393,20 +7421,25 @@ function renderMultiModelValuation(val) {
     // Render Sliders in the right panel
     if (sliderBox && models.length) {
         sliderBox.innerHTML = models.map(m => {
-            const wVal = Number(m.weight_percent || m.weight || 0);
+            const wVal = Number(m.weight_percent !== undefined ? m.weight_percent : (m.weight || 0));
             return `
                 <div class="space-y-1">
                     <div class="flex items-center justify-between text-[11px]">
                         <span class="text-slate-300 font-sans font-medium truncate max-w-[200px]" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</span>
                         <span class="font-mono text-cyan-400 font-bold" id="val-slider-val-${m.id}">${wVal.toFixed(2)}%</span>
                     </div>
-                    <input type="range" min="0" max="100" step="0.1" value="${wVal}"
+                    <input type="range" min="0" max="100" step="0.5" value="${wVal}"
                         id="val-slider-${m.id}"
                         oninput="onValuationWeightInput('${m.id}', this.value)"
                         class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
                 </div>
             `;
         }).join("");
+    }
+
+    // Refresh icons
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
     }
 
     // Update Big Summary Card
@@ -7509,7 +7542,8 @@ function onValuationWeightInput(modelId, rawVal) {
                 body: JSON.stringify({
                     ticker: ticker,
                     current_market_price: liveCmp,
-                    custom_weights: customWeights
+                    custom_weights: customWeights,
+                    weights: customWeights
                 })
             });
             if (!resp.ok) return;
@@ -7528,46 +7562,45 @@ function onValuationWeightInput(modelId, rawVal) {
     }, 250);
 }
 
-function resetValuationWeights() {
-    const defaultWeights = {
-        "dcf": 12.70,
-        "graham_1": 6.04,
-        "graham_2": 18.91,
-        "graham_3": 4.94,
-        "pe": 54.81,
-        "pb": 2.60
-    };
-
-    if (currentMultiValuationState && currentMultiValuationState.models) {
-        currentMultiValuationState.models.forEach(m => {
-            if (defaultWeights[m.id] !== undefined) {
-                m.weight_percent = defaultWeights[m.id];
-                const sl = document.getElementById(`val-slider-${m.id}`);
-                const slV = document.getElementById(`val-slider-val-${m.id}`);
-                if (sl) sl.value = defaultWeights[m.id];
-                if (slV) slV.textContent = `${defaultWeights[m.id].toFixed(2)}%`;
-            }
-        });
-    }
-
+async function resetValuationWeights() {
     const ticker = currentReport ? currentReport.ticker : "HPG";
     const liveCmp = (currentReport && currentReport.consensus_summary) ? currentReport.consensus_summary.current_market_price : undefined;
-    fetch("/api/valuation/multi-model", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            ticker: ticker,
-            current_market_price: liveCmp,
-            custom_weights: defaultWeights
-        })
-    }).then(r => r.json()).then(result => {
-        if (result && result.models) {
-            renderMultiModelValuation(result);
-            showToast("Đã khôi phục trọng số định giá chuẩn hóa!");
+
+    try {
+        // Fetch optimal sector weights
+        const respSec = await fetch(`/api/valuation/sector-weights/${ticker}`);
+        let secWeights = null;
+        let secName = "chuẩn ngành";
+        if (respSec.ok) {
+            const secData = await respSec.json();
+            secWeights = secData.weights;
+            secName = secData.sector_name || secName;
         }
-    }).catch(err => {
+
+        if (!secWeights && currentMultiValuationState && currentMultiValuationState.default_weights) {
+            secWeights = currentMultiValuationState.default_weights;
+        }
+
+        const resp = await fetch("/api/valuation/multi-model", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ticker: ticker,
+                current_market_price: liveCmp,
+                custom_weights: secWeights,
+                weights: secWeights
+            })
+        });
+
+        if (resp.ok) {
+            const result = await resp.json();
+            currentMultiValuationState = result;
+            renderMultiModelValuation(result);
+            showToast(`Đã khôi phục ma trận trọng số chuẩn ngành: ${secName}!`);
+        }
+    } catch (err) {
         console.error("resetValuationWeights error:", err);
-    });
+    }
 }
 
 function askCopilotValuation() {
@@ -7583,18 +7616,22 @@ function askCopilotValuation() {
     const mos = currentMultiValuationState && currentReport && currentReport.consensus_summary ? 
         (((currentMultiValuationState.blended_fair_value - currentReport.consensus_summary.current_market_price) / currentReport.consensus_summary.current_market_price) * 100).toFixed(1) : "N/A";
 
+    const sectorName = currentMultiValuationState ? (currentMultiValuationState.applied_sector_name || "Chuẩn ngành") : "Chuẩn ngành";
+    const rationale = currentMultiValuationState ? (currentMultiValuationState.applied_sector_description || "") : "";
+    const primary = currentMultiValuationState && currentMultiValuationState.primary_models ? currentMultiValuationState.primary_models.join(", ") : "P/E, P/B, DCF";
+
     if (timeEl) timeEl.textContent = new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
 
     textEl.innerHTML = `
         <div class="space-y-2">
-            <p><strong>Bản tin phân tích AI cho ${ticker} (${company}):</strong></p>
+            <p><strong>Bản tin phân tích AI cho ${ticker} (${company}) - Nhóm ngành: <span class="text-emerald-400 font-bold">${escapeHtml(sectorName)}</span>:</strong></p>
             <ul class="list-disc list-inside space-y-1 text-slate-300">
                 <li><strong>Giá trị hợp lý tổng hợp:</strong> <span class="text-cyan-300 font-bold">${blendedVal} VND</span> (Biên an toàn Margin of Safety: <span class="text-emerald-400 font-bold">${mos > 0 ? '+' : ''}${mos}%</span>).</li>
-                <li><strong>P/E & P/B Ngành:</strong> Định giá so sánh chiếm tỷ trọng lớn (~57%), phản ánh tính thanh khoản và chu kỳ định giá của thị trường chứng khoán Việt Nam.</li>
-                <li><strong>3 Mô hình Benjamin Graham:</strong> Tạo lớp đệm an toàn giá trị thực, bảo vệ nhà đầu tư trước các biến động chu kỳ và lãi suất (lãi suất TPCP 10Y ~4.8%).</li>
-                <li><strong>Mô hình DCF:</strong> Phản ánh năng lực tạo dòng tiền tự do FCF từ dự án đang vận hành và chu kỳ vốn đầu tư (Capex).</li>
+                <li><strong>Mô hình trọng tâm của ngành:</strong> <span class="text-amber-300 font-semibold">${escapeHtml(primary)}</span>.</li>
+                <li><strong>Cơ sở phân bổ trọng số:</strong> ${escapeHtml(rationale)}</li>
+                <li><strong>Định giá Graham & Lãi suất TPCP:</strong> Sử dụng lãi suất phi rủi ro 10 năm (${currentMultiValuationState ? currentMultiValuationState.risk_free_rate || 4.8 : 4.8}%) làm mốc đối ứng để bảo vệ vốn trước rủi ro lạm phát.</li>
             </ul>
-            <p class="text-slate-400 italic text-[10px] pt-1">Khuyến nghị: Nhà đầu tư có thể phân bổ tỷ trọng theo chiến lược (Tăng DCF cho đầu tư dài hạn / Tăng P/E cho lướt sóng chu kỳ).</p>
+            <p class="text-slate-400 italic text-[10px] pt-1">Nhà đầu tư có thể chủ động kéo thanh trượt trọng số để kiểm tra các kịch bản định giá theo khẩu vị rủi ro.</p>
         </div>
     `;
     box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -7613,12 +7650,14 @@ function exportValuationToExcel() {
     const val = currentMultiValuationState;
     const cmp = currentReport && currentReport.consensus_summary ? currentReport.consensus_summary.current_market_price : 0;
     const mos = cmp > 0 ? (((val.blended_fair_value - cmp) / cmp) * 100).toFixed(2) : 0;
+    const sectorName = val.applied_sector_name || "Chuẩn ngành";
 
     const dataRows = [
-        ["IERM TERMINAL - BẢNG ĐỊNH GIÁ CHUYÊN SÂU ĐA MÔ HÌNH"],
+        ["IERM TERMINAL - BẢNG ĐỊNH GIÁ CHUYÊN SÂU ĐA MÔ HÌNH THEO ĐẶC THÙ NGÀNH"],
         ["Mã chứng khoán:", ticker, "Tên doanh nghiệp:", company],
-        ["Ngày xuất báo cáo:", dateStr, "Thị giá live (VND):", cmp],
-        ["Giá trị hợp lý Blended (VND):", Math.round(val.blended_fair_value || 0), "Biên an toàn (%):", `${mos}%`],
+        ["Nhóm ngành phân loại:", sectorName, "Thị giá live (VND):", cmp],
+        ["Ngày xuất báo cáo:", dateStr, "Biên an toàn (%):", `${mos}%`],
+        ["Giá trị hợp lý Blended (VND):", Math.round(val.blended_fair_value || 0)],
         [],
         ["STT", "Mã mô hình", "Tên phương pháp định giá", "Công thức / Căn cứ tính", "Định giá (VND)", "Định giá (k VND)", "Trọng số (%)"],
     ];
@@ -7631,7 +7670,7 @@ function exportValuationToExcel() {
             m.description || "",
             Math.round(m.fair_value || 0),
             Number(m.fair_value_k || (m.fair_value / 1000) || 0).toFixed(2),
-            Number(m.weight_percent || 0).toFixed(2) + "%"
+            Number(m.weight_percent !== undefined ? m.weight_percent : (m.weight || 0)).toFixed(2) + "%"
         ]);
     });
 
@@ -7642,6 +7681,9 @@ function exportValuationToExcel() {
     dataRows.push(["P/E mục tiêu ngành", val.industry_pe || "N/A"]);
     dataRows.push(["P/B mục tiêu ngành", val.industry_pb || "N/A"]);
     dataRows.push(["Lãi suất TPCP 10Y (Risk-free)", `${val.risk_free_rate || 4.8}%`]);
+    if (val.applied_sector_description) {
+        dataRows.push(["Lý do phân bổ trọng số ngành", val.applied_sector_description]);
+    }
 
     if (window.XLSX) {
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
@@ -7658,6 +7700,7 @@ function exportValuationToExcel() {
         });
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
+
         const link = document.createElement("a");
         link.setAttribute("href", url);
         link.setAttribute("download", `${ticker}_Dinh_Gia_Chuyen_Sau_${dateStr}.csv`);
@@ -14030,6 +14073,25 @@ window.toggleCorporateActionPin = function(e) {
         if (window.lucide) lucide.createIcons();
     }
 };
+
+// -------------------------------------------------------------
+// HASH NAVIGATION SUPPORT (e.g. #tab-valuation)
+// -------------------------------------------------------------
+window.addEventListener("hashchange", () => {
+    if (window.location.hash) {
+        const tabId = window.location.hash.replace("#", "");
+        if (typeof switchTab === "function") switchTab(tabId);
+    }
+});
+window.addEventListener("load", () => {
+    if (window.location.hash) {
+        const tabId = window.location.hash.replace("#", "");
+        setTimeout(() => {
+            if (typeof switchTab === "function") switchTab(tabId);
+        }, 400);
+    }
+});
+
 
 document.addEventListener("click", function(e) {
     if (!e.target.closest(".ca-tooltip-trigger")) {

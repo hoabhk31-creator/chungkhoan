@@ -297,6 +297,12 @@ class ValuationModelResult(BaseModel):
     growth_rate: float = 12.0
     industry_pe: float = 13.0
     industry_pb: float = 1.6
+    sector_profile: Dict[str, Any] = Field(default_factory=dict, description="Hồ sơ phân loại ngành và ma trận trọng số")
+    applied_sector_name: str = Field(default="", description="Tên nhóm ngành áp dụng")
+    applied_sector_key: str = Field(default="", description="Mã nhóm ngành áp dụng")
+    applied_sector_description: str = Field(default="", description="Lý do phân bổ trọng số theo ngành")
+    primary_models: List[str] = Field(default_factory=list, description="Các mô hình định giá ưu tiên của ngành")
+    default_weights: Dict[str, float] = Field(default_factory=dict, description="Trọng số mặc định chuẩn hóa theo ngành")
 
 
 class TechnicalSignal(BaseModel):
@@ -676,6 +682,211 @@ def generate_valuation_bands_dataset(ticker: str, base_pe: float = 12.5, base_pb
     return timeframes_data
 
 
+
+def get_sector_valuation_profile(
+    ticker: str,
+    sector: str = "",
+    company_name: str = ""
+) -> Dict[str, Any]:
+    """
+    Phân loại nhóm ngành thông minh & Cung cấp Ma trận Trọng số Định giá Tối ưu (Smart Sector-Adaptive Valuation Matrix):
+    Dựa trên đặc thù cấu trúc dòng tiền, tài sản và phương pháp luận của các quỹ đầu tư & CTCK hàng đầu tại Việt Nam:
+    1. banking_finance (Ngân hàng, Chứng khoán, Bảo hiểm): Loại trừ DCF, tập trung P/B theo ROE & P/E, Số Graham.
+    2. real_estate (Bất động sản dân cư & KCN): Ưu tiên P/B định giá quỹ đất & DCF bàn giao dự án.
+    3. tech_retail_growth (Công nghệ, Bán lẻ tăng trưởng cao): Ưu tiên DCF dòng tiền & Graham chiết khấu tăng trưởng, loại trừ P/B vô hình.
+    4. materials_cyclical (Thép, Vật liệu, Hóa chất, Dầu khí chu kỳ): Cân bằng Số Graham (P/E & P/B) và P/B tài sản cố định.
+    5. infrastructure_energy (Năng lượng, Hạ tầng, Cảng biển, Logistics): DCF dòng tiền ổn định làm chủ đạo (40%).
+    6. consumer_pharma (Tiêu dùng thiết yếu, Dược phẩm, Y tế): Kết hợp DCF dòng tiền và P/E thương hiệu bền vững.
+    7. general (Sản xuất & Thương mại Đa ngành): Phân bổ cân bằng đa chiều.
+    """
+    t = (ticker or "").upper().strip()
+    s = (sector or "").lower().strip()
+    name = (company_name or "").lower().strip()
+
+    # Tra cứu cơ sở dữ liệu nếu thiếu thông tin
+    try:
+        from company_database import get_company
+        comp = get_company(t) or {}
+    except Exception:
+        comp = {}
+
+    if not comp:
+        try:
+            from financial_data import VIETNAM_STOCK_DIRECTORY
+            comp = VIETNAM_STOCK_DIRECTORY.get(t, {})
+        except Exception:
+            pass
+
+    if comp:
+        comp_sec = f"{comp.get('icb4', '')} {comp.get('fiintrade_sector', '')} {comp.get('icb2', '')} {comp.get('sector', '')}".lower().strip()
+        s = f"{s} {comp_sec}".strip()
+        if not name:
+            name = (comp.get("name") or "").lower().strip()
+
+    # Định nghĩa các tập hợp mã cổ phiếu đặc thù
+    BANKS = {
+        "VCB", "BID", "CTG", "TCB", "MBB", "ACB", "VPB", "STB", "HDB", "LPB",
+        "SHB", "VIB", "TPB", "MSB", "OCB", "SSB", "EIB", "NAB", "BVB", "BAB",
+        "KLB", "PGB", "SGB", "VBB", "ABB", "VAB"
+    }
+    SECURITIES = {
+        "SSI", "VND", "VCI", "HCM", "MBS", "SHS", "FTS", "BSI", "CTS", "VIX",
+        "ORS", "AGR", "TVS", "BVS", "PSI", "VDS", "IVS", "WSS", "EVS", "APG",
+        "HBS", "VPX", "TCX", "DSC", "TCI", "VFS", "ABW", "SBS", "BMS", "AAS",
+        "CSI", "VIG", "PHS", "HAC", "VUA", "APSC", "VSI"
+    }
+    INSURANCE = {
+        "BVH", "PVI", "BMI", "MIG", "BIC", "PRE", "VNR", "ABI", "PTI", "BLI", "AIC"
+    }
+    REAL_ESTATE = {
+        "VHM", "NVL", "PDR", "DIG", "DXG", "KDH", "NLG", "KBC", "IDC", "VRE",
+        "CEO", "SZC", "BCM", "HDG", "TCH", "HQC", "IJC", "QCG", "SCR", "D2D",
+        "NHA", "HDC", "LDG", "TIG", "IDV", "SIP", "NNC", "NTL", "AGG", "KHG",
+        "CRE", "NRC", "VPH", "DRH", "ITC", "CII", "BCG", "VCG", "HHV", "CTD", "HBC"
+    }
+    TECH_RETAIL = {
+        "FPT", "MWG", "FRT", "DGW", "CMG", "ELC", "ITD", "FOX", "CTR", "VGI",
+        "VNZ", "SGT", "PET", "PSD"
+    }
+    INFRASTRUCTURE = {
+        "POW", "REE", "PC1", "GMD", "HAH", "VSC", "GEG", "NT2", "PPC", "VSH",
+        "QTP", "HND", "TDM", "BWE", "VJC", "HVN", "ACV", "PHP", "TCL", "SWC",
+        "CLL", "SGP", "TMS", "VOS", "PVT", "VTO", "VIP"
+    }
+    CYCLICAL = {
+        "HPG", "HSG", "NKG", "TLH", "SMC", "POM", "VGS", "TIS",
+        "DGC", "DCM", "DPM", "BFC", "LAS", "CSV", "DDV",
+        "PVD", "PVS", "PLX", "BSR", "GAS", "OIL", "PVC", "PVB", "PXS",
+        "HT1", "BCC", "KSB", "VCS", "PTB", "GVR", "DPR", "PHR", "DRI"
+    }
+    CONSUMER = {
+        "VNM", "MSN", "SAB", "BHN", "MCH", "QNS", "SBT", "KDC", "DHG", "IMP",
+        "TRA", "DMC", "DBD", "DCL", "VHC", "ANV", "FMC", "BAF", "DBC", "PAN",
+        "TNG", "MSH", "GIL", "STK"
+    }
+
+    # BƯỚC 1: Khớp chính xác theo mã cổ phiếu danh mục đặc thù
+    if t in BANKS or t in SECURITIES or t in INSURANCE:
+        return {
+            "sector_key": "banking_finance",
+            "sector_name": "Ngân hàng & Dịch vụ Tài chính",
+            "weights": {"dcf": 0.0, "graham_1": 0.0, "graham_2": 0.0, "graham_3": 10.0, "pe": 45.0, "pb": 45.0},
+            "description": "Đặc thù tài chính không áp dụng dòng tiền FCFF sản xuất. P/B kết hợp P/E và Số Graham là phương pháp chuẩn xác nhất theo thông lệ phân tích quốc tế.",
+            "primary_models": ["P/B", "P/E", "Số Graham"]
+        }
+    if t in REAL_ESTATE:
+        return {
+            "sector_key": "real_estate",
+            "sector_name": "Bất động sản & Hạ tầng Đô thị",
+            "weights": {"dcf": 25.0, "graham_1": 5.0, "graham_2": 10.0, "graham_3": 10.0, "pe": 15.0, "pb": 35.0},
+            "description": "Tập trung vào giá trị tài sản ròng/quỹ đất (P/B) kết hợp chiết khấu dòng tiền bàn giao dự án (DCF), hạn chế sự biến động thất thường của EPS theo quý.",
+            "primary_models": ["P/B", "DCF", "P/E"]
+        }
+    if t in TECH_RETAIL:
+        return {
+            "sector_key": "tech_retail_growth",
+            "sector_name": "Công nghệ & Bán lẻ Tăng trưởng",
+            "weights": {"dcf": 35.0, "graham_1": 15.0, "graham_2": 25.0, "graham_3": 5.0, "pe": 20.0, "pb": 0.0},
+            "description": "Doanh nghiệp tăng trưởng cao sở hữu dòng tiền FCF dồi dào và lợi thế cạnh tranh vô hình. DCF và Graham chiết khấu tăng trưởng phản ánh chính xác nhất giá trị nội tại.",
+            "primary_models": ["DCF", "Graham 2", "P/E"]
+        }
+    if t in INFRASTRUCTURE:
+        return {
+            "sector_key": "infrastructure_energy",
+            "sector_name": "Hạ tầng, Năng lượng & Cảng biển",
+            "weights": {"dcf": 40.0, "graham_1": 5.0, "graham_2": 20.0, "graham_3": 5.0, "pe": 15.0, "pb": 15.0},
+            "description": "Dòng tiền kinh doanh 5-10 năm có độ ổn định và khả năng dự báo rất cao. Mô hình chiết khấu dòng tiền DCF là phương pháp trọng yếu hàng đầu.",
+            "primary_models": ["DCF", "Graham 2", "P/E", "P/B"]
+        }
+    if t in CYCLICAL:
+        return {
+            "sector_key": "materials_cyclical",
+            "sector_name": "Thép, Hóa chất & Sản xuất Chu kỳ",
+            "weights": {"dcf": 15.0, "graham_1": 10.0, "graham_2": 15.0, "graham_3": 25.0, "pe": 10.0, "pb": 25.0},
+            "description": "Ngành sản xuất thâm dụng vốn lớn và có chu kỳ. Số Graham (cân bằng P/E & P/B) và P/B định giá tài sản cố định chuẩn xác mà không bị nhiễu bởi đỉnh/đáy lợi nhuận ngắn hạn.",
+            "primary_models": ["Số Graham", "P/B", "DCF", "Graham 2"]
+        }
+    if t in CONSUMER:
+        return {
+            "sector_key": "consumer_pharma",
+            "sector_name": "Tiêu dùng thiết yếu & Dược phẩm",
+            "weights": {"dcf": 30.0, "graham_1": 10.0, "graham_2": 20.0, "graham_3": 10.0, "pe": 25.0, "pb": 5.0},
+            "description": "Doanh nghiệp ít chịu ảnh hưởng chu kỳ vĩ mô, sở hữu thương hiệu lớn và biên lợi nhuận ổn định. Kết hợp DCF dòng tiền và P/E mục tiêu thương hiệu.",
+            "primary_models": ["DCF", "P/E", "Graham 2"]
+        }
+
+    # BƯỚC 2: Quét từ khóa thông minh cho các mã ngoài danh mục
+    bank_kw = ["ngân hàng", "bank", "nhtm", "chứng khoán", "securities", "bảo hiểm", "insurance", "tài chính"]
+    if any(w in s for w in bank_kw) or any(w in name for w in ["ngân hàng", "chứng khoán", "bảo hiểm"]):
+        return {
+            "sector_key": "banking_finance",
+            "sector_name": "Ngân hàng & Dịch vụ Tài chính",
+            "weights": {"dcf": 0.0, "graham_1": 0.0, "graham_2": 0.0, "graham_3": 10.0, "pe": 45.0, "pb": 45.0},
+            "description": "Đặc thù tài chính không áp dụng dòng tiền FCFF sản xuất. P/B kết hợp P/E và Số Graham là phương pháp chuẩn xác nhất theo thông lệ phân tích quốc tế.",
+            "primary_models": ["P/B", "P/E", "Số Graham"]
+        }
+
+    re_kw = ["bất động sản", "địa ốc", "real estate", "khu công nghiệp", "phát triển đô thị", "nhà ở", "xây dựng dân dụng"]
+    if any(w in s for w in re_kw) or any(w in name for w in ["bất động sản", "địa ốc", "đô thị"]):
+        return {
+            "sector_key": "real_estate",
+            "sector_name": "Bất động sản & Hạ tầng Đô thị",
+            "weights": {"dcf": 25.0, "graham_1": 5.0, "graham_2": 10.0, "graham_3": 10.0, "pe": 15.0, "pb": 35.0},
+            "description": "Tập trung vào giá trị tài sản ròng/quỹ đất (P/B) kết hợp chiết khấu dòng tiền bàn giao dự án (DCF), hạn chế sự biến động thất thường của EPS theo quý.",
+            "primary_models": ["P/B", "DCF", "P/E"]
+        }
+
+    tech_kw = ["công nghệ", "phần mềm", "viễn thông", "it", "technology", "software", "telecom", "bán lẻ kỹ thuật số"]
+    if any(w in s for w in tech_kw) or any(w in name for w in ["công nghệ", "viễn thông", "phần mềm"]):
+        return {
+            "sector_key": "tech_retail_growth",
+            "sector_name": "Công nghệ & Bán lẻ Tăng trưởng",
+            "weights": {"dcf": 35.0, "graham_1": 15.0, "graham_2": 25.0, "graham_3": 5.0, "pe": 20.0, "pb": 0.0},
+            "description": "Doanh nghiệp tăng trưởng cao sở hữu dòng tiền FCF dồi dào và lợi thế cạnh tranh vô hình. DCF và Graham chiết khấu tăng trưởng phản ánh chính xác nhất giá trị nội tại.",
+            "primary_models": ["DCF", "Graham 2", "P/E"]
+        }
+
+    infra_kw = ["điện", "năng lượng", "nhiệt điện", "thủy điện", "hạ tầng", "tiện ích", "cấp nước", "nước", "cảng biển", "logistics", "kho vận", "vận tải", "hàng không", "energy", "utility"]
+    if any(w in s for w in infra_kw) or any(w in name for w in ["năng lượng", "điện lực", "cảng", "logistics", "cấp nước"]):
+        return {
+            "sector_key": "infrastructure_energy",
+            "sector_name": "Hạ tầng, Năng lượng & Cảng biển",
+            "weights": {"dcf": 40.0, "graham_1": 5.0, "graham_2": 20.0, "graham_3": 5.0, "pe": 15.0, "pb": 15.0},
+            "description": "Dòng tiền kinh doanh 5-10 năm có độ ổn định và khả năng dự báo rất cao. Mô hình chiết khấu dòng tiền DCF là phương pháp trọng yếu hàng đầu.",
+            "primary_models": ["DCF", "Graham 2", "P/E", "P/B"]
+        }
+
+    consumer_kw = ["thực phẩm", "đồ uống", "tiêu dùng", "sữa", "bia", "bánh kẹo", "dược phẩm", "y tế", "thủy sản", "nông nghiệp", "chăn nuôi", "dệt may", "consumer", "food", "pharma"]
+    if any(w in s for w in consumer_kw) or any(w in name for w in ["dược", "thực phẩm", "sữa", "nông nghiệp", "thủy sản"]):
+        return {
+            "sector_key": "consumer_pharma",
+            "sector_name": "Tiêu dùng thiết yếu & Dược phẩm",
+            "weights": {"dcf": 30.0, "graham_1": 10.0, "graham_2": 20.0, "graham_3": 10.0, "pe": 25.0, "pb": 5.0},
+            "description": "Doanh nghiệp ít chịu ảnh hưởng chu kỳ vĩ mô, sở hữu thương hiệu lớn và biên lợi nhuận ổn định. Kết hợp DCF dòng tiền và P/E mục tiêu thương hiệu.",
+            "primary_models": ["DCF", "P/E", "Graham 2"]
+        }
+
+    cyclical_kw = ["thép", "kim loại", "vật liệu xây dựng", "xi măng", "hóa chất", "phân bón", "dầu khí", "khai khoáng", "khai thác", "cao su", "nhựa", "petroleum", "chemical"]
+    if any(w in s for w in cyclical_kw) or any(w in name for w in ["thép", "hóa chất", "dầu khí", "khoáng sản"]):
+        return {
+            "sector_key": "materials_cyclical",
+            "sector_name": "Thép, Hóa chất & Sản xuất Chu kỳ",
+            "weights": {"dcf": 15.0, "graham_1": 10.0, "graham_2": 15.0, "graham_3": 25.0, "pe": 10.0, "pb": 25.0},
+            "description": "Ngành sản xuất thâm dụng vốn lớn và có chu kỳ. Số Graham (cân bằng P/E & P/B) và P/B định giá tài sản cố định chuẩn xác mà không bị nhiễu bởi đỉnh/đáy lợi nhuận ngắn hạn.",
+            "primary_models": ["Số Graham", "P/B", "DCF", "Graham 2"]
+        }
+
+
+    # Nhóm 7: Sản xuất & Thương mại Đa ngành (Mặc định)
+    return {
+        "sector_key": "general",
+        "sector_name": "Sản xuất & Thương mại Đa ngành",
+        "weights": {"dcf": 25.0, "graham_1": 5.0, "graham_2": 20.0, "graham_3": 10.0, "pe": 25.0, "pb": 15.0},
+        "description": "Cơ cấu trọng số chuẩn hóa đa chiều cân bằng giữa DCF dòng tiền, định giá tương đối P/E & P/B và các mô hình cổ điển Graham.",
+        "primary_models": ["DCF", "P/E", "Graham 2", "P/B"]
+    }
+
+
 def calculate_multi_model_valuation(
     ticker: str,
     current_market_price: float,
@@ -690,16 +901,18 @@ def calculate_multi_model_valuation(
     wacc: float = 11.5,
     terminal_g: float = 2.5,
     risk_free_rate: float = 4.8,
-    custom_weights: Optional[Dict[str, float]] = None
+    custom_weights: Optional[Dict[str, float]] = None,
+    sector: Optional[str] = None,
+    company_name: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Tính toán 6 mô hình định giá định lượng độc lập theo chuẩn tổ chức / FireAnt:
-    1. DCF (Chiết khấu dòng tiền tự do FCF) - Trọng số: 12.70%
-    2. Graham 1 (sử dụng EPS) - Trọng số: 6.04%
-    3. Graham 2 (sử dụng EPS và ls phi rủi ro) - Trọng số: 18.91%
-    4. Graham 3 (sử dụng EPS và giá trị sổ sách - Graham Number) - Trọng số: 4.94%
-    5. P/E (sử dụng EPS và P/E mục tiêu / ngành) - Trọng số: 54.81%
-    6. P/B (sử dụng BVPS và P/B mục tiêu / ngành) - Trọng số: 2.60%
+    Tính toán 6 mô hình định giá định lượng độc lập theo chuẩn tổ chức, tự động thích ứng theo đặc thù ngành (Smart Sector-Adaptive Valuation):
+    1. DCF (Chiết khấu dòng tiền tự do FCF)
+    2. Graham 1 (sử dụng EPS)
+    3. Graham 2 (sử dụng EPS và ls phi rủi ro)
+    4. Graham 3 (sử dụng EPS và giá trị sổ sách - Graham Number)
+    5. P/E (sử dụng EPS và P/E mục tiêu / ngành)
+    6. P/B (sử dụng BVPS và P/B mục tiêu / ngành)
     """
     eff_eps = max(100.0, float(eps)) if eps else 1000.0
     eff_bvps = max(500.0, float(bvps)) if bvps else 10000.0
@@ -738,15 +951,9 @@ def calculate_multi_model_valuation(
     target_pb_eff = max(float(industry_pb or 1.6), 0.5)
     pb_val = round(max(0, eff_bvps * target_pb_eff), -2)
 
-    # Weights configuration
-    default_weights = {
-        "dcf": 12.70,
-        "graham_1": 6.04,
-        "graham_2": 18.91,
-        "graham_3": 4.94,
-        "pe": 54.81,
-        "pb": 2.60
-    }
+    # Xác định Ma trận Trọng số Chuẩn hóa theo Ngành (Smart Sector Weights)
+    sector_profile = get_sector_valuation_profile(ticker=ticker, sector=sector or "", company_name=company_name or "")
+    default_weights = sector_profile["weights"]
     
     weights = default_weights.copy()
     if custom_weights:
@@ -856,7 +1063,13 @@ def calculate_multi_model_valuation(
         "risk_free_rate": rf,
         "growth_rate": growth_rate,
         "industry_pe": target_pe_eff,
-        "industry_pb": target_pb_eff
+        "industry_pb": target_pb_eff,
+        "sector_profile": sector_profile,
+        "applied_sector_name": sector_profile["sector_name"],
+        "applied_sector_key": sector_profile["sector_key"],
+        "applied_sector_description": sector_profile["description"],
+        "primary_models": sector_profile["primary_models"],
+        "default_weights": sector_profile["weights"]
     }
 
 
@@ -2901,6 +3114,38 @@ def calculate_live_financial_multiples(
     roe_ttm = round((np_ttm / equity_latest) * 100.0, 2) if equity_latest > 0 else 0.0
     roa_ttm = round((np_ttm / assets_latest) * 100.0, 2) if assets_latest > 0 else 0.0
 
+    # 6. Cơ chế kiểm soát an toàn và tính toán hợp lý (Sanity Check & Guardrail)
+    # Bảo vệ chống lại việc cào thiếu dòng BCTC từ nguồn cấp (ví dụ CafeF trả 0 cho KQKD ngân hàng làm LNST bị teo tóp 10 lần)
+    db_pe = float(db.get("pe_ttm") or 0.0)
+    db_pb = float(db.get("pb_ttm") or 0.0)
+    db_roe = float(db.get("roe_ttm_pct") or 0.0)
+    db_eps = float(db.get("eps") or 0.0)
+    db_q_np = float(db.get("net_profit_q1_26_bil") or 0.0)
+
+    # Nếu P/E live bị thổi phồng bất thường (> 25x khi chuẩn ngành/CSDL < 20x hoặc gấp 1.6 lần CSDL) hoặc ROE bị teo tóp (< 50% so với CSDL)
+    is_pe_anomalous = (db_pe > 0 and ((pe_live > 1.6 * db_pe and pe_live > 22.0) or (db_pe <= 25.0 and pe_live > 40.0)))
+    is_roe_anomalous = (db_roe >= 6.0 and roe_ttm < 0.5 * db_roe)
+
+    if is_pe_anomalous or is_roe_anomalous:
+        if db_q_np > 0:
+            np_ttm = db_q_np * 4.0
+        elif db_eps > 0 and shares > 0:
+            np_ttm = (shares * db_eps) / 1000.0
+        elif db_pe > 0:
+            np_ttm = mcap_bil / db_pe
+        
+        eps_ttm = round((np_ttm * 1000.0) / shares, 1) if (shares > 0 and np_ttm != 0) else db_eps
+        pe_live = round(p / eps_ttm, 2) if eps_ttm > 0 else db_pe
+        roe_ttm = round((np_ttm / equity_latest) * 100.0, 2) if equity_latest > 0 else db_roe
+        roa_ttm = round((np_ttm / assets_latest) * 100.0, 2) if assets_latest > 0 else round(roe_ttm * 0.1, 2)
+
+    # Kiểm tra an toàn cho P/B live (Vốn CSH bị cào thiếu hoặc lệch đơn vị)
+    is_pb_anomalous = (db_pb > 0 and ((pb_live > 3.0 * db_pb and pb_live > 10.0) or (pb_live < 0.25 * db_pb and pb_live < 0.4)))
+    if is_pb_anomalous:
+        equity_latest = mcap_bil / db_pb
+        bvps = round((equity_latest * 1000.0) / shares, 1) if shares > 0 else 0.0
+        pb_live = round(p / bvps, 2) if bvps > 0 else db_pb
+
     return {
         "ticker": clean_ticker,
         "live_price": p,
@@ -3194,7 +3439,9 @@ def get_financial_data_bundle(
         growth_rate=12.0,
         wacc=11.5,
         terminal_g=2.5,
-        risk_free_rate=4.8
+        risk_free_rate=4.8,
+        sector=sect_n,
+        company_name=comp_n
     )
 
     val_timeframes = generate_valuation_bands_dataset(clean_ticker, pe_live, pb_live)
@@ -3220,7 +3467,13 @@ def get_financial_data_bundle(
         risk_free_rate=4.8,
         growth_rate=12.0,
         industry_pe=round(ind_avg_pe, 2),
-        industry_pb=round(ind_avg_pb, 2)
+        industry_pb=round(ind_avg_pb, 2),
+        sector_profile=multi_val.get("sector_profile", {}),
+        applied_sector_name=multi_val.get("applied_sector_name", ""),
+        applied_sector_key=multi_val.get("applied_sector_key", ""),
+        applied_sector_description=multi_val.get("applied_sector_description", ""),
+        primary_models=multi_val.get("primary_models", []),
+        default_weights=multi_val.get("default_weights", {})
     )
 
     final_ind_model = get_financial_statement_model(clean_ticker, sect_n, comp_n)

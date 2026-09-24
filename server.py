@@ -850,6 +850,7 @@ class MultiModelValuationRequest(BaseModel):
     industry_pe: Optional[float] = None
     industry_pb: Optional[float] = None
     weights: Optional[Dict[str, float]] = None
+    custom_weights: Optional[Dict[str, float]] = None
     current_market_price: Optional[float] = None
 
 
@@ -1141,9 +1142,29 @@ async def post_multi_model_valuation(req: MultiModelValuationRequest):
         wacc=req.wacc or 11.5,
         terminal_g=req.terminal_g or 2.5,
         risk_free_rate=req.risk_free_rate or 4.8,
-        custom_weights=req.weights
+        custom_weights=req.custom_weights or req.weights,
+        sector=prof.get("sector", ""),
+        company_name=prof.get("name", "")
     )
     return res
+
+
+@app.get("/api/valuation/sector-weights/{ticker}")
+async def get_valuation_sector_weights(ticker: str):
+    """
+    Lấy ma trận trọng số và phân loại nhóm ngành chuẩn hóa cho từng mã cổ phiếu.
+    """
+    clean_ticker = ticker.upper().strip()
+    from financial_data import get_sector_valuation_profile, get_financial_data_bundle
+    try:
+        bundle = get_financial_data_bundle(clean_ticker)
+        prof = bundle.get("company_profile", {})
+        sector = prof.get("sector", "")
+        company_name = prof.get("name", "")
+    except Exception:
+        sector = ""
+        company_name = ""
+    return get_sector_valuation_profile(clean_ticker, sector=sector, company_name=company_name)
 
 
 @app.get("/api/valuation/bands/{ticker}")

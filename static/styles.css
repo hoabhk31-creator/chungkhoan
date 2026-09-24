@@ -726,6 +726,28 @@ html:not(.dark) footer {
     }
 }
 
+/* Custom Sleek Scrollbar for Cards and Panels (Dự án & Catalysts) */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 rgba(15, 23, 42, 0.6);
+}
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.8);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #0284c7;
+}
+
 /* Custom High-Visibility Scrollbar for CTCK Modal */
 .custom-scrollbar-cyan::-webkit-scrollbar {
     height: 14px;
