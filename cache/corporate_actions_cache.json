@@ -3173,5 +3173,116 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "NT2": [
+    {
+      "id": "nt2-ca-21102025-dividend_cash",
+      "ex_date": "21/10/2025",
+      "record_date": "22/10/2025",
+      "execution_date": "31/10/2025",
+      "event_type": "dividend_cash",
+      "title": "NT2: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức còn lại từ nguồn lợi nhuận sau thuế chưa phân phối lũy kế",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 700 đồng/CP",
+      "cash_amount": 700.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "PC1": [
+    {
+      "id": "pc1-ca-12112025-bonus_share",
+      "ex_date": "12/11/2025",
+      "record_date": "13/11/2025",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "PC1: Thông báo về ngày đăng ký cuối cùng phát hành cổ phiếu để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 100:15",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.15,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8696,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "pc1-ca-07112024-dividend_stock",
+      "ex_date": "07/11/2024",
+      "record_date": "08/11/2024",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "PC1: Thông báo ngày ĐKCC để phát hành cổ phiếu để trả cổ tức năm 2023",
+      "description": "Trả cổ tức  năm 2023  bằng cổ phiếu, tỷ lệ 100:15",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.15,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8696,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "CII": [
+    {
+      "id": "cii-ca-26082026-rights_issue",
+      "ex_date": "26/08/2026",
+      "record_date": "27/08/2026",
+      "execution_date": "",
+      "event_type": "rights_issue",
+      "title": "CII: Thông báo ngày ĐKCC thực hiện quyền mua trái phiếu chuyển đổi phát hành cho CĐHH",
+      "description": "Thực hiện quyền mua trái phiếu chuyển đổi, tỷ lệ 10:1, giá 100,000 đồng/CP",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.1,
+      "rights_price": 100000.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "cii-ca-12092025-dividend_cash",
+      "ex_date": "12/09/2025",
+      "record_date": "15/09/2025",
+      "execution_date": "01/10/2025",
+      "event_type": "dividend_cash",
+      "title": "CII: Thông báo về việc niêm yết và giao dịch chứng khoán thay đổi niêm yết",
+      "description": "Trả cổ tức  đợt 2/2023 bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "cii-ca-05082025-bonus_share",
+      "ex_date": "05/08/2025",
+      "record_date": "06/08/2025",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "CII: Thông báo ngày ĐKCC nhận cổ phiếu phát hành do thực hiện tăng vốn cổ phần từ NVCSH",
+      "description": "Thưởng cổ phiếu, tỷ lệ 100:14",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.14,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8772,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "cii-ca-26122024-dividend_cash",
+      "ex_date": "26/12/2024",
+      "record_date": "27/12/2024",
+      "execution_date": "20/01/2025",
+      "event_type": "dividend_cash",
+      "title": "CII: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức còn lại năm 2022 và đợt 1 năm 2023 bằng tiền",
+      "description": "Trả cổ tức  đợt 1/2023 bằng tiền, 200 đồng/CP",
+      "cash_amount": 200.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
