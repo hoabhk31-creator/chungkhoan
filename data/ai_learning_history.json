@@ -1,5 +1,256 @@
 [
   {
+    "id": "log-460f276f",
+    "ticker": "BÁO CÁO TH",
+    "title": "Báo cáo Thị trường Trái phiếu: Huy động qua kênh TPDN sôi động trong T8",
+    "institution": "MBS",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 2,
+    "theses_extracted": 0,
+    "confidence": 0.83,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Tổng giá trị trái phiếu chậm thanh toán Lũy kế đạt gần 43.4 nghìn tỷ đồng tương đương khoảng 3% dư nợ TPDN toàn thị trường.",
+      "Giá trị mua lại trước hạn tháng 8 đạt khoảng 30 nghìn tỷ đồng trong đó ngân hàng chiếm 91%."
+    ]
+  },
+  {
+    "id": "log-4150c5c6",
+    "ticker": "CTG",
+    "title": "CTG: Khuyến nghị MUA với giá mục tiêu 48,800 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Báo cáo chưa bao gồm lợi nhuận từ thương vụ chuyển nhượng dự án Vietin Bank Tower.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8 lần và P/B dự phóng ở mức 1,2 lần, ROE dự phóng đạt 21,3%. tỷ lệ lợi suất cổ tức dự kiến ở mức 1,4%."
+    ]
+  },
+  {
+    "id": "log-c0e4dae0",
+    "ticker": "DHC",
+    "title": "DHC: Khuyến nghị MUA với giá mục tiêu 45,800 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "kế hoạch chi trả cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phiếu, tương ứng lợi suất cổ tức 5,6%.",
+      "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 464.8 tỷ đồng (vượt LNST 393.1 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào."
+    ]
+  },
+  {
+    "id": "log-7b517430",
+    "ticker": "FRT",
+    "title": "FRT: Khuyến nghị MUA với giá mục tiêu 181,400 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Chuỗi Nhà thuốc Long Châu vượt mốc 2,000 cửa hàng, tiếp tục là động lực tăng trưởng doanh thu cốt lõi với mức tăng trên 35%/năm.",
+      "Mảng tiêm chủng vaccine Long Châu mở rộng nhanh, tận dụng hạ tầng có sẵn với biên lợi nhuận gộp dịch vụ trên 30%."
+    ]
+  },
+  {
+    "id": "log-ee4096f7",
+    "ticker": "PNJ",
+    "title": "PNJ: Khuyến nghị KHẢ QUAN với giá mục tiêu 42,900 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Mở rộng thị phần bán lẻ trang sức vàng từ các cửa hàng truyền thống nhờ uy tín thương hiệu và mạng lưới hơn 400 cửa hàng hiện đại.",
+      "Gia tăng tỷ trọng dòng sản phẩm vàng trang sức và kim cương có biên lợi nhuận gộp cao, thay vì phụ thuộc vàng miếng 24K."
+    ]
+  },
+  {
+    "id": "log-c1676846",
+    "ticker": "VCB",
+    "title": "VCB: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Dự phóng năm 2026, thu nhập lãi thuần NII đạt 75.009 tỷ đồng (tăng 27,8% YoY) và LNST đạt 45.162 tỷ đồng (tăng 28% YoY), nhờ NIM phục hồi và tăng trưởng tín dụng ổn định.",
+      "lợi suất cổ tức dự phóng ở mức 0,8%."
+    ]
+  },
+  {
+    "id": "log-c50ba2a2",
+    "ticker": "HT1",
+    "title": "HT1: Khuyến nghị MUA với giá mục tiêu 15,800 đồng/cổ phiếu",
+    "institution": "SSI",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSI",
+    "extracted_catalysts_preview": [
+      "Dự phóng năm 2026, doanh thu thuần đạt 9.293 tỷ đồng.",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
+    ]
+  },
+  {
+    "id": "log-48dae2b3",
+    "ticker": "TCB",
+    "title": "TCB: Khuyến nghị KHẢ QUAN với giá mục tiêu 44,300 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "LNTT 6T2026 đạt 18.540 tỷ đồng (tăng 22,5% YoY, hoàn thành 49% kế hoạch năm).",
+      "Dự phóng năm 2026, tổng thu nhập hoạt động TOI đạt 60.075 tỷ đồng (tăng 12,5% YoY), LNTT đạt 37.973 tỷ đồng (tăng 16,7% YoY, hoàn thành 102% kế hoạch năm)."
+    ]
+  },
+  {
+    "id": "log-71abc7b0",
+    "ticker": "AST",
+    "title": "AST: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "Dự phóng năm 2026, doanh số thuần đạt 2.185 tỷ đồng và LNST của cổ đông công ty mẹ đạt 370 tỷ đồng (tăng 48% YoY), nhờ đà phục hồi của lượng khách quốc tế và mở rộng mạng lưới điểm bán.",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
+    ]
+  },
+  {
+    "id": "log-8a412e34",
+    "ticker": "BWE",
+    "title": "BWE: Khuyến nghị  MUA với giá mục tiêu 59,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
+    "catalysts_extracted": 1,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "Dự phóng năm 2026, doanh số thuần đạt 4.926 tỷ đồng (tăng 8,4% YoY) và LNST của cổ đông công ty mẹ đạt 1.097 tỷ đồng (tăng 10,7% YoY), được hỗ trợ bởi sản lượng nước tiêu thụ tăng trưởng ổn định."
+    ]
+  },
+  {
+    "id": "log-6ae5981a",
+    "ticker": "ACB",
+    "title": "ACB: Khuyến nghị KHẢ QUAN với giá mục tiêu 28,300 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dự phóng năm 2026, LNTT đạt mức tăng trưởng 10% YoY, CIR dự kiến duy trì quanh 32% và ROE giai đoạn 2026-2028 đạt 17-18%.",
+      "KQKD 6T2026 ghi nhận LNTT đạt 10,7 nghìn tỷ đồng (tăng 0,4% YoY, lợi luận cốt lõi tăng 11% YoY), tăng trưởng tín dụng đạt 8,6% YTD."
+    ]
+  },
+  {
+    "id": "log-e40ef00c",
+    "ticker": "SIP",
+    "title": "SIP: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VFS",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VFS",
+    "extracted_catalysts_preview": [
+      "Vị thế tài chính lành mạnh với lượng tiền mặt và đầu tư ngắn hạn đạt 12.362,2 tỷ đồng (tăng 81% YoY).",
+      "Công ty duy trì kế hoạch chi trả cổ tức bằng tiền mặt đều đặn từ 10% đến 50%."
+    ]
+  },
+  {
+    "id": "log-b401a9fe",
+    "ticker": "DPG",
+    "title": "DPG: Khuyến nghị MUA với giá mục tiêu 35,000 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Xây dựng & Hạ tầng Đầu tư công (CTD, VCG, HHV)",
+    "catalysts_extracted": 0,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": []
+  },
+  {
+    "id": "log-fd916136",
+    "ticker": "CTD",
+    "title": "CTD: Khuyến nghị MUA với giá mục tiêu 79,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Xây dựng & Hạ tầng Đầu tư công (CTD, VCG, HHV)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Dự phóng N ĐTC 2027, lợi nhuận gộp đạt 2.025 tỷ đồng (tăng 40% YoY) và LNST công ty mẹ đạt 948 tỷ đồng (tăng 21% YoY), nhờ khả năng đàm phán giá thầu và lượng backlog lớn.",
+      "kế hoạch chi trả cổ tức tiền mặt dự kiến là 1.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-ffe7a2cb",
+    "ticker": "VCB",
+    "title": "VCB: Khuyến nghị TÍCH LŨY với giá mục tiêu 69,000 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "24/09/2026 13:18",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Định giá P/E dự phóng năm 2026 ở mức 12,5 lần, P/B dự phóng ở mức 1,9 lần, ROE đạt 18,4%. tỷ suất cổ tức 0,8%, kế hoạch phát hành riêng lẻ tỷ lệ 6,5% dự kiến hoàn tất trong năm.",
+      "Thương vụ phát hành riêng lẻ 6.5% vốn cho cổ đông chiến lược quốc tế thu về khoảng 1 tỷ USD, gia tăng sức mạnh tài chính vượt bậc."
+    ]
+  },
+  {
     "id": "log-5144fa5b",
     "ticker": "BÁO CÁO TH",
     "title": "Báo cáo Thị trường Trái phiếu: Huy động qua kênh TPDN sôi động trong T8",
@@ -1426,257 +1677,6 @@
     "extracted_catalysts_preview": [
       "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
       "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
-    ]
-  },
-  {
-    "id": "log-4c26aeba",
-    "ticker": "BÁO CÁO TH",
-    "title": "Báo cáo Thị trường Trái phiếu: Huy động qua kênh TPDN sôi động trong T8",
-    "institution": "MBS",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 2,
-    "theses_extracted": 0,
-    "confidence": 0.83,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / MBS",
-    "extracted_catalysts_preview": [
-      "Tổng giá trị trái phiếu chậm thanh toán Lũy kế đạt gần 43.4 nghìn tỷ đồng tương đương khoảng 3% dư nợ TPDN toàn thị trường.",
-      "Giá trị mua lại trước hạn tháng 8 đạt khoảng 30 nghìn tỷ đồng trong đó ngân hàng chiếm 91%."
-    ]
-  },
-  {
-    "id": "log-0e570ced",
-    "ticker": "CTG",
-    "title": "CTG: Khuyến nghị MUA với giá mục tiêu 48,800 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 7,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Báo cáo chưa bao gồm lợi nhuận từ thương vụ chuyển nhượng dự án Vietin Bank Tower.",
-      "Định giá P/E dự phóng năm 2026 ở mức 6,8 lần và P/B dự phóng ở mức 1,2 lần, ROE dự phóng đạt 21,3%. tỷ lệ lợi suất cổ tức dự kiến ở mức 1,4%."
-    ]
-  },
-  {
-    "id": "log-af99fdc4",
-    "ticker": "DHC",
-    "title": "DHC: Khuyến nghị MUA với giá mục tiêu 45,800 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
-    "catalysts_extracted": 15,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "kế hoạch chi trả cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phiếu, tương ứng lợi suất cổ tức 5,6%.",
-      "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 464.8 tỷ đồng (vượt LNST 393.1 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào."
-    ]
-  },
-  {
-    "id": "log-ea551e85",
-    "ticker": "FRT",
-    "title": "FRT: Khuyến nghị MUA với giá mục tiêu 181,400 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
-    "catalysts_extracted": 9,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Chuỗi Nhà thuốc Long Châu vượt mốc 2,000 cửa hàng, tiếp tục là động lực tăng trưởng doanh thu cốt lõi với mức tăng trên 35%/năm.",
-      "Mảng tiêm chủng vaccine Long Châu mở rộng nhanh, tận dụng hạ tầng có sẵn với biên lợi nhuận gộp dịch vụ trên 30%."
-    ]
-  },
-  {
-    "id": "log-334d246c",
-    "ticker": "PNJ",
-    "title": "PNJ: Khuyến nghị KHẢ QUAN với giá mục tiêu 42,900 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
-    "catalysts_extracted": 9,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Mở rộng thị phần bán lẻ trang sức vàng từ các cửa hàng truyền thống nhờ uy tín thương hiệu và mạng lưới hơn 400 cửa hàng hiện đại.",
-      "Gia tăng tỷ trọng dòng sản phẩm vàng trang sức và kim cương có biên lợi nhuận gộp cao, thay vì phụ thuộc vàng miếng 24K."
-    ]
-  },
-  {
-    "id": "log-96794751",
-    "ticker": "VCB",
-    "title": "VCB: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
-    "institution": "Vietcap",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 7,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / Vietcap",
-    "extracted_catalysts_preview": [
-      "Dự phóng năm 2026, thu nhập lãi thuần NII đạt 75.009 tỷ đồng (tăng 27,8% YoY) và LNST đạt 45.162 tỷ đồng (tăng 28% YoY), nhờ NIM phục hồi và tăng trưởng tín dụng ổn định.",
-      "lợi suất cổ tức dự phóng ở mức 0,8%."
-    ]
-  },
-  {
-    "id": "log-48b71d7b",
-    "ticker": "HT1",
-    "title": "HT1: Khuyến nghị MUA với giá mục tiêu 15,800 đồng/cổ phiếu",
-    "institution": "SSI",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
-    "catalysts_extracted": 15,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / SSI",
-    "extracted_catalysts_preview": [
-      "Dự phóng năm 2026, doanh thu thuần đạt 9.293 tỷ đồng.",
-      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
-    ]
-  },
-  {
-    "id": "log-07e8417a",
-    "ticker": "TCB",
-    "title": "TCB: Khuyến nghị KHẢ QUAN với giá mục tiêu 44,300 đồng/cổ phiếu",
-    "institution": "MBS",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 8,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / MBS",
-    "extracted_catalysts_preview": [
-      "LNTT 6T2026 đạt 18.540 tỷ đồng (tăng 22,5% YoY, hoàn thành 49% kế hoạch năm).",
-      "Dự phóng năm 2026, tổng thu nhập hoạt động TOI đạt 60.075 tỷ đồng (tăng 12,5% YoY), LNTT đạt 37.973 tỷ đồng (tăng 16,7% YoY, hoàn thành 102% kế hoạch năm)."
-    ]
-  },
-  {
-    "id": "log-4800e072",
-    "ticker": "AST",
-    "title": "AST: Khuyến nghị MUA với giá mục tiêu 76,500 đồng/cổ phiếu",
-    "institution": "KBSV",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
-    "catalysts_extracted": 15,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KBSV",
-    "extracted_catalysts_preview": [
-      "Dự phóng năm 2026, doanh số thuần đạt 2.185 tỷ đồng và LNST của cổ đông công ty mẹ đạt 370 tỷ đồng (tăng 48% YoY), nhờ đà phục hồi của lượng khách quốc tế và mở rộng mạng lưới điểm bán.",
-      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
-    ]
-  },
-  {
-    "id": "log-9b531010",
-    "ticker": "BWE",
-    "title": "BWE: Khuyến nghị  MUA với giá mục tiêu 59,000 đồng/cổ phiếu",
-    "institution": "KBSV",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bán lẻ & Tiêu dùng (MWG, FRT, PNJ, MSN, VNM)",
-    "catalysts_extracted": 1,
-    "theses_extracted": 0,
-    "confidence": 0.86,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KBSV",
-    "extracted_catalysts_preview": [
-      "Dự phóng năm 2026, doanh số thuần đạt 4.926 tỷ đồng (tăng 8,4% YoY) và LNST của cổ đông công ty mẹ đạt 1.097 tỷ đồng (tăng 10,7% YoY), được hỗ trợ bởi sản lượng nước tiêu thụ tăng trưởng ổn định."
-    ]
-  },
-  {
-    "id": "log-65f42547",
-    "ticker": "ACB",
-    "title": "ACB: Khuyến nghị KHẢ QUAN với giá mục tiêu 28,300 đồng/cổ phiếu",
-    "institution": "KAFI",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 7,
-    "theses_extracted": 1,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / KAFI",
-    "extracted_catalysts_preview": [
-      "Dự phóng năm 2026, LNTT đạt mức tăng trưởng 10% YoY, CIR dự kiến duy trì quanh 32% và ROE giai đoạn 2026-2028 đạt 17-18%.",
-      "KQKD 6T2026 ghi nhận LNTT đạt 10,7 nghìn tỷ đồng (tăng 0,4% YoY, lợi luận cốt lõi tăng 11% YoY), tăng trưởng tín dụng đạt 8,6% YTD."
-    ]
-  },
-  {
-    "id": "log-91ea9e57",
-    "ticker": "SIP",
-    "title": "SIP: Báo cáo cập nhật KQKD Q2/2026",
-    "institution": "VFS",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
-    "catalysts_extracted": 15,
-    "theses_extracted": 0,
-    "confidence": 0.91,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VFS",
-    "extracted_catalysts_preview": [
-      "Vị thế tài chính lành mạnh với lượng tiền mặt và đầu tư ngắn hạn đạt 12.362,2 tỷ đồng (tăng 81% YoY).",
-      "Công ty duy trì kế hoạch chi trả cổ tức bằng tiền mặt đều đặn từ 10% đến 50%."
-    ]
-  },
-  {
-    "id": "log-435b16e0",
-    "ticker": "DPG",
-    "title": "DPG: Khuyến nghị MUA với giá mục tiêu 35,000 đồng/cổ phiếu",
-    "institution": "BSC",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Xây dựng & Hạ tầng Đầu tư công (CTD, VCG, HHV)",
-    "catalysts_extracted": 0,
-    "theses_extracted": 0,
-    "confidence": 0.86,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / BSC",
-    "extracted_catalysts_preview": []
-  },
-  {
-    "id": "log-3076316d",
-    "ticker": "CTD",
-    "title": "CTD: Khuyến nghị MUA với giá mục tiêu 79,400 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Xây dựng & Hạ tầng Đầu tư công (CTD, VCG, HHV)",
-    "catalysts_extracted": 6,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Dự phóng N ĐTC 2027, lợi nhuận gộp đạt 2.025 tỷ đồng (tăng 40% YoY) và LNST công ty mẹ đạt 948 tỷ đồng (tăng 21% YoY), nhờ khả năng đàm phán giá thầu và lượng backlog lớn.",
-      "kế hoạch chi trả cổ tức tiền mặt dự kiến là 1.000 đồng/cổ phiếu."
-    ]
-  },
-  {
-    "id": "log-33e209ca",
-    "ticker": "VCB",
-    "title": "VCB: Khuyến nghị TÍCH LŨY với giá mục tiêu 69,000 đồng/cổ phiếu",
-    "institution": "VDS",
-    "learned_at": "23/09/2026 19:29",
-    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB, VPB)",
-    "catalysts_extracted": 6,
-    "theses_extracted": 0,
-    "confidence": 0.94,
-    "status": "SUCCESS",
-    "source": "Vietstock eDocs / VDS",
-    "extracted_catalysts_preview": [
-      "Định giá P/E dự phóng năm 2026 ở mức 12,5 lần, P/B dự phóng ở mức 1,9 lần, ROE đạt 18,4%. tỷ suất cổ tức 0,8%, kế hoạch phát hành riêng lẻ tỷ lệ 6,5% dự kiến hoàn tất trong năm.",
-      "Thương vụ phát hành riêng lẻ 6.5% vốn cho cổ đông chiến lược quốc tế thu về khoảng 1 tỷ USD, gia tăng sức mạnh tài chính vượt bậc."
     ]
   }
 ]
