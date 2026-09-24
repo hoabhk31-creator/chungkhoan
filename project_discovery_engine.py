@@ -431,6 +431,38 @@ CORPORATE_OFFICIAL_WEBSITES: Dict[str, Dict[str, str]] = {
         "projects_url": "https://vingroup.net",
         "ir_url": "https://ir.vingroup.net",
         "keywords": ["Tổ hợp Nhà máy Xe điện VinFast Hải Phòng", "VinES", "Trung tâm Nghiên cứu AI"]
+    },
+    "CII": {
+        "name": "CTCP Đầu tư Hạ tầng Kỹ thuật TP.HCM",
+        "domain": "cii.com.vn",
+        "projects_url": "https://cii.com.vn",
+        "ir_url": "https://cii.com.vn/quan-he-co-dong",
+        "keywords": [
+            "BOT Xa lộ Hà Nội", "BOT Cao tốc Trung Lương - Mỹ Thuận", "BOT Cầu Rạch Chiếc",
+            "Khu đô thị mới Thủ Thiêm", "The River Thủ Thiêm", "Thủ Thiêm Lakeview",
+            "D'Verano", "The Opera Residence", "152 Điện Biên Phủ", "Nước Tân Hiệp"
+        ]
+    },
+    "TNG": {
+        "name": "CTCP Đầu tư và Thương mại TNG",
+        "domain": "tng.vn",
+        "projects_url": "https://tng.vn",
+        "ir_url": "https://tng.vn/quan-he-co-dong",
+        "keywords": ["Nhà máy may Sông Công", "Chi nhánh May Phú Bình", "Cụm Công nghiệp Sơn Cẩm", "TNG Landmark"]
+    },
+    "C4G": {
+        "name": "CTCP Tập đoàn CIENCO4",
+        "domain": "cienco4.vn",
+        "projects_url": "https://cienco4.vn/du-an",
+        "ir_url": "https://cienco4.vn/quan-he-co-dong",
+        "keywords": ["Sân bay Long Thành", "Cao tốc Diễn Châu - Bãi Vọt", "Cầu Bến Rừng", "Hầm chui Lê Văn Lương"]
+    },
+    "FCN": {
+        "name": "CTCP FECON",
+        "domain": "fecon.com.vn",
+        "projects_url": "https://fecon.com.vn/du-an",
+        "ir_url": "https://fecon.com.vn/quan-he-co-dong",
+        "keywords": ["Metro Tuyến số 3 Hà Nội", "Cảng biển Nam Đình Vũ", "Điện gió Quốc Vinh Sóc Trăng", "Nhiệt điện Vũng Áng 2"]
     }
 }
 
@@ -466,13 +498,26 @@ def _save_discovered_cache() -> None:
 # 3. BỘ PHÂN GIẢI WEBSITE CHÍNH THỨC & QUÉT DỰ ÁN TỰ ĐỘNG
 # =============================================================================
 
+def strip_vietnamese_accents(text: str) -> str:
+    """Loại bỏ dấu tiếng Việt chuẩn Unicode để tạo brand token chính xác, tránh biến 'tầng' thành 'tng'."""
+    import unicodedata
+    if not text:
+        return ""
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    text = text.replace('đ', 'd').replace('Đ', 'D')
+    return text
+
+
 async def resolve_official_corporate_website(ticker: str) -> Dict[str, Any]:
     """
     Suy luận và tìm kiếm website chính thức còn hoạt động của doanh nghiệp niêm yết:
     1. Tra cứu cấu hình chuẩn trong CORPORATE_OFFICIAL_WEBSITES.
-    2. Rút trích thương hiệu từ tên niêm yết (company_database & VIETNAM_STOCK_DIRECTORY).
-    3. Thử nghiệm kết nối danh sách domain tiềm năng (HEAD request với timeout 2.5s).
-    4. Trả về thông tin domain hoạt động thực tế hoặc chuyển hướng Cổng UBCKNN nếu không tìm thấy.
+    2. Ưu tiên hàng đầu tên miền theo mã cổ phiếu ({ticker}.com.vn, {ticker}.vn, {ticker}.com).
+    3. Rút trích thương hiệu từ tên niêm yết sau khi chuẩn hóa bỏ dấu tiếng Việt (tránh co cụm phụ âm sai lệch).
+    4. Thử nghiệm kết nối danh sách domain tiềm năng (HEAD request với timeout 2.5s).
+    5. Chốt chặn Guardrail: Không chấp nhận tên miền 3 ký tự khác với mã cổ phiếu (ví dụ CII không bao giờ nhận tng.com).
+    6. Trả về thông tin domain hoạt động thực tế hoặc chuyển hướng Cổng UBCKNN nếu không tìm thấy.
     """
     clean_ticker = (ticker or "").upper().strip()
     if clean_ticker in CORPORATE_OFFICIAL_WEBSITES:
@@ -485,26 +530,30 @@ async def resolve_official_corporate_website(ticker: str) -> Dict[str, Any]:
     stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
     raw_name = comp_meta.get("name") or stock_meta.get("name") or f"CTCP {clean_ticker}"
 
+    candidates = []
+    t_lower = clean_ticker.lower()
+    # Ưu tiên 1: Tên miền theo mã cổ phiếu (phổ biến nhất tại TTCK VN)
+    candidates.extend([f"{t_lower}.com.vn", f"{t_lower}.vn", f"{t_lower}.com"])
+
+    # Rút trích tên thương hiệu sau khi chuẩn hóa bỏ dấu tiếng Việt
+    name_unaccented = strip_vietnamese_accents(raw_name)
     brand_tokens = []
-    m = re.search(r'\((.*?)\)', raw_name)
+    m = re.search(r'\((.*?)\)', name_unaccented)
     if m:
         brand_clean = re.sub(r'[^a-zA-Z0-9]', '', m.group(1)).lower()
         if len(brand_clean) >= 3:
             brand_tokens.append(brand_clean)
 
-    name_clean = re.sub(r'(CTCP|Tập đoàn|Tổng Công ty|Ngân hàng TMCP|Tổng CTCP|Việt Nam)', '', raw_name, flags=re.IGNORECASE)
+    name_clean = re.sub(r'(CTCP|Tập đoàn|Tổng Công ty|Ngân hàng TMCP|Tổng CTCP|Việt Nam)', '', name_unaccented, flags=re.IGNORECASE)
     words = [re.sub(r'[^a-zA-Z0-9]', '', w).lower() for w in name_clean.split() if len(w) >= 3]
     if words:
         brand_tokens.append("".join(words[:2]))
         brand_tokens.append(words[0])
 
-    candidates = []
+    # Ưu tiên 2: Tên miền theo thương hiệu doanh nghiệp (.com.vn và .vn trước .com)
     for b in brand_tokens:
         if b and len(b) >= 3:
-            candidates.extend([f"{b}.com", f"{b}.com.vn", f"{b}.vn"])
-
-    t_lower = clean_ticker.lower()
-    candidates.extend([f"{t_lower}.com.vn", f"{t_lower}.vn", f"{t_lower}.com"])
+            candidates.extend([f"{b}.com.vn", f"{b}.vn", f"{b}.com"])
 
     seen_domains = []
     for c in candidates:
@@ -514,7 +563,12 @@ async def resolve_official_corporate_website(ticker: str) -> Dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
         async with httpx.AsyncClient(headers=headers, timeout=2.5, follow_redirects=True, verify=False) as client:
-            for dom in seen_domains[:5]:
+            for dom in seen_domains[:8]:
+                prefix = dom.split('.')[0]
+                # Chốt chặn Guardrail: Tên miền 3 ký tự phải khớp với ticker để tránh nhận nhầm domain rác nước ngoài
+                if len(prefix) == 3 and prefix != t_lower:
+                    continue
+
                 for proto in ["https", "http"]:
                     test_url = f"{proto}://{dom}"
                     try:

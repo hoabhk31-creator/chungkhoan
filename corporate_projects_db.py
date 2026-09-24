@@ -1618,6 +1618,78 @@ EXPANDED_CORPORATE_PROJECTS_DB: Dict[str, List[Dict[str, Any]]] = {
     ],
 
     # -------------------------------------------------------------------------
+    # HẠ TẦNG KỸ THUẬT TP.HCM (CII)
+    # -------------------------------------------------------------------------
+    "CII": [
+        {
+            "name": "Dự án BOT Mở rộng Xa lộ Hà Nội & Quốc lộ 1 (Cửa ngõ phía Đông TP.HCM)",
+            "scale": "Tuyến huyết mạch kết nối TP.HCM - Đồng Nai - Bình Dương, từ chân cầu Sài Gòn đến nút giao Tân Vạn",
+            "investment_bil": 4905,
+            "progress_pct": 100,
+            "commercial_date": "Đang vận hành thu phí",
+            "impact": "Trục giao thông huyết mạch mang lại nguồn thu phí ổn định dài hạn (đến năm 2036+) và biên EBITDA vượt trội.",
+            "legal_status": "Hợp đồng BOT chính thức ký với UBND TP.HCM, thu phí tự động không dừng ETC 100%",
+            "occupancy_rate": 98,
+            "phase_tag": "Đang vận hành thu phí"
+        },
+        {
+            "name": "Dự án BOT Cao tốc Trung Lương - Mỹ Thuận",
+            "scale": "Chiều dài 51.5 km, 4 làn xe cao tốc, tuyến huyết mạch độc đạo kết nối TP.HCM với 13 tỉnh ĐBSCL",
+            "investment_bil": 12668,
+            "progress_pct": 100,
+            "commercial_date": "Đang vận hành thu phí",
+            "impact": "Lưu lượng xe thực tế vượt thiết kế, đóng góp dòng tiền doanh thu lớn nhất trong hệ thống BOT của CII.",
+            "legal_status": "Thông xe kỹ thuật và thu phí chính thức, đang lập đề xuất mở rộng Giai đoạn 2 (6 làn xe)",
+            "occupancy_rate": 95,
+            "phase_tag": "Đang vận hành thu phí"
+        },
+        {
+            "name": "Cụm Quỹ đất & Dự án Bất động sản KĐT Mới Thủ Thiêm (TP. Thủ Đức, TP.HCM)",
+            "scale": "Hơn 9 ha đất sạch đối ứng từ các dự án BT hạ tầng Thủ Thiêm (The River Thủ Thiêm, Lakeview 1-2, D'Verano...)",
+            "investment_bil": 10000,
+            "progress_pct": 85,
+            "commercial_date": "Bàn giao & Khai thác các phân khu",
+            "impact": "Quỹ đất vàng Thủ Thiêm có giá trị thị trường cực lớn, đem lại lợi nhuận đột biến khi đấu giá và bàn giao.",
+            "legal_status": "Đầy đủ quy hoạch chi tiết 1/500, đã bàn giao The River Thủ Thiêm và Lakeview 1-2",
+            "occupancy_rate": 88,
+            "phase_tag": "Đang mở bán & bàn giao"
+        },
+        {
+            "name": "Tổ hợp Căn hộ & Văn phòng 152 Điện Biên Phủ (Bình Thạnh, TP.HCM)",
+            "scale": "Tháp đôi văn phòng và căn hộ cao cấp 27 tầng liền kề ga Metro số 1 Bến Thành - Suối Tiên",
+            "investment_bil": 1600,
+            "progress_pct": 100,
+            "commercial_date": "Đang vận hành & Khai thác",
+            "impact": "Tỷ lệ lấp đầy văn phòng trên 90%, dòng tiền cho thuê và dịch vụ quản lý tòa nhà ổn định.",
+            "legal_status": "Đã hoàn công nghiệm thu, cấp sổ hồng căn hộ và vận hành tòa nhà văn phòng hạng A-",
+            "occupancy_rate": 92,
+            "phase_tag": "Đang khai thác"
+        },
+        {
+            "name": "Tổ hợp Nhà máy Nước sạch & Cấp thoát nước (CII Water - SII)",
+            "scale": "Cụm Nhà máy nước Tân Hiệp (300,000 m3/ngày đêm), Kênh Đông, Sài Gòn - Pleiku và Cà Ná",
+            "investment_bil": 3500,
+            "progress_pct": 100,
+            "commercial_date": "Đang vận hành cấp nước",
+            "impact": "Bảo đảm dòng tiền phòng thủ bền vững chống chịu chu kỳ kinh tế, phục vụ hàng triệu người dân TP.HCM.",
+            "legal_status": "Hợp đồng cung cấp nước sạch dài hạn với Tổng Công ty Cấp nước Sài Gòn (Sawaco)",
+            "occupancy_rate": 96,
+            "phase_tag": "Đang khai thác"
+        },
+        {
+            "name": "Dự án BOT Nâng cấp Mở rộng Quốc lộ 1A (Tỉnh Ninh Thuận) & BOT Cầu Cổ Chiên",
+            "scale": "Nâng cấp mở rộng 37 km QL1A và cầu huyết mạch Cổ Chiên nối Bến Tre - Trà Vinh",
+            "investment_bil": 4400,
+            "progress_pct": 100,
+            "commercial_date": "Đang vận hành thu phí",
+            "impact": "Đóng góp dòng tiền thu phí ổn định, bảo đảm thanh toán nợ gốc và lãi vay các gói trái phiếu dự án.",
+            "legal_status": "Hợp đồng BOT ký với Bộ GTVT, vận hành thu phí tự động ETC 100%",
+            "occupancy_rate": 94,
+            "phase_tag": "Đang vận hành thu phí"
+        }
+    ],
+
+    # -------------------------------------------------------------------------
     # GEMADEPT (GMD)
     # -------------------------------------------------------------------------
     "GMD": [
