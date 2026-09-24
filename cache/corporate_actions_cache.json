@@ -3062,5 +3062,22 @@
       "adjustment_factor": 0.9091,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "MSR": [
+    {
+      "id": "msr-ca-16092026-dividend_cash",
+      "ex_date": "16/09/2026",
+      "record_date": "17/09/2026",
+      "execution_date": "24/09/2026",
+      "event_type": "dividend_cash",
+      "title": "MSR: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt",
+      "description": "Trả cổ tức  đợt 1/2026 bằng tiền, 1,000 đồng/CP",
+      "cash_amount": 1000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
