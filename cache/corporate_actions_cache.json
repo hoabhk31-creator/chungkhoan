@@ -3713,5 +3713,195 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "CTI": [
+    {
+      "id": "cti-ca-17082026-dividend_stock",
+      "ex_date": "17/08/2026",
+      "record_date": "18/08/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "CTI: Thông báo ngày ĐKCC trả cổ tức năm 2025 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:10",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "ANV": [
+    {
+      "id": "anv-ca-23102025-dividend_cash",
+      "ex_date": "23/10/2025",
+      "record_date": "24/10/2025",
+      "execution_date": "10/11/2025",
+      "event_type": "dividend_cash",
+      "title": "ANV: Thông báo ngày ĐKCC chi trả cổ tức năm 2024 và tạm ứng cổ tức năm 2025",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "anv-ca-07112024-bonus_share",
+      "ex_date": "07/11/2024",
+      "record_date": "08/11/2024",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "ANV: Thông báo về ngày đăng ký cuối cùng nhận cổ phiếu phát hành do thực hiện tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 1:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 1.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.5,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "anv-ca-11102024-dividend_cash",
+      "ex_date": "11/10/2024",
+      "record_date": "14/10/2024",
+      "execution_date": "27/12/2024",
+      "event_type": "dividend_cash",
+      "title": "ANV: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức năm 2023 bằng tiền",
+      "description": "Trả cổ tức  năm 2023  bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "VHC": [
+    {
+      "id": "vhc-ca-29092025-dividend_cash",
+      "ex_date": "29/09/2025",
+      "record_date": "30/09/2025",
+      "execution_date": "15/10/2025",
+      "event_type": "dividend_cash",
+      "title": "VHC: Thông báo ngày ĐKCC tạm ứng cổ tức năm 2025 bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 2,000 đồng/CP",
+      "cash_amount": 2000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "vhc-ca-05122024-dividend_cash",
+      "ex_date": "05/12/2024",
+      "record_date": "06/12/2024",
+      "execution_date": "18/12/2024",
+      "event_type": "dividend_cash",
+      "title": "VHC: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức năm 2024 bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 2,000 đồng/CP",
+      "cash_amount": 2000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "DDV": [
+    {
+      "id": "ddv-ca-25062026-dividend_cash",
+      "ex_date": "25/06/2026",
+      "record_date": "26/06/2026",
+      "execution_date": "10/07/2026",
+      "event_type": "dividend_cash",
+      "title": "DDV: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 1,700 đồng/CP",
+      "cash_amount": 1700.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ddv-ca-20062025-dividend_cash",
+      "ex_date": "20/06/2025",
+      "record_date": "23/06/2025",
+      "execution_date": "18/07/2025",
+      "event_type": "dividend_cash",
+      "title": "DDV: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 900 đồng/CP",
+      "cash_amount": 900.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ddv-ca-27062024-dividend_cash",
+      "ex_date": "27/06/2024",
+      "record_date": "28/06/2024",
+      "execution_date": "19/07/2024",
+      "event_type": "dividend_cash",
+      "title": "DDV: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt",
+      "description": "Trả cổ tức  năm 2023  bằng tiền, 600 đồng/CP",
+      "cash_amount": 600.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "CTR": [
+    {
+      "id": "ctr-ca-09072026-dividend_cash",
+      "ex_date": "09/07/2026",
+      "record_date": "10/07/2026",
+      "execution_date": "30/07/2026",
+      "event_type": "dividend_cash",
+      "title": "CTR: Thông báo ngày ĐKCC thực hiện quyền nhận cổ tức năm 2025 bằng tiền và cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 1,500 đồng/CP",
+      "cash_amount": 1500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ctr-ca-09072026-dividend_stock",
+      "ex_date": "09/07/2026",
+      "record_date": "10/07/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "CTR: Thông báo ngày ĐKCC thực hiện quyền nhận cổ tức năm 2025 bằng tiền và cổ phiếu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:12",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.12,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8929,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ctr-ca-30092025-dividend_cash",
+      "ex_date": "30/09/2025",
+      "record_date": "01/10/2025",
+      "execution_date": "15/10/2025",
+      "event_type": "dividend_cash",
+      "title": "CTR: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền nhận cổ tức năm 2024 bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 2,150 đồng/CP",
+      "cash_amount": 2150.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
