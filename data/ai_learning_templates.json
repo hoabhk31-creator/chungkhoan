@@ -952,5 +952,31 @@
     "sample_text": "",
     "is_system": false,
     "updated_at": "23/09/2026 19:29"
+  },
+  {
+    "id": "custom-c902ccbc",
+    "name": "Hóa chất & Phân bón (DGC, DCM)",
+    "sector": "Hóa chất & Phân bón",
+    "keywords": [
+      "dgc",
+      "dcm",
+      "phốt pho vàng",
+      "apatit",
+      "urê",
+      "hóa chất"
+    ],
+    "catalyst_rules": [
+      "Tiến độ tổ hợp hóa chất Nghi Sơn và nhà máy mới",
+      "Chênh lệch giá xuất khẩu phốt pho vàng (P4) và giá quặng apatit đầu vào"
+    ],
+    "thesis_rules": [
+      "Lợi thế tự chủ nguồn quặng apatit giúp kiểm soát giá vốn cạnh tranh"
+    ],
+    "risk_rules": [
+      "Giá phân bón thế giới sụt giảm do nguồn cung xuất khẩu từ Trung Quốc"
+    ],
+    "sample_text": "",
+    "is_system": false,
+    "updated_at": "24/09/2026 17:17"
   }
 ]

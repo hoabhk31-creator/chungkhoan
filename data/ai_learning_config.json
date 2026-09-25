@@ -1,9 +1,15 @@
 {
   "enabled": true,
-  "interval_hours": 2,
-  "watchlist": [],
-  "last_run": "24/09/2026 13:18",
-  "next_run": "24/09/2026 15:18",
+  "interval_hours": 6,
+  "watchlist": [
+    "HPG",
+    "SSI",
+    "FPT",
+    "MWG",
+    "TCH"
+  ],
+  "last_run": "24/09/2026 17:17",
+  "next_run": "24/09/2026 23:17",
   "auto_ingest_matrix": true,
   "status": "LEARNED"
 }
