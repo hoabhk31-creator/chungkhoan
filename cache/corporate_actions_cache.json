@@ -3474,5 +3474,52 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "HDC": [
+    {
+      "id": "hdc-ca-19062026-dividend_stock",
+      "ex_date": "19/06/2026",
+      "record_date": "22/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "HDC: Thông báo về ngày ĐKCC thực hiện quyền nhận cổ tức bằng CP năm 2025",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 100:15",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.15,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8696,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "hdc-ca-11112025-rights_issue",
+      "ex_date": "11/11/2025",
+      "record_date": "12/11/2025",
+      "execution_date": "",
+      "event_type": "rights_issue",
+      "title": "HDC: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền nhận cổ phiếu phát hành để tăng vốn cổ phần từ nguồn vốn chủ sở hữu và để thực hiện quyền mua trái phiếu chuyển đổi chào bán cho cổ đông hiện hữu",
+      "description": "Thực hiện quyền mua trái phiếu chuyển đổi, tỷ lệ 35671:1000, giá 100,000 đồng/CP",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.028,
+      "rights_price": 100000.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "hdc-ca-11112025-bonus_share",
+      "ex_date": "11/11/2025",
+      "record_date": "12/11/2025",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "HDC: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền nhận cổ phiếu phát hành để tăng vốn cổ phần từ nguồn vốn chủ sở hữu và để thực hiện quyền mua trái phiếu chuyển đổi chào bán cho cổ đông hiện hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 100:12",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.12,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8929,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
