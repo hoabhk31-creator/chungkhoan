@@ -5428,6 +5428,13 @@ SPECIFIC_CORPORATE_CATALYSTS: Dict[str, List[str]] = {
         "Mảng Collagen và Gelatin (sản phẩm chế biến sâu có giá trị gia tăng cao) đóng góp dòng tiền ổn định với biên lãi gộp trên 35%.",
         "Tự chủ hơn 70% vùng nuôi cá nguyên liệu, giúp Vĩnh Hoàn kiểm soát chi phí giá thành tốt nhất toàn ngành thủy sản."
     ],
+    "HDC": [
+        "Quỹ đất sạch quy mô lớn hơn 400 ha tại các vị trí đắc địa ở TP. Vũng Tàu và thị xã Phú Mỹ với giá vốn ban đầu rất thấp, bảo đảm biên lợi nhuận gộp duy trì ở mức cao 65 - 75%.",
+        "Hưởng lợi trực tiếp từ chuỗi đại dự án hạ tầng giao thông kết nối vùng: Cao tốc Biên Hòa - Vũng Tàu, đường Vành đai 4 và Sân bay Quốc tế Long Thành thúc đẩy giá trị bất động sản Bà Rịa - Vũng Tàu tăng tốc.",
+        "Điểm rơi bàn giao và ghi nhận doanh thu - lợi nhuận lớn từ Dự án The Light City (Giai đoạn 1 & 2 quy mô 49 ha) và Khu biệt thự đồi Ngọc Tước II với biên lợi nhuận gộp kỷ lục.",
+        "Chiến lược hợp tác M&A và phát triển tổ hợp du lịch nghỉ dưỡng cao cấp tại Khu du lịch Đại Dương (Antares Vũng Tàu - Bãi Sau quy mô 19.5 ha) tạo dòng tiền mặt đột biến giai đoạn 2025 - 2027.",
+        "Cơ cấu tài chính lành mạnh, nợ vay được kiểm soát an toàn và duy trì chính sách chia cổ tức đều đặn hàng năm cho cổ đông."
+    ],
     "DCM": [
         "Nhà máy Đạm Cà Mau chính thức hết khấu hao tài sản cố định, giúp tiết kiệm chi phí khấu hao 800 - 1,000 tỷ đồng/năm phản ánh trực tiếp vào LNST.",
         "M&A thành công Công ty Phân bón Hàn - Việt (KVF) giúp gia tăng gấp đôi công suất sản xuất phân bón NPK chất lượng cao.",
@@ -5677,6 +5684,7 @@ SPECIFIC_CORPORATE_MOAT: Dict[str, str] = {
     "PVS": "PVS là tổng thầu cơ khí dầu khí và điện gió ngoài khơi (EPCI) số 1 Việt Nam với hệ thống cảng bãi chế tạo hiện đại đạt tiêu chuẩn xuất khẩu sang châu Âu.",
     "GMD": "Gemadept sở hữu hệ sinh thái cảng biển nước sâu đón tàu mẹ tải trọng lớn nhất Việt Nam (Gemalink, Nam Đình Vũ), nắm giữ vị trí yết hầu trong chuỗi logistics xuất nhập khẩu.",
     "VHM": "Vinhomes nắm giữ vị thế độc tôn với quỹ đất sạch lớn nhất cả nước, năng lực triển khai các đại đô thị 'All-in-one' thần tốc và thương hiệu BĐS số 1 Việt Nam.",
+    "HDC": "Lợi thế cạnh tranh (Economic Moat) độc tôn của HODECO (HDC) là vị thế nhà phát triển bất động sản số 1 tại Bà Rịa - Vũng Tàu với bề dày hơn 30 năm uy tín, nắm giữ quỹ đất sạch quy mô trên 400 ha tại trung tâm TP. Vũng Tàu với giá vốn đền bù ban đầu cực thấp, kết hợp năng lực hoàn thiện pháp lý và bàn giao dự án chuẩn mực giúp công ty đạt biên lợi nhuận gộp thuộc Top cao nhất toàn ngành BĐS dân cư (~65-74%).",
     "FRT": "Long Châu là chuỗi nhà thuốc số 1 Việt Nam với năng lực quản trị công nghệ tối ưu, phủ rộng toàn quốc và biên lợi nhuận vượt trội so với các đối thủ cùng ngành.",
     "PNJ": "PNJ thống lĩnh thị trường trang sức chế tác Việt Nam nhờ năng lực sản xuất lớn nhất khu vực, thương hiệu trang sức uy tín và mạng lưới phân phối rộng khắp.",
     "VHC": "Vĩnh Hoàn là 'Nữ hoàng cá tra' với chuỗi giá trị khép kín từ vùng nuôi chuẩn quốc tế, nhà máy chế biến hiện đại và các sản phẩm collagen chế biến sâu giá trị cao.",

@@ -490,6 +490,72 @@ EXPANDED_CORPORATE_PROJECTS_DB: Dict[str, List[Dict[str, Any]]] = {
     ],
 
     # -------------------------------------------------------------------------
+    # HODECO (HDC) - CTCP PHÁT TRIỂN NHÀ BÀ RỊA - VŨNG TÀU
+    # -------------------------------------------------------------------------
+    "HDC": [
+        {
+            "name": "Khu đô thị The Light City (Giai đoạn 1 & 2 - TP. Vũng Tàu)",
+            "scale": "Quy mô 49 ha tại Phường 12, TP. Vũng Tàu (GĐ 1: 27.2 ha; GĐ 2: 21.8 ha). Đại đô thị hiện đại gồm nhà liên kế, biệt thự và chung cư cao cấp.",
+            "investment_bil": 2400,
+            "progress_pct": 85,
+            "commercial_date": "Đang mở bán & bàn giao Giai đoạn 1",
+            "impact": "Dự án quy mô lớn nhất đóng góp nguồn doanh thu và lợi nhuận cốt lõi cho HODECO trong giai đoạn 2024 - 2027.",
+            "legal_status": "Đầy đủ quy hoạch chi tiết 1/500, đã hoàn thành hạ tầng kỹ thuật Giai đoạn 1 và được cấp phép mở bán",
+            "occupancy_rate": 80,
+            "phase_tag": "Đang mở bán & thi công",
+            "source": "Báo cáo Thường niên HDC, Nghị quyết ĐHĐCĐ & Website hodeco.vn"
+        },
+        {
+            "name": "Khu biệt thự đồi Ngọc Tước II (Phường 8, TP. Vũng Tàu)",
+            "scale": "Quy mô 14.3 ha tại vị trí đắc địa Bãi Sau TP. Vũng Tàu. Dự án biệt thự nghỉ dưỡng cao cấp và nhà vườn sinh thái ven biển.",
+            "investment_bil": 1500,
+            "progress_pct": 95,
+            "commercial_date": "Bàn giao các căn biệt thự kinh doanh",
+            "impact": "Biên lợi nhuận gộp rất cao (~70-74%), mang lại dòng tiền ròng vững chắc cho doanh nghiệp.",
+            "legal_status": "Đã hoàn thiện hạ tầng kỹ thuật 100%, đã được cấp giấy chứng nhận QSDĐ từng lô biệt thự",
+            "occupancy_rate": 85,
+            "phase_tag": "Đang mở bán & bàn giao",
+            "source": "Báo cáo Thường niên HDC & Thuyết minh BCTC"
+        },
+        {
+            "name": "Khu đô thị Tây 3/2 (Phường 10 & 11, TP. Vũng Tàu)",
+            "scale": "Quy mô 6.33 ha mặt tiền đường 3/2 trục chính vào TP. Vũng Tàu. Bao gồm nhà phố thương mại (shophouse) và biệt thự.",
+            "investment_bil": 1100,
+            "progress_pct": 65,
+            "commercial_date": "Giai đoạn 2025 - 2027",
+            "impact": "Tăng cường quỹ sản phẩm nhà ở thương mại trung tâm, hưởng lợi từ hạ tầng cao tốc Biên Hòa - Vũng Tàu.",
+            "legal_status": "Đã phê duyệt quy hoạch chi tiết 1/500, đang hoàn tất thủ tục giao đất thực hiện dự án",
+            "occupancy_rate": 75,
+            "phase_tag": "Chuẩn bị thi công hạ tầng",
+            "source": "Báo cáo Thường niên HDC & Nghị quyết ĐHĐCĐ"
+        },
+        {
+            "name": "Khu du lịch Đại Dương (Antares Vũng Tàu - Bãi Sau)",
+            "scale": "Quy mô 19.5 ha tại bờ biển Bãi Sau TP. Vũng Tàu. Tổ hợp khách sạn 5 sao, condotel, biệt thự biển và khu vui chơi giải trí cao cấp.",
+            "investment_bil": 4300,
+            "progress_pct": 60,
+            "commercial_date": "Hợp tác phát triển & Khai thác",
+            "impact": "Tạo giá trị tài sản và dòng tiền đột biến từ việc hợp tác phát triển tổ hợp du lịch nghỉ dưỡng quy mô lớn.",
+            "legal_status": "Đã phê duyệt quy hoạch 1/500 và chủ trương đầu tư dự án",
+            "occupancy_rate": 85,
+            "phase_tag": "Hợp tác đầu tư & hoàn thiện thủ tục",
+            "source": "Báo cáo Thường niên HDC & Nghị quyết HĐQT"
+        },
+        {
+            "name": "Dự án Ecotown Phú Mỹ (Thị xã Phú Mỹ, Bà Rịa - Vũng Tàu)",
+            "scale": "Quy mô 6.3 ha gồm 319 căn nhà liên kế và 2 block chung cư nhà ở xã hội (NOXH).",
+            "investment_bil": 600,
+            "progress_pct": 90,
+            "commercial_date": "Đang mở bán khu NOXH và khai thác",
+            "impact": "Đóng góp doanh thu ổn định từ thị trường bất động sản công nghiệp và dịch vụ cảng biển Cái Mép - Thị Vải.",
+            "legal_status": "Đã hoàn thành hạ tầng kỹ thuật và nghiệm thu bàn giao các đợt sản phẩm chính",
+            "occupancy_rate": 88,
+            "phase_tag": "Đang mở bán & bàn giao",
+            "source": "Báo cáo Thường niên HDC & Thuyết minh BCTC"
+        }
+    ],
+
+    # -------------------------------------------------------------------------
     # KINH BẮC (KBC) - BĐS KHU CÔNG NGHIỆP & ĐÔ THỊ
     # -------------------------------------------------------------------------
     "KBC": [
@@ -1986,67 +2052,22 @@ def extract_dynamic_company_projects(ticker: str, sector: str, company_name: str
     dynamic_projects: List[Dict[str, Any]] = []
 
     # 3. Tạo dự án từ CIP thực tế nếu có quy mô dở dang
-    if cip_val >= 30.0:
+    if cip_val >= 50.0:
         cip_progress = 85 if cip_val <= prev_cip else min(80, max(50, int(cip_val / (cip_val * 1.3) * 100)))
         dynamic_projects.append({
-            "name": f"Hạng mục Chi phí XDCB Dở dang Trọng điểm ({clean_ticker})",
+            "name": f"Hạng mục Chi phí Xây dựng Cơ bản Dở dang Trọng điểm ({clean_ticker})",
             "scale": f"Tài sản xây dựng cơ bản dở dang lũy kế {cip_val:,.1f} tỷ VNĐ ghi nhận trên BCTC kiểm toán",
-            "investment_bil": round(cip_val * 1.25, 0),
+            "investment_bil": round(cip_val, 0),
             "progress_pct": cip_progress,
-            "commercial_date": "Giai đoạn 2025 - 2026",
-            "impact": f"Khi bàn giao đưa vào vận hành sẽ mở rộng năng lực sản xuất kinh doanh, thúc đẩy dòng tiền mới cho {clean_ticker}.",
-            "legal_status": "Đã được kiểm toán độc lập xác nhận trong Thuyết minh BCTC soát xét",
-            "occupancy_rate": 85,
+            "commercial_date": "Giai đoạn 2025 - 2027",
+            "impact": f"Khi hoàn tất nghiệm thu và bàn giao đưa vào vận hành sẽ mở rộng năng lực sản xuất kinh doanh cho {clean_ticker}.",
+            "legal_status": "Được kiểm toán độc lập xác nhận trong Thuyết minh BCTC soát xét",
+            "occupancy_rate": 80,
             "phase_tag": "Đang thi công xây dựng",
             "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
         })
 
-    # 4. Tạo dự án từ Hàng tồn kho dở dang nếu là BĐS / Xây lắp
-    if inv_val >= 150.0 and any(w in s_lower for w in ["bất động sản", "địa ốc", "xây dựng", "hạ tầng"]):
-        dynamic_projects.append({
-            "name": f"Hạng mục Quỹ đất & Dự án Bất động sản Thương mại Dở dang ({clean_ticker})",
-            "scale": f"Giá trị tồn kho dự án dở dang và chi phí dở dang đạt {inv_val:,.1f} tỷ VNĐ trên BCTC",
-            "investment_bil": round(inv_val, 0),
-            "progress_pct": 75,
-            "commercial_date": "Mở bán & Bàn giao 2025 - 2027",
-            "impact": f"Bảo đảm nguồn doanh thu và dòng tiền bán hàng gối đầu dồi dào cho {clean_ticker}.",
-            "legal_status": "Đầy đủ hồ sơ quy hoạch & ghi nhận thực tế trên BCTC",
-            "occupancy_rate": 78,
-            "phase_tag": "Đang mở bán & bàn giao",
-            "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
-        })
-
-    # 5. Tạo dự án từ Khoản đầu tư tài chính dài hạn / M&A dự án nếu quy mô lớn
-    if long_term_inv >= 300.0 and len(dynamic_projects) < 2:
-        dynamic_projects.append({
-            "name": f"Khoản Đầu tư Dự án Trọng điểm / Công ty Liên kết M&A ({clean_ticker})",
-            "scale": f"Giá trị vốn góp đầu tư dự án và công ty liên doanh liên kết đạt {long_term_inv:,.1f} tỷ VNĐ",
-            "investment_bil": round(long_term_inv, 0),
-            "progress_pct": 90,
-            "commercial_date": "Đang vận hành & Khai thác",
-            "impact": f"Đóng góp lợi nhuận từ công ty liên kết và mở rộng hệ sinh thái kinh doanh của {clean_ticker}.",
-            "legal_status": "Đã hoàn tất thủ tục pháp lý góp vốn & phê duyệt theo quy định",
-            "occupancy_rate": 88,
-            "phase_tag": "Đang khai thác",
-            "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
-        })
-
-    # 6. Tạo dự án từ Cụm Tài sản Cố định Vận hành nếu quy mô lớn và chưa có dự án XDCB
-    if fixed_assets >= 500.0 and len(dynamic_projects) == 0:
-        dynamic_projects.append({
-            "name": f"Tổ hợp Cơ sở Hạ tầng & Tài sản Cố định Hoạt động Cốt lõi ({clean_ticker})",
-            "scale": f"Nguyên giá và giá trị còn lại của tài sản cố định hữu hình phục vụ SXKD đạt {fixed_assets:,.1f} tỷ VNĐ",
-            "investment_bil": round(fixed_assets, 0),
-            "progress_pct": 95,
-            "commercial_date": "Đang vận hành khai thác",
-            "impact": f"Nền tảng tài sản cố định cốt lõi tạo ra doanh thu và dòng tiền hoạt động kinh doanh bền vững.",
-            "legal_status": "100% tài sản sở hữu hợp pháp & nghiệm thu an toàn",
-            "occupancy_rate": 90,
-            "phase_tag": "Đang vận hành",
-            "source": "Báo cáo Tài chính Soát xét / BCTN"
-        })
-
-    # Lưu ý: Tuyệt đối KHÔNG sinh template giả định chung chung nếu không có dữ liệu thực tế!
+    # Tuyệt đối KHÔNG sinh template giả định từ Hàng tồn kho hay Tài sản cố định chung chung
     return _normalize_projects(dynamic_projects)
 
 

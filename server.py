@@ -1021,16 +1021,39 @@ async def get_catalysts_and_insights(ticker: str):
 
         # Tự động quét và lấy danh mục dự án mới nhất (sử dụng cache thông minh nếu vừa quét, hoặc quét tự động)
         disc_entry = await discover_company_projects_master(clean_ticker, force_refresh=False)
-        if disc_entry and disc_entry.get("projects"):
-            data["projects"] = disc_entry["projects"]
-            data["total_projects"] = len(disc_entry["projects"])
-            data["total_investment_bil"] = disc_entry.get("total_investment_bil", data.get("total_investment_bil", 0))
+        if disc_entry:
             data["official_website"] = disc_entry.get("official_website")
             data["scan_sources"] = disc_entry.get("scan_sources")
             data["scan_time_str"] = disc_entry.get("scan_time_str")
-            data["auto_discovered"] = True
+            if disc_entry.get("projects"):
+                data["projects"] = disc_entry["projects"]
+                data["total_projects"] = len(disc_entry["projects"])
+                data["total_investment_bil"] = disc_entry.get("total_investment_bil", 0)
+                data["auto_discovered"] = True
+            else:
+                data["projects"] = []
+                data["total_projects"] = 0
+                data["total_investment_bil"] = 0
+                data["auto_discovered"] = False
     except Exception as e:
         print(f"[get_catalysts_and_insights] Auto discovery error for {clean_ticker}: {e}")
+
+    # Tích hợp Adaptive Corporate Growth Engine để tùy biến tiêu đề và Thẻ Kế hoạch/Động lực theo ngành
+    try:
+        from adaptive_growth_engine import build_adaptive_growth_portfolio
+        company_name = data.get("company_name", f"CTCP {clean_ticker}")
+        sector = data.get("sector", "")
+        official_web = data.get("official_website", "")
+        adaptive_info = build_adaptive_growth_portfolio(
+            clean_ticker,
+            sector=sector,
+            company_name=company_name,
+            existing_projects=data.get("projects", []),
+            official_website=official_web
+        )
+        data.update(adaptive_info)
+    except Exception as e:
+        print(f"[get_catalysts_and_insights] Adaptive growth engine error for {clean_ticker}: {e}")
 
     return data
 
@@ -1041,10 +1064,25 @@ async def discover_company_projects_route(ticker: str, force_refresh: bool = Fal
     """
     Kích hoạt quét và bóc tách thông tin dự án mở rộng trực tiếp từ
     Website chính thức của doanh nghiệp và Báo cáo Thường niên (BCTN), Báo cáo Bán niên (BCTCSN).
+    Tích hợp Adaptive Growth Engine phân loại theo mô hình kinh doanh.
     """
     clean_ticker = ticker.upper().strip()
     from project_discovery_engine import discover_company_projects_master
-    return await discover_company_projects_master(clean_ticker, force_refresh=force_refresh)
+    res = await discover_company_projects_master(clean_ticker, force_refresh=force_refresh)
+    try:
+        from adaptive_growth_engine import build_adaptive_growth_portfolio
+        company_name = res.get("company_name", f"CTCP {clean_ticker}")
+        official_web = res.get("official_website", "")
+        adaptive_info = build_adaptive_growth_portfolio(
+            clean_ticker,
+            company_name=company_name,
+            existing_projects=res.get("projects", []),
+            official_website=official_web
+        )
+        res.update(adaptive_info)
+    except Exception as e:
+        print(f"[discover_company_projects_route] Adaptive error for {clean_ticker}: {e}")
+    return res
 
 
 @app.get("/api/ssc-company-profile/{ticker}")

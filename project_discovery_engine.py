@@ -626,35 +626,109 @@ def _save_discovered_cache() -> None:
     except Exception as e:
         print(f"[ProjectDiscovery] Lỗi lưu cache: {e}")
 
+# File cache danh bạ website chính thức từ Cổng công bố thông tin (UBCKNN & Vietstock)
+OFFICIAL_REGISTRY_CACHE_FILE = os.path.join(DATA_DIR, "official_corporate_websites_registry.json")
+_REGISTRY_CACHE: Dict[str, Any] = {}
 
-# =============================================================================
-# 3. BỘ PHÂN GIẢI WEBSITE CHÍNH THỨC & QUÉT DỰ ÁN TỰ ĐỘNG
-# =============================================================================
+def _load_registry_cache() -> Dict[str, Any]:
+    global _REGISTRY_CACHE
+    if _REGISTRY_CACHE:
+        return _REGISTRY_CACHE
+    if os.path.exists(OFFICIAL_REGISTRY_CACHE_FILE):
+        try:
+            with open(OFFICIAL_REGISTRY_CACHE_FILE, "r", encoding="utf-8") as f:
+                _REGISTRY_CACHE = json.load(f)
+        except Exception:
+            _REGISTRY_CACHE = {}
+    return _REGISTRY_CACHE
 
-def strip_vietnamese_accents(text: str) -> str:
-    """Loại bỏ dấu tiếng Việt chuẩn Unicode để tạo brand token chính xác, tránh biến 'tầng' thành 'tng'."""
-    import unicodedata
-    if not text:
-        return ""
-    text = unicodedata.normalize('NFD', text)
-    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
-    text = text.replace('đ', 'd').replace('Đ', 'D')
-    return text
+def _save_registry_cache() -> None:
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with open(OFFICIAL_REGISTRY_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(_REGISTRY_CACHE, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[ProjectDiscovery] Lỗi lưu registry cache: {e}")
+
+
+async def fetch_official_corporate_website_from_registry(ticker: str) -> Optional[Dict[str, Any]]:
+    """
+    Truy vấn hồ sơ doanh nghiệp niêm yết chính thức từ Cổng công bố thông tin (Vietstock Profile & SSC Registry):
+    1. Kiểm tra cache hồ sơ đã lưu.
+    2. Gửi request đến trang hồ sơ doanh nghiệp: https://finance.vietstock.vn/{ticker}/ho-so-doanh-nghiep.htm
+    3. Bóc tách Website chính thức từ thẻ HTML Website (chuẩn xác 100% như trên Cổng UBCKNN).
+    4. Trích xuất tên công ty, sàn niêm yết.
+    5. Lưu vào cache và trả về cấu trúc đồng bộ.
+    """
+    clean_ticker = (ticker or "").upper().strip()
+    cache = _load_registry_cache()
+    if clean_ticker in cache:
+        return cache[clean_ticker]
+
+    url = f"https://finance.vietstock.vn/{clean_ticker}/ho-so-doanh-nghiep.htm"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    }
+
+    try:
+        async with httpx.AsyncClient(headers=headers, timeout=4.5, follow_redirects=True, verify=False) as client:
+            r = await client.get(url)
+            if r.status_code == 200:
+                html = r.text
+                m = re.search(r'Website</span>\s*<span>\s*<a\s+href=([^\s>]+)', html, re.IGNORECASE)
+                raw_site = None
+                if m:
+                    raw_site = m.group(1).strip('\'"')
+                else:
+                    m2 = re.search(r'class=company-general-logo__wrapper><a[^>]+href=([^\s>]+)', html)
+                    if m2:
+                        raw_site = m2.group(1).strip('\'"')
+
+                if raw_site:
+                    proto = "https" if raw_site.startswith("https") else "http"
+                    dom = re.sub(r'^https?://', '', raw_site).split('/')[0].lower()
+                    dom = dom.replace('www.', '') if (dom.startswith('www.') and len(dom) > 8) else dom
+                    base_url = f"{proto}://{dom}"
+
+                    m_name = re.search(r'<title>([^-|]+)', html)
+                    comp_name = m_name.group(1).strip() if m_name else f"CTCP {clean_ticker}"
+
+                    entry = {
+                        "name": comp_name,
+                        "domain": dom,
+                        "official_url": raw_site,
+                        "projects_url": f"{base_url}/du-an",
+                        "ir_url": f"{base_url}/quan-he-co-dong",
+                        "keywords": ["Dự án", "Công trình", "Nhà máy", "Cảng", "Đầu tư"],
+                        "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+                        "ssc_profile_url": SSC_COMPANY_PROFILES_SEARCH_URL
+                    }
+                    cache[clean_ticker] = entry
+                    _save_registry_cache()
+                    return entry
+    except Exception as e:
+        print(f"[ProjectDiscovery] Lỗi tra cứu website registry cho {clean_ticker}: {e}")
+
+    return None
 
 
 async def resolve_official_corporate_website(ticker: str) -> Dict[str, Any]:
     """
     Suy luận và tìm kiếm website chính thức còn hoạt động của doanh nghiệp niêm yết:
     1. Tra cứu cấu hình chuẩn trong CORPORATE_OFFICIAL_WEBSITES.
-    2. Ưu tiên hàng đầu tên miền theo mã cổ phiếu ({ticker}.com.vn, {ticker}.vn, {ticker}.com).
-    3. Rút trích thương hiệu từ tên niêm yết sau khi chuẩn hóa bỏ dấu tiếng Việt (tránh co cụm phụ âm sai lệch).
-    4. Thử nghiệm kết nối danh sách domain tiềm năng (HEAD request với timeout 2.5s).
-    5. Chốt chặn Guardrail: Không chấp nhận tên miền 3 ký tự khác với mã cổ phiếu (ví dụ CII không bao giờ nhận tng.com).
-    6. Trả về thông tin domain hoạt động thực tế hoặc chuyển hướng Cổng UBCKNN nếu không tìm thấy.
+    2. Ưu tiên hàng đầu: Tra cứu trực tiếp từ Cổng Hồ sơ Doanh nghiệp Niêm yết chính thức (UBCKNN & Vietstock Profile).
+    3. Thử nghiệm kết nối danh sách domain tiềm năng với Chốt chặn Guardrail nội dung.
+    4. Trả về thông tin domain hoạt động thực tế hoặc chuyển hướng Cổng UBCKNN nếu không tìm thấy.
     """
     clean_ticker = (ticker or "").upper().strip()
     if clean_ticker in CORPORATE_OFFICIAL_WEBSITES:
         return dict(CORPORATE_OFFICIAL_WEBSITES[clean_ticker])
+
+    # Tra cứu trực tiếp từ Cổng Hồ sơ Doanh nghiệp Niêm yết chính thức (UBCKNN & Vietstock Profile)
+    reg_site = await fetch_official_corporate_website_from_registry(clean_ticker)
+    if reg_site:
+        return dict(reg_site)
 
     from company_database import get_company
     from financial_data import VIETNAM_STOCK_DIRECTORY

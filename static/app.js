@@ -914,6 +914,34 @@ async function selectTicker(ticker) {
         if (vietstockText) vietstockText.textContent = `Tài liệu ${cleanTicker}`;
     }
 
+    // Reset ngay lập tức các Badge dự án & Banner quét BCTN để tránh rò rỉ dữ liệu của mã trước
+    const initProjCont = document.getElementById("overview-projects-container");
+    const initCountBadge = document.getElementById("overview-projects-count-badge");
+    const initCapexBadge = document.getElementById("overview-projects-total-capex");
+    const initStatusBox = document.getElementById("overview-projects-discovery-status");
+    if (initCountBadge) {
+        initCountBadge.style.display = "none";
+        initCountBadge.innerText = "0 dự án";
+    }
+    if (initCapexBadge) {
+        initCapexBadge.classList.add("hidden");
+        initCapexBadge.innerText = "";
+    }
+    if (initStatusBox) {
+        initStatusBox.classList.add("hidden");
+        initStatusBox.innerHTML = "";
+    }
+    const initPanelTitle = document.getElementById("overview-projects-panel-title");
+    const initModelBadge = document.getElementById("overview-projects-model-badge");
+    if (initPanelTitle) initPanelTitle.textContent = `DỰ ÁN & KẾ HOẠCH PHÁT TRIỂN (${cleanTicker})`;
+    if (initModelBadge) {
+        initModelBadge.style.display = "none";
+        initModelBadge.innerText = "";
+    }
+    if (initProjCont) {
+        initProjCont.innerHTML = `<div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center text-slate-400 text-xs"><span class="animate-spin inline-block mr-1">⏳</span>Đang đồng bộ hóa dự án & động lực tăng trưởng của ${cleanTicker}...</div>`;
+    }
+
     // Dynamically ensure chip exists in Quick Chips Bar
     let chip = document.getElementById(`chip-${cleanTicker}`);
     if (!chip) {
@@ -3191,6 +3219,7 @@ function handleReportPdfClick(event, pdfUrl, source, ticker) {
 
 async function renderOverviewSection(ticker) {
     const cleanTicker = (ticker || "HPG").trim().toUpperCase();
+    const thisOverviewReqSeq = activeRequestSeq;
     try {
         // Khởi tạo và nạp biểu đồ nến tương tác TradingView thời gian thực cho tab Tổng quan
         renderOverviewTvChart(cleanTicker, currentOverviewResolution);
@@ -3201,28 +3230,40 @@ async function renderOverviewSection(ticker) {
             fetch(`/api/company-catalysts-insights/${cleanTicker}`).catch(e => { console.warn("Catalysts fetch err", e); return null; })
         ]);
 
+        // Integrity check: nếu người dùng đã chuyển sang mã khác trong lúc fetch thì không render
+        if (cleanTicker !== getActiveTicker() || thisOverviewReqSeq !== activeRequestSeq) {
+            console.warn(`[Integrity Guard] Bỏ qua kết quả fetch Overview của ${cleanTicker} vì mã hiện tại đã là ${getActiveTicker()}`);
+            return;
+        }
+
         if (miniRes && miniRes.ok) {
             try {
                 const data = await miniRes.json();
-                currentMiniChartData = data;
-                renderOverviewHeaderAndStats(data);
-                renderOverviewMiniDonut(data.market_cap_bil, data.revenue_ttm_bil, data.net_profit_ttm_bil);
+                if (cleanTicker === getActiveTicker()) {
+                    currentMiniChartData = data;
+                    renderOverviewHeaderAndStats(data);
+                    renderOverviewMiniDonut(data.market_cap_bil, data.revenue_ttm_bil, data.net_profit_ttm_bil);
+                }
             } catch (e) { console.error("Parse mini chart err", e); }
         }
 
         if (newsRes && newsRes.ok) {
             try {
                 const data = await newsRes.json();
-                currentNewsEventsData = data;
-                renderNewsAndEvents(data);
+                if (cleanTicker === getActiveTicker()) {
+                    currentNewsEventsData = data;
+                    renderNewsAndEvents(data);
+                }
             } catch (e) { console.error("Parse news events err", e); }
         }
 
         if (catRes && catRes.ok) {
             try {
                 const data = await catRes.json();
-                currentCatalystsData = data;
-                renderCatalystsAndProjects(data);
+                if (cleanTicker === getActiveTicker()) {
+                    currentCatalystsData = data;
+                    renderCatalystsAndProjects(data);
+                }
             } catch (e) { console.error("Parse catalysts err", e); }
         }
 
@@ -4794,12 +4835,39 @@ function switchOverviewFinancialPeriod(mode) {
 
 function renderCatalystsAndProjects(data) {
     if (!data) return;
+    const currentSym = getActiveTicker();
 
-    // 1. Projects
+    // Integrity Guard: Tuyệt đối không cho phép dữ liệu bất đồng bộ của mã khác đè lên mã hiện tại
+    if (data.ticker && data.ticker.toUpperCase() !== currentSym) {
+        console.warn(`[Integrity Guard] Bỏ qua renderCatalystsAndProjects của ${data.ticker} vì mã hiện tại đã là ${currentSym}`);
+        return;
+    }
+
+    // 1. Projects & Adaptive Growth Engine Elements
     const projCont = document.getElementById("overview-projects-container");
     const countBadge = document.getElementById("overview-projects-count-badge");
     const capexBadge = document.getElementById("overview-projects-total-capex");
-    const currentSym = getActiveTicker();
+    const statusBox = document.getElementById("overview-projects-discovery-status");
+    const panelTitleEl = document.getElementById("overview-projects-panel-title");
+    const panelIconEl = document.getElementById("overview-projects-panel-icon");
+    const modelBadgeEl = document.getElementById("overview-projects-model-badge");
+
+    // Tự động tùy biến tiêu đề khối, icon và huy hiệu ngành nghề theo mô hình kinh doanh
+    if (panelTitleEl && data.panel_title) {
+        panelTitleEl.textContent = `${data.panel_title} (${currentSym})`;
+    }
+    if (panelIconEl && data.panel_icon) {
+        panelIconEl.setAttribute("data-lucide", data.panel_icon);
+    }
+    if (modelBadgeEl) {
+        if (data.model_badge_text) {
+            modelBadgeEl.textContent = data.model_badge_text;
+            modelBadgeEl.className = `px-2 py-0.5 rounded text-[10px] font-mono font-bold ${data.model_badge_class || 'bg-slate-800 text-slate-300 border border-slate-700'}`;
+            modelBadgeEl.style.display = "inline-block";
+        } else {
+            modelBadgeEl.style.display = "none";
+        }
+    }
 
     // Tự động đồng bộ hóa đường dẫn Tải Tài Liệu Vietstock theo mã cổ phiếu hiện tại
     const vietstockBtn = document.getElementById("btn-vietstock-docs-link");
@@ -4810,114 +4878,186 @@ function renderCatalystsAndProjects(data) {
         if (vietstockText) vietstockText.textContent = `Tài liệu ${currentSym}`;
     }
 
-    if (countBadge && data.projects) {
-        countBadge.innerText = `${data.projects.length} dự án`;
-        countBadge.style.display = data.projects.length > 0 ? "inline-block" : "none";
+    const projectsList = Array.isArray(data.projects) ? data.projects : [];
+    const totalProjects = data.total_projects !== undefined ? Number(data.total_projects) : projectsList.length;
+    const growthNotesList = Array.isArray(data.growth_notes) ? data.growth_notes : [];
+
+    if (countBadge) {
+        if (totalProjects > 0) {
+            countBadge.innerText = `${totalProjects} dự án`;
+            countBadge.style.display = "inline-block";
+        } else if (growthNotesList.length > 0) {
+            countBadge.innerText = `${growthNotesList.length} kế hoạch trọng yếu`;
+            countBadge.style.display = "inline-block";
+        } else {
+            countBadge.style.display = "none";
+        }
     }
-    if (capexBadge && data.projects) {
-        const totalCapex = data.total_investment_bil || data.projects.reduce((acc, p) => acc + (Number(p.investment_bil) || 0), 0);
-        if (totalCapex > 0) {
+
+    if (capexBadge) {
+        const totalCapex = Number(data.total_investment_bil) || projectsList.reduce((acc, p) => acc + (Number(p.investment_bil) || 0), 0);
+        if (totalCapex > 0 && totalProjects > 0) {
             capexBadge.innerText = `Tổng vốn: ${Number(totalCapex).toLocaleString('vi-VN')} tỷ đ`;
             capexBadge.classList.remove("hidden");
         } else {
+            capexBadge.innerText = "";
             capexBadge.classList.add("hidden");
         }
     }
 
     // Tự động cập nhật thanh thông báo Quét BCTN & Website chính thức
-    const statusBox = document.getElementById("overview-projects-discovery-status");
-    if (statusBox && data.projects && data.projects.length > 0) {
-        statusBox.classList.remove("hidden");
-        const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
-        const webLinkHtml = hasRealDomain
-            ? `<a href="https://${data.official_website}" target="_blank" rel="noopener noreferrer" class="underline text-cyan-300 hover:text-cyan-200 font-mono font-bold">${data.official_website}</a>`
-            : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
+    if (statusBox) {
+        if (totalProjects > 0) {
+            statusBox.classList.remove("hidden");
+            const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
+            const webLinkHtml = hasRealDomain
+                ? `<a href="https://${data.official_website}" target="_blank" rel="noopener noreferrer" class="underline text-cyan-300 hover:text-cyan-200 font-mono font-bold">${data.official_website}</a>`
+                : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
 
-        statusBox.innerHTML = `
-            <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
-                <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
-                    <span>✓ Đã tự động quét BCTN & Website!</span>
-                    <span>Tìm thấy <strong>${data.total_projects || data.projects.length}</strong> dự án (Website: ${webLinkHtml}, <a href="https://finance.vietstock.vn/${currentSym}/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="underline text-emerald-300 hover:text-emerald-200 font-bold" title="Tải BCTN và BCTC trên Vietstock">📑 Vietstock Tài Liệu</a> & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
-                </div>
-                <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'mới nhất'}</span>
-            </div>
-        `;
-    }
-
-    if (projCont && data.projects) {
-        if (data.projects.length === 0) {
-            const currSym = getActiveTicker();
-            projCont.innerHTML = `
-                <div class="p-4 rounded-lg bg-slate-900/80 border border-slate-800 text-center space-y-3.5 my-2">
-                    <div class="text-amber-400 font-mono text-xs font-semibold flex items-center justify-center gap-1.5">
-                        <span>ℹ️</span>
-                        <span>Doanh nghiệp không ghi nhận chi phí XDCB dở dang trọng yếu trên BCTC kiểm toán gần nhất.</span>
+            statusBox.innerHTML = `
+                <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
+                    <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
+                        <span>✓ Đã tự động quét BCTN & Website!</span>
+                        <span>Tìm thấy <strong>${totalProjects}</strong> dự án (Website: ${webLinkHtml}, <a href="https://finance.vietstock.vn/${currentSym}/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="underline text-emerald-300 hover:text-emerald-200 font-bold" title="Tải BCTN và BCTC trên Vietstock">📑 Vietstock Tài Liệu</a> & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
                     </div>
-                    <p class="text-slate-400 text-[11px] leading-relaxed max-w-xl mx-auto font-sans">
-                        Dự án có thể đã hoàn thành đưa vào khai thác hoặc được hạch toán trong <strong>Hàng tồn kho / Dự án dở dang</strong>. Để tra cứu đầy đủ Báo cáo Thường niên (BCTN), BCTC kiểm toán, Website chính thức và hồ sơ niêm yết của <strong>${currSym}</strong>, bạn có thể tra cứu nhanh qua các cổng chính thống:
-                    </p>
-
-                    <!-- Nút NỔI BẬT Tải Tài Liệu Vietstock -->
-                    <div class="flex items-center justify-center pt-1">
-                        <a href="https://finance.vietstock.vn/${currSym}/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/80 transition-all shadow-md active:scale-95 hover:border-emerald-400" title="Tải BCTN, BCTC, Nghị quyết ĐHCĐ, Bản cáo bạch của ${currSym} trên Vietstock">
-                            <span class="text-sm">📑</span>
-                            <span>Mở Kho Tải Tài Liệu ${currSym} tại Vietstock (finance.vietstock.vn/${currSym}/tai-tai-lieu.htm)</span>
-                        </a>
-                    </div>
-
-                    <!-- Lưới Cổng Tra Cứu UBCKNN (congbothongtin.ssc.gov.vn) -->
-                    <div class="pt-2 border-t border-slate-800/80">
-                        <div class="text-[10px] font-mono text-amber-400/90 font-bold mb-2 flex items-center justify-center gap-1">
-                            <span>🏛️</span>
-                            <span>CỔNG CÔNG BỐ THÔNG TIN ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC (UBCKNN - ssc.gov.vn)</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-amber-950/60 border border-slate-800 hover:border-amber-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-amber-400">🏛️</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-amber-300 font-mono">Hồ sơ Niêm yết & Website</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">CompanyProfilesSearch</div>
-                                </div>
-                            </a>
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-cyan-400">📰</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-cyan-300 font-mono">Tin tức Công bố (Tin chung)</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">NewsSearch</div>
-                                </div>
-                            </a>
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyAuditingSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-emerald-950/60 border border-slate-800 hover:border-emerald-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-emerald-400">🔍</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-emerald-300 font-mono">Đơn vị Kiểm toán & BCTC</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">CompanyAuditingSearch</div>
-                                </div>
-                            </a>
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch1" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-sky-400">📊</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-sky-300 font-mono">Báo cáo Tài chính định kỳ</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">NewsSearch1</div>
-                                </div>
-                            </a>
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch5" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-indigo-400">🗳️</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-indigo-300 font-mono">Họp ĐHĐCĐ & Cổ tức</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">NewsSearch5</div>
-                                </div>
-                            </a>
-                            <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch12" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-rose-950/60 border border-slate-800 hover:border-rose-600/60 transition-all group flex items-start gap-2">
-                                <span class="text-rose-400">⚡</span>
-                                <div>
-                                    <div class="text-[11px] font-bold text-slate-200 group-hover:text-rose-300 font-mono">Thông tin Bất thường & Sở hữu</div>
-                                    <div class="text-[10px] text-slate-400 font-sans">NewsSearch12</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+                    <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'mới nhất'}</span>
                 </div>
             `;
+        } else {
+            // TUYỆT ĐỐI ẨN VÀ DỌN SẠCH KHI 0 DỰ ÁN ĐỂ KHÔNG RÒ RỈ BANNER CỦA MÃ CŨ (HPG) SANG MÃ MỚI (DMX, HDC...)
+            statusBox.classList.add("hidden");
+            statusBox.innerHTML = "";
+        }
+    }
+
+    if (projCont) {
+        if (totalProjects === 0) {
+            const currSym = getActiveTicker();
+            if (growthNotesList.length > 0) {
+                // Hiển thị Thẻ Kế hoạch & Sự kiện Tăng trưởng Thích ứng (Adaptive Growth Cards)
+                projCont.innerHTML = `
+                    <div class="space-y-3 p-0.5">
+                        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5 text-cyan-300 font-mono font-semibold">
+                                <span>🎯</span>
+                                <span>Mô hình <strong>${data.model_badge_text || 'Đặc thù'}</strong>: Tăng trưởng qua Mạng lưới, Kế hoạch ĐHĐCĐ & Dòng tiền Vận hành (Không phụ thuộc XDCB nặng).</span>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-400">Dữ liệu BCTN & BCTC Soát xét</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-2.5">
+                            ${growthNotesList.map((note) => `
+                                <div class="p-3 rounded-lg bg-slate-950/70 hover:bg-slate-900/90 border border-slate-800 hover:border-cyan-600/60 transition-all shadow-sm flex flex-col gap-2 group">
+                                    <div class="flex items-center justify-between flex-wrap gap-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${note.tag_class || 'bg-cyan-950/80 text-cyan-300 border-cyan-800'} border">
+                                                ${note.category_tag}
+                                            </span>
+                                            <span class="text-xs font-mono font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">${note.title}</span>
+                                        </div>
+                                        <a href="${note.source_url || '#'}" target="_blank" rel="noopener noreferrer" class="text-[10px] font-mono text-slate-400 hover:text-emerald-300 flex items-center gap-1 underline transition-colors" title="Xem tài liệu nguồn">
+                                            <span>📑</span>
+                                            <span>${note.source || 'BCTN & ĐHĐCĐ'}</span>
+                                        </a>
+                                    </div>
+                                    
+                                    ${note.metrics && note.metrics.length > 0 ? `
+                                        <div class="flex items-center gap-2 flex-wrap text-[11px] font-mono pt-0.5">
+                                            ${note.metrics.map(m => `
+                                                <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-slate-800 text-slate-300">
+                                                    <span class="text-slate-400">${m.label}:</span> <strong class="text-cyan-300 font-bold">${m.value}</strong>
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+
+                                    <p class="text-slate-300 text-[11px] leading-relaxed font-sans">
+                                        ${note.content}
+                                    </p>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Nút NỔI BẬT Tải Tài Liệu Vietstock -->
+                        <div class="flex items-center justify-center pt-1.5">
+                            <a href="https://finance.vietstock.vn/${currSym}/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/80 transition-all shadow-md active:scale-95 hover:border-emerald-400" title="Tải BCTN, BCTC, Nghị quyết ĐHCĐ, Bản cáo bạch của ${currSym} trên Vietstock">
+                                <span class="text-sm">📑</span>
+                                <span>Mở Kho Tải Tài Liệu ${currSym} tại Vietstock (finance.vietstock.vn/${currSym}/tai-tai-lieu.htm)</span>
+                            </a>
+                        </div>
+
+                        <!-- Lưới Cổng Tra Cứu UBCKNN (congbothongtin.ssc.gov.vn) -->
+                        <div class="pt-2 border-t border-slate-800/80">
+                            <div class="text-[10px] font-mono text-amber-400/90 font-bold mb-2 flex items-center justify-center gap-1">
+                                <span>🏛️</span>
+                                <span>CỔNG CÔNG BỐ THÔNG TIN ỦY BAN CHỨNG KHOÁN NHÀ NƯỚC (UBCKNN - ssc.gov.vn)</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-amber-950/60 border border-slate-800 hover:border-amber-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-amber-400">🏛️</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-amber-300 font-mono">Hồ sơ Niêm yết & Website</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">CompanyProfilesSearch</div>
+                                    </div>
+                                </a>
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-cyan-400">📰</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-cyan-300 font-mono">Tin tức Công bố (Tin chung)</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">NewsSearch</div>
+                                    </div>
+                                </a>
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyAuditingSearch" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-emerald-950/60 border border-slate-800 hover:border-emerald-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-emerald-400">🔍</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-emerald-300 font-mono">Đơn vị Kiểm toán & BCTC</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">CompanyAuditingSearch</div>
+                                    </div>
+                                </a>
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch1" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-sky-400">📊</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-sky-300 font-mono">Báo cáo Tài chính định kỳ</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">NewsSearch1</div>
+                                    </div>
+                                </a>
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch5" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-indigo-400">🗳️</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-indigo-300 font-mono">Họp ĐHĐCĐ & Cổ tức</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">NewsSearch5</div>
+                                    </div>
+                                </a>
+                                <a href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch12" target="_blank" rel="noopener noreferrer" class="p-2 rounded bg-slate-950 hover:bg-rose-950/60 border border-slate-800 hover:border-rose-600/60 transition-all group flex items-start gap-2">
+                                    <span class="text-rose-400">⚡</span>
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-200 group-hover:text-rose-300 font-mono">Thông tin Bất thường & Sở hữu</div>
+                                        <div class="text-[10px] text-slate-400 font-sans">NewsSearch12</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                projCont.innerHTML = `
+                    <div class="p-4 rounded-lg bg-slate-900/80 border border-slate-800 text-center space-y-3.5 my-2">
+                        <div class="text-amber-400 font-mono text-xs font-semibold flex items-center justify-center gap-1.5">
+                            <span>ℹ️</span>
+                            <span>Doanh nghiệp không ghi nhận chi phí XDCB dở dang trọng yếu trên BCTC kiểm toán gần nhất.</span>
+                        </div>
+                        <p class="text-slate-400 text-[11px] leading-relaxed max-w-xl mx-auto font-sans">
+                            Dự án có thể đã hoàn thành đưa vào khai thác hoặc được hạch toán trong <strong>Hàng tồn kho / Dự án dở dang</strong>. Để tra cứu đầy đủ Báo cáo Thường niên (BCTN), BCTC kiểm toán, Website chính thức và hồ sơ niêm yết của <strong>${currSym}</strong>, bạn có thể tra cứu nhanh qua các cổng chính thống:
+                        </p>
+                        <div class="flex items-center justify-center pt-1">
+                            <a href="https://finance.vietstock.vn/${currSym}/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-bold bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/80 transition-all shadow-md active:scale-95 hover:border-emerald-400">
+                                <span>📑</span>
+                                <span>Mở Kho Tải Tài Liệu ${currSym} tại Vietstock</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
         } else {
             let html = "";
             data.projects.forEach((p, pIdx) => {
@@ -5036,6 +5176,10 @@ function renderCatalystsAndProjects(data) {
     if (risksEl && data.ai_insights) {
         risksEl.textContent = data.ai_insights.risks || data.ai_insights.key_risks || "Biến động thị trường chung, lãi suất và biến động tỷ giá.";
     }
+
+    if (window.lucide) {
+        try { lucide.createIcons(); } catch(e) {}
+    }
 }
 window.renderOverviewInsights = renderCatalystsAndProjects;
 
@@ -5075,36 +5219,47 @@ window.triggerDeepProjectDiscovery = async function() {
             return;
         }
 
-        // Cập nhật lại giao diện panel dự án
+        // Cập nhật lại giao diện panel dự án & adaptive growth engine
         if (typeof renderCatalystsAndProjects === "function") {
             renderCatalystsAndProjects({
+                ticker: data.ticker || sym,
                 projects: data.projects,
                 total_projects: data.total_projects,
                 total_investment_bil: data.total_investment_bil,
                 official_website: data.official_website,
                 scan_sources: data.scan_sources,
-                scan_time_str: data.scan_time_str
+                scan_time_str: data.scan_time_str,
+                panel_title: data.panel_title,
+                panel_icon: data.panel_icon,
+                model_badge_text: data.model_badge_text,
+                model_badge_class: data.model_badge_class,
+                growth_notes: data.growth_notes
             });
         }
 
         if (statusBox) {
-            const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
-            const webLinkHtml = hasRealDomain
-                ? `<a href="https://${data.official_website}" target="_blank" class="underline text-cyan-300 hover:text-cyan-200 font-mono">${data.official_website}</a>`
-                : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
+            if (data.total_projects > 0) {
+                const hasRealDomain = data.official_website && !data.official_website.includes("UBCKNN") && data.official_website.includes(".");
+                const webLinkHtml = hasRealDomain
+                    ? `<a href="https://${data.official_website}" target="_blank" class="underline text-cyan-300 hover:text-cyan-200 font-mono">${data.official_website}</a>`
+                    : `<span class="text-slate-300 font-mono">Website Doanh nghiệp</span>`;
 
-            statusBox.innerHTML = `
-                <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
-                    <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
-                        <span>✓ Đã quét thành công!</span>
-                        <span>Tìm thấy <strong>${data.total_projects}</strong> dự án (Website: ${webLinkHtml}, BCTN & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
+                statusBox.innerHTML = `
+                    <div class="flex items-center justify-between w-full flex-wrap gap-1 text-[11px]">
+                        <div class="flex items-center gap-1.5 text-emerald-300 font-semibold flex-wrap">
+                            <span>✓ Đã quét thành công!</span>
+                            <span>Tìm thấy <strong>${data.total_projects}</strong> dự án (Website: ${webLinkHtml}, BCTN & <a href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="underline text-amber-300 hover:text-amber-200 font-bold" title="Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN">🏛️ UBCKNN</a>)</span>
+                        </div>
+                        <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'vừa xong'}</span>
                     </div>
-                    <span class="text-slate-400 text-[10px]">Cập nhật lúc ${data.scan_time_str || 'vừa xong'}</span>
-                </div>
-            `;
-            setTimeout(() => {
-                if (statusBox) statusBox.classList.add("hidden");
-            }, 15000);
+                `;
+                setTimeout(() => {
+                    if (statusBox && getActiveTicker() === sym) statusBox.classList.add("hidden");
+                }, 15000);
+            } else {
+                statusBox.classList.add("hidden");
+                statusBox.innerHTML = "";
+            }
         }
     } catch (err) {
         console.error("Discovery error:", err);
