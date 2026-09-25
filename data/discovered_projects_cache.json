@@ -490,8 +490,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790238182.3100965,
-    "scan_time_str": "15:23:02 24/09/2026"
+    "timestamp": 1790297374.9455545,
+    "scan_time_str": "07:49:34 25/09/2026"
   },
   "HDG": {
     "ticker": "HDG",
@@ -1995,5 +1995,108 @@
     ],
     "timestamp": 1790232932.9010475,
     "scan_time_str": "13:55:32 24/09/2026"
+  },
+  "NTL": {
+    "ticker": "NTL",
+    "company_name": "Đô thị Từ Liêm",
+    "official_website": "ntl.com.vn",
+    "website_projects_url": "https://ntl.com.vn/du-an",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: ntl.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790297428.5687964,
+    "scan_time_str": "07:50:28 25/09/2026"
+  },
+  "NLG": {
+    "ticker": "NLG",
+    "company_name": "BĐS Nam Long",
+    "official_website": "namlongvn.com",
+    "website_projects_url": "https://namlongvn.com/du-an",
+    "total_projects": 5,
+    "total_investment_bil": 66600,
+    "projects": [
+      {
+        "name": "Đại đô thị Sinh thái Waterpoint (Bến Lức, Long An)",
+        "scale": "Quy mô 355 ha hợp tác cùng đối tác chiến lược Nhật Bản (Nishi Nippon Railroad)",
+        "investment_bil": 24000,
+        "progress_pct": 75,
+        "commercial_date": "Mở bán & Bàn giao các phân kỳ liên tục",
+        "impact": "Doanh số pre-sales hàng nghìn tỷ đồng, các phân kỳ Rivera, Aquaria, Park Village hút dòng tiền.",
+        "legal_status": "Sổ hồng từng phân khu, đã hoàn thiện công viên trung tâm 25 ha và bến du thuyền",
+        "occupancy_rate": 72,
+        "phase_tag": "Đang mở bán & bàn giao",
+        "source": "Website chính thức (namlongvn.com) & BCTN"
+      },
+      {
+        "name": "Khu đô thị Mizuki Park (Bình Chánh, TP.HCM)",
+        "scale": "Quy mô 26 ha với hơn 4,600 căn hộ Flora và biệt thự Valora ven kênh đào",
+        "investment_bil": 9500,
+        "progress_pct": 92,
+        "commercial_date": "Bàn giao các phân khu MP6-10",
+        "impact": "Tỷ lệ lấp đầy cư dân thực tế trên 95%, dòng tiền bán hàng chắc chắn.",
+        "legal_status": "Đang cấp sổ hồng phân khu Flora Mizuki, hoàn thành toàn bộ tiện ích",
+        "occupancy_rate": 95,
+        "phase_tag": "Đang bàn giao",
+        "source": "Website chính thức (namlongvn.com) & BCTN"
+      },
+      {
+        "name": "Khu đô thị Akari City (Bình Tân, TP.HCM)",
+        "scale": "Quy mô 8.5 ha trên trục Đại lộ Võ Văn Kiệt với hơn 5,000 căn hộ dòng Flora",
+        "investment_bil": 8000,
+        "progress_pct": 95,
+        "commercial_date": "Bàn giao giai đoạn 2 (AK7, AK8, AK9, AK NEO)",
+        "impact": "Điểm rơi bàn giao căn hộ đem lại doanh thu tài chính bứt phá trong năm 2025 - 2026.",
+        "legal_status": "Đầy đủ GPXD, đã cất nóc và bàn giao hàng nghìn căn hộ giai đoạn 2",
+        "occupancy_rate": 94,
+        "phase_tag": "Đang bàn giao",
+        "source": "Website chính thức (namlongvn.com) & BCTN"
+      },
+      {
+        "name": "Đại đô thị Izumi City (Biên Hòa, Đồng Nai)",
+        "scale": "Quy mô 170 ha đối diện Aqua City liên doanh cùng tập đoàn Hankyu Hanshin (Nhật Bản)",
+        "investment_bil": 18600,
+        "progress_pct": 60,
+        "commercial_date": "Mở bán 2025 - 2027",
+        "impact": "Động lực tăng trưởng trung và dài hạn khi hạ tầng giao thông kết nối TP.HCM hoàn tất.",
+        "legal_status": "Đã có quy hoạch 1/500 và GPXD hạ tầng kỹ thuật giai đoạn 1",
+        "occupancy_rate": 55,
+        "phase_tag": "Đang thi công hạ tầng",
+        "source": "Website chính thức (namlongvn.com) & BCTN"
+      },
+      {
+        "name": "Khu đô thị Nam Long Đại Phước & Nam Long Cần Thơ",
+        "scale": "Quy mô 45 ha và 43 ha phát triển dòng sản phẩm nhà phố EHome và Valora",
+        "investment_bil": 6500,
+        "progress_pct": 70,
+        "commercial_date": "Mở bán 2025 - 2026",
+        "impact": "Đáp ứng nhu cầu nhà ở thực tại các thủ phủ kinh tế Tây Nam Bộ.",
+        "legal_status": "Đầy đủ hồ sơ pháp lý mở bán phân kỳ nhà phố thương phẩm",
+        "occupancy_rate": 75,
+        "phase_tag": "Đang mở bán",
+        "source": "Website chính thức (namlongvn.com) & BCTN"
+      }
+    ],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: namlongvn.com",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790297421.3455439,
+    "scan_time_str": "07:50:21 25/09/2026"
   }
 }
