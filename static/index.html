@@ -826,17 +826,55 @@
                             </h3>
                             <span id="overview-projects-count-badge" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950/90 text-cyan-300 border border-cyan-700/80"></span>
                         </div>
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             <span id="overview-projects-total-capex" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 hidden sm:inline-block"></span>
-                            <button id="btn-discover-company-projects" onclick="triggerDeepProjectDiscovery()" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-gradient-to-r from-cyan-950 via-slate-900 to-blue-950 hover:from-cyan-900 hover:to-blue-900 text-cyan-300 border border-cyan-700/80 transition-all shadow-sm active:scale-95" title="Quét tìm kiếm dự án từ Website chính thức & Báo cáo Thường niên, Bán niên của doanh nghiệp">
+                            <button id="btn-discover-company-projects" onclick="triggerDeepProjectDiscovery()" class="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono font-bold bg-gradient-to-r from-cyan-950 via-slate-900 to-blue-950 hover:from-cyan-900 hover:to-blue-900 text-cyan-300 border border-cyan-700/80 transition-all shadow-sm active:scale-95" title="Quét tìm kiếm dự án từ Website chính thức & Báo cáo Thường niên, Bán niên của doanh nghiệp">
                                 <i data-lucide="scan-search" class="w-3.5 h-3.5 text-cyan-400"></i>
-                                <span>🔍 Quét BCTN & Website</span>
+                                <span>🔍 Quét BCTN</span>
                             </button>
-                            <a id="btn-ssc-portal-link" href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 border border-amber-600/70 transition-all shadow-sm active:scale-95" title="Tra cứu Hồ sơ Niêm yết, Website chính thức & Báo cáo công bố trên Cổng UBCKNN (congbothongtin.ssc.gov.vn)">
-                                <span>🏛️</span>
-                                <span>Hồ sơ UBCKNN</span>
+                            <!-- Nút Tải Tài Liệu Vietstock (Đổi động theo mã cổ phiếu) -->
+                            <a id="btn-vietstock-docs-link" href="https://finance.vietstock.vn/HPG/tai-tai-lieu.htm" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono font-bold bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/80 transition-all shadow-sm active:scale-95" title="Mở trang Tải Tài Liệu của doanh nghiệp trên Vietstock (BCTN, BCTC, Nghị quyết ĐHĐCĐ)">
+                                <span>📑</span>
+                                <span id="btn-vietstock-docs-text">Tài liệu Vietstock</span>
                             </a>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 hidden md:inline-block">Động lực trung - dài hạn</span>
+                            <!-- Cụm Dropdown Cổng UBCKNN -->
+                            <div class="relative group">
+                                <button type="button" class="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono font-bold bg-amber-950/70 hover:bg-amber-900 text-amber-300 border border-amber-600/70 transition-all shadow-sm" title="Tra cứu Hồ sơ Niêm yết, Báo cáo kiểm toán & Tin CBTT trên Cổng UBCKNN (congbothongtin.ssc.gov.vn)">
+                                    <span>🏛️</span>
+                                    <span>Cổng UBCKNN</span>
+                                    <span class="text-[8px] opacity-75">▼</span>
+                                </button>
+                                <div class="absolute right-0 top-full mt-1 w-64 bg-slate-900/95 border border-amber-600/60 rounded-lg shadow-2xl p-1.5 hidden group-hover:block z-50 text-[11px] font-mono backdrop-blur-md">
+                                    <div class="px-2 py-1 text-[10px] text-amber-400 font-bold border-b border-slate-800 flex items-center justify-between">
+                                        <span>CỔNG CBTT UBCKNN</span>
+                                        <span class="text-[9px] text-slate-400">ssc.gov.vn</span>
+                                    </div>
+                                    <a id="ssc-sublink-profile" href="https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-amber-300 transition-colors">
+                                        <span>🏛️</span>
+                                        <span>Hồ sơ Doanh nghiệp Niêm yết</span>
+                                    </a>
+                                    <a id="ssc-sublink-news" href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-cyan-300 transition-colors">
+                                        <span>📰</span>
+                                        <span>Tra cứu Tin tức Công bố (NewsSearch)</span>
+                                    </a>
+                                    <a id="ssc-sublink-audit" href="https://congbothongtin.ssc.gov.vn/faces/CompanyAuditingSearch" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-emerald-300 transition-colors">
+                                        <span>🔍</span>
+                                        <span>Đơn vị Kiểm toán & BCTC Kiểm toán</span>
+                                    </a>
+                                    <a id="ssc-sublink-news1" href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch1" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-sky-300 transition-colors">
+                                        <span>📊</span>
+                                        <span>CBTT Báo cáo Tài chính định kỳ</span>
+                                    </a>
+                                    <a id="ssc-sublink-news5" href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch5" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-indigo-300 transition-colors">
+                                        <span>🗳️</span>
+                                        <span>Họp ĐHĐCĐ & Chi trả Cổ tức</span>
+                                    </a>
+                                    <a id="ssc-sublink-news12" href="https://congbothongtin.ssc.gov.vn/faces/NewsSearch12" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 text-slate-200 hover:text-rose-300 transition-colors">
+                                        <span>⚡</span>
+                                        <span>Tin CBTT Bất thường & Tỷ lệ Sở hữu</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="overview-projects-discovery-status" class="hidden text-[11px] font-mono p-2.5 rounded bg-cyan-950/60 border border-cyan-800/80 text-cyan-300 flex items-center justify-between shrink-0">
