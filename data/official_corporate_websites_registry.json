@@ -1,0 +1,130 @@
+{
+  "DMX": {
+    "name": "DMX: CTCP Đầu tư Điện máy Xanh",
+    "domain": "dmx.vn",
+    "official_url": "https://www.dmx.vn",
+    "projects_url": "https://dmx.vn/du-an",
+    "ir_url": "https://dmx.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "VGT": {
+    "name": "VGT: Tập đoàn Dệt May Việt Nam",
+    "domain": "vinatex.com.vn",
+    "official_url": "https://vinatex.com.vn/",
+    "projects_url": "https://vinatex.com.vn/du-an",
+    "ir_url": "https://vinatex.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DXG": {
+    "name": "DXG: CTCP Bluemarq Group",
+    "domain": "bluemarq.com",
+    "official_url": "https://bluemarq.com/",
+    "projects_url": "https://bluemarq.com/du-an",
+    "ir_url": "https://bluemarq.com/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "KBC": {
+    "name": "KBC: Tổng Công ty Phát triển Đô thị Kinh Bắc",
+    "domain": "kinhbaccity.vn",
+    "official_url": "https://kinhbaccity.vn/",
+    "projects_url": "https://kinhbaccity.vn/du-an",
+    "ir_url": "https://kinhbaccity.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "PVD": {
+    "name": "PVD: Tổng Công ty cổ phần Khoan và Dịch vụ khoan Dầu khí",
+    "domain": "pvdrilling.com.vn",
+    "official_url": "https://www.pvdrilling.com.vn",
+    "projects_url": "https://pvdrilling.com.vn/du-an",
+    "ir_url": "https://pvdrilling.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "CTR": {
+    "name": "CTR: Tổng Công ty cổ phần Công trình Viettel",
+    "domain": "viettelconstruction.com.vn",
+    "official_url": "https://viettelconstruction.com.vn",
+    "projects_url": "https://viettelconstruction.com.vn/du-an",
+    "ir_url": "https://viettelconstruction.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "LDG": {
+    "name": "LDG: CTCP Đầu tư LDG",
+    "domain": "ldggroup.com.vn",
+    "official_url": "https://ldggroup.com.vn/",
+    "projects_url": "https://ldggroup.com.vn/du-an",
+    "ir_url": "https://ldggroup.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "ACV": {
+    "name": "ACV: Tổng Công ty Cảng Hàng không Việt Nam",
+    "domain": "acv.vn",
+    "official_url": "https://acv.vn/",
+    "projects_url": "https://acv.vn/du-an",
+    "ir_url": "https://acv.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  }
+}
