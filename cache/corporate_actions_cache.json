@@ -3935,5 +3935,67 @@
       "adjustment_factor": 0.9091,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "GEX": [
+    {
+      "id": "gex-ca-05052026-bonus_share",
+      "ex_date": "05/05/2026",
+      "record_date": "06/05/2026",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "GEX: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng cổ phiếu, nhận cổ phiếu phát hành để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 5:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.2,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8333,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "gex-ca-05052026-dividend_stock",
+      "ex_date": "05/05/2026",
+      "record_date": "06/05/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "GEX: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng cổ phiếu, nhận cổ phiếu phát hành để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Trả cổ tức  năm 2025  bằng cổ phiếu, tỷ lệ 4:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.25,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "gex-ca-10092025-dividend_cash",
+      "ex_date": "10/09/2025",
+      "record_date": "11/09/2025",
+      "execution_date": "10/10/2025",
+      "event_type": "dividend_cash",
+      "title": "GEX: Thông báo ngày ĐKCC nhận tạm ứng cổ tức năm 2025 bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 800 đồng/CP",
+      "cash_amount": 800.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "gex-ca-14052025-dividend_stock",
+      "ex_date": "14/05/2025",
+      "record_date": "15/05/2025",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "GEX: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2024 bằng cổ phiếu",
+      "description": "Trả cổ tức  năm 2024  bằng cổ phiếu, tỷ lệ 20:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.05,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9524,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
