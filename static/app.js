@@ -7056,6 +7056,124 @@ function renderBctcCharts(stm) {
 // -------------------------------------------------------------
 // TAB 3: NGÀNH & ĐỐI THỦ (PEERS & RADAR)
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// TAB 3: NGÀNH & ĐỐI THỦ (PEERS & RADAR) - HỆ THỐNG CỘT LINH HOẠT
+// -------------------------------------------------------------
+const PEER_BASE_COLUMNS = [
+    { field: "market_cap_bil", label: "Vốn hóa (tỷ đ)", format: (p) => p.market_cap_bil >= 1000 ? (p.market_cap_bil / 1000).toFixed(1) + 'k tỷ' : Math.round(p.market_cap_bil) + ' tỷ', avgFormat: () => "-" },
+    { field: "pe", label: "P/E", format: (p) => p.pe !== undefined && p.pe !== null ? p.pe + 'x' : '-', avgFormat: (a) => a.pe !== undefined && a.pe !== null ? a.pe + 'x' : '-' },
+    { field: "pb", label: "P/B", format: (p) => p.pb !== undefined && p.pb !== null ? p.pb + 'x' : '-', avgFormat: (a) => a.pb !== undefined && a.pb !== null ? a.pb + 'x' : '-' },
+    { field: "roe", label: "ROE (%)", colorClass: "text-emerald-400", format: (p) => p.roe !== undefined && p.roe !== null ? p.roe + '%' : '-', avgFormat: (a) => a.roe !== undefined && a.roe !== null ? a.roe + '%' : '-' },
+    { field: "roa", label: "ROA (%)", colorClass: "text-sky-400", format: (p) => p.roa !== undefined && p.roa !== null ? p.roa + '%' : '-', avgFormat: (a) => a.roa !== undefined && a.roa !== null ? a.roa + '%' : '-' },
+    { field: "net_margin", label: "Biên ròng (%)", format: (p) => p.net_margin !== undefined && p.net_margin !== null ? p.net_margin + '%' : '-', avgFormat: (a) => a.net_margin !== undefined && a.net_margin !== null ? a.net_margin + '%' : '-' },
+    { field: "debt_to_equity", label: "Nợ/VCSH", colorClass: "text-amber-400", format: (p) => p.debt_to_equity !== undefined && p.debt_to_equity !== null ? p.debt_to_equity + 'x' : '-', avgFormat: (a) => a.debt_to_equity !== undefined && a.debt_to_equity !== null ? a.debt_to_equity + 'x' : '-' }
+];
+
+function getPeerVisibleColumns(sectorKpiCols) {
+    if (!window.peerVisibleColumnsState) {
+        try {
+            const saved = localStorage.getItem('vietnam_stocks_peer_visible_cols');
+            if (saved) {
+                window.peerVisibleColumnsState = JSON.parse(saved);
+            }
+        } catch (e) {
+            console.warn("Could not parse peer_visible_cols", e);
+        }
+    }
+    if (!window.peerVisibleColumnsState) {
+        window.peerVisibleColumnsState = {};
+    }
+    PEER_BASE_COLUMNS.forEach(c => {
+        if (window.peerVisibleColumnsState[c.field] === undefined) {
+            window.peerVisibleColumnsState[c.field] = true;
+        }
+    });
+    (sectorKpiCols || []).forEach(c => {
+        if (window.peerVisibleColumnsState[c.field] === undefined) {
+            window.peerVisibleColumnsState[c.field] = true;
+        }
+    });
+    return window.peerVisibleColumnsState;
+}
+
+function savePeerVisibleColumns() {
+    try {
+        localStorage.setItem('vietnam_stocks_peer_visible_cols', JSON.stringify(window.peerVisibleColumnsState || {}));
+    } catch(e) {}
+}
+
+function togglePeerColumnModal() {
+    const modal = document.getElementById("modal-peer-columns");
+    if (!modal) return;
+    const isHidden = modal.classList.contains("hidden");
+    if (isHidden) {
+        renderPeerColumnSelectors();
+        modal.classList.remove("hidden");
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    } else {
+        modal.classList.add("hidden");
+    }
+}
+
+function renderPeerColumnSelectors() {
+    const peersData = window.currentPeersData;
+    if (!peersData) return;
+    const kpiCols = peersData.sector_kpi_columns || [];
+    const state = getPeerVisibleColumns(kpiCols);
+
+    const baseContainer = document.getElementById("peer-base-col-selectors");
+    if (baseContainer) {
+        baseContainer.innerHTML = PEER_BASE_COLUMNS.map(col => `
+            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-800/60 cursor-pointer select-none">
+                <input type="checkbox" ${state[col.field] ? 'checked' : ''} onchange="togglePeerColumnVisibility('${col.field}', this.checked)" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                <span class="text-slate-300 font-mono text-[11px]">${col.label}</span>
+            </label>
+        `).join("");
+    }
+
+    const countElem = document.getElementById("modal-sector-kpi-count");
+    if (countElem) countElem.textContent = kpiCols.length;
+
+    const sectorContainer = document.getElementById("peer-sector-col-selectors");
+    if (sectorContainer) {
+        sectorContainer.innerHTML = kpiCols.map(col => `
+            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-800/60 cursor-pointer select-none">
+                <input type="checkbox" ${state[col.field] ? 'checked' : ''} onchange="togglePeerColumnVisibility('${col.field}', this.checked)" class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
+                <span class="text-amber-200 font-mono text-[11px]">${col.label} <span class="text-slate-500 text-[10px]">(${col.unit})</span></span>
+            </label>
+        `).join("");
+    }
+}
+
+function togglePeerColumnVisibility(field, isVisible) {
+    if (!window.peerVisibleColumnsState) window.peerVisibleColumnsState = {};
+    window.peerVisibleColumnsState[field] = isVisible;
+    savePeerVisibleColumns();
+    if (window.currentPeersData) {
+        renderPeersSection(window.currentPeersData);
+    }
+}
+
+function selectAllPeerColumns(visible) {
+    const peersData = window.currentPeersData;
+    if (!peersData) return;
+    const kpiCols = peersData.sector_kpi_columns || [];
+    PEER_BASE_COLUMNS.forEach(c => window.peerVisibleColumnsState[c.field] = visible);
+    kpiCols.forEach(c => window.peerVisibleColumnsState[c.field] = visible);
+    savePeerVisibleColumns();
+    renderPeerColumnSelectors();
+    renderPeersSection(peersData);
+}
+
+function resetPeerColumnsDefault() {
+    window.peerVisibleColumnsState = {};
+    savePeerVisibleColumns();
+    renderPeerColumnSelectors();
+    if (window.currentPeersData) {
+        renderPeersSection(window.currentPeersData);
+    }
+}
+
 function formatSectorKpiValue(val, unit) {
     if (val === undefined || val === null || val === "") return "—";
     const num = Number(val);
@@ -7069,10 +7187,19 @@ function formatSectorKpiValue(val, unit) {
     if (unit === "ha") return `${num.toLocaleString('vi-VN')} ha`;
     if (unit === "x") return `${num.toFixed(1)}x`;
     if (unit === "VND") return `${num.toLocaleString('vi-VN')} đ`;
-    if (unit === "CH") return `${num.toLocaleString('vi-VN')} CH`;
-    if (unit === "chiếc") return `${num} tàu`;
+    if (unit === "CH" || unit === "điểm") return `${num.toLocaleString('vi-VN')} điểm`;
+    if (unit === "chiếc" || unit === "tàu") return `${num} tàu`;
     if (unit === "ngày") return `${num} ngày`;
     if (unit === "k TEU") return `${num.toLocaleString('vi-VN')}k TEU`;
+    if (unit === "$m") return `$${num.toLocaleString('vi-VN')}M`;
+    if (unit === "MW") return `${num.toLocaleString('vi-VN')} MW`;
+    if (unit === "tr.kWh") return `${num.toLocaleString('vi-VN')} tr.kWh`;
+    if (unit === "người") return `${num.toLocaleString('vi-VN')} người`;
+    if (unit === "vòng") return `${num.toFixed(1)} vòng`;
+    if (unit === "trạm") return `${num.toLocaleString('vi-VN')} trạm`;
+    if (unit === "dây chuyền") return `${num} dc`;
+    if (unit === "m³/ngày") return `${num.toLocaleString('vi-VN')} m³`;
+    if (unit === "m") return `${num.toLocaleString('vi-VN')} m`;
     if (unit === "tr.tấn" || unit === "tr.đv" || unit === "kt") return `${num.toLocaleString('vi-VN')} ${unit}`;
     return num.toLocaleString('vi-VN');
 }
@@ -7083,17 +7210,26 @@ function renderPeersSection(peersData) {
     const secTitle = document.getElementById("peer-sector-title");
     if (secTitle) secTitle.textContent = peersData.sector_name;
 
+    const allKpiCols = peersData.sector_kpi_columns || [];
+    const colState = getPeerVisibleColumns(allKpiCols);
+
+    const visibleBaseCols = PEER_BASE_COLUMNS.filter(c => colState[c.field] !== false);
+    const visibleKpiCols = allKpiCols.filter(c => colState[c.field] !== false);
+
     const badgesContainer = document.getElementById("peer-badges-container");
-    const kpiCols = peersData.sector_kpi_columns || [];
     if (badgesContainer) {
         badgesContainer.innerHTML = `
             <span class="text-[10px] text-cyan-400 bg-cyan-950/70 border border-cyan-800/80 px-2 py-0.5 rounded-full font-mono">
                 ${peersData.peers.length} DN ngành
             </span>
-            ${kpiCols.length > 0 ? `
+            ${allKpiCols.length > 0 ? `
             <span class="text-[10px] text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
-                <span>★ ${kpiCols.length} chỉ số đặc thù ngành</span>
+                <span>★ ${visibleKpiCols.length}/${allKpiCols.length} chỉ số đặc thù</span>
             </span>` : ''}
+            <span class="text-[10px] text-slate-300 bg-slate-800/70 border border-slate-700/80 px-2 py-0.5 rounded-full font-mono flex items-center gap-1 cursor-pointer hover:bg-slate-700 transition-colors" onclick="togglePeerColumnModal()" title="Bấm để tùy chọn hiển thị cột">
+                <i data-lucide="columns" class="w-3 h-3 text-cyan-400"></i>
+                <span>${visibleBaseCols.length + visibleKpiCols.length + 1} cột</span>
+            </span>
             ${peersData.recommended_valuation ? `
             <span class="text-[10px] text-emerald-300 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1 shadow-sm" title="${peersData.recommended_valuation.rationale || ''}">
                 <i data-lucide="crosshair" class="w-3 h-3 text-emerald-400"></i>
@@ -7102,41 +7238,49 @@ function renderPeersSection(peersData) {
         `;
     }
 
-    // Cập nhật thead động theo ngành (Cố định hàng đầu)
+    // Cập nhật thead động theo ngành và cấu hình cột người dùng chọn
     const thead = document.getElementById("peer-table-head");
     if (thead) {
+        let baseHeaders = "";
+        visibleBaseCols.forEach(col => {
+            baseHeaders += `<th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)] font-bold text-slate-300">${col.label}</th>`;
+        });
+
         let kpiHeaders = "";
-        kpiCols.forEach(col => {
+        visibleKpiCols.forEach(col => {
             const colorClass = col.color === "emerald" ? "text-emerald-300 bg-emerald-950/70 border-emerald-900/60" :
                                col.color === "amber" ? "text-amber-300 bg-amber-950/70 border-amber-900/60" :
                                col.color === "rose" ? "text-rose-300 bg-rose-950/70 border-rose-900/60" :
                                col.color === "violet" ? "text-purple-300 bg-purple-950/70 border-purple-900/60" :
                                "text-sky-300 bg-sky-950/70 border-sky-900/60";
-            kpiHeaders += `<th class="p-2.5 text-right font-bold border-l border-b border-slate-800 whitespace-nowrap sticky top-0 z-20 shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)] ${colorClass}" title="${col.label}">${col.label}</th>`;
+            kpiHeaders += `<th class="p-2.5 text-right font-bold border-l border-b border-slate-800 whitespace-nowrap sticky top-0 z-20 shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)] ${colorClass}" title="${col.label} (${col.unit || ''})">${col.label}</th>`;
         });
+
         thead.innerHTML = `
             <tr>
                 <th class="p-2.5 sticky top-0 left-0 z-30 bg-slate-950 border-b border-r border-slate-800 whitespace-nowrap shadow-[2px_2px_5px_-1px_rgba(0,0,0,0.5)]">Doanh nghiệp</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">Vốn hóa (tỷ đ)</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">P/E</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">P/B</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">ROE (%)</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">ROA (%)</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">Biên ròng (%)</th>
-                <th class="p-2.5 text-right sticky top-0 z-20 bg-slate-950 border-b border-slate-800 whitespace-nowrap shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">Nợ/VCSH</th>
+                ${baseHeaders}
                 ${kpiHeaders}
             </tr>
         `;
     }
 
-    // Cập nhật tbody (Cố định cột đầu Doanh nghiệp)
+    // Cập nhật tbody
     const tbody = document.getElementById("peer-table-body");
     if (tbody) {
         let rows = "";
         peersData.peers.forEach(p => {
             const isTarget = p.ticker === peersData.target_ticker;
+            
+            let baseCells = "";
+            visibleBaseCols.forEach(col => {
+                const formatted = col.format(p);
+                const colorClass = col.colorClass || "text-slate-200";
+                baseCells += `<td class="p-2.5 text-right ${colorClass} border-b border-slate-800/80 whitespace-nowrap">${formatted}</td>`;
+            });
+
             let kpiCells = "";
-            kpiCols.forEach(col => {
+            visibleKpiCols.forEach(col => {
                 const val = p[col.field];
                 const formatted = formatSectorKpiValue(val, col.unit);
                 const colorClass = col.color === "emerald" ? "text-emerald-300" :
@@ -7159,20 +7303,21 @@ function renderPeersSection(peersData) {
                     </div>
                     <span class="text-[10px] text-slate-400 block truncate max-w-[190px]">${p.name}</span>
                 </td>
-                <td class="p-2.5 text-right text-slate-200 border-b border-slate-800/80 whitespace-nowrap">${p.market_cap_bil >= 1000 ? (p.market_cap_bil / 1000).toFixed(1) + 'k tỷ' : Math.round(p.market_cap_bil) + ' tỷ'}</td>
-                <td class="p-2.5 text-right text-slate-200 border-b border-slate-800/80 whitespace-nowrap">${p.pe}x</td>
-                <td class="p-2.5 text-right text-slate-200 border-b border-slate-800/80 whitespace-nowrap">${p.pb}x</td>
-                <td class="p-2.5 text-right text-emerald-400 border-b border-slate-800/80 whitespace-nowrap">${p.roe}%</td>
-                <td class="p-2.5 text-right text-sky-400 border-b border-slate-800/80 whitespace-nowrap">${p.roa}%</td>
-                <td class="p-2.5 text-right text-slate-200 border-b border-slate-800/80 whitespace-nowrap">${p.net_margin}%</td>
-                <td class="p-2.5 text-right text-amber-400 border-b border-slate-800/80 whitespace-nowrap">${p.debt_to_equity}x</td>
+                ${baseCells}
                 ${kpiCells}
             </tr>`;
         });
 
-        const avg = peersData.industry_average;
+        // Dòng TRUNG BÌNH NGÀNH
+        const avg = peersData.industry_average || {};
+        let avgBaseCells = "";
+        visibleBaseCols.forEach(col => {
+            const formatted = col.avgFormat(avg);
+            avgBaseCells += `<td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap text-cyan-200 font-bold">${formatted}</td>`;
+        });
+
         let avgKpiCells = "";
-        kpiCols.forEach(col => {
+        visibleKpiCols.forEach(col => {
             const val = avg[col.field];
             const formatted = formatSectorKpiValue(val, col.unit);
             avgKpiCells += `<td class="p-2.5 text-right border-l border-t-2 border-slate-700 bg-slate-900 font-black text-cyan-200 whitespace-nowrap">${formatted}</td>`;
@@ -7180,13 +7325,7 @@ function renderPeersSection(peersData) {
 
         rows += `<tr class="bg-slate-950 font-bold border-t-2 border-slate-700 text-cyan-300">
             <td class="p-2.5 sticky left-0 z-10 bg-slate-950 border-r border-t-2 border-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.5)] whitespace-nowrap text-cyan-300">TRUNG BÌNH NGÀNH (${peersData.peers.length} DN)</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">-</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.pe}x</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.pb}x</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.roe}%</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.roa}%</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.net_margin}%</td>
-            <td class="p-2.5 text-right bg-slate-950 border-t-2 border-slate-700 whitespace-nowrap">${avg.debt_to_equity}x</td>
+            ${avgBaseCells}
             ${avgKpiCells}
         </tr>`;
         tbody.innerHTML = rows;

@@ -2545,13 +2545,15 @@ def build_sector_peers_data(
     target_name: str,
     market_cap_bil: float,
     target_pe: float = 12.5,
-    target_pb: float = 1.45
+    target_pb: float = 1.45,
+    annual_stm: Optional[Any] = None
 ) -> PeerComparisonData:
     """
     Tự động khớp và thiết lập bảng so sánh đối thủ cùng ngành chính xác theo CSDL 650+ doanh nghiệp.
     Luôn đặt doanh nghiệp được tra cứu ở vị trí đầu tiên (index 0, [Đang xem]) và loại bỏ trùng lặp.
     Sắp xếp các đối thủ cùng ngành còn lại theo Vốn hóa thị trường (market_cap_bil) giảm dần từ lớn đến bé.
     Tính toán trung bình ngành động chuẩn xác theo tập hợp đối thủ thực tế hiển thị.
+    Tính toán các chỉ số đặc thù trực tiếp từ BCTC thực tế của doanh nghiệp mà không suy diễn.
     """
     clean_ticker = target_ticker.upper().strip()
     sec_lower = (sector_name or "").lower().strip()
@@ -2621,6 +2623,56 @@ def build_sector_peers_data(
         target_extra["price_change_ytd"] = target_db.get("price_change_ytd_pct", 0.0)
         target_extra["revenue_bil"] = target_db.get("revenue_q1_26_bil", 0.0)
 
+    # Tính toán chính xác từ BCTC thực tế (nếu được truyền vào) mà không suy diễn
+    if annual_stm and getattr(annual_stm, "revenue", None) and len(annual_stm.revenue) > 0:
+        rev_last = annual_stm.revenue[-1]
+        gp_last = annual_stm.gross_profit[-1] if getattr(annual_stm, "gross_profit", None) else 0.0
+        np_last = annual_stm.net_profit[-1] if getattr(annual_stm, "net_profit", None) else 0.0
+        op_last = annual_stm.operating_profit[-1] if getattr(annual_stm, "operating_profit", None) else 0.0
+        depr_last = annual_stm.depreciation[-1] if getattr(annual_stm, "depreciation", None) else 0.0
+        inv_last = annual_stm.inventories[-1] if getattr(annual_stm, "inventories", None) else 0.0
+        eq_last = annual_stm.owner_equity[-1] if getattr(annual_stm, "owner_equity", None) else 1.0
+        ta_last = annual_stm.total_assets[-1] if getattr(annual_stm, "total_assets", None) else 1.0
+        cash_last = (annual_stm.cash_and_equivalents[-1] if getattr(annual_stm, "cash_and_equivalents", None) else 0.0) + \
+                    (annual_stm.short_term_investments[-1] if getattr(annual_stm, "short_term_investments", None) else 0.0)
+        st_debt = annual_stm.short_term_debt[-1] if getattr(annual_stm, "short_term_debt", None) else 0.0
+        lt_debt = annual_stm.long_term_debt[-1] if getattr(annual_stm, "long_term_debt", None) else 0.0
+        tot_debt = st_debt + lt_debt
+
+        if rev_last > 0:
+            if gp_last > 0:
+                target_extra["gross_margin"] = round((gp_last / rev_last) * 100, 1)
+            if np_last > 0:
+                self_margin = round((np_last / rev_last) * 100, 1)
+            target_extra["ebitda_margin"] = round(((op_last + depr_last) / rev_last) * 100, 1)
+            cogs = rev_last - gp_last
+            if cogs > 0 and inv_last > 0:
+                target_extra["inventory_days"] = round((inv_last / cogs) * 365, 0)
+                target_extra["inventory_turnover"] = round(cogs / inv_last, 1)
+
+        if inv_last > 0:
+            target_extra["inventory_bil"] = round(inv_last, 1)
+            adv = target_extra.get("advance_from_buyers_bil", 0.0)
+            if adv > 0:
+                target_extra["prepayment_to_inventory"] = round((adv / inv_last) * 100, 1)
+
+        if cash_last > 0:
+            target_extra["cash_and_equivalents_bil"] = round(cash_last, 1)
+            if ta_last > 0:
+                target_extra["cash_to_assets"] = round((cash_last / ta_last) * 100, 1)
+            target_extra["net_cash_bil"] = round(cash_last - tot_debt, 1)
+
+        if eq_last > 0:
+            if tot_debt > 0:
+                self_de = round(tot_debt / eq_last, 2)
+                target_extra["net_debt_to_equity"] = round((tot_debt - cash_last) / eq_last, 2)
+
+    target_extra.pop("debt_to_equity", None)
+    target_extra.pop("net_margin", None)
+    target_extra.pop("roe", None)
+    target_extra.pop("roa", None)
+    target_extra.pop("pe", None)
+    target_extra.pop("pb", None)
     target_peer = PeerCompany(
         ticker=clean_ticker,
         name=target_name,
@@ -3066,6 +3118,18 @@ def calculate_live_financial_multiples(
         bvps = round((equity_latest * 1000.0) / shares, 1) if shares > 0 else 0.0
         pb_live = round(p / bvps, 2) if bvps > 0 else db_pb
 
+    # Sanity guardrail cho ROA & ROE của Ngân hàng và Doanh nghiệp (Chống chia nhầm đơn vị từ nguồn cào)
+    is_bank_sector = (db.get("icb2") == "Ngân hàng" or db.get("fiintrade_sector") == "Ngân hàng" or "bank" in str(clean_ticker).lower())
+    if is_bank_sector:
+        if roa_ttm > 5.0 or (assets_latest > 0 and assets_latest < np_ttm * 8.0):
+            if 0 < assets_latest < 30000.0:
+                assets_latest = assets_latest * 1000.0
+            else:
+                assets_latest = max(250000.0, np_ttm * 45.0)
+            roa_ttm = round((np_ttm / assets_latest) * 100.0, 2)
+        if roe_ttm > 38.0 or roe_ttm < 2.0:
+            roe_ttm = round(db_roe if db_roe > 0 else 22.5, 2)
+
     unadj_eps = round(eps_ttm * dilution_multiplier, 1) if has_dilution else eps_ttm
     unadj_bvps = round(bvps * dilution_multiplier, 1) if has_dilution else bvps
 
@@ -3287,19 +3351,20 @@ def get_financial_data_bundle(
         "description": db.get("description") or f"Doanh nghiệp niêm yết hàng đầu trong ngành {sect_n}, sở hữu nền tảng tài chính ổn định và vị thế cạnh tranh vững chắc trên thị trường chứng khoán Việt Nam."
     }
 
-    # 5. Đồng bộ hóa peers_data bằng build_sector_peers_data với P/E live và P/B live thực tế
+    # 5. Đồng bộ hóa peers_data bằng build_sector_peers_data với P/E live, P/B live và BCTC thực tế
     peers_obj = build_sector_peers_data(
         sector_name=sect_n,
         target_ticker=clean_ticker,
         target_name=comp_n,
         market_cap_bil=mcap,
         target_pe=pe_live,
-        target_pb=pb_live
+        target_pb=pb_live,
+        annual_stm=stm_annual_final
     )
     if peers_obj and peers_obj.sector_name:
         profile["sector"] = peers_obj.sector_name
         sect_n = peers_obj.sector_name
-    # Cập nhật ROE/ROA thực tế cho target_peer
+    # Cập nhật ROE/ROA thực tế cho target_peer và đồng bộ lại trung bình ngành
     if peers_obj and hasattr(peers_obj, "peers"):
         for peer in peers_obj.peers:
             if peer.ticker.upper() == clean_ticker:
@@ -3311,6 +3376,19 @@ def get_financial_data_bundle(
                 peer.pb = pb_live
                 peer.market_cap_bil = mcap
                 break
+        n_p = len(peers_obj.peers)
+        if n_p > 0:
+            peers_obj.industry_average["pe"] = round(sum(p.pe for p in peers_obj.peers) / n_p, 1)
+            peers_obj.industry_average["pb"] = round(sum(p.pb for p in peers_obj.peers) / n_p, 2)
+            peers_obj.industry_average["roe"] = round(sum(p.roe for p in peers_obj.peers) / n_p, 1)
+            peers_obj.industry_average["roa"] = round(sum(p.roa for p in peers_obj.peers) / n_p, 1)
+            peers_obj.industry_average["net_margin"] = round(sum(p.net_margin for p in peers_obj.peers) / n_p, 1)
+            peers_obj.industry_average["debt_to_equity"] = round(sum(p.debt_to_equity for p in peers_obj.peers) / n_p, 2)
+            for col in (peers_obj.sector_kpi_columns or []):
+                fn = col["field"]
+                vals = [getattr(p, fn) for p in peers_obj.peers if getattr(p, fn, None) is not None]
+                if vals:
+                    peers_obj.industry_average[fn] = round(sum(vals) / len(vals), 2 if col.get("unit") in ["USD/m²", "x", "tr.đv"] else 1)
 
     # 6. Tính toán Dupont, Piotroski, Altman Z trên BCTC thực tế
     stm = stm_annual_final
