@@ -3333,5 +3333,146 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "DXG": [
+    {
+      "id": "dxg-ca-28052026-bonus_share",
+      "ex_date": "28/05/2026",
+      "record_date": "29/05/2026",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "DXG: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền phát hành cổ phiếu để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 100:14",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.14,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8772,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dxg-ca-04062025-bonus_share",
+      "ex_date": "04/06/2025",
+      "record_date": "05/06/2025",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "DXG: Thông báo ngày ĐKCC để thực hiện quyền nhận cổ phiếu phát hành do thực hiện tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+      "description": "Thưởng cổ phiếu, tỷ lệ 100:17",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.17,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.8547,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dxg-ca-06012025-rights_issue",
+      "ex_date": "06/01/2025",
+      "record_date": "07/01/2025",
+      "execution_date": "",
+      "event_type": "rights_issue",
+      "title": "DXG: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền mua cổ phiếu",
+      "description": "Thực hiện quyền mua cổ phiếu phát hành thêm, tỷ lệ 24:5, giá 12,000 đồng/CP",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.2083,
+      "rights_price": 12000.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "NTL": [
+    {
+      "id": "ntl-ca-16122025-dividend_cash",
+      "ex_date": "16/12/2025",
+      "record_date": "17/12/2025",
+      "execution_date": "25/12/2025",
+      "event_type": "dividend_cash",
+      "title": "NTL: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền tạm ứng cổ tức năm 2025 bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 1,000 đồng/CP",
+      "cash_amount": 1000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ntl-ca-03102024-dividend_cash",
+      "ex_date": "03/10/2024",
+      "record_date": "04/10/2024",
+      "execution_date": "11/10/2024",
+      "event_type": "dividend_cash",
+      "title": "NTL: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức năm 2024 bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 1,200 đồng/CP",
+      "cash_amount": 1200.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "ntl-ca-04072024-bonus_share",
+      "ex_date": "04/07/2024",
+      "record_date": "05/07/2024",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "NTL: Thông báo về ngày ĐKCC nhận cổ phiếu phát hành do tăng vốn",
+      "description": "Thưởng cổ phiếu, tỷ lệ 1:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 1.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.5,
+      "source": "Sở GDCK / Simplize Open API"
+    }
+  ],
+  "NLG": [
+    {
+      "id": "nlg-ca-12062026-dividend_cash",
+      "ex_date": "12/06/2026",
+      "record_date": "15/06/2026",
+      "execution_date": "30/06/2026",
+      "event_type": "dividend_cash",
+      "title": "NLG: Thông báo về ngày ĐKCC chi trả cổ tức năm 2025 bằng tiền",
+      "description": "Trả cổ tức  năm 2025  bằng tiền, 500 đồng/CP",
+      "cash_amount": 500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "nlg-ca-17102025-rights_issue",
+      "ex_date": "17/10/2025",
+      "record_date": "20/10/2025",
+      "execution_date": "",
+      "event_type": "rights_issue",
+      "title": "NLG: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền mua cổ phiếu",
+      "description": "Thực hiện quyền mua cổ phiếu phát hành thêm, tỷ lệ 100:26, giá 25,000 đồng/CP",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.26,
+      "rights_price": 25000.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "nlg-ca-05062025-dividend_cash",
+      "ex_date": "05/06/2025",
+      "record_date": "06/06/2025",
+      "execution_date": "30/06/2025",
+      "event_type": "dividend_cash",
+      "title": "NLG: Thông báo ngày ĐKCC trả cổ tức năm 2024 bằng tiền",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 499 đồng/CP",
+      "cash_amount": 499.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
