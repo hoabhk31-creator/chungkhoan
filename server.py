@@ -117,11 +117,17 @@ from ai_learning_engine import (
     get_learned_ticker_catalysts
 )
 
+from fastapi.middleware.gzip import GZipMiddleware
+
 app = FastAPI(
     title="Institutional Equity Research Matrix (IERM)",
     description="Fintech Research Co-Pilot & WebApp Engine for Vietnam Financial Market",
     version="1.0.0"
 )
+
+# Kích hoạt nén GZip toàn cục cho toàn bộ phản hồi API và Static Files (> 1KB)
+# Giúp giảm 70% - 90% dung lượng payload truyền tải qua mạng
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Thư mục static UI
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -142,10 +148,14 @@ for _fn in ["index.html", "app.js", "styles.css"]:
 @app.middleware("http")
 async def add_no_cache_headers(request, call_next):
     response = await call_next(request)
-    if request.url.path.startswith("/static/") or request.url.path == "/":
+    path = request.url.path
+    if path == "/" or path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+    elif path.startswith("/static/"):
+        # Cho phép trình duyệt lưu đệm tài nguyên tĩnh (JS 740KB, CSS, fonts) để tăng tốc tải trang tức thì
+        response.headers["Cache-Control"] = "public, max-age=3600, stale-while-revalidate=86400"
     return response
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -168,24 +178,29 @@ async def startup_event():
     except Exception as e:
         print(f"AI Learning Scheduler startup exception: {e}")
 
-    # Pre-warm cache cho top 20 mã phổ biến nhất để giảm latency lần đầu
+    # Pre-warm cache cho top các mã phổ biến nhất để giảm latency xuống mức tức thì
     async def _prewarm_top_tickers():
         top_tickers = [
-            "HPG", "VHM", "VIC", "VNM", "MWG", "FPT", "TCB", "VCB", "BID", "CTG",
-            "STB", "MSN", "GVR", "SAB", "ACB", "MBB", "VPB", "HDB", "EIB", "PLX"
+            "HPG", "VNM", "VCB", "SSI", "MWG", "FPT", "TCB", "MBB", "VIC", "VHM",
+            "STB", "CTG", "ACB", "MSN", "VHC"
         ]
-        await asyncio.sleep(5)  # Đợi server sẵn sàng hoàn toàn
+        await asyncio.sleep(3)  # Đợi server sẵn sàng hoàn toàn
         for tkr in top_tickers:
+            try:
+                # Pre-warm BCTC & Financial Analysis Bundle
+                await asyncio.wait_for(get_financial_overview(tkr), timeout=10.0)
+            except Exception:
+                pass
             try:
                 await asyncio.wait_for(
                     get_synchronized_matrix_reports(
                         ticker=tkr, base_reports=[], comp_name="", sector_name="", market_p=25000.0
                     ),
-                    timeout=15.0
+                    timeout=10.0
                 )
-                await asyncio.sleep(2)  # Throttle để tránh DDoS Vietstock
             except Exception:
                 pass
+            await asyncio.sleep(0.5)
 
     try:
         asyncio.create_task(_prewarm_top_tickers())

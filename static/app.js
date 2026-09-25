@@ -631,12 +631,18 @@ function switchTab(tabId) {
         } else if (currentMultiValuationState && currentMultiValuationState.ticker === activeTicker) {
             renderValuationSection(currentMultiValuationState);
         } else {
-            fetch(`/api/financial-overview/${activeTicker}`).then(r => r.json()).then(b => {
-                if (b && b.valuation) {
-                    currentFinancialBundle = b;
-                    renderValuationSection(b.valuation);
-                }
-            }).catch(e => console.warn("Fetch val on tab switch error:", e));
+            const cachedFin = window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[activeTicker]?.fin;
+            if (cachedFin && cachedFin.valuation) {
+                currentFinancialBundle = cachedFin;
+                renderValuationSection(cachedFin.valuation);
+            } else {
+                fetch(`/api/financial-overview/${activeTicker}`).then(r => r.json()).then(b => {
+                    if (b && b.valuation) {
+                        currentFinancialBundle = b;
+                        renderValuationSection(b.valuation);
+                    }
+                }).catch(e => console.warn("Fetch val on tab switch error:", e));
+            }
         }
         if (chartPeBands) chartPeBands.resize();
         if (chartPbBands) chartPbBands.resize();
@@ -979,12 +985,12 @@ async function selectTicker(ticker) {
 
     // 2. CHECK CLIENT CACHE (0.00s INSTANT RENDERING)
     const cached = window._CLIENT_TICKER_CACHE[cleanTicker];
-    if (cached && (Date.now() - cached.ts < 300000) && cached.preset) {
+    if (cached && (Date.now() - cached.ts < 300000) && (cached.preset || cached.fin)) {
         currentReport = cached.preset;
         currentFinancialBundle = cached.fin;
         currentTechnicalData = cached.tech;
 
-        renderPresetReportData(cleanTicker, currentReport, chip);
+        if (currentReport) renderPresetReportData(cleanTicker, currentReport, chip);
         if (currentFinancialBundle) renderFinancialBundleData(cleanTicker, currentFinancialBundle);
         if (currentTechnicalData) renderTechnicalDataSection(cleanTicker, currentTechnicalData);
 
@@ -1317,6 +1323,8 @@ async function selectTicker(ticker) {
             if (thisReqSeq !== activeRequestSeq) return;
             if (finBundle) {
                 currentFinancialBundle = finBundle;
+                window._CLIENT_TICKER_CACHE[cleanTicker] = window._CLIENT_TICKER_CACHE[cleanTicker] || { ts: Date.now() };
+                window._CLIENT_TICKER_CACHE[cleanTicker].fin = finBundle;
                 renderFinancialBundleData(cleanTicker, finBundle);
                 if (window.lucide) lucide.createIcons();
             }
@@ -1327,6 +1335,8 @@ async function selectTicker(ticker) {
             if (thisReqSeq !== activeRequestSeq) return;
             if (techData) {
                 currentTechnicalData = techData;
+                window._CLIENT_TICKER_CACHE[cleanTicker] = window._CLIENT_TICKER_CACHE[cleanTicker] || { ts: Date.now() };
+                window._CLIENT_TICKER_CACHE[cleanTicker].tech = techData;
                 renderTechnicalDataSection(cleanTicker, techData);
                 if (window.lucide) lucide.createIcons();
             }
@@ -13572,9 +13582,14 @@ async function executeExport(format) {
         // 1. Thu thập dữ liệu tài chính
         let bundle = currentFinancialBundle;
         if (!bundle || bundle.ticker !== ticker) {
-            const resp = await fetch(`/api/financial-overview/${ticker}`);
-            if (!resp.ok) throw new Error(`Không tìm thấy dữ liệu cho mã ${ticker}`);
-            bundle = await resp.json();
+            const cachedFin = window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[ticker]?.fin;
+            if (cachedFin) {
+                bundle = cachedFin;
+            } else {
+                const resp = await fetch(`/api/financial-overview/${ticker}`);
+                if (!resp.ok) throw new Error(`Không tìm thấy dữ liệu cho mã ${ticker}`);
+                bundle = await resp.json();
+            }
         }
 
         // 2. Thu thập dữ liệu giao dịch SSI (OHLCV)

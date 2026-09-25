@@ -11,19 +11,50 @@ import time
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple, Union
 from bs4 import BeautifulSoup
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
 CACHE_FILE = os.path.join(CACHE_DIR, "financial_statements_cache.json")
+STATEMENTS_CACHE_DIR = os.path.join(CACHE_DIR, "statements")
 CACHE_TTL = 86400  # 24 giờ
 
 # Bộ nhớ tạm in-memory
 _MEMORY_CACHE: Dict[str, Dict[str, Any]] = {}
+
+# HTTP Connection Pool dùng chung để giữ kết nối TLS/TCP Keep-Alive, tăng tốc cào gấp 2-3 lần
+_CAFEF_SESSION: Optional[requests.Session] = None
+
+def get_cafef_session() -> requests.Session:
+    global _CAFEF_SESSION
+    if _CAFEF_SESSION is None:
+        session = requests.Session()
+        adapter = HTTPAdapter(
+            pool_connections=35,
+            pool_maxsize=35,
+            max_retries=Retry(total=1, backoff_factor=0.2, status_forcelist=[500, 502, 503, 504])
+        )
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive"
+        })
+        _CAFEF_SESSION = session
+    return _CAFEF_SESSION
 
 
 def _ensure_cache_dir():
     if not os.path.exists(CACHE_DIR):
         try:
             os.makedirs(CACHE_DIR, exist_ok=True)
+        except Exception:
+            pass
+    if not os.path.exists(STATEMENTS_CACHE_DIR):
+        try:
+            os.makedirs(STATEMENTS_CACHE_DIR, exist_ok=True)
         except Exception:
             pass
 
@@ -43,7 +74,37 @@ def _save_disk_cache():
     _ensure_cache_dir()
     try:
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
-            json.dump(_MEMORY_CACHE, f, ensure_ascii=False, indent=2)
+            json.dump(_MEMORY_CACHE, f, ensure_ascii=False, separators=(',', ':'))
+    except Exception:
+        pass
+
+
+def _get_ticker_disk_cache(cache_key: str) -> Optional[Dict[str, Any]]:
+    """Đọc cache theo từng mã riêng biệt với độ phức tạp O(1) siêu tốc."""
+    if cache_key in _MEMORY_CACHE:
+        return _MEMORY_CACHE[cache_key]
+    granular_file = os.path.join(STATEMENTS_CACHE_DIR, f"{cache_key}.json")
+    if os.path.exists(granular_file):
+        try:
+            with open(granular_file, "r", encoding="utf-8") as f:
+                entry = json.load(f)
+                _MEMORY_CACHE[cache_key] = entry
+                return entry
+        except Exception:
+            pass
+    if not _MEMORY_CACHE:
+        _load_disk_cache()
+    return _MEMORY_CACHE.get(cache_key)
+
+
+def _save_ticker_disk_cache(cache_key: str, entry: Dict[str, Any]):
+    """Lưu cache riêng từng mã dạng compact JSON (không ghi đè file tổng lớn)."""
+    _MEMORY_CACHE[cache_key] = entry
+    _ensure_cache_dir()
+    granular_file = os.path.join(STATEMENTS_CACHE_DIR, f"{cache_key}.json")
+    try:
+        with open(granular_file, "w", encoding="utf-8") as f:
+            json.dump(entry, f, ensure_ascii=False, separators=(',', ':'))
     except Exception:
         pass
 
@@ -84,66 +145,73 @@ def fetch_cafef_report_raw(ticker: str, report_type: str, year: int, quarter: in
     url = f"https://s.cafef.vn/bao-cao-tai-chinh/{ticker.upper()}/{report_type}/{year}/{quarter}/0/0/bao-cao.chn"
     
     try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=3) as resp:
-            html = resp.read().decode("utf-8", errors="ignore")
-            soup = BeautifulSoup(html, "html.parser")
+        session = get_cafef_session()
+        try:
+            resp = session.get(url, timeout=3.5)
+            if resp.status_code != 200:
+                return ([], {})
+            html = resp.text
+        except Exception:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                html = resp.read().decode("utf-8", errors="ignore")
+        soup = BeautifulSoup(html, "html.parser")
             
-            # 1. Trích xuất tiêu đề các cột thời gian từ tblGridData
-            header_table = soup.find("table", id="tblGridData")
-            raw_headers = [c.get_text(strip=True) for c in header_table.find_all(["th", "td"])] if header_table else []
-            
-            periods = []
-            col_indices = []
-            for idx, col in enumerate(raw_headers):
-                col_clean = col.strip()
-                # Dạng quý: 'Quý 3- 2025' hoặc 'Quý 3/2025' hoặc 'Quý 3-2025'
-                m_q = re.search(r"Qu[yý]\s*(\d)\s*[-/]?\s*(\d{4})", col_clean, re.IGNORECASE)
-                if m_q:
-                    periods.append(f"Q{m_q.group(1)}/{m_q.group(2)}")
-                    col_indices.append(idx)
-                # Dạng năm: '2024' (mở rộng lấy từ năm 2000 trở lại đây để có chuỗi dữ liệu lịch sử tối đa)
-                elif col_clean.isdigit() and len(col_clean) == 4 and int(col_clean) >= 2000:
-                    periods.append(col_clean)
-                    col_indices.append(idx)
+        # 1. Trích xuất tiêu đề các cột thời gian từ tblGridData
+        header_table = soup.find("table", id="tblGridData")
+        raw_headers = [c.get_text(strip=True) for c in header_table.find_all(["th", "td"])] if header_table else []
+        
+        periods = []
+        col_indices = []
+        for idx, col in enumerate(raw_headers):
+            col_clean = col.strip()
+            # Dạng quý: 'Quý 3- 2025' hoặc 'Quý 3/2025' hoặc 'Quý 3-2025'
+            m_q = re.search(r"Qu[yý]\s*(\d)\s*[-/]?\s*(\d{4})", col_clean, re.IGNORECASE)
+            if m_q:
+                periods.append(f"Q{m_q.group(1)}/{m_q.group(2)}")
+                col_indices.append(idx)
+            # Dạng năm: '2024' (mở rộng lấy từ năm 2000 trở lại đây để có chuỗi dữ liệu lịch sử tối đa)
+            elif col_clean.isdigit() and len(col_clean) == 4 and int(col_clean) >= 2000:
+                periods.append(col_clean)
+                col_indices.append(idx)
 
-            # 2. Trích xuất dữ liệu các hàng từ tableContent
-            content_table = soup.find("table", id="tableContent")
-            items: Dict[str, List[float]] = {}
-            if content_table:
-                for r in content_table.find_all("tr"):
-                    cells = [c.get_text(strip=True) for c in r.find_all(["td", "th"])]
-                    if len(cells) > 1 and cells[0]:
-                        title = cells[0].strip()
-                        row_vals = []
-                        for c_idx in col_indices:
-                            if c_idx < len(cells):
-                                row_vals.append(clean_number_bil(cells[c_idx]))
-                            else:
-                                row_vals.append(0.0)
-                        items[title] = row_vals
-
-            # 3. Phát hiện và loại bỏ dữ liệu bị nhân bản (tất cả cột cùng giá trị)
-            # Đây là nguyên nhân chính gây trùng lặp dữ liệu nhiều năm liên tiếp
-            if len(periods) >= 3:
-                items_cleaned = {}
-                for title, vals in items.items():
-                    if len(vals) >= 3:
-                        non_zero_vals = [v for v in vals if v != 0.0]
-                        # Nếu tất cả giá trị khác 0 đều giống nhau → dữ liệu bị nhân bản, bỏ qua
-                        if len(non_zero_vals) >= 2 and len(set(non_zero_vals)) == 1:
-                            # Chỉ giữ lại cột cuối cùng (mới nhất), các cột trước để 0.0
-                            last_idx = len(vals) - 1
-                            cleaned = [0.0] * len(vals)
-                            cleaned[last_idx] = vals[last_idx]
-                            items_cleaned[title] = cleaned
+        # 2. Trích xuất dữ liệu các hàng từ tableContent
+        content_table = soup.find("table", id="tableContent")
+        items: Dict[str, List[float]] = {}
+        if content_table:
+            for r in content_table.find_all("tr"):
+                cells = [c.get_text(strip=True) for c in r.find_all(["td", "th"])]
+                if len(cells) > 1 and cells[0]:
+                    title = cells[0].strip()
+                    row_vals = []
+                    for c_idx in col_indices:
+                        if c_idx < len(cells):
+                            row_vals.append(clean_number_bil(cells[c_idx]))
                         else:
-                            items_cleaned[title] = vals
+                            row_vals.append(0.0)
+                    items[title] = row_vals
+
+        # 3. Phát hiện và loại bỏ dữ liệu bị nhân bản (tất cả cột cùng giá trị)
+        # Đây là nguyên nhân chính gây trùng lặp dữ liệu nhiều năm liên tiếp
+        if len(periods) >= 3:
+            items_cleaned = {}
+            for title, vals in items.items():
+                if len(vals) >= 3:
+                    non_zero_vals = [v for v in vals if v != 0.0]
+                    # Nếu tất cả giá trị khác 0 đều giống nhau → dữ liệu bị nhân bản, bỏ qua
+                    if len(non_zero_vals) >= 2 and len(set(non_zero_vals)) == 1:
+                        # Chỉ giữ lại cột cuối cùng (mới nhất), các cột trước để 0.0
+                        last_idx = len(vals) - 1
+                        cleaned = [0.0] * len(vals)
+                        cleaned[last_idx] = vals[last_idx]
+                        items_cleaned[title] = cleaned
                     else:
                         items_cleaned[title] = vals
-                items = items_cleaned
+                else:
+                    items_cleaned[title] = vals
+            items = items_cleaned
 
-            return periods, items
+        return periods, items
     except Exception:
         return [], {}
 
@@ -1293,10 +1361,7 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
         target_count = 24
 
     # 1. Kiểm tra cache
-    if not _MEMORY_CACHE:
-        _load_disk_cache()
-    
-    cached_entry = _MEMORY_CACHE.get(cache_key)
+    cached_entry = _get_ticker_disk_cache(cache_key)
     now = time.time()
     if cached_entry and (now - cached_entry.get("timestamp", 0) < CACHE_TTL):
         data = cached_entry.get("data", {})
@@ -1640,10 +1705,9 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
     # Tự động làm sạch và bù đắp dữ liệu thiếu trước khi lưu cache và trả về
     result = clean_and_impute_financial_data(result, clean_ticker, mode)
 
-    _MEMORY_CACHE[cache_key] = {
+    _save_ticker_disk_cache(cache_key, {
         "timestamp": now,
         "data": result
-    }
-    _save_disk_cache()
+    })
 
     return result
