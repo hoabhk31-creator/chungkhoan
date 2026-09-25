@@ -3997,5 +3997,37 @@
       "adjustment_factor": 0.9524,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "DPR": [
+    {
+      "id": "dpr-ca-20082025-dividend_cash",
+      "ex_date": "20/08/2025",
+      "record_date": "21/08/2025",
+      "execution_date": "29/09/2025",
+      "event_type": "dividend_cash",
+      "title": "DPR: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức năm 2024 bằng tiền mặt",
+      "description": "Trả cổ tức  năm 2024  bằng tiền, 2,000 đồng/CP",
+      "cash_amount": 2000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "dpr-ca-21102024-dividend_cash",
+      "ex_date": "21/10/2024",
+      "record_date": "22/10/2024",
+      "execution_date": "20/12/2024",
+      "event_type": "dividend_cash",
+      "title": "DPR: Thông báo về ngày đăng ký cuối cùng chi trả cổ tức năm 2023 bằng tiền",
+      "description": "Trả cổ tức  năm 2023  bằng tiền, 1,500 đồng/CP",
+      "cash_amount": 1500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
