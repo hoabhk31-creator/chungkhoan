@@ -344,8 +344,8 @@
     "company_name": "Hòa Phát",
     "official_website": "hoaphat.com.vn",
     "website_projects_url": "https://hoaphat.com.vn/linh-vuc-hoat-dong",
-    "total_projects": 11,
-    "total_investment_bil": 202134.0,
+    "total_projects": 8,
+    "total_investment_bil": 202000,
     "projects": [
       {
         "name": "Khu liên hợp Gang thép Dung Quất 2 (Quảng Ngãi)",
@@ -420,8 +420,8 @@
         "source": "Website chính thức (hoaphat.com.vn) & BCTN"
       },
       {
-        "name": "Động lực tăng trưởng chủ yếu đến từ: (1) tiến độ giải ngân đầu tư công được đẩy mạnh, (2) ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "name": "dự án hạ tầng",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HPG",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -432,32 +432,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Hòa Phát đang triển khai đầu tư các dự án lớn, trong đó bao gồm (1) các hạng mục thuộc Khu...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Hòa Phát đang triển khai đầu tư các dự án lớn, trong đó bao gồm (1) các hạng mục thuộc Khu liên hợp Dung Quất, (2) dự án nhà máy thép ray và thép đặc biệt công suất 700,000 tấn/năm, và (3) dự án container.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Nguồn: Báo cáo công ty, KBSV Điểm nhấn đầu tư Chú thích Nhu cầu thép nội địa sẽ là động lự...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Nguồn: Báo cáo công ty, KBSV Điểm nhấn đầu tư Chú thích Nhu cầu thép nội địa sẽ là động lực tăng trưởng chính nhờ (1) Việt Nam đẩy mạnh giải ngân đầu tư công và triển khai các dự án hạ tầng trọng điểm, (2) nguồn cung bất động sản dân dụng cải thiện, (3) HRC nội địa sẽ thay thế HRC nhập khẩu trong dài hạn.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Dự báo lợi nhuận giai đoạn 2028-30 cao hơn phản ánh đóng góp từ nhà máy thép xây dựng EAF ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HPG",
+        "name": "nhà máy thép xây dựng EAF mới tại Tây Ninh",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HPG",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -466,21 +442,9 @@
         "occupancy_rate": 85,
         "phase_tag": "Đang mở bán & thi công",
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (HPG)",
-        "scale": "Giá trị công trình dở dang lũy kế 107.2 tỷ đồng trên BCTC kiểm toán",
-        "investment_bil": 134.0,
-        "progress_pct": 80,
-        "commercial_date": "Hoàn thiện 2025 - 2026",
-        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
-        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang thi công xây dựng",
-        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
       }
     ],
-    "newly_discovered_count": 5,
+    "newly_discovered_count": 2,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -490,8 +454,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790297374.9455545,
-    "scan_time_str": "07:49:34 25/09/2026"
+    "timestamp": 1790319360.068723,
+    "scan_time_str": "13:56:00 25/09/2026"
   },
   "HDG": {
     "ticker": "HDG",
