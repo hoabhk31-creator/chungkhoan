@@ -2794,7 +2794,7 @@ def build_quarterly_statements(annual_stm: FinancialStatements, ticker: str) -> 
     # 1. Ưu tiên nạp dữ liệu quý thực tế từ financial_scraper (có lưu cache 24h)
     try:
         from financial_scraper import fetch_multi_period_financials
-        real_q = fetch_multi_period_financials(clean_ticker, mode="quarter", count=12)
+        real_q = fetch_multi_period_financials(clean_ticker, mode="quarter", count="all")
         if real_q and len(real_q.get("periods", [])) >= 4:
             rev_bd = getattr(annual_stm, "revenue_breakdown", {}) or {}
             ast_bd = getattr(annual_stm, "asset_breakdown", {}) or {}
@@ -2972,8 +2972,8 @@ def calculate_live_financial_multiples(
         from financial_scraper import fetch_multi_period_financials
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=2) as executor:
-            f_q = executor.submit(fetch_multi_period_financials, clean_ticker, "quarter", 12)
-            f_y = executor.submit(fetch_multi_period_financials, clean_ticker, "year", 8)
+            f_q = executor.submit(fetch_multi_period_financials, clean_ticker, "quarter", "all")
+            f_y = executor.submit(fetch_multi_period_financials, clean_ticker, "year", "all")
             real_q = f_q.result()
             real_y = f_y.result()
     except Exception:

@@ -267,6 +267,13 @@ CURATED_QUARTERLY_DATA: Dict[str, Dict[str, Dict[str, float]]] = {
 }
 
 CURATED_ANNUAL_DATA: Dict[str, Dict[str, Dict[str, float]]] = {
+    "HPG": {
+        "2015": {
+            "revenue": 27864.0, "net_profit": 3504.0, "gross_profit": 5580.0, "cogs": 22284.0,
+            "total_assets": 25548.0, "owner_equity": 13310.0, "total_liabilities": 12238.0,
+            "cfo": 4820.0, "operating_profit": 4210.0
+        }
+    },
     "CTD": {
         "2023": {
             "revenue": 13498.0, "net_profit": 104.0, "gross_profit": 352.0, "cogs": 13146.0
@@ -873,13 +880,12 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
             r_val = rev_list[i] if i < len(rev_list) else 10000.0
 
             curr_adm = raw_inc[key_admin][i] if i < len(raw_inc[key_admin]) else 0.0
-            if curr_adm <= 5.0:
+            if curr_adm <= 5.0 and r_val > 0:
                 calc_adm = round(gp + fr - fe + aff - sell - op, 1)
-                if calc_adm > 10.0:
-                    final_adm = calc_adm
-                else:
-                    final_adm = round(max(15.0, r_val * 0.015), 1)
-                raw_inc[key_admin][i] = final_adm
+                if calc_adm > 0:
+                    raw_inc[key_admin][i] = calc_adm
+            elif r_val <= 0:
+                raw_inc[key_admin][i] = 0.0
 
             curr_np = raw_inc[key_np][i] if key_np and i < len(raw_inc[key_np]) else (np_list[i] if i < len(np_list) else 0.0)
             curr_eps = raw_inc[key_eps_basic][i] if i < len(raw_inc[key_eps_basic]) else 0.0
@@ -1054,24 +1060,10 @@ def _build_general_statements(res: Dict[str, Any], clean_ticker: str, n_periods:
             for i in range(n_periods):
                 if i > 0 and i - 1 < len(res["cash_and_equivalents"]):
                     vals[i] = res["cash_and_equivalents"][i - 1]
-                elif vals[i] == 0 and i < len(res["cash_and_equivalents"]):
-                    vals[i] = round(res["cash_and_equivalents"][i] * 0.9, 1)
-        elif kl.startswith("1. lợi nhuận trước thuế") or kl == "lợi nhuận trước thuế":
-            for i in range(n_periods):
-                if vals[i] == 0 and i < len(res["net_profit"]):
-                    vals[i] = round(res["net_profit"][i] * 1.25, 1)
         elif kl == "chi phí lãi vay":
             for i in range(n_periods):
                 if vals[i] == 0 and i < len(res["financial_expense"]):
                     vals[i] = res["financial_expense"][i]
-        elif kl == "- tiền lãi vay đã trả":
-            for i in range(n_periods):
-                if vals[i] == 0 and i < len(res["financial_expense"]):
-                    vals[i] = round(-res["financial_expense"][i] * 0.95, 1)
-        elif kl == "- thuế thu nhập doanh nghiệp đã nộp":
-            for i in range(n_periods):
-                if vals[i] == 0 and i < len(res["net_profit"]):
-                    vals[i] = round(-res["net_profit"][i] * 0.20, 1)
         raw_cf[key] = vals
 
     res["raw_cf"] = raw_cf
@@ -1150,102 +1142,19 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     n = len(periods)
     clean_ticker = ticker.upper().strip()
 
-    # 0. Khử triệt để outlier ngoại lai do lỗi nhập liệu của nguồn cấp
-    # Đồng thời phát hiện và xóa dữ liệu bị fill trùng cho các năm trước niêm yết
-    from collections import Counter as _Counter
+    # 0. Khử triệt để outlier ngoại lai do lỗi nhập liệu của nguồn cấp (CafeF gõ nhầm số 0)
     for metric_key in ["revenue", "net_profit", "cogs", "gross_profit", "operating_profit", "financial_expense",
                        "total_assets", "short_term_assets", "cash_and_equivalents", "inventories",
                        "total_liabilities", "short_term_debt", "long_term_debt", "owner_equity",
                        "cfo", "cfi", "cff", "free_cash_flow"]:
         if metric_key in res and isinstance(res[metric_key], list):
-            vals = _sanitize_series_outliers(res[metric_key])
-            # Phát hiện block repetition: CafeF trả 4 cột/chunk, tất cả cùng giá trị
-            # Pattern: [A,A,A,A, B,B,B,B, C,C,C,C] → giữ lại chỉ [0,0,0,A, 0,0,0,B, 0,0,0,C]
-            if len(vals) >= 6 and mode == "year":
-                # Detect block size: tìm N sao cho vals[i]==vals[i+1]==...==vals[i+N-1] nhưng vals[i+N] khác
-                # Scan lên đến 5 chunks
-                for block_size in [4, 3, 2]:
-                    non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
-                    if len(non_zero_pos) < block_size * 2:
-                        continue
-                    # Kiểm tra xem có pattern block_size: mỗi cụm block_size kỳ liên tiếp có cùng giá trị
-                    blocks_found = 0
-                    i = 0
-                    non_z_vals = [vals[p] for p in non_zero_pos]
-                    while i + block_size <= len(non_z_vals):
-                        block = non_z_vals[i:i+block_size]
-                        if len(set(block)) == 1:
-                            blocks_found += 1
-                        i += block_size
-                    # Nếu >= 3 block đều có cùng giá trị nội tại → đây là block repetition từ CafeF
-                    total_complete_blocks = len(non_z_vals) // block_size
-                    if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
-                        # Xóa tất cả trừ kỳ cuối trong mỗi block
-                        i = 0
-                        while i + block_size <= len(non_zero_pos):
-                            block_indices = non_zero_pos[i:i+block_size]
-                            block_vals = [vals[bi] for bi in block_indices]
-                            if len(set(block_vals)) == 1:
-                                # Giữ lại kỳ cuối của block, reset các kỳ trước
-                                for bi in block_indices[:-1]:
-                                    vals[bi] = 0.0
-                            i += block_size
-                        break  # Đã xử lý xong
-            res[metric_key] = vals
+            res[metric_key] = _sanitize_series_outliers(res[metric_key])
 
-
-    # Phát hiện và xóa dữ liệu bị nhân bản trong raw_inc/raw_bs/raw_cf
-    # Nếu >= 3 kỳ liên tiếp có cùng giá trị khác 0 → đó là dữ liệu bị copy → reset về 0.0
     for raw_sec in ["raw_inc", "raw_bs", "raw_cf"]:
         if raw_sec in res and isinstance(res[raw_sec], dict):
             for row_k in list(res[raw_sec].keys()):
                 if isinstance(res[raw_sec][row_k], list):
-                    vals = res[raw_sec][row_k]
-                    # Sanitize outliers
-                    vals = _sanitize_series_outliers(vals)
-                    # Phát hiện block repetition pattern (giống aggregate metrics)
-                    if len(vals) >= 6 and mode == "year":
-                        for block_size in [4, 3, 2]:
-                            non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
-                            if len(non_zero_pos) < block_size * 2:
-                                continue
-                            blocks_found = 0
-                            idx = 0
-                            non_z_vals = [vals[p] for p in non_zero_pos]
-                            while idx + block_size <= len(non_z_vals):
-                                block = non_z_vals[idx:idx+block_size]
-                                if len(set(block)) == 1:
-                                    blocks_found += 1
-                                idx += block_size
-                            total_complete_blocks = len(non_z_vals) // block_size
-                            if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
-                                idx = 0
-                                while idx + block_size <= len(non_zero_pos):
-                                    block_indices = non_zero_pos[idx:idx+block_size]
-                                    block_vals = [vals[bi] for bi in block_indices]
-                                    if len(set(block_vals)) == 1:
-                                        for bi in block_indices[:-1]:
-                                            vals[bi] = 0.0
-                                    idx += block_size
-                                break
-                    # Phát hiện chuỗi liên tiếp cùng giá trị (>= 3)
-                    elif len(vals) >= 3:
-                        i = 0
-                        while i < len(vals):
-                            if vals[i] != 0.0:
-                                run_len = 1
-                                j = i + 1
-                                while j < len(vals) and vals[j] == vals[i]:
-                                    run_len += 1
-                                    j += 1
-                                if run_len >= 3:
-                                    for k in range(i, j - 1):
-                                        vals[k] = 0.0
-                                i = j
-                            else:
-                                i += 1
-
-                    res[raw_sec][row_k] = vals
+                    res[raw_sec][row_k] = _sanitize_series_outliers(res[raw_sec][row_k])
 
     # 1. Nạp dữ liệu kiểm toán chuẩn xác nếu mã nằm trong danh sách đặc thù
     if mode == "quarter" and clean_ticker in CURATED_QUARTERLY_DATA:
@@ -1269,291 +1178,49 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
                         res[metric].append(0.0)
                     res[metric][i] = val
 
-    # 2. Xử lý thiếu hụt Doanh thu (Revenue Gap Filling)
-    rev = res.get("revenue", [])
-    valid_rev_indices = [i for i, r in enumerate(rev) if r and r > 0]
-    if valid_rev_indices:
-        avg_rev = sum(rev[i] for i in valid_rev_indices) / len(valid_rev_indices)
-        for i in range(n):
-            if i >= len(rev) or rev[i] is None or rev[i] <= 0:
-                val = 0.0
-                # Ưu tiên lấy cùng kỳ năm trước hoặc năm sau (YoY)
-                if i >= 4 and i - 4 < len(rev) and rev[i - 4] > 0:
-                    val = rev[i - 4] * 1.08
-                elif i + 4 < len(rev) and rev[i + 4] > 0:
-                    val = rev[i + 4] / 1.08
-                # Hoặc trung bình 2 kỳ lân cận
-                elif i > 0 and i < n - 1 and i - 1 < len(rev) and i + 1 < len(rev) and rev[i - 1] > 0 and rev[i + 1] > 0:
-                    val = (rev[i - 1] + rev[i + 1]) / 2.0
-                elif i > 0 and i - 1 < len(rev) and rev[i - 1] > 0:
-                    val = rev[i - 1]
-                elif i < n - 1 and i + 1 < len(rev) and rev[i + 1] > 0:
-                    val = rev[i + 1]
-                else:
-                    val = avg_rev
-
-                if i < len(rev):
-                    rev[i] = round(val, 1)
-                else:
-                    rev.append(round(val, 1))
-        res["revenue"] = rev
-
-    # 3. Xử lý thiếu hụt Lợi nhuận sau thuế (Net Profit Gap Filling)
-    c_info = {}
-    try:
-        from company_database import get_company
-        c_info = get_company(clean_ticker) or {}
-    except Exception:
-        c_info = {}
-
-    c_sec = (c_info.get("fiintrade_sector") or c_info.get("icb4") or c_info.get("icb2") or "").lower()
-    is_bank_sector = any(b in c_sec for b in ["ngân hàng", "ngan hang", "bank"])
-    is_sec_sector = any(s in c_sec for s in ["chứng khoán", "chung khoan", "securities"])
-    db_q_np = float(c_info.get("net_profit_q1_26_bil") or 0.0)
-    db_q_rev = float(c_info.get("revenue_q1_26_bil") or 0.0)
-    db_eps = float(c_info.get("eps") or 0.0)
-
-    np_list = res.get("net_profit", [])
-    valid_np_indices = [i for i, val in enumerate(np_list) if val is not None and val != 0.0]
-    
-    # Tính biên lợi nhuận ròng hiện tại từ dữ liệu cào
-    curr_npm = 0.0
-    if valid_np_indices and valid_rev_indices:
-        tot_np = sum(np_list[i] for i in valid_np_indices if i < len(np_list))
-        tot_rv = sum(rev[i] for i in valid_np_indices if i < len(rev) and rev[i] > 0)
-        curr_npm = (tot_np / tot_rv) if tot_rv > 0 else 0.05
-
-    # Phát hiện dữ liệu lợi nhuận bị lỗi suy giảm (corrupted) do CafeF trả 0 cho bank/chứng khoán dẫn đến npm bị ép về 0.05
-    is_corrupted = False
-    if is_bank_sector and (curr_npm < 0.20 or not valid_np_indices):
-        is_corrupted = True
-    elif is_sec_sector and (curr_npm < 0.15 or not valid_np_indices):
-        is_corrupted = True
-    elif not valid_np_indices:
-        is_corrupted = True
-
-    # Xác định biên ròng chuẩn xác (avg_npm)
-    if is_corrupted:
-        if db_q_np > 0 and db_q_rev > 0:
-            avg_npm = db_q_np / db_q_rev
-        elif is_bank_sector:
-            avg_npm = 0.50  # Ngân hàng: LNST / NII chuẩn ngành ~45% - 55%
-        elif is_sec_sector:
-            avg_npm = 0.35  # Chứng khoán: LNST / Doanh thu hoạt động chuẩn ngành ~30% - 40%
-        else:
-            avg_npm = 0.08
-    else:
-        avg_npm = curr_npm if curr_npm > 0 else 0.08
-
-    # Nếu chuỗi net_profit bị lỗi toàn bộ (is_corrupted), cần tính lại toàn bộ theo biên ròng chuẩn
-    for i in range(n):
-        r_val = rev[i] if i < len(rev) else 1000.0
-        cur_np = np_list[i] if i < len(np_list) else None
-        
-        needs_replace = False
-        if cur_np is None or cur_np == 0.0:
-            needs_replace = True
-        elif is_corrupted and is_bank_sector and r_val > 0 and (cur_np / r_val < 0.15):
-            needs_replace = True
-        elif is_corrupted and is_sec_sector and r_val > 0 and (cur_np / r_val < 0.10):
-            needs_replace = True
-
-        if needs_replace:
-            if not is_corrupted and i > 0 and i < n - 1 and i - 1 < len(np_list) and i + 1 < len(np_list) and np_list[i - 1] != 0 and np_list[i + 1] != 0:
-                val = (np_list[i - 1] + np_list[i + 1]) / 2.0
-            else:
-                val = r_val * avg_npm
-            if i < len(np_list):
-                np_list[i] = round(val, 1)
-            else:
-                np_list.append(round(val, 1))
-
-    # Nếu là quý và có số liệu quý gần nhất chuẩn xác từ database (db_q_np)
-    if mode == "quarter" and db_q_np > 0 and len(np_list) >= 1:
-        if abs(np_list[-1] - db_q_np) / db_q_np > 0.25:
-            np_list[-1] = round(db_q_np, 1)
-
-    res["net_profit"] = np_list
-
-    # 4. Giá vốn hàng bán & Lợi nhuận gộp
-    gp_list = res.get("gross_profit", [])
-    cogs_list = res.get("cogs", [])
-    valid_gp = [i for i, g in enumerate(gp_list) if g and g > 0 and i < len(rev) and rev[i] > 0]
-    avg_gm = (sum(gp_list[i] / rev[i] for i in valid_gp) / len(valid_gp)) if valid_gp else 0.15
-
-    for i in range(n):
-        r = rev[i] if i < len(rev) else 0.0
-        if i >= len(gp_list) or gp_list[i] is None or gp_list[i] <= 0:
-            val_gp = round(r * avg_gm, 1)
-            if i < len(gp_list):
-                gp_list[i] = val_gp
-            else:
-                gp_list.append(val_gp)
-        if i >= len(cogs_list) or cogs_list[i] is None or cogs_list[i] <= 0:
-            val_cogs = round(max(0.0, r - gp_list[i]), 1)
-            if i < len(cogs_list):
-                cogs_list[i] = val_cogs
-            else:
-                cogs_list.append(val_cogs)
-    res["gross_profit"] = gp_list
-    res["cogs"] = cogs_list
-
-    # 5. Lợi nhuận hoạt động & Chi phí tài chính
-    op_list = res.get("operating_profit", [])
-    fe_list = res.get("financial_expense", [])
-    for i in range(n):
-        r = rev[i] if i < len(rev) else 0.0
-        p = np_list[i] if i < len(np_list) else 0.0
-        if i >= len(op_list) or op_list[i] is None or op_list[i] == 0:
-            val_op = round(p * 1.3, 1)
-            if i < len(op_list):
-                op_list[i] = val_op
-            else:
-                op_list.append(val_op)
-        if i >= len(fe_list) or fe_list[i] is None or fe_list[i] == 0:
-            val_fe = round(r * 0.015, 1)
-            if i < len(fe_list):
-                fe_list[i] = val_fe
-            else:
-                fe_list.append(val_fe)
-    res["operating_profit"] = op_list
-    res["financial_expense"] = fe_list
-
-    # 6. Bảng cân đối kế toán (Nội suy mượt mà)
-    bs_metrics = [
-        ("total_assets", 2.0),
-        ("short_term_assets", 1.2),
-        ("cash_and_equivalents", 0.35),
-        ("inventories", 0.35),
-        ("total_liabilities", 1.1),
-        ("short_term_debt", 0.4),
-        ("long_term_debt", 0.15),
-        ("owner_equity", 0.9)
-    ]
-    for k, ratio in bs_metrics:
+    # 2. Đảm bảo độ dài đồng bộ cho toàn bộ các chuỗi chỉ tiêu (không tự ý suy diễn dữ liệu)
+    # Các năm/kỳ không có số liệu giữ nguyên 0.0 (hiển thị '-' trên giao diện theo đúng công bố)
+    for k in ["revenue", "net_profit", "cogs", "gross_profit", "operating_profit", "financial_expense",
+              "total_assets", "short_term_assets", "cash_and_equivalents", "inventories",
+              "total_liabilities", "short_term_debt", "long_term_debt", "owner_equity",
+              "cfo", "cfi", "cff", "free_cash_flow"]:
         arr = res.get(k, [])
-        valid_idx = [i for i, v in enumerate(arr) if v and v > 0]
-        if valid_idx:
-            for i in range(n):
-                if i >= len(arr) or arr[i] is None or arr[i] <= 0:
-                    if i > 0 and i < n - 1 and i - 1 < len(arr) and i + 1 < len(arr) and arr[i - 1] > 0 and arr[i + 1] > 0:
-                        v = (arr[i - 1] + arr[i + 1]) / 2.0
-                    elif i > 0 and i - 1 < len(arr) and arr[i - 1] > 0:
-                        v = arr[i - 1]
-                    elif i < n - 1 and i + 1 < len(arr) and arr[i + 1] > 0:
-                        v = arr[i + 1]
-                    else:
-                        v = rev[i] * ratio
-                    if i < len(arr):
-                        arr[i] = round(v, 1)
-                    else:
-                        arr.append(round(v, 1))
-        else:
-            for i in range(n):
-                v = round(rev[i] * ratio, 1)
-                if i < len(arr):
-                    arr[i] = v
-                else:
-                    arr.append(v)
-        res[k] = arr
+        if not isinstance(arr, list):
+            arr = [0.0] * n
+        while len(arr) < n:
+            arr.append(0.0)
+        res[k] = arr[:n]
 
-    # 6b. Kiểm toán đối chiếu Cân đối kế toán (Balance Sheet Integrity: Tổng tài sản = Nợ phải trả + Vốn CSH)
-    tot_assets = res.get("total_assets", [])
-    tot_liab = res.get("total_liabilities", [])
-    eq_list = res.get("owner_equity", [])
-    st_assets = res.get("short_term_assets", [])
-
+    # Đồng bộ các mối quan hệ kế toán chuẩn (Identity check - tuyệt đối không bịa số)
+    rev = res["revenue"]
+    cg = res["cogs"]
+    gp = res["gross_profit"]
     for i in range(n):
-        l_val = tot_liab[i] if i < len(tot_liab) and tot_liab[i] is not None else 0.0
-        e_val = eq_list[i] if i < len(eq_list) and eq_list[i] is not None else 0.0
-        st_val = st_assets[i] if i < len(st_assets) and st_assets[i] is not None else 0.0
-        cur_a = tot_assets[i] if i < len(tot_assets) and tot_assets[i] is not None else 0.0
+        if gp[i] == 0.0 and rev[i] > 0 and cg[i] > 0:
+            gp[i] = round(rev[i] - cg[i], 1)
+        elif cg[i] == 0.0 and rev[i] > 0 and gp[i] > 0:
+            cg[i] = round(max(0.0, rev[i] - gp[i]), 1)
+    res["gross_profit"] = gp
+    res["cogs"] = cg
 
-        sum_liab_eq = round(l_val + e_val, 1)
-        # Nếu tổng tài sản bất thường (nhỏ hơn nợ phải trả, nhỏ hơn tài sản ngắn hạn, hoặc sai lệch lớn so với Nợ + Vốn CSH)
-        if sum_liab_eq > 0:
-            if cur_a <= 0 or cur_a < l_val or cur_a < st_val or abs(cur_a - sum_liab_eq) > 0.15 * sum_liab_eq:
-                cur_a = sum_liab_eq
-        elif st_val > 0 and (cur_a < st_val or cur_a <= 0):
-            cur_a = round(st_val * 1.35, 1)
-
-        if i < len(tot_assets):
-            tot_assets[i] = round(cur_a, 1)
-        else:
-            tot_assets.append(round(cur_a, 1))
-
-        # Đảm bảo nếu Nợ hoặc Vốn CSH bị 0 trong khi đã có Tổng tài sản
-        if l_val > 0 and (e_val <= 0 or e_val > cur_a):
-            e_val = round(max(0.0, cur_a - l_val), 1)
-            if i < len(eq_list):
-                eq_list[i] = e_val
-            else:
-                eq_list.append(e_val)
-        elif e_val > 0 and (l_val <= 0 or l_val > cur_a):
-            l_val = round(max(0.0, cur_a - e_val), 1)
-            if i < len(tot_liab):
-                tot_liab[i] = l_val
-            else:
-                tot_liab.append(l_val)
-
+    tot_assets = res["total_assets"]
+    tot_liab = res["total_liabilities"]
+    eq_list = res["owner_equity"]
+    for i in range(n):
+        l_val = tot_liab[i]
+        e_val = eq_list[i]
+        cur_a = tot_assets[i]
+        sum_le = round(l_val + e_val, 1)
+        if sum_le > 0:
+            if cur_a <= 0 or cur_a < l_val or abs(cur_a - sum_le) > 0.15 * sum_le:
+                tot_assets[i] = sum_le
     res["total_assets"] = tot_assets
-    res["total_liabilities"] = tot_liab
-    res["owner_equity"] = eq_list
 
-    # Cập nhật ngay vào raw_bs nếu đã có sẵn (chỉ bổ sung nếu kỳ đó = 0)
-    if "raw_bs" in res and isinstance(res["raw_bs"], dict):
-        for bs_k in list(res["raw_bs"].keys()):
-            bs_kl = bs_k.lower().strip()
-            agg_vals = None
-            if "tổng cộng tài sản" in bs_kl or "tổng tài sản" in bs_kl or bs_kl == "tài sản" or "tổng cộng nguồn vốn" in bs_kl:
-                agg_vals = tot_assets[:n]
-            elif "nợ phải trả" in bs_kl and "không kể" not in bs_kl:
-                agg_vals = tot_liab[:n]
-            elif "vốn chủ sở hữu" in bs_kl and "nguồn" not in bs_kl:
-                agg_vals = eq_list[:n]
-            if agg_vals is not None:
-                cur = res["raw_bs"][bs_k]
-                merged = []
-                for idx in range(n):
-                    cur_v = cur[idx] if idx < len(cur) else 0.0
-                    agg_v = agg_vals[idx] if idx < len(agg_vals) else 0.0
-                    merged.append(agg_v if (cur_v == 0.0 or cur_v is None) else cur_v)
-                res["raw_bs"][bs_k] = merged
-
-    # 7. Lưu chuyển tiền tệ
-    cfo_list = res.get("cfo", [])
-    cfi_list = res.get("cfi", [])
-    cff_list = res.get("cff", [])
-    fcf_list = res.get("free_cash_flow", [])
+    cfo_list = res["cfo"]
+    fcf_list = res["free_cash_flow"]
     for i in range(n):
-        p = np_list[i] if i < len(np_list) else 50.0
-        if i >= len(cfo_list) or cfo_list[i] is None or cfo_list[i] == 0:
-            val_cfo = round(p * 1.1, 1)
-            if i < len(cfo_list):
-                cfo_list[i] = val_cfo
-            else:
-                cfo_list.append(val_cfo)
-        if i >= len(cfi_list) or cfi_list[i] is None or cfi_list[i] == 0:
-            val_cfi = round(-p * 0.4, 1)
-            if i < len(cfi_list):
-                cfi_list[i] = val_cfi
-            else:
-                cfi_list.append(val_cfi)
-        if i >= len(cff_list) or cff_list[i] is None or cff_list[i] == 0:
-            val_cff = round(-p * 0.2, 1)
-            if i < len(cff_list):
-                cff_list[i] = val_cff
-            else:
-                cff_list.append(val_cff)
-        if i >= len(fcf_list) or fcf_list[i] is None or fcf_list[i] == 0:
-            val_fcf = round(cfo_list[i] * 0.72, 1)
-            if i < len(fcf_list):
-                fcf_list[i] = val_fcf
-            else:
-                fcf_list.append(val_fcf)
-    res["cfo"] = cfo_list
-    res["cfi"] = cfi_list
-    res["cff"] = cff_list
+        if fcf_list[i] == 0.0 and cfo_list[i] != 0.0:
+            fcf_list[i] = round(cfo_list[i] * 0.72, 1)
     res["free_cash_flow"] = fcf_list
 
     # 8. Đồng bộ hóa và bù đắp dữ liệu theo Mô hình Ngành kế toán (Industry-Adaptive Statements)
@@ -1604,55 +1271,6 @@ def clean_and_impute_financial_data(res: Dict[str, Any], ticker: str, mode: str 
     else:
         res = _build_general_statements(res, clean_ticker, n_periods, shares_mil)
 
-    # Post-build: Apply block dedup và run-length dedup cho toàn bộ các ngành
-    if mode == "year":
-        for raw_sec in ["raw_inc", "raw_bs", "raw_cf"]:
-            if raw_sec in res and isinstance(res[raw_sec], dict):
-                for row_k in list(res[raw_sec].keys()):
-                    if isinstance(res[raw_sec][row_k], list):
-                        vals = res[raw_sec][row_k]
-                        # 1. Block repetition (size 4, 3, 2)
-                        for block_size in [4, 3, 2]:
-                            non_zero_pos = [i for i, v in enumerate(vals) if v != 0.0]
-                            if len(non_zero_pos) < block_size * 2:
-                                continue
-                            blocks_found = 0
-                            idx = 0
-                            non_z_vals = [vals[p] for p in non_zero_pos]
-                            while idx + block_size <= len(non_z_vals):
-                                block = non_z_vals[idx:idx+block_size]
-                                if len(set(block)) == 1:
-                                    blocks_found += 1
-                                idx += block_size
-                            total_complete_blocks = len(non_z_vals) // block_size
-                            if total_complete_blocks >= 2 and blocks_found >= max(2, total_complete_blocks * 0.6):
-                                idx = 0
-                                while idx + block_size <= len(non_zero_pos):
-                                    block_indices = non_zero_pos[idx:idx+block_size]
-                                    block_vals = [vals[bi] for bi in block_indices]
-                                    if len(set(block_vals)) == 1:
-                                        for bi in block_indices[:-1]:
-                                            vals[bi] = 0.0
-                                    idx += block_size
-                                break
-
-                        # 2. Phát hiện chuỗi liên tiếp cùng giá trị (>= 3)
-                        i = 0
-                        while i < len(vals):
-                            if vals[i] != 0.0:
-                                run_len = 1
-                                j = i + 1
-                                while j < len(vals) and vals[j] == vals[i]:
-                                    run_len += 1
-                                    j += 1
-                                if run_len >= 3:
-                                    for k in range(i, j - 1):
-                                        vals[k] = 0.0
-                                i = j
-                            else:
-                                i += 1
-                        res[raw_sec][row_k] = vals
-
     return res
 
 
@@ -1683,7 +1301,12 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
     if cached_entry and (now - cached_entry.get("timestamp", 0) < CACHE_TTL):
         data = cached_entry.get("data", {})
         if data and "raw_inc" in data and len(data.get("raw_inc", {})) > 0:
-            if is_all or len(data.get("periods", [])) >= target_count:
+            if is_all:
+                if data.get("is_full_history"):
+                    data_cleaned = clean_and_impute_financial_data(data, clean_ticker, mode)
+                    cached_entry["data"] = data_cleaned
+                    return data_cleaned
+            elif len(data.get("periods", [])) >= target_count:
                 data_cleaned = clean_and_impute_financial_data(data, clean_ticker, mode)
                 cached_entry["data"] = data_cleaned
                 return data_cleaned
@@ -1692,21 +1315,29 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
     from concurrent.futures import ThreadPoolExecutor
 
     if mode == "quarter":
-        # Năm và quý cần quét: 2026 Q2, 2025 Q2, 2024 Q2, 2023 Q2, 2022 Q2 (lên đến 20 quý - 5 năm)
+        # Quét tới 11 năm (44 quý)
         all_targets = [
             (2026, 2),
             (2025, 2),
             (2024, 2),
             (2023, 2),
-            (2022, 2)
+            (2022, 2),
+            (2021, 2),
+            (2020, 2),
+            (2019, 2),
+            (2018, 2),
+            (2017, 2),
+            (2016, 2)
         ]
     else:
-        # Năm cần quét: 2025 Q0, 2021 Q0, 2017 Q0, 2013 Q0 (lên đến 16 năm lịch sử)
+        # Năm cần quét: 2025, 2021, 2017, 2013, 2009, 2005 (lên đến 24 năm: 2002 - 2025)
         all_targets = [
             (2025, 0),
             (2021, 0),
             (2017, 0),
-            (2013, 0)
+            (2013, 0),
+            (2009, 0),
+            (2005, 0)
         ]
 
     # Giới hạn số lượng chunk theo target_count cần lấy (mỗi chunk CafeF chứa 4 kỳ)
@@ -1727,7 +1358,7 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
         except Exception:
             return (c_idx, rt, [], {})
 
-    with ThreadPoolExecutor(max_workers=min(12, len(tasks))) as executor:
+    with ThreadPoolExecutor(max_workers=min(18, len(tasks))) as executor:
         results = list(executor.map(_parallel_fetch_worker, tasks))
 
     # Tái cấu trúc kết quả theo từng chunk
@@ -1808,11 +1439,31 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
     if not sorted_periods:
         return {}
 
+    # Cắt bỏ các năm/kỳ dẫn đầu trước khi doanh nghiệp niêm yết hoặc bắt đầu công bố BCTC
+    # (nơi tất cả các chỉ tiêu đều bằng 0 hoặc trống) -> Doanh nghiệp công bố tới đâu lấy tới đó
+    def period_has_data(p: str) -> bool:
+        p_data = period_dict.get(p, {})
+        for sec in ["inc", "bs", "cf"]:
+            for v in p_data.get(sec, {}).values():
+                if v is not None and abs(v) > 0.001:
+                    return True
+        return False
+
+    first_published_idx = 0
+    for idx, p in enumerate(sorted_periods):
+        if period_has_data(p):
+            first_published_idx = idx
+            break
+
+    available_periods = sorted_periods[first_published_idx:]
+    if not available_periods:
+        available_periods = sorted_periods
+
     # Lấy toàn bộ hoặc số kỳ gần nhất theo target_count
     if is_all:
-        final_periods = sorted_periods
+        final_periods = available_periods
     else:
-        final_periods = sorted_periods[-target_count:] if len(sorted_periods) > target_count else sorted_periods
+        final_periods = available_periods[-target_count:] if len(available_periods) > target_count else available_periods
     period_len = len(final_periods)
 
     def get_timeline_metric(source_key: str, keywords: List[str]) -> List[float]:
@@ -1982,6 +1633,7 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
         "raw_inc": raw_inc,
         "raw_bs": raw_bs,
         "raw_cf": raw_cf,
+        "is_full_history": is_all,
         "data_source": "Ưu tiên API SSI #1 (Bổ sung BCTC Kiểm toán Vietstock & CafeF)"
     }
 

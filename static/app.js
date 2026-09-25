@@ -6929,6 +6929,7 @@ function renderBctcCharts(stm) {
                         backgroundColor: bullChartColor,
                         borderWidth: 3,
                         tension: 0.3,
+                        spanGaps: true,
                         pointRadius: activeStm.periods.map((_, idx) => idx === currentSelectedPeriodIdx ? 8 : 4),
                         pointHoverRadius: 9,
                         pointBackgroundColor: activeStm.periods.map((_, idx) => idx === currentSelectedPeriodIdx ? '#38bdf8' : bullChartColor),
