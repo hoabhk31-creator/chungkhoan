@@ -526,6 +526,11 @@ function toggleTheme() {
         const tSym = (currentTechnicalData && currentTechnicalData.ticker) || currentTechnicalTicker || "HPG";
         initFireantChart(tSym, currentTechnicalInterval || "D");
     }
+    if (currentTechnicalData && currentTechnicalData.candles_history && currentTechnicalData.candles_history.length > 0) {
+        if (typeof renderFireantSubPanes === "function") {
+            renderFireantSubPanes(currentTechnicalData.candles_history);
+        }
+    }
 }
 
 function updateThemeIcons(isDark) {
@@ -9358,7 +9363,8 @@ function renderMcdxCanvas(candles) {
     const y25 = h - 16 - (0.25 * (h - 26));
     const y50 = h - 16 - (0.50 * (h - 26));
 
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+    const isDarkMcdx = document.documentElement.classList.contains("dark");
+    ctx.strokeStyle = isDarkMcdx ? "rgba(148, 163, 184, 0.25)" : "rgba(100, 116, 139, 0.35)";
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(10, y25); ctx.lineTo(w - 50, y25);
@@ -9368,11 +9374,10 @@ function renderMcdxCanvas(candles) {
 
     // Nhãn 25% và 50% ở mép phải
     ctx.font = "9px 'Roboto', 'Inter', sans-serif";
-    ctx.fillStyle = "#64748b";
+    ctx.fillStyle = isDarkMcdx ? "#64748b" : "#475569";
     ctx.fillText("25%", w - 45, y25 + 3);
     ctx.fillText("50%", w - 45, y50 + 3);
 
-    const isDarkMcdx = document.documentElement.classList.contains("dark");
     const bankerColor = isDarkMcdx ? "#ff3b57" : "#dc2626";
     const hotColor = isDarkMcdx ? "#f59e0b" : "#d97706";
     const retailColor = isDarkMcdx ? "#00c060" : "#15803d";
@@ -9458,13 +9463,13 @@ function renderMacdCanvas(candles) {
     const midY = h / 2;
     const barW = Math.max(1.5, (w - 60) / n - 1.5);
 
+    const isDarkMacd = document.documentElement.classList.contains("dark");
     // Đường 0 trung tâm
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
+    ctx.strokeStyle = isDarkMacd ? "rgba(148, 163, 184, 0.2)" : "rgba(100, 116, 139, 0.35)";
     ctx.beginPath();
     ctx.moveTo(10, midY); ctx.lineTo(w - 50, midY);
     ctx.stroke();
 
-    const isDarkMacd = document.documentElement.classList.contains("dark");
     const macdBullColor = isDarkMacd ? "rgba(0, 192, 96, 0.75)" : "rgba(21, 128, 61, 0.8)";
     const macdBearColor = isDarkMacd ? "rgba(255, 59, 87, 0.75)" : "rgba(220, 38, 38, 0.8)";
     const macdLineColor = isDarkMacd ? "#38bdf8" : "#0284c7";
@@ -9556,13 +9561,14 @@ function renderRsiCanvas(candles) {
 
     const y70 = h - (70 / 100) * (h - 18) - 9;
     const y30 = h - (30 / 100) * (h - 18) - 9;
+    const isDarkRsi = document.documentElement.classList.contains("dark");
 
     // Tô nền vùng 30 - 70
-    ctx.fillStyle = "rgba(168, 85, 247, 0.12)";
+    ctx.fillStyle = isDarkRsi ? "rgba(168, 85, 247, 0.12)" : "rgba(147, 51, 234, 0.08)";
     ctx.fillRect(10, y70, w - 60, y30 - y70);
 
     // Kẻ đường 70 và 30
-    ctx.strokeStyle = "rgba(168, 85, 247, 0.35)";
+    ctx.strokeStyle = isDarkRsi ? "rgba(168, 85, 247, 0.35)" : "rgba(147, 51, 234, 0.4)";
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
     ctx.moveTo(10, y70); ctx.lineTo(w - 50, y70);
@@ -9571,11 +9577,9 @@ function renderRsiCanvas(candles) {
     ctx.setLineDash([]);
 
     ctx.font = "9px 'Roboto', 'Inter', sans-serif";
-    ctx.fillStyle = "#a855f7";
+    ctx.fillStyle = isDarkRsi ? "#a855f7" : "#7e22ce";
     ctx.fillText("70", w - 45, y70 + 3);
     ctx.fillText("30", w - 45, y30 + 3);
-
-    const isDarkRsi = document.documentElement.classList.contains("dark");
 
     // Vẽ đường RSI
     ctx.beginPath();

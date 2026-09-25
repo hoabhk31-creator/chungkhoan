@@ -254,10 +254,13 @@ html:not(.dark) .bg-black\/80,
 html:not(.dark) .bg-slate-950,
 html:not(.dark) .bg-slate-950\/95,
 html:not(.dark) .bg-slate-950\/90,
+html:not(.dark) .bg-slate-950\/85,
 html:not(.dark) .bg-slate-950\/80,
 html:not(.dark) .bg-slate-950\/70,
 html:not(.dark) .bg-slate-950\/60,
+html:not(.dark) .bg-slate-950\/50,
 html:not(.dark) .bg-slate-950\/40,
+html:not(.dark) .bg-slate-950\/30,
 html:not(.dark) .bg-slate-900,
 html:not(.dark) .bg-slate-900\/90,
 html:not(.dark) .bg-slate-900\/80,
@@ -592,11 +595,14 @@ html:not(.dark) .bg-cyan-950,
 html:not(.dark) .bg-cyan-950\/90,
 html:not(.dark) .bg-cyan-950\/80,
 html:not(.dark) .bg-cyan-950\/70,
+html:not(.dark) .bg-cyan-950\/60,
 html:not(.dark) .bg-cyan-950\/40,
+html:not(.dark) .bg-cyan-950\/30,
 html:not(.dark) .bg-sky-950,
 html:not(.dark) .bg-sky-950\/90,
 html:not(.dark) .bg-sky-950\/80,
 html:not(.dark) .bg-sky-950\/70,
+html:not(.dark) .bg-sky-950\/60,
 html:not(.dark) .bg-sky-950\/40 {
     background-color: #e0f2fe !important;
     border-color: #7dd3fc !important;
@@ -614,7 +620,11 @@ html:not(.dark) .bg-purple-950\/40 {
 html:not(.dark) .bg-indigo-950,
 html:not(.dark) .bg-indigo-950\/90,
 html:not(.dark) .bg-indigo-950\/80,
-html:not(.dark) .bg-indigo-950\/70 {
+html:not(.dark) .bg-indigo-950\/70,
+html:not(.dark) .bg-blue-950,
+html:not(.dark) .bg-blue-950\/90,
+html:not(.dark) .bg-blue-950\/80,
+html:not(.dark) .bg-blue-950\/70 {
     background-color: #eef2ff !important;
     border-color: #c7d2fe !important;
     color: #4338ca !important;
@@ -879,6 +889,7 @@ html:not(.dark) #tab-overview .bg-slate-900 {
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
+html:not(.dark) #tab-overview .bg-slate-950\/85,
 html:not(.dark) #tab-overview .bg-slate-950\/80,
 html:not(.dark) #tab-overview .bg-slate-950\/70,
 html:not(.dark) #tab-overview .bg-slate-950\/60,
@@ -931,6 +942,257 @@ html:not(.dark) #tab-overview table thead th {
 }
 html:not(.dark) #tab-overview table tbody tr:hover td {
     background-color: #f8fafc;
+}
+
+/* Thẻ Dự Án Trọng Điểm & Danh Mục Thích Ứng (Tab Tổng quan) */
+html:not(.dark) #overview-projects-container .bg-slate-950\/85,
+html:not(.dark) #overview-projects-container > div {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+html:not(.dark) #overview-projects-container > div:hover {
+    border-color: #0284c7 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08) !important;
+}
+html:not(.dark) #overview-projects-container h4,
+html:not(.dark) #overview-projects-container h4 span {
+    color: #0369a1 !important;
+}
+html:not(.dark) #overview-projects-container .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+html:not(.dark) #overview-projects-container .bg-slate-900\/90 {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+html:not(.dark) #overview-projects-container .bg-purple-950\/90 {
+    background-color: #f3e8ff !important;
+    border-color: #d8b4fe !important;
+    color: #7e22ce !important;
+}
+html:not(.dark) #overview-projects-container .text-cyan-300 {
+    color: #0284c7 !important;
+}
+html:not(.dark) #overview-projects-container .text-slate-400 {
+    color: #64748b !important;
+}
+html:not(.dark) #overview-projects-container .text-slate-300 {
+    color: #334155 !important;
+}
+html:not(.dark) #overview-projects-container .text-slate-200 {
+    color: #0f172a !important;
+}
+html:not(.dark) #overview-projects-container .text-amber-300 {
+    color: #b45309 !important;
+}
+html:not(.dark) #overview-projects-container .text-emerald-400 {
+    color: #15803d !important;
+}
+html:not(.dark) #overview-projects-container .border-slate-800\/60,
+html:not(.dark) #overview-projects-container .border-slate-800\/80,
+html:not(.dark) #overview-projects-container .border-slate-800 {
+    border-color: #e2e8f0 !important;
+}
+
+/* Banner Quét Dự Án Thông Minh */
+html:not(.dark) #overview-projects-discovery-status {
+    background-color: #f0fdf4 !important;
+    border-color: #86efac !important;
+    color: #166534 !important;
+}
+html:not(.dark) #overview-projects-discovery-status strong {
+    color: #14532d !important;
+}
+
+/* ========================================================================= */
+/* Light Mode Overrides for Tab Technical (Đồ thị Kỹ thuật & FireAnt Studio) */
+/* ========================================================================= */
+
+/* 1. FireAnt Terminal Container & Main Panes */
+html:not(.dark) #tab-technical .bg-\[\#0e1320\],
+html:not(.dark) #tab-technical .bg-\[\#090d16\],
+html:not(.dark) #tab-technical #pane-main-chart,
+html:not(.dark) #tab-technical #tech-chart-stack-container,
+html:not(.dark) #tab-technical #tech-tv-render-box,
+html:not(.dark) .bg-\[\#0e1320\],
+html:not(.dark) .bg-\[\#090d16\] {
+    background-color: #ffffff !important;
+}
+
+/* 2. Top Header Controls & Bottom Range Bar & Left Drawing Toolbar */
+html:not(.dark) #tab-technical .bg-\[\#131927\],
+html:not(.dark) #tab-technical .bg-\[\#101625\],
+html:not(.dark) .bg-\[\#131927\],
+html:not(.dark) .bg-\[\#101625\] {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* 3. Sub-panes (Volume, MCDX, MACD, RSI) */
+html:not(.dark) #tab-technical .bg-\[\#080b13\],
+html:not(.dark) #tab-technical .bg-\[\#070a11\],
+html:not(.dark) #tab-technical #pane-volume,
+html:not(.dark) #tab-technical #pane-mcdx,
+html:not(.dark) #tab-technical #pane-macd,
+html:not(.dark) #tab-technical #pane-rsi,
+html:not(.dark) .bg-\[\#080b13\],
+html:not(.dark) .bg-\[\#070a11\] {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* 4. Realtime Legend Header */
+html:not(.dark) #tab-technical #tech-fireant-legend,
+html:not(.dark) #tab-technical .bg-\[\#0d121e\],
+html:not(.dark) .bg-\[\#0d121e\] {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-legend .text-slate-300,
+html:not(.dark) #tab-technical #tech-fireant-legend .text-slate-400 {
+    color: #475569 !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-legend #legend-open,
+html:not(.dark) #tab-technical #tech-fireant-legend #legend-close {
+    color: #0f172a !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-legend #legend-vol {
+    color: #0284c7 !important;
+}
+
+/* 5. Inputs, Buttons & Dropdowns in Technical Header */
+html:not(.dark) #tab-technical #tech-quick-ticker {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+html:not(.dark) #tab-technical #tech-quick-ticker:focus {
+    border-color: #0284c7 !important;
+}
+
+html:not(.dark) #tab-technical #tech-fireant-timeframe-group {
+    background-color: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-timeframe-group button {
+    color: #475569 !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-timeframe-group button:hover {
+    color: #0f172a !important;
+    background-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical #tech-fireant-timeframe-group button.bg-cyan-600 {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+html:not(.dark) #tab-technical #btn-candle-type,
+html:not(.dark) #tab-technical #btn-indicators-menu,
+html:not(.dark) #tab-technical #btn-ma-cross {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+html:not(.dark) #tab-technical #btn-candle-type:hover,
+html:not(.dark) #tab-technical #btn-indicators-menu:hover,
+html:not(.dark) #tab-technical #btn-ma-cross:hover {
+    background-color: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+html:not(.dark) #tab-technical #dropdown-candle-type,
+html:not(.dark) #tab-technical #dropdown-indicators-menu {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+html:not(.dark) #tab-technical #dropdown-candle-type button,
+html:not(.dark) #tab-technical #dropdown-indicators-menu label {
+    color: #334155 !important;
+}
+html:not(.dark) #tab-technical #dropdown-candle-type button:hover,
+html:not(.dark) #tab-technical #dropdown-indicators-menu label:hover {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* 6. Left Drawing Toolbar */
+html:not(.dark) #tab-technical .w-10.bg-\[\#101625\] button {
+    color: #475569 !important;
+}
+html:not(.dark) #tab-technical .w-10.bg-\[\#101625\] button:hover {
+    color: #0f172a !important;
+    background-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical .w-10.bg-\[\#101625\] button.bg-cyan-600 {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+html:not(.dark) #tab-technical .w-10.bg-\[\#101625\] .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+
+/* 7. Sub-panes Title Badges & Labels */
+html:not(.dark) #pane-volume .text-slate-300,
+html:not(.dark) #pane-mcdx .text-slate-200,
+html:not(.dark) #pane-macd .text-slate-300 {
+    color: #0f172a !important;
+}
+html:not(.dark) #pane-volume .text-slate-400,
+html:not(.dark) #pane-mcdx .text-slate-400,
+html:not(.dark) #pane-macd .text-slate-400 {
+    color: #475569 !important;
+}
+
+/* 8. Bottom Range Bar */
+html:not(.dark) #tech-range-bar button {
+    color: #475569 !important;
+}
+html:not(.dark) #tech-range-bar button:hover {
+    color: #0f172a !important;
+    background-color: #e2e8f0 !important;
+}
+html:not(.dark) #tech-range-bar button.bg-slate-800 {
+    background-color: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+html:not(.dark) #tab-technical .text-slate-400 {
+    color: #475569 !important;
+}
+
+/* 9. Three Cards below Chart in Tab Technical */
+html:not(.dark) #tab-technical .bg-slate-900\/90,
+html:not(.dark) #tab-technical .bg-slate-900 {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+}
+html:not(.dark) #tab-technical .bg-slate-950 {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical .border-slate-800,
+html:not(.dark) #tab-technical .border-slate-800\/90,
+html:not(.dark) #tab-technical .border-slate-800\/80,
+html:not(.dark) #tab-technical .border-slate-700\/80 {
+    border-color: #e2e8f0 !important;
+}
+html:not(.dark) #tab-technical .text-slate-200,
+html:not(.dark) #tab-technical .text-slate-300,
+html:not(.dark) #tab-technical .text-white {
+    color: #0f172a !important;
+}
+html:not(.dark) #tab-technical .text-slate-400 {
+    color: #475569 !important;
+}
+html:not(.dark) #tab-technical .text-slate-500 {
+    color: #64748b !important;
 }
 
 /* Corporate Action Interactive Hover Tooltip */
