@@ -318,5 +318,53 @@
     ],
     "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
     "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "SIP": {
+    "name": "SIP: CTCP Đầu tư Sài Gòn VRG",
+    "domain": "saigonvrg.com.vn",
+    "official_url": "https://saigonvrg.com.vn/",
+    "projects_url": "https://saigonvrg.com.vn/du-an",
+    "ir_url": "https://saigonvrg.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "PHR": {
+    "name": "PHR: CTCP Cao su Phước Hòa",
+    "domain": "phr.vn",
+    "official_url": "https://www.phr.vn",
+    "projects_url": "https://phr.vn/du-an",
+    "ir_url": "https://phr.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "HDG": {
+    "name": "HDG: CTCP Tập đoàn Hà Đô",
+    "domain": "hado.com.vn",
+    "official_url": "https://hado.com.vn",
+    "projects_url": "https://hado.com.vn/du-an",
+    "ir_url": "https://hado.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
   }
 }

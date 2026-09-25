@@ -460,14 +460,14 @@
   "HDG": {
     "ticker": "HDG",
     "company_name": "Tập đoàn Hà Đô",
-    "official_website": "hdg.com.vn",
-    "website_projects_url": "https://hdg.com.vn/du-an",
-    "total_projects": 11,
-    "total_investment_bil": 2359.0,
+    "official_website": "hado.com.vn",
+    "website_projects_url": "https://hado.com.vn/du-an",
+    "total_projects": 6,
+    "total_investment_bil": 139.0,
     "projects": [
       {
-        "name": "Nhà máy Thủy điện La Trọng (22MW): Đã hoàn tất, dự kiến đưa vào vận hành thương mại (COD) ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "Nhà máy Thủy điện La Trọng",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 130.0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -478,20 +478,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Thủy điện Sơn Linh & Sơn Nhâm (24MW) mở rộng: Tiếp tục công tác thi công nâng công suất nh...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
-        "investment_bil": 78.0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Thủy điện Sơn Linh & Sơn Nhâm (24MW) mở rộng: Tiếp tục công tác thi công nâng công suất nhà máy, với chi phí CIP đi ngang ở mức 78 tỷ đồng (+0% so với quý trước) với mục tiêu hoàn thành trong Q4/2026.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Dự án Điện gió Phước Hữu (50MW): Đang trong thời gian chuẩn bị đầu tư cho giai đoạn 2026–2...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "Dự án Điện gió Phước Hữu",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 4.0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -502,8 +490,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Dự án Điện gió Bình Gia (80MW): Đã chính thức được chấp thuận chủ trương đầu tư, cột mốc q...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "Dự án Điện gió Bình Gia",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -514,8 +502,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Hoạt động bán hàng cho dự án Hado Charm Villa tiếp tục trầm lắng, với dự phóng chỉ 6 căn đ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "dự án Hado Charm Villa tiếp tục trầm lắng",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -526,8 +514,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Tổng vốn đầu tư cho các dự án điện gió dự kiến 4,730 tỷ đồng, dự phóng làm tăng tỷ lệ nợ v...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "dự án điện gió dự kiến 4",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 5.0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -538,8 +526,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Tình hình đầu tư: Thủy đi ện La Tr ọng dự kiến COD trong năm 2026; các dự án đi ện gió Phư...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
+        "name": "dự án đi ện gió Phước H ữu 50 MW",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HDG",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -548,68 +536,20 @@
         "occupancy_rate": 85,
         "phase_tag": "Đang mở bán & thi công",
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Ý nghĩa quan tr ọng hơn là nghĩa vụ tài chính của dự án được làm rõ hơn, t ạo cơ sở để HDG...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Ý nghĩa quan tr ọng hơn là nghĩa vụ tài chính của dự án được làm rõ hơn, t ạo cơ sở để HDG tiếp tục hoàn thiện thủ tục GCN cho từng sản phẩm.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Hợp nhất 1.175 -1,1% 904 Cập nhật đầu tư, kinh doanh B ĐS và năng lượng Dự án / mảng Cập n...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Hợp nhất 1.175 -1,1% 904 Cập nhật đầu tư, kinh doanh B ĐS và năng lượng Dự án / mảng Cập nhật đến 08/2026 Hado Charm Villas Q2/2026 bán thêm 1 căn.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Chúng tôi cho r ằng sự cải thiện này nhiều khả năng đến từ các điều chỉnh kế toán hoặc hoà...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của HDG",
-        "investment_bil": 39.0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Chúng tôi cho r ằng sự cải thiện này nhiều khả năng đến từ các điều chỉnh kế toán hoặc hoàn nhập chi phí liên quan đến các dự án đã hoàn thành trước đây. dịch vụ khách sạn: Doanh thu và LNG lần lượt đạt 39 tỷ đồng (+9% n/n, biểu đồ 1) và 21 tỷ đồng (+14% n/n, biểu đồ 2), nhờ tỷ lệ lấp đầy của chuỗi khách sạn IBIS cải thiện lên 82% (2Q25: 74%) và giá phòng bình quân ư ớc tăng 4% n/n.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (HDG)",
-        "scale": "Giá trị công trình dở dang lũy kế 1,682.6 tỷ đồng trên BCTC kiểm toán",
-        "investment_bil": 2103.0,
-        "progress_pct": 80,
-        "commercial_date": "Hoàn thiện 2025 - 2026",
-        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
-        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang thi công xây dựng",
-        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
       }
     ],
-    "newly_discovered_count": 11,
+    "newly_discovered_count": 6,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
-      "Website chính thức: hdg.com.vn",
+      "Website chính thức: hado.com.vn",
       "Báo cáo Thường niên (Annual Report)",
       "Báo cáo Tài chính Bán niên Soát xét",
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790231257.1494443,
-    "scan_time_str": "13:27:37 24/09/2026"
+    "timestamp": 1790328446.546238,
+    "scan_time_str": "16:27:26 25/09/2026"
   },
   "CTD": {
     "ticker": "CTD",
@@ -5025,5 +4965,307 @@
     ],
     "timestamp": 1790316405.9705422,
     "scan_time_str": "13:06:45 25/09/2026"
+  },
+  "ACB": {
+    "ticker": "ACB",
+    "company_name": "ACB",
+    "official_website": "acb.com.vn",
+    "website_projects_url": "https://acb.com.vn",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: acb.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790326274.2603498,
+    "scan_time_str": "15:51:14 25/09/2026"
+  },
+  "VCI": {
+    "ticker": "VCI",
+    "company_name": "Chứng khoán Vietcap",
+    "official_website": "vietcap.com.vn",
+    "website_projects_url": "https://vietcap.com.vn",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: vietcap.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790326744.187422,
+    "scan_time_str": "15:59:04 25/09/2026"
+  },
+  "SIP": {
+    "ticker": "SIP",
+    "company_name": "Đầu tư Sài Gòn VRG",
+    "official_website": "saigonvrg.com.vn",
+    "website_projects_url": "https://saigonvrg.com.vn/du-an",
+    "total_projects": 12,
+    "total_investment_bil": 8854.0,
+    "projects": [
+      {
+        "name": "Khu công nghiệp vượt trội so",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "SIP hiện sở hữu hơn 1.100 ha đất thương phẩm sẵn sàng cho thuê, phần lớn có nguồn gốc chuyển đổi từ đất cao su của Tập đoàn Công nghiệp Cao su Việt Nam (GVR) với chi phí đền bù thấp, giúp biên lợi nhuận mảng KCN vượt trội so với trung bình ngành. đồng thời, định hướng đẩy mạnh đầu tư hạ tầng kết nối liên vùng mở ra dư địa tăng giá thuê tại các KCN trọng điểm như Phước Đông và Lộc An – Bình Sơn.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp và cơ chế điều chỉnh giá bán lẻ điện theo Nghị địn",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Mảng cung cấp điện được hỗ trợ bởi nhu cầu tiêu thụ điện tăng từ các khách thuê mới trong KCN và cơ chế điều chỉnh giá bán lẻ điện theo Nghị định 278/2026/N Đ-CP giúp SIP bảo toàn biên lợi nhuận gộp.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp và cung cấp điện nước",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Nhờ dòng tiền ổn định từ cho thuê KCN và cung cấp điện nước, SIP duy trì chính sách chi trả cổ tức tiền mặt đều đặn hàng năm với tỷ lệ 10 – 50%.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu Công nghiệp Nam Tân Uyên",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 2025.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Trong đó, các cổ đông lớn bao gồm CTCP Đầu tư và Phát triển Đô thị An Lộc (19,79%), CTCP Khu Công nghiệp Nam Tân Uyên (9,00%), bà Lư Thanh Nhã – Tổng Giám đốc (7,56%), ông Trần mạnh Hùng – Chủ tịch H ĐQT (7,11%), Nguồn: Fiin Pro-X, VFS tổng hợp 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 2021 2022 2023 2024 2025 tỷ đồng Cơ cấu doanh thu 2021-2025 của SIP Mảng khác B ĐS thương mại Cho thuê nhà xưởng và cung cấp DVTI khác trong KCN Cho thuê lại đất đã phát triển cơ sở hạ tầng Điện, Nước KCN Cơ cấu cổ đông của SIP CTCP An Lộc CTCP KCN Nam Tân Uyên Lư Thanh Nhã Trần mạnh Hùng Tập đoàn Công nghiệp Cao su Việt Nam Cổ đông khác BÁO CÁO PHÂN TÍCH DOANH NGHIỆP 22/09/20264 II.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "khu công nghiệp cũng tăng nhẹ svck đạt 226 tỷ đồng doanh thu và 15",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 226.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Mảng cho thuê bất động sản khu công nghiệp cũng tăng nhẹ svck đạt 226 tỷ đồng doanh thu và 157 tỷ đồng LNG.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp khác vốn trước đây ghi nhận một lần buộc phải chuy",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Tuy chỉ tăng nhẹ, kết quả này vẫn rất tích cực khi so sánh với hàng loạt các doanh nghiệp B ĐS KCN khác vốn trước đây ghi nhận một lần buộc phải chuyển sang ghi nhận phân bổ theo thông tư 99/2025/TT-BT, còn SIP đã áp dụng chính sách phân bổ doanh thu trong suốt nhiều năm qua.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp 8 tháng đầu 2026",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Ngành B ĐS Khu công nghiệp 8 tháng đầu 2026 : Dòng vốn FDI vẫn “ào ào” đổ vào Việt Nam Vốn FDI đăng ký vào Việt Nam trong 8 tháng đầu năm 2026 đạt 41 tỷ USD, tăng mạnh 55% so với cùng kỳ năm trước.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp Lê Minh Xuân",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Ngoài ra, chúng tôi đánh giá rất cao KCN Lê Minh Xuân – với vị trí đắc địa ven thành phố Hồ Chí Minh, còn quỹ đất thương phẩm còn rất lớn (gần 100ha) và giá thuê cao ngất ngưởng (trên 300USD/m2) rất phù hợp cho hàng loạt các doanh nghiệp logistics hậu cần đặt làm đại bản doanh khi kinh tế Hồ Chí Minh vẫn sẽ là đầu tàu tăng trưởng của cả nước.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp tiế p tụ c là mả ng hoạ t độ ng đem lạ i doanh thu",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 3680.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Phân phố i điệ n, nư ớc cho KCN tiế p tụ c là mả ng hoạ t độ ng đem lạ i doanh thu chính cho SIP, với doanh thu và lợi nhuận gộ p lần lượt đạt 3,68 nghìn tỷ đồng ( +9%YoY) và 315 tỷ đồng ( +13%YoY).",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp Phư ớc Đông",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 226.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Cho thuê đấ t và hạ tầ ng tạ i KCN: ghi nhậ n kế t quả khả quan và đạt 226 tỷ đồng ( +8%YoY) đế n từ việ c ghi nhậ n thêm doanh thu từ các hợp đồng cho thu ê trong 2024 - 2025 với diệ n tích cho thuê mớ i đạt ~120ha (tậ p trung tạ i KCN Phư ớc Đông).",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án hợ p lý",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của SIP",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Quan điể m và khuy ến ngh ị Chúng tôi đánh giá cao SIP về lợi thế quỹ đấ t (nằ m tạ i các trung tâm công nghi ệp củ a miề n Nam), nề n tả ng tài chính lành mạnh và chi ến lư ợc tri ển khai dự án hợ p lý, qua đó đem lạ i dòng tiề nổ n đị nh cho doanh nghi ệp trong dài hạ n.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (SIP)",
+        "scale": "Giá trị công trình dở dang lũy kế 2,157.9 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 2697.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 12,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: saigonvrg.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790327423.0043194,
+    "scan_time_str": "16:10:23 25/09/2026"
+  },
+  "PHR": {
+    "ticker": "PHR",
+    "company_name": "Cao su Phước Hòa",
+    "official_website": "phr.vn",
+    "website_projects_url": "https://phr.vn/du-an",
+    "total_projects": 6,
+    "total_investment_bil": 2823.0,
+    "projects": [
+      {
+        "name": "Khu công nghiệp VSIP III",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của PHR",
+        "investment_bil": 323.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Bức tranh lợi nhuận kỷ lục này không thuần túy đến từ H ĐKD, mà được đóng góp chủ yếu bởi thu nhập đột biến từ đền bù đất cao su tại KCN VSIP III (323.4 tỷ đồng) và KCN Thaco Bắc Tân Uyên (171 tỷ đồng).",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp giảm svck do KCN Tân Bình GDD1 đã gần như đạt công",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của PHR",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Doanh thu mảng khai thác KCN giảm svck do KCN Tân Bình GDD1 đã gần như đạt công suất cho thuê tối đa, chưa có nguồn cung mới bổ sung.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp VSIP 3",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của PHR",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "LNST chứng kiến mức tăng đột phá 332% lên mức 655 tỷ nhờ PHR ghi nhận khoản tiền đền bù đất từ KCN VSIP 3, KCN Bắc Tân Uyên 1 và dự án đường cao tốc, được ghi nhận vào khoản mục thu nhập khác.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp tại dự án VSIP III Bình Dương và Bắc Tân Uyên",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của PHR",
+        "investment_bil": 499.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Thu nhập khác ghi nhận tăng đột biếnở mức 499 tỷ đồng (gấp 40 lần svck) từ khoản đền bù chuyển đổi đất cao su sang KCN tại dự án VSIP III Bình Dương và Bắc Tân Uyên.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp Bắc Tân Uyên",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của PHR",
+        "investment_bil": 1498.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Thu nhập khác tăng mạnh (1.498 tỷ đồng, gấp 10 lần YoY) nhờ tổng mức TN ĐB còn lại từ VSIP III và KCN Bắc Tân Uyên.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (PHR)",
+        "scale": "Giá trị công trình dở dang lũy kế 402.2 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 503.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 6,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: phr.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790327500.623294,
+    "scan_time_str": "16:11:40 25/09/2026"
   }
 }
