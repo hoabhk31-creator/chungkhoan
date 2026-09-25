@@ -7078,6 +7078,11 @@ function renderPeersSection(peersData) {
             <span class="text-[10px] text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
                 <span>★ ${kpiCols.length} chỉ số đặc thù ngành</span>
             </span>` : ''}
+            ${peersData.recommended_valuation ? `
+            <span class="text-[10px] text-emerald-300 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1 shadow-sm" title="${peersData.recommended_valuation.rationale || ''}">
+                <i data-lucide="crosshair" class="w-3 h-3 text-emerald-400"></i>
+                <span>${peersData.recommended_valuation.badge || 'Định giá chuẩn ngành'}</span>
+            </span>` : ''}
         `;
     }
 
@@ -7623,9 +7628,17 @@ function renderMultiModelValuation(val) {
 
     const primaryBox = document.getElementById("val-primary-models-container");
     const primaryModels = val.primary_models || (val.sector_profile && val.sector_profile.primary_models) || [];
+    const recVal = val.recommended_valuation || (val.sector_profile && val.sector_profile.recommended_valuation);
     if (primaryBox) {
-        if (primaryModels.length) {
-            primaryBox.innerHTML = primaryModels.map(pm => `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold flex items-center gap-0.5">★ ${escapeHtml(pm)}</span>`).join("");
+        let recValHtml = "";
+        if (recVal && recVal.badge) {
+            recValHtml = `<span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold flex items-center gap-1 shadow-sm" title="${escapeHtml(recVal.rationale || '')}">
+                <i data-lucide="crosshair" class="w-3 h-3 text-emerald-400"></i>
+                <span>${escapeHtml(recVal.badge)}</span>
+            </span>`;
+        }
+        if (primaryModels.length || recValHtml) {
+            primaryBox.innerHTML = recValHtml + primaryModels.map(pm => `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold flex items-center gap-0.5">★ ${escapeHtml(pm)}</span>`).join("");
         } else {
             primaryBox.innerHTML = "";
         }

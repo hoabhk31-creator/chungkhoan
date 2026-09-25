@@ -634,6 +634,17 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         final_comp_name = comp_name
         final_sect_name = sect_name
 
+        # Đồng bộ hóa ngành nghề theo ma trận 23 ngành chuẩn toàn diện
+        from adaptive_growth_engine import classify_business_model
+        from sector_peers_matrix import get_universal_sector_peer_config
+
+        model_info = classify_business_model(clean_ticker, final_comp_name, final_sect_name)
+        model_key = model_info.get("model_key", "HOLDING_CONGLOMERATE")
+        model_badge = model_info.get("badge_text", final_sect_name)
+        sector_cfg = get_universal_sector_peer_config(model_key, clean_ticker)
+        standard_sector = sector_cfg.get("sector_name") or model_badge or final_sect_name
+        final_sect_name = standard_sector
+
         # Nếu market_p hợp lệ, đồng bộ nhanh upside cho synced_reports
         if market_p > 0:
             for r in synced_reports:
@@ -654,8 +665,10 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         reconciled.ticker = clean_ticker
         if final_comp_name:
             reconciled.company_name = final_comp_name
-        if final_sect_name:
-            reconciled.sector = final_sect_name
+        reconciled.sector = final_sect_name
+        reconciled.growth_model_key = model_key
+        reconciled.model_badge_text = model_badge
+        reconciled.recommended_valuation = sector_cfg.get("recommended_valuation")
 
         if base_causality and len(base_causality) > len(reconciled.causality_analysis):
             reconciled.causality_analysis = base_causality
@@ -1040,13 +1053,25 @@ async def get_catalysts_and_insights(ticker: str):
 
     # Tích hợp Adaptive Corporate Growth Engine để tùy biến tiêu đề và Thẻ Kế hoạch/Động lực theo ngành
     try:
-        from adaptive_growth_engine import build_adaptive_growth_portfolio
+        from adaptive_growth_engine import build_adaptive_growth_portfolio, classify_business_model
+        from sector_peers_matrix import get_universal_sector_peer_config
+
         company_name = data.get("company_name", f"CTCP {clean_ticker}")
         sector = data.get("sector", "")
         official_web = data.get("official_website", "")
+        
+        m_info = classify_business_model(clean_ticker, company_name, sector)
+        m_key = m_info.get("model_key", "HOLDING_CONGLOMERATE")
+        m_cfg = get_universal_sector_peer_config(m_key, clean_ticker)
+        std_sector = m_cfg.get("sector_name") or m_info.get("badge_text") or sector
+        data["sector"] = std_sector
+        data["growth_model_key"] = m_key
+        data["model_badge_text"] = m_info.get("badge_text", std_sector)
+        data["recommended_valuation"] = m_cfg.get("recommended_valuation")
+
         adaptive_info = build_adaptive_growth_portfolio(
             clean_ticker,
-            sector=sector,
+            sector=std_sector,
             company_name=company_name,
             existing_projects=data.get("projects", []),
             official_website=official_web
@@ -2572,6 +2597,15 @@ async def api_export_matrix_excel(req: ExportRequest):
     ticker = data.get("ticker", "CP")
     company_name = data.get("company_name", f"Công ty Cổ phần {ticker}")
     sector = data.get("sector", "")
+    if not sector or sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"]:
+        try:
+            from adaptive_growth_engine import classify_business_model
+            from sector_peers_matrix import get_universal_sector_peer_config
+            model_info = classify_business_model(ticker, company_name, sector)
+            cfg = get_universal_sector_peer_config(model_info.get("model_key", ""), ticker)
+            sector = cfg.get("sector_name") or model_info.get("badge_text") or sector or "Doanh nghiệp niêm yết"
+        except Exception:
+            pass
 
     def _get(obj, k, d=""):
         return obj.get(k, d) if isinstance(obj, dict) else getattr(obj, k, d)

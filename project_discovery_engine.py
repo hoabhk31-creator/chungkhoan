@@ -10,9 +10,24 @@ import re
 import json
 import time
 import asyncio
+import unicodedata
 from typing import Dict, List, Any, Optional, Tuple
 import httpx
 from bs4 import BeautifulSoup
+
+
+def strip_vietnamese_accents(text: str) -> str:
+    """
+    Chuẩn hóa chuỗi ký tự tiếng Việt có dấu thành không dấu (ASCII).
+    Ví dụ: 'Thế Giới Di Động' -> 'The Gioi Di Dong'
+    """
+    if not text:
+        return ""
+    text = str(text)
+    text = text.replace('đ', 'd').replace('Đ', 'D')
+    normalized = unicodedata.normalize('NFD', text)
+    unaccented = ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+    return unaccented
 
 # Đường dẫn file cache dự án đã khám phá
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -596,6 +611,114 @@ CORPORATE_OFFICIAL_WEBSITES: Dict[str, Dict[str, Any]] = {
         "projects_url": "https://fecon.com.vn/du-an",
         "ir_url": "https://fecon.com.vn/quan-he-co-dong",
         "keywords": ["Metro Tuyến số 3 Hà Nội", "Cảng biển Nam Đình Vũ", "Điện gió Quốc Vinh Sóc Trăng", "Nhiệt điện Vũng Áng 2"]
+    },
+    "ANV": {
+        "name": "CTCP Nam Việt (Navico)",
+        "domain": "navicorp.com.vn",
+        "projects_url": "https://navicorp.com.vn/du-an-dau-tu/",
+        "ir_url": "https://navicorp.com.vn/quan-he-co-dong/",
+        "keywords": [
+            "Bình Phú", "Vùng nuôi Bình Phú", "Amicogen", "Collagen", "Gelatin",
+            "Điện mặt trời áp mái", "Thức ăn thủy sản", "Chuỗi khép kín 3F", "Navico"
+        ],
+        "default_projects": [
+            {
+                "name": "Đại Vùng nuôi Thủy sản Công nghệ cao Bình Phú (Châu Phú, An Giang)",
+                "scale": "Quy mô 600 ha, công suất cung cấp 200.000 tấn cá tra nguyên liệu/năm, giúp ANV tự chủ 100% thức ăn và con giống khép kín chuỗi 3F.",
+                "investment_bil": 4000,
+                "progress_pct": 85,
+                "commercial_date": "Đang vận hành khai thác từng phần & hoàn thiện",
+                "impact": "Là đại dự án trọng điểm chiếm phần lớn chi phí XDCB dở dang trên BCTC (~446.6 tỷ đ lũy kế), đảm bảo kiểm soát giá thành sản xuất cá nguyên liệu thấp nhất ngành.",
+                "legal_status": "Đầy đủ quy hoạch vùng nuôi thủy sản công nghệ cao, chứng nhận kiểm toán BCTC và chứng chỉ GlobalGAP/ASC",
+                "occupancy_rate": 85,
+                "phase_tag": "Đang vận hành & hoàn thiện hạ tầng",
+                "source": "Báo cáo Thường niên ANV & Website navicorp.com.vn"
+            },
+            {
+                "name": "Nhà máy Chế biến Collagen & Gelatin Amicogen (Liên doanh Amicogen Hàn Quốc)",
+                "scale": "Nhà máy chiết xuất Collagen Peptide y tế & Gelatin công nghệ cao từ da cá tra tại KCN Thốt Nốt (Cần Thơ). Giai đoạn 1: 800 tấn/năm, GĐ 2: 1.600 tấn/năm.",
+                "investment_bil": 550,
+                "progress_pct": 90,
+                "commercial_date": "Đã vận hành thương mại GĐ 1 & mở rộng GĐ 2",
+                "impact": "Chuyển dịch chuỗi giá trị sang sản phẩm sinh học biên lợi nhuận gộp cực cao (>40%), cung cấp cho ngành dược phẩm & mỹ phẩm quốc tế.",
+                "legal_status": "Giấy phép đầu tư liên doanh quốc tế, chứng nhận tiêu chuẩn phòng sạch GMP & ISO 22000",
+                "occupancy_rate": 90,
+                "phase_tag": "Đang vận hành & mở rộng công suất",
+                "source": "Báo cáo Thường niên ANV & BCTC Soát xét"
+            },
+            {
+                "name": "Hệ thống Năng lượng Điện mặt trời Áp mái Chuỗi Vùng nuôi (53 MWp)",
+                "scale": "Lắp đặt tại toàn bộ hệ thống nhà xưởng chế biến và trạm bơm vùng nuôi Bình Phú với tổng công suất 53 MWp.",
+                "investment_bil": 850,
+                "progress_pct": 95,
+                "commercial_date": "Đang vận hành phát điện tự dùng & hòa lưới",
+                "impact": "Tiết giảm 25 - 30% chi phí điện năng vận hành cho toàn bộ chuỗi nuôi trồng, đáp ứng tiêu chuẩn giảm phát thải carbon xuất khẩu vào EU và Mỹ.",
+                "legal_status": "Đầy đủ thỏa thuận đấu nối lưới điện và nghiệm thu PCCC công nghiệp",
+                "occupancy_rate": 95,
+                "phase_tag": "Đang khai thác vận hành",
+                "source": "Báo cáo Thường niên ANV & Thuyết minh Tài sản"
+            }
+        ]
+    },
+    "VHC": {
+        "name": "CTCP Vĩnh Hoàn (Vinh Hoan Corp)",
+        "domain": "vinhhoan.com",
+        "projects_url": "https://vinhhoan.com/our-business/",
+        "ir_url": "https://vinhhoan.com/investor-relations/",
+        "keywords": [
+            "Vinh Wellness", "Collagen", "Gelatin", "Thành Ngọc", "TNG Food",
+            "Feed One", "Sa Giang", "Vùng nuôi Tân Hưng", "Vùng nuôi Cao Lãnh", "Cá tra ASC"
+        ],
+        "default_projects": [
+            {
+                "name": "Tổ hợp Sản xuất Vĩnh Hoàn Collagen & Gelatin (Vinh Wellness)",
+                "scale": "Mở rộng tổ hợp nhà máy Collagen & Gelatin tại Cao Lãnh (Đồng Tháp) lên công suất 7.000 tấn/năm, chiết xuất collagen peptide tinh khiết từ da cá tra.",
+                "investment_bil": 1200,
+                "progress_pct": 90,
+                "commercial_date": "Đang vận hành toàn công suất & mở rộng",
+                "impact": "Sản phẩm có biên lợi nhuận gộp cao nhất của VHC (trên 35%), xuất khẩu trực tiếp sang thị trường Mỹ, Nhật Bản, Hàn Quốc và EU.",
+                "legal_status": "Đầy đủ chứng nhận quốc tế FSSC 22000, ISO 9001, Halal và kiểm toán BCTC định kỳ",
+                "occupancy_rate": 92,
+                "phase_tag": "Đang vận hành thương mại",
+                "source": "Báo cáo Thường niên VHC & Website vinhhoan.com"
+            },
+            {
+                "name": "Nhà máy Chế biến Nông sản Thực phẩm Thành Ngọc (TNG Food)",
+                "scale": "Tổ hợp chế biến rau củ quả, trái cây sấy thăng hoa và nước ép xuất khẩu trên diện tích 4,5 ha tại Đồng Tháp, công suất 23.000 tấn/năm.",
+                "investment_bil": 500,
+                "progress_pct": 85,
+                "commercial_date": "Vận hành thương mại & mở rộng xuất khẩu",
+                "impact": "Đa dạng hóa danh mục sản phẩm ngoài thủy sản, tận dụng tối đa chuỗi cung ứng lạnh và hệ thống phân phối toàn cầu của tập đoàn.",
+                "legal_status": "Đầy đủ giấy phép xây dựng, chứng chỉ an toàn thực phẩm BRC, HACCP toàn cầu",
+                "occupancy_rate": 80,
+                "phase_tag": "Đang vận hành & mở rộng thị trường",
+                "source": "Báo cáo Thường niên VHC & Nghị quyết ĐHĐCĐ"
+            },
+            {
+                "name": "Mở rộng Vùng nuôi Cá tra Công nghệ cao Đạt chuẩn Quốc tế (ASC & BAP 4 Sao)",
+                "scale": "Mở rộng thêm hơn 150 ha vùng nuôi công nghệ cao tại Đồng Tháp và An Giang, nâng tổng diện tích mặt nước lên hơn 700 ha.",
+                "investment_bil": 800,
+                "progress_pct": 88,
+                "commercial_date": "Đang khai thác cung ứng cá nguyên liệu",
+                "impact": "Bảo đảm tự chủ 75 - 80% nguyên liệu chế biến, đáp ứng 100% tiêu chuẩn nhập khẩu của Bộ Nông nghiệp Hoa Kỳ (USDA).",
+                "legal_status": "Chứng nhận 100% diện tích đạt chuẩn xanh ASC, BAP 4 sao và GlobalGAP",
+                "occupancy_rate": 90,
+                "phase_tag": "Đang vận hành & thả nuôi gối đầu",
+                "source": "Báo cáo Thường niên VHC & Website vinhhoan.com"
+            },
+            {
+                "name": "Nhà máy Sản xuất Thức ăn Thủy sản Feed One",
+                "scale": "Nhà máy sản xuất thức ăn thủy sản công suất 350.000 tấn/năm tại Tiền Giang, phục vụ toàn bộ chuỗi trang trại cá tra Vĩnh Hoàn.",
+                "investment_bil": 450,
+                "progress_pct": 95,
+                "commercial_date": "Đang vận hành toàn công suất",
+                "impact": "Khép kín hoàn toàn chuỗi 3F (Feed - Farm - Food), tối ưu hóa hệ số chuyển đổi thức ăn (FCR) và giảm thiểu rủi ro biến động giá thức ăn.",
+                "legal_status": "Đạt chuẩn ISO 22000, GlobalGAP CFM và chứng nhận an toàn sinh học",
+                "occupancy_rate": 95,
+                "phase_tag": "Đang vận hành toàn công suất",
+                "source": "Báo cáo Thường niên VHC & Thuyết minh BCTC"
+            }
+        ]
     }
 }
 
@@ -934,14 +1057,37 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                     c_clean = c.strip()
                     c_lower = c_clean.lower()
                     
-                    # 1. Trích xuất tên dự án thực thụ bắt đầu bằng danh từ dự án/công trình
-                    m_proj = re.search(r'(?:dự án|kđt|khu đô thị|kcn|khu công nghiệp|tổ hợp|chung cư|khu biệt thự|nhà máy|khu du lịch)\s+([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ0-9][^\,\.\;\:\(\)\n]{2,45})', c_clean, re.IGNORECASE)
+                    # 1. Trích xuất tên dự án thực thụ (nhận diện tiền tố Dự án, DA, KĐT, KCN, Biệt thự...)
+                    pattern = r'(?:dự án|da\b|d/a\b|kđt\b|khu đô thị|kcn\b|khu công nghiệp|tổ hợp|chung cư|khu biệt thự|biệt thự|nhà máy|khu du lịch|hoa viên)\s+([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ0-9a-zđàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ\s]{3,50})'
+                    m_proj = re.search(pattern, c_clean, re.IGNORECASE)
                     
                     proj_name = None
                     if m_proj:
-                        proj_name = m_proj.group(0).strip()
-                        # Làm sạch các từ nối ở đuôi
-                        proj_name = re.sub(r'\s+(?:và|hoặc|được|cho|với|tại|của|ở|nằm|có|do|khi)$', '', proj_name, flags=re.IGNORECASE)
+                        raw_matched = m_proj.group(0).strip()
+                        # Cắt bỏ phần phụ sau dấu phẩy hoặc từ chỉ thông số diện tích/quy mô/tiến độ
+                        cut_parts = re.split(r'[,;:(\n]|\s+(?:diện tích|quy mô|với|khởi công|tỷ lệ|giai đoạn|đã bán|ước tính)\s+', raw_matched, flags=re.IGNORECASE)
+                        proj_name = cut_parts[0].strip()
+                        
+                        # Chuẩn hóa tiền tố DA / D/A -> Dự án
+                        if re.match(r'^(?:da|d/a)\s+', proj_name, re.IGNORECASE):
+                            proj_name = re.sub(r'^(?:da|d/a)\s+', 'Dự án ', proj_name, flags=re.IGNORECASE)
+                        # Chuẩn hóa kđt -> Khu đô thị
+                        if re.match(r'^kđt\s+', proj_name, re.IGNORECASE):
+                            proj_name = re.sub(r'^kđt\s+', 'Khu đô thị ', proj_name, flags=re.IGNORECASE)
+                        # Chuẩn hóa kcn -> Khu công nghiệp
+                        if re.match(r'^kcn\s+', proj_name, re.IGNORECASE):
+                            proj_name = re.sub(r'^kcn\s+', 'Khu công nghiệp ', proj_name, flags=re.IGNORECASE)
+                            
+                        # Làm sạch các từ nối/trợ từ ở đuôi
+                        proj_name = re.sub(r'\s+(?:và|hoặc|được|cho|với|tại|của|ở|nằm|có|do|khi|này|trên)$', '', proj_name, flags=re.IGNORECASE)
+                        
+                        # Loại bỏ các cụm động từ sai (VD: "dự án ghi nhận", "dự án đã bán", "dự án còn lại")
+                        INVALID_PROJ_PATTERNS = [
+                            r'dự án ghi nhận', r'dự án đã', r'dự án còn', r'dự án này', r'dự án trên',
+                            r'dự án có', r'dự án được', r'dự án sẽ', r'dự án đem lại', r'dự án dở dang'
+                        ]
+                        if any(re.search(pat, proj_name, re.IGNORECASE) for pat in INVALID_PROJ_PATTERNS):
+                            proj_name = None
                     
                     # Nếu câu thuần túy là nhận định tài chính/dòng tiền mà không có tên dự án riêng biệt -> Bỏ qua
                     if any(ex in c_lower for ex in EXCLUDED_COMMENTARY):
@@ -957,13 +1103,16 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                         if not proj_name:
                             continue
 
-                    # Trích xuất quy mô vốn nếu có
+                    # Trích xuất quy mô vốn nếu có (chuẩn hóa dấu phân cách phần nghìn tiếng Việt)
                     m_inv = re.search(r'(\d+(?:[\.,]\d+)?)\s*(?:nghìn tỷ|tỷ đồng|tỷ đ|triệu USD)', c_clean, re.I)
                     inv_bil = 0
                     if m_inv:
-                        num_str = m_inv.group(1).replace(',', '.')
+                        raw_num = m_inv.group(1).strip()
                         try:
-                            inv_bil = float(num_str)
+                            if re.search(r'^\d+\.\d{3}$', raw_num):
+                                inv_bil = float(raw_num.replace('.', ''))
+                            else:
+                                inv_bil = float(raw_num.replace(',', '.'))
                             if "nghìn tỷ" in c_lower:
                                 inv_bil *= 1000
                             elif "triệu usd" in c_lower:
@@ -1081,6 +1230,10 @@ def merge_and_deduplicate_projects(base_projects: List[Dict[str, Any]], discover
         if "@" in p_name or "tel:" in p_name.lower() or "hotline" in p_name.lower() or "copyright" in p_name.lower() or "liên hệ" in p_name.lower() or "chính sách" in p_name.lower():
             continue
 
+        # Bỏ qua item fallback XDCB chung chung nếu đã có các dự án thực tế đích danh
+        if len(base_projects) > 0 and ("chi phí xdcb dở dang" in p_name.lower() or "hạng mục chi phí" in p_name.lower()):
+            continue
+
         if not is_duplicate and len(p_name) >= 10:
             seen_names.add(norm)
             merged.append(item)
@@ -1125,6 +1278,12 @@ async def discover_company_projects_master(ticker: str, force_refresh: bool = Fa
             if not p.get("source"):
                 site_info = CORPORATE_OFFICIAL_WEBSITES.get(clean_ticker)
                 domain = site_info.get("domain") if site_info else f"{clean_ticker.lower()}.com.vn"
+                p["source"] = f"Website chính thức ({domain}) & BCTN"
+    elif clean_ticker in CORPORATE_OFFICIAL_WEBSITES and CORPORATE_OFFICIAL_WEBSITES[clean_ticker].get("default_projects"):
+        base_projects = [dict(p) for p in CORPORATE_OFFICIAL_WEBSITES[clean_ticker]["default_projects"]]
+        for p in base_projects:
+            if not p.get("source"):
+                domain = CORPORATE_OFFICIAL_WEBSITES[clean_ticker].get("domain") or f"{clean_ticker.lower()}.com.vn"
                 p["source"] = f"Website chính thức ({domain}) & BCTN"
     else:
         base_projects = extract_dynamic_company_projects(clean_ticker, sector, company_name)

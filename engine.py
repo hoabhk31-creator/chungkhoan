@@ -127,6 +127,7 @@ class StrategyRecommendation(BaseModel):
 
 
 class FullMatrixReport(BaseModel):
+    model_config = {"extra": "allow"}
     ticker: str
     company_name: str
     sector: str
@@ -137,6 +138,9 @@ class FullMatrixReport(BaseModel):
     causality_analysis: List[CausalityItem]
     disensus_table: List[DisensusItem]
     corporate_actions: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Toàn bộ lịch sử sự kiện quyền của mã CP")
+    growth_model_key: Optional[str] = None
+    model_badge_text: Optional[str] = None
+    recommended_valuation: Optional[Dict[str, Any]] = None
 
 
 # -------------------------------------------------------------

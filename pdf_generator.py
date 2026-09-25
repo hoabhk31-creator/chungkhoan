@@ -523,6 +523,15 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     ticker = report_data.get("ticker", "CP")
     company_name = report_data.get("company_name", f"Công ty Cổ phần {ticker}")
     sector = report_data.get("sector", "Doanh nghiệp niêm yết")
+    if not sector or sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"]:
+        try:
+            from adaptive_growth_engine import classify_business_model
+            from sector_peers_matrix import get_universal_sector_peer_config
+            model_info = classify_business_model(ticker, company_name, sector)
+            cfg = get_universal_sector_peer_config(model_info.get("model_key", ""), ticker)
+            sector = cfg.get("sector_name") or model_info.get("badge_text") or sector
+        except Exception:
+            pass
     raw_reports = report_data.get("matrix_table", [])
     reports = [to_dict_safe(r) for r in raw_reports]
     if reports:

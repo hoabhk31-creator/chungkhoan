@@ -192,6 +192,7 @@ class FinancialStatements(BaseModel):
 
 
 class PeerCompany(BaseModel):
+    model_config = {"extra": "allow"}
     ticker: str
     name: str
     market_cap_bil: float
@@ -251,6 +252,7 @@ class PeerCompany(BaseModel):
 
 
 class PeerComparisonData(BaseModel):
+    model_config = {"extra": "allow"}
     sector_name: str
     target_ticker: str
     peers: List[PeerCompany]
@@ -260,9 +262,12 @@ class PeerComparisonData(BaseModel):
     industry_cycle: str
     industry_catalysts: List[str]
     industry_risks: Optional[List[str]] = None
-    sector_kpi_columns: Optional[List[Dict[str, str]]] = None
+    sector_kpi_columns: Optional[List[Dict[str, Any]]] = None
     # Danh sách cột đặc thù ngành: [{"field": "nim_percent", "label": "NIM (%)", "unit": "%", "color": "sky"}]
     data_source: Optional[str] = Field(default="Ưu tiên API SSI #1 (Bổ sung Vietstock & CafeF)", description="Nguồn dữ liệu đối thủ ngành")
+    recommended_valuation: Optional[Dict[str, Any]] = None
+    model_key: Optional[str] = None
+    model_badge_text: Optional[str] = None
 
 
 class ValuationModelItem(BaseModel):
@@ -278,6 +283,7 @@ class ValuationModelItem(BaseModel):
 
 
 class ValuationModelResult(BaseModel):
+    model_config = {"extra": "allow"}
     ticker: str
     current_market_price: float
     pe_fair_value: float
@@ -310,6 +316,9 @@ class ValuationModelResult(BaseModel):
     unadjusted_blended_fair_value: float = Field(default=0.0, description="Giá trị hợp lý ban đầu trước điều chỉnh (nếu có)")
     unadjusted_eps: float = Field(default=0.0, description="EPS gốc trước điều chỉnh")
     unadjusted_bvps: float = Field(default=0.0, description="BVPS gốc trước điều chỉnh")
+    recommended_valuation: Optional[Dict[str, Any]] = None
+    model_key: Optional[str] = None
+    model_badge_text: Optional[str] = None
 
 
 class TechnicalSignal(BaseModel):
@@ -960,6 +969,19 @@ def calculate_multi_model_valuation(
 
     # Xác định Ma trận Trọng số Chuẩn hóa theo Ngành (Smart Sector Weights)
     sector_profile = get_sector_valuation_profile(ticker=ticker, sector=sector or "", company_name=company_name or "")
+    try:
+        from adaptive_growth_engine import classify_business_model
+        from sector_peers_matrix import get_universal_sector_peer_config
+        _m_info = classify_business_model(ticker, company_name or "", sector or "")
+        _m_key = _m_info.get("model_key", "")
+        _cfg = get_universal_sector_peer_config(_m_key, ticker)
+        sector_profile["growth_model_key"] = _m_key
+        sector_profile["model_badge_text"] = _m_info.get("badge_text", "")
+        sector_profile["recommended_valuation"] = _cfg.get("recommended_valuation")
+        if _cfg.get("sector_name") and sector_profile.get("sector_key") == "general":
+            sector_profile["sector_name"] = _cfg["sector_name"]
+    except Exception:
+        pass
     default_weights = sector_profile["weights"]
     
     weights = default_weights.copy()
@@ -1076,7 +1098,10 @@ def calculate_multi_model_valuation(
         "applied_sector_key": sector_profile["sector_key"],
         "applied_sector_description": sector_profile["description"],
         "primary_models": sector_profile["primary_models"],
-        "default_weights": sector_profile["weights"]
+        "default_weights": sector_profile["weights"],
+        "recommended_valuation": sector_profile.get("recommended_valuation"),
+        "model_key": sector_profile.get("growth_model_key"),
+        "model_badge_text": sector_profile.get("model_badge_text")
     }
 
 
@@ -2551,151 +2576,22 @@ def build_sector_peers_data(
         if (target_pb <= 0 or target_pb > 50) and target_db.get("pb_ttm") and 0.3 <= target_db["pb_ttm"] <= 20:
             target_pb = target_db["pb_ttm"]
 
-    # 2. Xác định tên ngành chuẩn xác
-    resolved_sector_name = db_fiin_sec or sector_name or db_icb4 or db_icb2 or "Doanh nghiệp niêm yết"
-    if resolved_sector_name in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"] and db_fiin_sec:
-        resolved_sector_name = db_fiin_sec
+    # 2. Xác định tên ngành và phân loại mô hình doanh nghiệp chuẩn 23 ngành nghề
+    initial_sector = db_fiin_sec or sector_name or db_icb4 or db_icb2 or "Doanh nghiệp niêm yết"
+    if initial_sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"] and db_fiin_sec:
+        initial_sector = db_fiin_sec
+
+    from adaptive_growth_engine import classify_business_model
+    from sector_peers_matrix import get_universal_sector_peer_config, UNIVERSAL_SECTOR_PEERS_CONFIG
+
+    model_info = classify_business_model(clean_ticker, target_name, initial_sector)
+    model_key = model_info.get("model_key", "HOLDING_CONGLOMERATE")
+    model_badge_text = model_info.get("badge_text", initial_sector)
+
+    # 3. Lấy cấu hình đối thủ, KPI ngành và Porter 5 Forces từ ma trận 23 ngành toàn diện
+    selected_group = get_universal_sector_peer_config(model_key, clean_ticker)
+    resolved_sector_name = selected_group.get("sector_name") or model_badge_text or initial_sector
     res_sec_lower = resolved_sector_name.lower().strip()
-
-    # 3. Tìm nhóm cấu hình KPI & Porter 5 Forces trong SECTOR_PEER_GROUPS nếu có
-    selected_group = None
-    # Khớp theo mã cổ phiếu trong nhóm
-    for group_key, grp in SECTOR_PEER_GROUPS.items():
-        if t_lower in [p["ticker"].lower() for p in grp["peers"]] or t_lower in grp.get("keywords", []):
-            selected_group = grp
-            break
-
-    # Khớp theo từ khóa ngành
-    if not selected_group:
-        priority_order = [
-            "thiet_bi_dien", "dau_khi", "hoa_chat_phan_bon", "tien_ich_dien_nuoc",
-            "bds_kcn", "chung_khoan", "ngan_hang", "thep", "cong_nghe", 
-            "cang_bien", "ban_le", "nong_nghiep_thuy_san", 
-            "xay_dung_ha_tang", "bds_dan_dung"
-        ]
-        for key in priority_order:
-            grp = SECTOR_PEER_GROUPS[key]
-            if any(kw in res_sec_lower or kw in sec_lower for kw in grp.get("keywords", [])):
-                selected_group = grp
-                break
-
-    # Cấu hình đặc thù động nếu ngành không nằm trong 11 nhóm tĩnh
-    if not selected_group:
-        if any(k in res_sec_lower for k in ["khai khoáng", "khoáng sản", "than", "mỏ", "đá"]):
-            selected_group = {
-                "sector_name": resolved_sector_name if resolved_sector_name != "Doanh nghiệp niêm yết" else "Khai khoáng & Khoáng sản",
-                "sector_kpi_columns": [
-                    {"field": "net_profit_growth_yoy", "label": "Tăng trưởng LN (%)", "unit": "%", "color": "emerald"},
-                    {"field": "revenue_growth_yoy",    "label": "Tăng trưởng DT (%)", "unit": "%", "color": "sky"},
-                    {"field": "price_change_ytd",      "label": "Hiệu suất YTD (%)",   "unit": "%", "color": "amber"},
-                ],
-                "cycle": "Hưởng lợi từ Siêu dự án Hạ tầng & Giải ngân Đầu tư công trọng điểm",
-                "catalysts": [
-                    "Nhu cầu vật liệu đá xây dựng và khoáng sản tăng vọt từ các đại dự án Sân bay Long Thành, Cao tốc Bắc - Nam và Vành đai 3.",
-                    "Thời hạn cấp phép khai thác mỏ mới siết chặt, các doanh nghiệp sở hữu mỏ đá trữ lượng lớn có lợi thế độc quyền tự nhiên.",
-                    "Giá bán đá và khoáng sản duy trì đà tăng ổn định bù đắp chi phí bóc phủ và thuế tài nguyên."
-                ],
-                "forces": {
-                    "rivalry":            {"score": 3, "desc": "Cạnh tranh theo bán kính địa lý vận chuyển (dưới 50-70km để tối ưu chi phí logistics đường bộ/sông)."},
-                    "supplier_power":     {"score": 2, "desc": "Thiết bị khai khoáng, máy nghiền sàng và vật liệu nổ công nghiệp nguồn cung dồi dào, ổn định."},
-                    "buyer_power":        {"score": 3, "desc": "Các nhà thầu xây lắp hạ tầng ưu tiên mỏ đá chất lượng cao, công suất cấp hàng liên tục."},
-                    "substitution_threat":{"score": 1, "desc": "Cát nhân tạo và đá xây dựng là vật liệu nền tảng không thể thay thế trong bê tông hạ tầng."},
-                    "new_entrants_threat":{"score": 2, "desc": "Rào cản pháp lý cấp phép mỏ mới và đền bù GPMB mỏ đá kéo dài nhiều năm rất khó thâm nhập."}
-                },
-                "peers": []
-            }
-        elif any(k in res_sec_lower for k in ["dược", "y tế", "thuốc", "bệnh viện"]):
-            selected_group = {
-                "sector_name": resolved_sector_name,
-                "sector_kpi_columns": [
-                    {"field": "net_margin",            "label": "Biên ròng (%)",       "unit": "%", "color": "emerald"},
-                    {"field": "revenue_growth_yoy",    "label": "Tăng trưởng DT (%)", "unit": "%", "color": "sky"},
-                    {"field": "price_change_ytd",      "label": "Hiệu suất YTD (%)",   "unit": "%", "color": "violet"},
-                ],
-                "cycle": "Gia tăng Tiêu chuẩn EU-GMP & Đấu thầu Kênh Bệnh viện (ETC)",
-                "catalysts": [
-                    "Nâng cấp dây chuyền đạt chuẩn EU-GMP/Japan-GMP để cạnh tranh gói thầu thuốc nhóm 1-2 tại các bệnh viện công.",
-                    "Dân số già hóa và thu nhập bình quân đầu người tăng thúc đẩy chi tiêu thuốc bình quân trên đầu người.",
-                    "Xu hướng M&A và liên doanh với các tập đoàn dược phẩm đa quốc gia mở rộng xuất khẩu."
-                ],
-                "forces": {
-                    "rivalry":            {"score": 3, "desc": "Cạnh tranh phân khúc thuốc generic chất lượng cao và chuỗi phân phối nhà thuốc hiện đại."},
-                    "supplier_power":     {"score": 4, "desc": "Phụ thuộc 80-90% nguồn nguyên liệu hoạt chất dược phẩm (API) nhập khẩu từ Trung Quốc và Ấn Độ."},
-                    "buyer_power":        {"score": 4, "desc": "Áp lực đấu thầu tập trung bảo hiểm y tế và kiểm soát giá bán lẻ thuốc."},
-                    "substitution_threat":{"score": 2, "desc": "Thực phẩm chức năng hỗ trợ điều trị cạnh tranh một phần danh mục thuốc bổ OTC."},
-                    "new_entrants_threat":{"score": 2, "desc": "Chi phí đầu tư nhà máy EU-GMP hàng trăm tỷ VND và thời gian thẩm định cấp phép kéo dài."}
-                },
-                "peers": []
-            }
-        elif any(k in res_sec_lower for k in ["may", "dệt", "sợi", "vải"]):
-            selected_group = {
-                "sector_name": resolved_sector_name,
-                "sector_kpi_columns": [
-                    {"field": "net_margin",            "label": "Biên ròng (%)",       "unit": "%", "color": "emerald"},
-                    {"field": "revenue_growth_yoy",    "label": "Tăng trưởng DT (%)", "unit": "%", "color": "sky"},
-                    {"field": "price_change_ytd",      "label": "Hiệu suất YTD (%)",   "unit": "%", "color": "amber"},
-                ],
-                "cycle": "Phục hồi Đơn hàng Xuất khẩu Mỹ & EU kèm Tiêu chuẩn Xanh hóa ESG",
-                "catalysts": [
-                    "Hồi phục nhu cầu tiêu dùng và tái tích lũy hàng tồn kho tại các thị trường bán lẻ chủ lực Mỹ, EU, Nhật Bản.",
-                    "Lợi thế cạnh tranh từ các hiệp định thương mại tự do EVFTA, CPTPP với thuế quan ưu đãi 0%.",
-                    "Đẩy mạnh chuyển đổi phương thức sản xuất FOB, ODM nâng cao biên lợi nhuận thay thế gia công CMT."
-                ],
-                "forces": {
-                    "rivalry":            {"score": 4, "desc": "Cạnh tranh gay gắt về đơn giá đơn hàng với các đối thủ Bangladesh, Ấn Độ, Indonesia."},
-                    "supplier_power":     {"score": 3, "desc": "Chi phí bông, sợi và giá điện năng biến động theo chu kỳ hàng hóa thế giới."},
-                    "buyer_power":        {"score": 4, "desc": "Các nhãn hàng thời trang quốc tế ép giá và đòi hỏi tiêu chuẩn khắt khe về lao động và chứng chỉ xanh."},
-                    "substitution_threat":{"score": 1, "desc": "Hàng dệt may là sản phẩm thiết yếu toàn cầu, nhu cầu ổn định lâu dài."},
-                    "new_entrants_threat":{"score": 3, "desc": "Quy mô vốn ban đầu vừa phải nhưng khó khăn trong việc xây dựng tệp khách hàng quốc tế uy tín."}
-                },
-                "peers": []
-            }
-        elif any(k in res_sec_lower for k in ["điện", "năng lượng", "nước"]):
-            selected_group = {
-                "sector_name": resolved_sector_name,
-                "sector_kpi_columns": [
-                    {"field": "net_margin",            "label": "Biên ròng (%)",       "unit": "%", "color": "emerald"},
-                    {"field": "revenue_growth_yoy",    "label": "Tăng trưởng DT (%)", "unit": "%", "color": "sky"},
-                    {"field": "debt_to_equity",        "label": "Đòn bẩy D/E",        "unit": "x", "color": "rose"},
-                ],
-                "cycle": "Triển khai Quy hoạch Điện VIII & Nhu cầu Phụ tải Công nghiệp Tăng trưởng Cao",
-                "catalysts": [
-                    "Nhu cầu tiêu thụ điện toàn quốc duy trì tăng trưởng 8-10%/năm song hành cùng dòng vốn FDI sản xuất công nghiệp.",
-                    "Cơ chế mua bán điện trực tiếp DPPA và khung giá phát điện mới cho các dự án năng lượng chuyển dịch.",
-                    "Lợi thế dòng tiền kinh doanh dồi dào, ổn định và tỷ suất chi trả cổ tức tiền mặt đều đặn."
-                ],
-                "forces": {
-                    "rivalry":            {"score": 2, "desc": "Sản lượng phát điện huy động theo hợp đồng PPA dài hạn và điều độ lưới điện quốc gia A0."},
-                    "supplier_power":     {"score": 3, "desc": "Giá than, khí đầu vào và biến động thủy văn mùa mưa/khô tác động trực tiếp tới biên lợi nhuận."},
-                    "buyer_power":        {"score": 4, "desc": "EVN là khách hàng mua điện độc quyền duy nhất, tiến độ thanh toán ảnh hưởng dòng tiền."},
-                    "substitution_threat":{"score": 1, "desc": "Năng lượng điện là huyết mạch cơ sở hạ tầng thiết yếu không thể thay thế."},
-                    "new_entrants_threat":{"score": 2, "desc": "Chi phí đầu tư Capex nhà máy điện rất lớn và quy hoạch pháp lý nguồn điện chặt chẽ."}
-                },
-                "peers": []
-            }
-        else:
-            selected_group = {
-                "sector_name": resolved_sector_name,
-                "sector_kpi_columns": [
-                    {"field": "net_profit_growth_yoy", "label": "Tăng trưởng LN (%)", "unit": "%", "color": "emerald"},
-                    {"field": "revenue_growth_yoy",    "label": "Tăng trưởng DT (%)", "unit": "%", "color": "sky"},
-                    {"field": "price_change_ytd",      "label": "Hiệu suất YTD (%)",   "unit": "%", "color": "amber"},
-                ],
-                "cycle": "Tăng trưởng Theo Chu kỳ Kinh tế & Mở rộng Thị phần Ngành",
-                "catalysts": [
-                    "Tăng trưởng doanh thu và mở rộng quy mô thị phần nội địa và xuất khẩu.",
-                    "Nâng cao hiệu quả quản trị chi phí hoạt động và biên lợi nhuận ròng.",
-                    "Cơ cấu tài chính lành mạnh với dòng tiền tự do dồi dào phục vụ mở rộng kinh doanh."
-                ],
-                "forces": {
-                    "rivalry":            {"score": 3, "desc": "Cạnh tranh thị phần giữa các doanh nghiệp niêm yết đầu ngành."},
-                    "supplier_power":     {"score": 3, "desc": "Nguồn cung ứng nguyên vật liệu đa dạng trong và ngoài nước."},
-                    "buyer_power":        {"score": 3, "desc": "Khách hàng chú trọng chất lượng dịch vụ và uy tín thương hiệu."},
-                    "substitution_threat":{"score": 2, "desc": "Sự xuất hiện của các giải pháp và sản phẩm công nghệ thế hệ mới."},
-                    "new_entrants_threat":{"score": 3, "desc": "Rào cản quy mô vốn, thương hiệu và hệ thống kênh phân phối hiện hữu."}
-                },
-                "peers": []
-            }
 
     # 4. Tìm kiếm mẫu thông số tài chính cho doanh nghiệp mục tiêu
     template_peers_dict = {p["ticker"].upper(): p for p in selected_group.get("peers", [])}
@@ -2877,11 +2773,14 @@ def build_sector_peers_data(
         peers=peer_list,
         industry_average=ind_avg,
         radar_metrics=radar_metrics,
-        porter_five_forces=selected_group["forces"],
-        industry_cycle=selected_group["cycle"],
+        porter_five_forces=selected_group.get("forces", {}),
+        industry_cycle=selected_group.get("cycle", "Tăng trưởng theo chu kỳ ngành"),
         industry_catalysts=selected_group.get("catalysts", [])[:10],
         industry_risks=selected_group.get("risks", [])[:5],
-        sector_kpi_columns=kpi_cols
+        sector_kpi_columns=kpi_cols,
+        recommended_valuation=selected_group.get("recommended_valuation"),
+        model_key=model_key,
+        model_badge_text=model_badge_text
     )
 
 
@@ -3397,6 +3296,9 @@ def get_financial_data_bundle(
         target_pe=pe_live,
         target_pb=pb_live
     )
+    if peers_obj and peers_obj.sector_name:
+        profile["sector"] = peers_obj.sector_name
+        sect_n = peers_obj.sector_name
     # Cập nhật ROE/ROA thực tế cho target_peer
     if peers_obj and hasattr(peers_obj, "peers"):
         for peer in peers_obj.peers:
@@ -3528,6 +3430,9 @@ def get_financial_data_bundle(
     return {
         "ticker": clean_ticker,
         "industry_model": final_ind_model,
+        "growth_model_key": getattr(peers_obj, "model_key", None),
+        "model_badge_text": getattr(peers_obj, "model_badge_text", None),
+        "recommended_valuation": getattr(peers_obj, "recommended_valuation", None),
         "company_profile": profile,
         "dupont": dupont.model_dump(),
         "piotroski": piotroski.model_dump(),

@@ -1970,6 +1970,95 @@ EXPANDED_CORPORATE_PROJECTS_DB: Dict[str, List[Dict[str, Any]]] = {
             "occupancy_rate": 90,
             "phase_tag": "Đang khai thác"
         }
+    ],
+
+    # -------------------------------------------------------------------------
+    # THỦY SẢN NAM VIỆT (ANV - NAVICO)
+    # -------------------------------------------------------------------------
+    "ANV": [
+        {
+            "name": "Đại Vùng nuôi Thủy sản Công nghệ cao Bình Phú (Châu Phú, An Giang)",
+            "scale": "Quy mô 600 ha mặt nước, sản lượng 200.000 tấn cá tra nguyên liệu/năm, tự chủ 100% thức ăn và con giống khép kín chuỗi 3F.",
+            "investment_bil": 4000,
+            "progress_pct": 85,
+            "commercial_date": "Đang vận hành khai thác từng phần & hoàn thiện",
+            "impact": "Là đại dự án trọng điểm chiếm phần lớn chi phí XDCB dở dang trên BCTC (~446.6 tỷ đ lũy kế), đảm bảo kiểm soát giá thành sản xuất cá nguyên liệu thấp nhất ngành.",
+            "legal_status": "Đầy đủ quy hoạch vùng nuôi thủy sản công nghệ cao, chứng nhận kiểm toán BCTC và chứng chỉ GlobalGAP/ASC",
+            "occupancy_rate": 85,
+            "phase_tag": "Đang vận hành & hoàn thiện hạ tầng"
+        },
+        {
+            "name": "Nhà máy Chế biến Collagen & Gelatin Amicogen (Liên doanh Amicogen Hàn Quốc)",
+            "scale": "Nhà máy chiết xuất Collagen Peptide y tế & Gelatin công nghệ cao từ da cá tra tại KCN Thốt Nốt (Cần Thơ). Giai đoạn 1: 800 tấn/năm, GĐ 2: 1.600 tấn/năm.",
+            "investment_bil": 550,
+            "progress_pct": 90,
+            "commercial_date": "Đã vận hành thương mại GĐ 1 & mở rộng GĐ 2",
+            "impact": "Chuyển dịch chuỗi giá trị sang sản phẩm sinh học biên lợi nhuận gộp cực cao (>40%), cung cấp cho ngành dược phẩm & mỹ phẩm quốc tế.",
+            "legal_status": "Giấy phép đầu tư liên doanh quốc tế, chứng nhận tiêu chuẩn phòng sạch GMP & ISO 22000",
+            "occupancy_rate": 90,
+            "phase_tag": "Đang vận hành & mở rộng công suất"
+        },
+        {
+            "name": "Hệ thống Năng lượng Điện mặt trời Áp mái Chuỗi Vùng nuôi (53 MWp)",
+            "scale": "Lắp đặt tại toàn bộ hệ thống nhà xưởng chế biến và trạm bơm vùng nuôi Bình Phú với tổng công suất 53 MWp.",
+            "investment_bil": 850,
+            "progress_pct": 95,
+            "commercial_date": "Đang vận hành phát điện tự dùng & hòa lưới",
+            "impact": "Tiết giảm 25 - 30% chi phí điện năng vận hành cho toàn bộ chuỗi nuôi trồng, đáp ứng tiêu chuẩn giảm phát thải carbon xuất khẩu vào EU và Mỹ.",
+            "legal_status": "Đầy đủ thỏa thuận đấu nối lưới điện và nghiệm thu PCCC công nghiệp",
+            "occupancy_rate": 95,
+            "phase_tag": "Đang khai thác vận hành"
+        }
+    ],
+
+    # -------------------------------------------------------------------------
+    # THỦY SẢN VĨNH HOÀN (VHC - "NỮ HOÀNG CÁ TRA")
+    # -------------------------------------------------------------------------
+    "VHC": [
+        {
+            "name": "Tổ hợp Sản xuất Vĩnh Hoàn Collagen & Gelatin (Vinh Wellness)",
+            "scale": "Mở rộng tổ hợp nhà máy Collagen & Gelatin tại Cao Lãnh (Đồng Tháp) lên công suất 7.000 tấn/năm, chiết xuất collagen peptide tinh khiết từ da cá tra.",
+            "investment_bil": 1200,
+            "progress_pct": 90,
+            "commercial_date": "Đang vận hành toàn công suất & mở rộng",
+            "impact": "Sản phẩm có biên lợi nhuận gộp cao nhất của VHC (trên 35%), xuất khẩu trực tiếp sang thị trường Mỹ, Nhật Bản, Hàn Quốc và EU.",
+            "legal_status": "Đầy đủ chứng nhận quốc tế FSSC 22000, ISO 9001, Halal và kiểm toán BCTC định kỳ",
+            "occupancy_rate": 92,
+            "phase_tag": "Đang vận hành thương mại"
+        },
+        {
+            "name": "Nhà máy Chế biến Nông sản Thực phẩm Thành Ngọc (TNG Food)",
+            "scale": "Tổ hợp chế biến rau củ quả, trái cây sấy thăng hoa và nước ép xuất khẩu trên diện tích 4,5 ha tại Đồng Tháp, công suất 23.000 tấn/năm.",
+            "investment_bil": 500,
+            "progress_pct": 85,
+            "commercial_date": "Vận hành thương mại & mở rộng xuất khẩu",
+            "impact": "Đa dạng hóa danh mục sản phẩm ngoài thủy sản, tận dụng tối đa chuỗi cung ứng lạnh và hệ thống phân phối toàn cầu của tập đoàn.",
+            "legal_status": "Đầy đủ giấy phép xây dựng, chứng chỉ an toàn thực phẩm BRC, HACCP toàn cầu",
+            "occupancy_rate": 80,
+            "phase_tag": "Đang vận hành & mở rộng thị trường"
+        },
+        {
+            "name": "Mở rộng Vùng nuôi Cá tra Công nghệ cao Đạt chuẩn Quốc tế (ASC & BAP 4 Sao)",
+            "scale": "Mở rộng thêm hơn 150 ha vùng nuôi công nghệ cao tại Đồng Tháp và An Giang, nâng tổng diện tích mặt nước lên hơn 700 ha.",
+            "investment_bil": 800,
+            "progress_pct": 88,
+            "commercial_date": "Đang khai thác cung ứng cá nguyên liệu",
+            "impact": "Bảo đảm tự chủ 75 - 80% nguyên liệu chế biến, đáp ứng 100% tiêu chuẩn nhập khẩu của Bộ Nông nghiệp Hoa Kỳ (USDA).",
+            "legal_status": "Chứng nhận 100% diện tích đạt chuẩn xanh ASC, BAP 4 sao và GlobalGAP",
+            "occupancy_rate": 90,
+            "phase_tag": "Đang vận hành & thả nuôi gối đầu"
+        },
+        {
+            "name": "Nhà máy Sản xuất Thức ăn Thủy sản Feed One",
+            "scale": "Nhà máy sản xuất thức ăn thủy sản công suất 350.000 tấn/năm tại Tiền Giang, phục vụ toàn bộ chuỗi trang trại cá tra Vĩnh Hoàn.",
+            "investment_bil": 450,
+            "progress_pct": 95,
+            "commercial_date": "Đang vận hành toàn công suất",
+            "impact": "Khép kín hoàn toàn chuỗi 3F (Feed - Farm - Food), tối ưu hóa hệ số chuyển đổi thức ăn (FCR) và giảm thiểu rủi ro biến động giá thức ăn.",
+            "legal_status": "Đạt chuẩn ISO 22000, GlobalGAP CFM và chứng nhận an toàn sinh học",
+            "occupancy_rate": 95,
+            "phase_tag": "Đang vận hành toàn công suất"
+        }
     ]
 }
 
