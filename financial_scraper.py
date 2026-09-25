@@ -348,12 +348,48 @@ CURATED_ANNUAL_DATA: Dict[str, Dict[str, Dict[str, float]]] = {
         }
     },
     "VCB": {
-        "2020": {"revenue": 36285.4, "net_profit": 18450.0, "total_assets": 1326230.0, "owner_equity": 98450.0},
-        "2021": {"revenue": 42399.6, "net_profit": 21940.0, "total_assets": 1414881.0, "owner_equity": 110386.0},
-        "2022": {"revenue": 53246.5, "net_profit": 29899.0, "total_assets": 1814000.0, "owner_equity": 136022.0},
-        "2023": {"revenue": 53620.9, "net_profit": 33054.0, "total_assets": 1839000.0, "owner_equity": 146505.0},
-        "2024": {"revenue": 55405.7, "net_profit": 33850.0, "total_assets": 1850000.0, "owner_equity": 154570.0},
-        "2025": {"revenue": 58771.4, "net_profit": 36200.0, "total_assets": 1980000.0, "owner_equity": 168000.0}
+        "2008": {"revenue": 6119.5, "net_profit": 2560.8, "total_assets": 222096.0, "owner_equity": 13858.0, "total_liabilities": 208238.0},
+        "2009": {"revenue": 7515.2, "net_profit": 3944.8, "total_assets": 256066.0, "owner_equity": 14845.0, "total_liabilities": 241221.0},
+        "2010": {"revenue": 12408.0, "net_profit": 4250.0, "total_assets": 307605.0, "owner_equity": 18918.0, "total_liabilities": 288687.0},
+        "2011": {"revenue": 9788.6, "net_profit": 4241.1, "total_assets": 367490.0, "owner_equity": 26051.0, "total_liabilities": 341439.0},
+        "2012": {"revenue": 11466.8, "net_profit": 4425.2, "total_assets": 414484.0, "owner_equity": 39418.0, "total_liabilities": 375066.0},
+        "2013": {"revenue": 11634.6, "net_profit": 4371.3, "total_assets": 468990.0, "owner_equity": 42912.0, "total_liabilities": 426078.0},
+        "2014": {"revenue": 12508.8, "net_profit": 4610.3, "total_assets": 574260.0, "owner_equity": 45394.0, "total_liabilities": 528866.0},
+        "2015": {"revenue": 15225.8, "net_profit": 5332.1, "total_assets": 673913.0, "owner_equity": 46140.0, "total_liabilities": 627773.0},
+        "2016": {"revenue": 18485.4, "net_profit": 6851.0, "total_assets": 787907.0, "owner_equity": 48154.0, "total_liabilities": 739753.0},
+        "2017": {"revenue": 21959.0, "net_profit": 9106.9, "total_assets": 1035293.0, "owner_equity": 52606.0, "total_liabilities": 982687.0},
+        "2018": {"revenue": 28477.5, "net_profit": 14622.1, "total_assets": 1074027.0, "owner_equity": 62357.0, "total_liabilities": 1011670.0},
+        "2019": {"revenue": 34577.0, "net_profit": 18526.0, "total_assets": 1222719.0, "owner_equity": 80883.0, "total_liabilities": 1141836.0},
+        "2020": {"revenue": 36285.4, "net_profit": 18450.0, "total_assets": 1326230.0, "owner_equity": 98450.0, "total_liabilities": 1227780.0},
+        "2021": {"revenue": 42399.6, "net_profit": 21940.0, "total_assets": 1414881.0, "owner_equity": 110386.0, "total_liabilities": 1304495.0},
+        "2022": {"revenue": 53246.5, "net_profit": 29899.0, "total_assets": 1814000.0, "owner_equity": 136022.0, "total_liabilities": 1677978.0},
+        "2023": {"revenue": 53620.9, "net_profit": 33054.0, "total_assets": 1839000.0, "owner_equity": 146505.0, "total_liabilities": 1692495.0},
+        "2024": {"revenue": 55405.7, "net_profit": 33850.0, "total_assets": 1850000.0, "owner_equity": 154570.0, "total_liabilities": 1695430.0},
+        "2025": {"revenue": 58771.4, "net_profit": 36200.0, "total_assets": 1980000.0, "owner_equity": 168000.0, "total_liabilities": 1812000.0}
+    },
+    "HCM": {
+        "2016": {"revenue": 847.6, "net_profit": 304.7, "total_assets": 4208.0, "owner_equity": 2420.0, "total_liabilities": 1788.0},
+        "2017": {"revenue": 1424.8, "net_profit": 554.4, "total_assets": 6736.0, "owner_equity": 3068.0, "total_liabilities": 3668.0},
+        "2018": {"revenue": 1709.8, "net_profit": 675.2, "total_assets": 5268.0, "owner_equity": 3105.0, "total_liabilities": 2163.0},
+        "2019": {"revenue": 1261.2, "net_profit": 432.4, "total_assets": 7500.0, "owner_equity": 4350.0, "total_liabilities": 3150.0},
+        "2020": {"revenue": 1589.6, "net_profit": 530.2, "total_assets": 12470.0, "owner_equity": 4650.0, "total_liabilities": 7820.0},
+        "2021": {"revenue": 3996.8, "net_profit": 1147.2, "total_assets": 22390.0, "owner_equity": 7320.0, "total_liabilities": 15070.0},
+        "2022": {"revenue": 2886.5, "net_profit": 852.5, "total_assets": 15460.0, "owner_equity": 7950.0, "total_liabilities": 7510.0},
+        "2023": {"revenue": 2255.4, "net_profit": 674.4, "total_assets": 17911.0, "owner_equity": 8312.0, "total_liabilities": 9599.0},
+        "2024": {"revenue": 3120.0, "net_profit": 1036.0, "total_assets": 20450.0, "owner_equity": 9850.0, "total_liabilities": 10600.0},
+        "2025": {"revenue": 3650.0, "net_profit": 1179.0, "total_assets": 23500.0, "owner_equity": 11200.0, "total_liabilities": 12300.0}
+    },
+    "FTS": {
+        "2016": {"revenue": 320.5, "net_profit": 162.4, "total_assets": 1820.0, "owner_equity": 1180.0, "total_liabilities": 640.0},
+        "2017": {"revenue": 458.2, "net_profit": 206.1, "total_assets": 2450.0, "owner_equity": 1390.0, "total_liabilities": 1060.0},
+        "2018": {"revenue": 695.2, "net_profit": 442.8, "total_assets": 3150.0, "owner_equity": 1850.0, "total_liabilities": 1300.0},
+        "2019": {"revenue": 386.6, "net_profit": 218.6, "total_assets": 3280.0, "owner_equity": 2050.0, "total_liabilities": 1230.0},
+        "2020": {"revenue": 403.5, "net_profit": 183.2, "total_assets": 4120.0, "owner_equity": 2210.0, "total_liabilities": 1910.0},
+        "2021": {"revenue": 1383.5, "net_profit": 852.1, "total_assets": 9480.0, "owner_equity": 3450.0, "total_liabilities": 6030.0},
+        "2022": {"revenue": 866.4, "net_profit": 326.5, "total_assets": 5580.0, "owner_equity": 3720.0, "total_liabilities": 1860.0},
+        "2023": {"revenue": 923.8, "net_profit": 418.2, "total_assets": 6850.0, "owner_equity": 4080.0, "total_liabilities": 2770.0},
+        "2024": {"revenue": 1120.0, "net_profit": 508.8, "total_assets": 8200.0, "owner_equity": 4550.0, "total_liabilities": 3650.0},
+        "2025": {"revenue": 1350.0, "net_profit": 615.0, "total_assets": 9800.0, "owner_equity": 5200.0, "total_liabilities": 4600.0}
     }
 }
 
@@ -1531,21 +1567,30 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
         final_periods = available_periods[-target_count:] if len(available_periods) > target_count else available_periods
     period_len = len(final_periods)
 
-    def get_timeline_metric(source_key: str, keywords: List[str]) -> List[float]:
+    def get_timeline_metric(source_key: str, keywords: List[str], exclude_keywords: Optional[List[str]] = None) -> List[float]:
         res = []
         for p in final_periods:
             p_data = period_dict[p][source_key]
             val = 0.0
+            found_nonzero = False
+            zero_cand = None
             for kw in keywords:
                 kw_lower = kw.lower()
-                found = False
                 for title, num in p_data.items():
-                    if kw_lower in title.lower():
-                        val = num
-                        found = True
-                        break
-                if found:
+                    t_lower = title.lower()
+                    if exclude_keywords and any(ex.lower() in t_lower for ex in exclude_keywords):
+                        continue
+                    if kw_lower in t_lower:
+                        if num is not None and abs(num) > 0.001:
+                            val = num
+                            found_nonzero = True
+                            break
+                        elif zero_cand is None:
+                            zero_cand = 0.0
+                if found_nonzero:
                     break
+            if not found_nonzero and zero_cand is not None:
+                val = zero_cand
             res.append(round(val, 1))
         return res
 
@@ -1598,13 +1643,52 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
 
     fin_expense = get_timeline_metric("inc", ["7. Chi phí tài chính", "Chi phí tài chính"])
     operating_profit = get_timeline_metric("inc", ["10. Lợi nhuận thuần từ hoạt động kinh doanh", "Lợi nhuận thuần từ hoạt động", "Lợi nhuận từ HĐKD"])
-    net_profit = get_timeline_metric("inc", [
-        "18. Lợi nhuận sau thuế của cổ đông của Công ty mẹ",
-        "Lợi nhuận sau thuế của cổ đông công ty mẹ",
-        "18. Lợi nhuận sau thuế thu nhập doanh nghiệp",
-        "Lợi nhuận sau thuế",
-        "LNST"
-    ])
+    net_profit = get_timeline_metric(
+        "inc",
+        [
+            "18. Lợi nhuận sau thuế của cổ đông của Công ty mẹ",
+            "19. Lợi nhuận sau thuế công ty mẹ",
+            "Lợi nhuận sau thuế của cổ đông công ty mẹ",
+            "Lợi nhuận sau thuế của cổ đông của Công ty mẹ",
+            "37. Lợi nhuận sau thuế của cổ đông công ty mẹ",
+            "35. Lợi nhuận sau thuế thu nhập doanh nghiệp",
+            "18. Lợi nhuận sau thuế thu nhập doanh nghiệp",
+            "Lợi nhuận sau thuế thu nhập doanh nghiệp",
+            "Lợi nhuận sau thuế",
+            "LNST"
+        ],
+        exclude_keywords=["lợi nhuận gộp", "không kiểm soát"]
+    )
+
+    # Xử lý thích ứng theo mô hình ngành kế toán (Industry-Adaptive Statement Mapping):
+    # 1. Với Ngân hàng (TT49/NHNN): CafeF để trống dòng 18/19 và lưu LNST vào dòng '6. Doanh thu hoạt động tài chính'
+    # 2. Với Chứng khoán (TT334/BTC): Một số mã (HCM, FTS) bị khuyết dòng 18/19, CafeF lưu LNTT ở dòng '21. Lãi cơ bản trên cổ phiếu' hoặc LNST ở dòng 6
+    fin_inc_bank = get_timeline_metric("inc", ["6. Doanh thu hoạt động tài chính"])
+    eps_cand = get_timeline_metric("inc", ["21. Lãi cơ bản trên cổ phiếu"])
+    ind_model = "general"
+    try:
+        from financial_data import get_financial_statement_model
+        ind_model = get_financial_statement_model(clean_ticker)
+    except Exception:
+        pass
+
+    if ind_model == "bank":
+        for i in range(period_len):
+            if net_profit[i] == 0.0 and i < len(fin_inc_bank) and fin_inc_bank[i] > 0:
+                net_profit[i] = fin_inc_bank[i]
+    elif ind_model == "securities" and sum(1 for v in net_profit if v > 0) <= 2:
+        for i in range(period_len):
+            if net_profit[i] == 0.0:
+                fb_val = fin_inc_bank[i] if i < len(fin_inc_bank) else 0.0
+                eps_val = eps_cand[i] if i < len(eps_cand) else 0.0
+                if 0 < fb_val < 5000.0:
+                    net_profit[i] = fb_val
+                elif eps_val > 10.0:
+                    net_profit[i] = round(eps_val * 0.8, 1)
+    elif sum(1 for v in net_profit if v > 0) <= 2:
+        for i in range(period_len):
+            if net_profit[i] == 0.0 and i < len(fin_inc_bank) and 0 < fin_inc_bank[i] < 50000.0:
+                net_profit[i] = fin_inc_bank[i]
 
     # 2. Bảng CĐKT
     total_assets = get_timeline_metric("bs", [
