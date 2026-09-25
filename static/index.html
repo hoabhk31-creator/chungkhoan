@@ -1481,6 +1481,18 @@
                             </div>
                         </div>
 
+                        <!-- Corporate Actions Dilution Notice Banner (Tự động kích hoạt khi có sự kiện chia cổ tức CP / thưởng CP / quyền mua) -->
+                        <div id="val-dilution-adjustment-banner" class="hidden p-3 rounded-lg bg-amber-950/40 border border-amber-700/60 text-amber-200 text-xs font-sans space-y-1.5 shadow-sm">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center gap-2 font-bold font-mono text-amber-300 text-xs">
+                                    <i data-lucide="git-branch" class="w-4 h-4 text-amber-400"></i>
+                                    <span>ĐỊNH GIÁ ĐÃ ĐIỀU CHỈNH THEO SỐ LƯỢNG CỔ PHIẾU SAU SỰ KIỆN QUYỀN</span>
+                                </div>
+                                <span id="val-dilution-badge" class="px-2 py-0.5 rounded font-mono text-[10px] bg-amber-900/60 text-amber-200 border border-amber-700 font-bold"></span>
+                            </div>
+                            <p id="val-dilution-explanation" class="text-[11px] text-amber-100/90 leading-relaxed"></p>
+                        </div>
+
                         <!-- Full Institutional Table of 6 Models (Matching Excel Export) -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs font-mono border-collapse" id="table-multi-valuation">
@@ -1510,11 +1522,11 @@
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 font-mono text-xs">
                                 <div class="p-2.5 rounded-lg bg-slate-950/90 border border-slate-800">
-                                    <span class="text-slate-500 block text-[10px]">EPS 4 Quý (VND)</span>
+                                    <span class="text-slate-500 block text-[10px]" id="val-param-eps-label">EPS 4 Quý (VND)</span>
                                     <span class="text-white font-bold text-xs" id="val-param-eps">--</span>
                                 </div>
                                 <div class="p-2.5 rounded-lg bg-slate-950/90 border border-slate-800">
-                                    <span class="text-slate-500 block text-[10px]">BVPS Sổ sách (VND)</span>
+                                    <span class="text-slate-500 block text-[10px]" id="val-param-bvps-label">BVPS Sổ sách (VND)</span>
                                     <span class="text-white font-bold text-xs" id="val-param-bvps">--</span>
                                 </div>
                                 <div class="p-2.5 rounded-lg bg-slate-950/90 border border-slate-800">

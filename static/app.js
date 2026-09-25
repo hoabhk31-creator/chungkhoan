@@ -7459,6 +7459,32 @@ function renderMultiModelValuation(val) {
         }).join("");
     }
 
+    // Corporate actions dilution notice banner & parameter labels
+    const dilutionBanner = document.getElementById("val-dilution-adjustment-banner");
+    const dilutionBadge = document.getElementById("val-dilution-badge");
+    const dilutionExp = document.getElementById("val-dilution-explanation");
+    const lblEps = document.getElementById("val-param-eps-label");
+    const lblBvps = document.getElementById("val-param-bvps-label");
+
+    if (val.is_adjusted_for_corporate_actions) {
+        if (dilutionBanner) dilutionBanner.classList.remove("hidden");
+        if (dilutionBadge) {
+            dilutionBadge.textContent = `Hệ số pha loãng: ${val.dilution_multiplier}x`;
+        }
+        if (dilutionExp) {
+            const unadjEpsStr = val.unadjusted_eps ? `${Number(val.unadjusted_eps).toLocaleString("vi-VN")} đ` : "";
+            const adjEpsStr = val.eps ? `${Number(val.eps).toLocaleString("vi-VN")} đ` : "";
+            const epsDesc = (unadjEpsStr && adjEpsStr) ? ` (EPS gốc ${unadjEpsStr} quy đổi thành ${adjEpsStr})` : "";
+            dilutionExp.innerHTML = `Hệ thống tự động phát hiện sự kiện quyền: <strong>${escapeHtml(val.dilution_summary_note || "")}</strong>. Toàn bộ số lượng cổ phiếu lưu hành đã được điều chỉnh tăng, đưa EPS${epsDesc}, BVPS và toàn bộ 6 mô hình định giá về đúng thị giá sau ngày GDKHQ, loại bỏ hoàn toàn biên an toàn ảo.`;
+        }
+        if (lblEps) lblEps.textContent = "EPS 4 Quý (Sau chia)";
+        if (lblBvps) lblBvps.textContent = "BVPS Sổ sách (Sau chia)";
+    } else {
+        if (dilutionBanner) dilutionBanner.classList.add("hidden");
+        if (lblEps) lblEps.textContent = "EPS 4 Quý (VND)";
+        if (lblBvps) lblBvps.textContent = "BVPS Sổ sách (VND)";
+    }
+
     // Render Grounding Parameters
     const pEps = document.getElementById("val-param-eps");
     const pBvps = document.getElementById("val-param-bvps");

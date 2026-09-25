@@ -625,6 +625,25 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
             "adjustment_factor": None,
             "source": "Sở GDCK / Simplize Open API"
         }
+    ],
+    "VHM": [
+        {
+            "id": "vhm-ca-06082026-dividend_stock",
+            "ex_date": "06/08/2026",
+            "record_date": "07/08/2026",
+            "execution_date": "06/08/2026",
+            "event_type": "dividend_stock",
+            "title": "VHM: Thông báo trả cổ tức năm 2025 bằng cổ phiếu, tỷ lệ 1:1 (100%)",
+            "description": "Trả cổ tức bằng cổ phiếu tỷ lệ 1:1 (cổ đông sở hữu 1 cổ phiếu được nhận thêm 1 cổ phiếu mới)",
+            "cash_amount": 0.0,
+            "stock_ratio": 1.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 130800.0,
+            "ref_price_after": 65400.0,
+            "adjustment_factor": 0.5,
+            "source": "HOSE & Vietstock"
+        }
     ]
 }
 
@@ -905,6 +924,99 @@ def adjust_target_price_for_corporate_actions(
         "applied_events": applied_events,
         "notes": notes_str
     }
+
+
+def get_corporate_actions_dilution_factor(
+    ticker: str,
+    base_shares_mil: Optional[float] = None,
+    as_of_date: Optional[date] = None
+) -> Dict[str, Any]:
+    """
+    Xác định hệ số pha loãng và điều chỉnh số lượng cổ phiếu lưu hành, EPS, BVPS,
+    và các mô hình định giá (DCF, Graham, P/E, P/B) do các sự kiện quyền:
+    - Cổ tức bằng cổ phiếu (dividend_stock)
+    - Thưởng cổ phiếu từ NVCSH (bonus_share)
+    - Phát hành quyền mua cho cổ đông hiện hữu (rights_issue)
+    
+    Quy tắc:
+    - Chỉ áp dụng các sự kiện có ngày GDKHQ ex_date <= as_of_date (mặc định là ngày hôm nay).
+    - Kiểm tra xem base_shares_mil trong cơ sở dữ liệu đã phản ánh số lượng cổ phiếu mới hay chưa:
+      + Nếu base_shares_mil chưa cập nhật (ví dụ VHM 4,354 triệu cp chưa nhân 2 sau đợt 1:1; TRC 30 triệu cp chưa nhân 4 sau đợt 1:3),
+        tự động nhân hệ số pha loãng để đưa về số lượng cổ phiếu thực tế sau chia.
+      + Nếu base_shares_mil đã là số lượng mới (như TCB 7,080 triệu cp; HPG 7,675 triệu cp; VCB 5,589 triệu cp), không nhân đúp.
+    """
+    clean_ticker = (ticker or "").upper().strip()
+    actions = get_ticker_corporate_actions(clean_ticker, auto_sync=True)
+    today = as_of_date or date.today()
+
+    # Danh mục các mã mà cơ sở dữ liệu số lượng cổ phiếu tĩnh đã ghi nhận sẵn đợt chia cổ phiếu cũ
+    ALREADY_FACTORED_TICKERS = {
+        "TCB": {"cutoff_date": date(2025, 1, 1)},
+        "HPG": {"cutoff_date": date(2025, 1, 1)},
+        "VCB": {"cutoff_date": date(2025, 1, 1)},
+        "SSI": {"cutoff_date": date(2025, 1, 1)},
+    }
+
+    dilution_multiplier = 1.0
+    applied_events = []
+    notes = []
+
+    sorted_actions = sorted(
+        actions,
+        key=lambda x: parse_action_date(x.get("ex_date", "")) or date(2000, 1, 1)
+    )
+
+    for ev in sorted_actions:
+        ex_d = parse_action_date(ev.get("ex_date", ""))
+        if not ex_d:
+            continue
+
+        if ex_d <= today:
+            # Nếu sự kiện đã được phản ánh trong base_shares tĩnh của CSDL thì bỏ qua
+            if clean_ticker in ALREADY_FACTORED_TICKERS:
+                cutoff = ALREADY_FACTORED_TICKERS[clean_ticker]["cutoff_date"]
+                if ex_d < cutoff:
+                    continue
+
+            sr = float(ev.get("stock_ratio") or 0.0)
+            rr = float(ev.get("rights_ratio") or 0.0)
+
+            # Cổ tức bằng cổ phiếu, thưởng cổ phiếu hoặc quyền mua làm tăng số lượng CP
+            if sr > 0 or rr > 0:
+                step_mult = 1.0 + sr + rr
+                dilution_multiplier *= step_mult
+                applied_events.append({
+                    "ex_date": ev.get("ex_date"),
+                    "event_type": ev.get("event_type"),
+                    "title": ev.get("title") or ev.get("description"),
+                    "stock_ratio": sr,
+                    "rights_ratio": rr,
+                    "step_multiplier": round(step_mult, 4),
+                    "adjustment_factor": round(1.0 / step_mult, 4)
+                })
+                t_str = f"Cổ phiếu: +{int(round(sr*100))}% ({'1:1' if sr==1.0 else ('1:'+str(int(sr)) if sr>=1 else '100:'+str(int(sr*100)))})" if sr > 0 else ""
+                r_str = f"Quyền mua: +{int(round(rr*100))}%" if rr > 0 else ""
+                combined_desc = ", ".join(filter(None, [t_str, r_str]))
+                notes.append(f"GDKHQ {ev.get('ex_date')} ({combined_desc})")
+
+    has_dilution = dilution_multiplier > 1.0001
+    price_adj_factor = round(1.0 / dilution_multiplier, 4) if dilution_multiplier > 0 else 1.0
+    
+    base_shares = float(base_shares_mil or 1000.0)
+    adjusted_shares = round(base_shares * dilution_multiplier, 2)
+
+    return {
+        "ticker": clean_ticker,
+        "has_dilution": has_dilution,
+        "base_shares_mil": base_shares,
+        "adjusted_shares_mil": adjusted_shares,
+        "dilution_multiplier": round(dilution_multiplier, 4),
+        "price_adjustment_factor": price_adj_factor,
+        "applied_events_count": len(applied_events),
+        "applied_events": applied_events,
+        "summary_note": "; ".join(notes) if notes else "Không có sự kiện pha loãng cổ phiếu."
+    }
+
 
 
 # ---------------------------------------------------------------------------

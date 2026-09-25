@@ -303,6 +303,13 @@ class ValuationModelResult(BaseModel):
     applied_sector_description: str = Field(default="", description="Lý do phân bổ trọng số theo ngành")
     primary_models: List[str] = Field(default_factory=list, description="Các mô hình định giá ưu tiên của ngành")
     default_weights: Dict[str, float] = Field(default_factory=dict, description="Trọng số mặc định chuẩn hóa theo ngành")
+    is_adjusted_for_corporate_actions: bool = Field(default=False, description="Đã điều chỉnh pha loãng theo sự kiện chia cổ tức CP / thưởng CP / phát hành thêm")
+    dilution_multiplier: float = Field(default=1.0, description="Hệ số pha loãng số lượng cổ phiếu")
+    dilution_summary_note: str = Field(default="", description="Ghi chú sự kiện quyền được điều chỉnh")
+    dilution_events: List[Dict[str, Any]] = Field(default_factory=list, description="Danh sách chi tiết các sự kiện quyền được áp dụng")
+    unadjusted_blended_fair_value: float = Field(default=0.0, description="Giá trị hợp lý ban đầu trước điều chỉnh (nếu có)")
+    unadjusted_eps: float = Field(default=0.0, description="EPS gốc trước điều chỉnh")
+    unadjusted_bvps: float = Field(default=0.0, description="BVPS gốc trước điều chỉnh")
 
 
 class TechnicalSignal(BaseModel):
@@ -3031,15 +3038,22 @@ def calculate_live_financial_multiples(
     info = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
     cap = corporate_capital or {}
 
-    # 1. Xác định số lượng cổ phiếu lưu hành (triệu CP)
-    shares = float(
+    # 1. Xác định số lượng cổ phiếu lưu hành (triệu CP) và kiểm tra sự kiện pha loãng (cổ tức CP / thưởng CP / phát hành thêm)
+    base_shares = float(
         cap.get("shares_outstanding_mil")
         or db.get("shares_outstanding_mil")
         or info.get("shares")
         or 1000.0
     )
-    if shares <= 0:
-        shares = 1000.0
+    if base_shares <= 0:
+        base_shares = 1000.0
+
+    from corporate_actions import get_corporate_actions_dilution_factor
+    dilution_info = get_corporate_actions_dilution_factor(clean_ticker, base_shares_mil=base_shares)
+    has_dilution = dilution_info.get("has_dilution", False)
+    dilution_multiplier = float(dilution_info.get("dilution_multiplier") or 1.0)
+    eff_shares = float(dilution_info.get("adjusted_shares_mil") or base_shares)
+    shares = eff_shares
 
     # 2. Xác định thị giá thời gian thực P_live (VND/CP)
     p = 0.0
@@ -3122,6 +3136,9 @@ def calculate_live_financial_multiples(
     db_eps = float(db.get("eps") or 0.0)
     db_q_np = float(db.get("net_profit_q1_26_bil") or 0.0)
 
+    # Nếu có pha loãng sự kiện quyền, db_eps trong CSDL tĩnh cũ cũng cần được điều chỉnh tương ứng
+    eff_db_eps = (db_eps / dilution_multiplier) if (has_dilution and db_eps > 0) else db_eps
+
     # Nếu P/E live bị thổi phồng bất thường (> 25x khi chuẩn ngành/CSDL < 20x hoặc gấp 1.6 lần CSDL) hoặc ROE bị teo tóp (< 50% so với CSDL)
     is_pe_anomalous = (db_pe > 0 and ((pe_live > 1.6 * db_pe and pe_live > 22.0) or (db_pe <= 25.0 and pe_live > 40.0)))
     is_roe_anomalous = (db_roe >= 6.0 and roe_ttm < 0.5 * db_roe)
@@ -3129,12 +3146,12 @@ def calculate_live_financial_multiples(
     if is_pe_anomalous or is_roe_anomalous:
         if db_q_np > 0:
             np_ttm = db_q_np * 4.0
-        elif db_eps > 0 and shares > 0:
-            np_ttm = (shares * db_eps) / 1000.0
+        elif db_eps > 0 and base_shares > 0:
+            np_ttm = (base_shares * db_eps) / 1000.0
         elif db_pe > 0:
             np_ttm = mcap_bil / db_pe
         
-        eps_ttm = round((np_ttm * 1000.0) / shares, 1) if (shares > 0 and np_ttm != 0) else db_eps
+        eps_ttm = round((np_ttm * 1000.0) / shares, 1) if (shares > 0 and np_ttm != 0) else eff_db_eps
         pe_live = round(p / eps_ttm, 2) if eps_ttm > 0 else db_pe
         roe_ttm = round((np_ttm / equity_latest) * 100.0, 2) if equity_latest > 0 else db_roe
         roa_ttm = round((np_ttm / assets_latest) * 100.0, 2) if assets_latest > 0 else round(roe_ttm * 0.1, 2)
@@ -3146,10 +3163,14 @@ def calculate_live_financial_multiples(
         bvps = round((equity_latest * 1000.0) / shares, 1) if shares > 0 else 0.0
         pb_live = round(p / bvps, 2) if bvps > 0 else db_pb
 
+    unadj_eps = round(eps_ttm * dilution_multiplier, 1) if has_dilution else eps_ttm
+    unadj_bvps = round(bvps * dilution_multiplier, 1) if has_dilution else bvps
+
     return {
         "ticker": clean_ticker,
         "live_price": p,
         "shares_outstanding_mil": shares,
+        "base_shares_mil": base_shares,
         "market_cap_bil": mcap_bil,
         "net_profit_ttm_bil": round(np_ttm, 1),
         "revenue_ttm_bil": round(rev_ttm, 1),
@@ -3162,7 +3183,14 @@ def calculate_live_financial_multiples(
         "roe_ttm": roe_ttm,
         "roa_ttm": roa_ttm,
         "real_quarterly": real_q,
-        "real_annual": real_y
+        "real_annual": real_y,
+        "is_corporate_action_adjusted": has_dilution,
+        "dilution_multiplier": dilution_multiplier,
+        "price_adjustment_factor": dilution_info.get("price_adjustment_factor", 1.0),
+        "dilution_summary_note": dilution_info.get("summary_note", ""),
+        "dilution_events": dilution_info.get("applied_events", []),
+        "unadjusted_eps": unadj_eps,
+        "unadjusted_bvps": unadj_bvps
     }
 
 
@@ -3473,7 +3501,14 @@ def get_financial_data_bundle(
         applied_sector_key=multi_val.get("applied_sector_key", ""),
         applied_sector_description=multi_val.get("applied_sector_description", ""),
         primary_models=multi_val.get("primary_models", []),
-        default_weights=multi_val.get("default_weights", {})
+        default_weights=multi_val.get("default_weights", {}),
+        is_adjusted_for_corporate_actions=mults.get("is_corporate_action_adjusted", False),
+        dilution_multiplier=mults.get("dilution_multiplier", 1.0),
+        dilution_summary_note=mults.get("dilution_summary_note", ""),
+        dilution_events=mults.get("dilution_events", []),
+        unadjusted_blended_fair_value=round(multi_val["blended_fair_value"] * mults.get("dilution_multiplier", 1.0), -2) if mults.get("is_corporate_action_adjusted") else multi_val["blended_fair_value"],
+        unadjusted_eps=round(mults.get("unadjusted_eps", eps_ttm), 1),
+        unadjusted_bvps=round(mults.get("unadjusted_bvps", bvps), 1)
     )
 
     final_ind_model = get_financial_statement_model(clean_ticker, sect_n, comp_n)

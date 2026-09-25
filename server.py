@@ -1120,8 +1120,16 @@ async def post_multi_model_valuation(req: MultiModelValuationRequest):
     net_debt = (stm["short_term_debt"][idx] + stm["long_term_debt"][idx]) - stm["cash_and_equivalents"][idx]
     
     shares = prof.get("shares_outstanding_mil") or 100.0
-    eps = (stm["net_profit"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 2500.0
-    bvps = (stm["owner_equity"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 18000.0
+    val_res = bundle.get("valuation")
+    if val_res and isinstance(val_res, dict) and val_res.get("eps"):
+        eps = float(val_res["eps"])
+        bvps = float(val_res["bvps"])
+    elif val_res and hasattr(val_res, "eps"):
+        eps = float(val_res.eps)
+        bvps = float(val_res.bvps)
+    else:
+        eps = (stm["net_profit"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 2500.0
+        bvps = (stm["owner_equity"][idx] * 1_000_000_000) / (shares * 1_000_000) if shares > 0 else 18000.0
     
     ind_pe = req.industry_pe or (peers.get("industry_average", {}).get("pe") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pe", 13.0)) or 13.0
     ind_pb = req.industry_pb or (peers.get("industry_average", {}).get("pb") if isinstance(peers, dict) else getattr(peers, "industry_average", {}).get("pb", 1.6)) or 1.6
@@ -1146,6 +1154,17 @@ async def post_multi_model_valuation(req: MultiModelValuationRequest):
         sector=prof.get("sector", ""),
         company_name=prof.get("name", "")
     )
+
+    if val_res:
+        v_dict = val_res if isinstance(val_res, dict) else (val_res.model_dump() if hasattr(val_res, "model_dump") else {})
+        res["is_adjusted_for_corporate_actions"] = v_dict.get("is_adjusted_for_corporate_actions", False)
+        res["dilution_multiplier"] = v_dict.get("dilution_multiplier", 1.0)
+        res["dilution_summary_note"] = v_dict.get("dilution_summary_note", "")
+        res["dilution_events"] = v_dict.get("dilution_events", [])
+        res["unadjusted_blended_fair_value"] = v_dict.get("unadjusted_blended_fair_value", res.get("blended_fair_value", 0.0))
+        res["unadjusted_eps"] = v_dict.get("unadjusted_eps", eps)
+        res["unadjusted_bvps"] = v_dict.get("unadjusted_bvps", bvps)
+
     return res
 
 
