@@ -126,5 +126,197 @@
     ],
     "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
     "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "CKG": {
+    "name": "CKG: CTCP Tập đoàn CIC",
+    "domain": "cicgroups.com",
+    "official_url": "https://cicgroups.com",
+    "projects_url": "https://cicgroups.com/du-an",
+    "ir_url": "https://cicgroups.com/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "CTI": {
+    "name": "CTI: CTCP Đầu tư Phát triển Cường Thuận IDICO",
+    "domain": "cuongthuan.vn",
+    "official_url": "http://www.cuongthuan.vn",
+    "projects_url": "http://cuongthuan.vn/du-an",
+    "ir_url": "http://cuongthuan.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "ANV": {
+    "name": "ANV: CTCP Nam Việt",
+    "domain": "navicorp.com.vn",
+    "official_url": "https://navicorp.com.vn",
+    "projects_url": "https://navicorp.com.vn/du-an",
+    "ir_url": "https://navicorp.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "BVH": {
+    "name": "BVH: Tập đoàn Bảo Việt",
+    "domain": "baoviet.com.vn",
+    "official_url": "https://www.baoviet.com.vn",
+    "projects_url": "https://baoviet.com.vn/du-an",
+    "ir_url": "https://baoviet.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "KSB": {
+    "name": "KSB: CTCP Khoáng sản và Xây dựng Bình Dương",
+    "domain": "ksb.vn",
+    "official_url": "https://ksb.vn/",
+    "projects_url": "https://ksb.vn/du-an",
+    "ir_url": "https://ksb.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "VHC": {
+    "name": "VHC: CTCP Vĩnh Hoàn",
+    "domain": "vinhhoan.com",
+    "official_url": "https://www.vinhhoan.com/",
+    "projects_url": "https://vinhhoan.com/du-an",
+    "ir_url": "https://vinhhoan.com/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DHG": {
+    "name": "DHG: CTCP Dược Hậu Giang",
+    "domain": "dhgpharma.com.vn",
+    "official_url": "https://www.dhgpharma.com.vn",
+    "projects_url": "https://dhgpharma.com.vn/du-an",
+    "ir_url": "https://dhgpharma.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "KSV": {
+    "name": "KSV: Tổng Công ty Khoáng sản TKV",
+    "domain": "vimico.vn",
+    "official_url": "https://vimico.vn",
+    "projects_url": "https://vimico.vn/du-an",
+    "ir_url": "https://vimico.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "BWE": {
+    "name": "BWE: CTCP",
+    "domain": "biwase.com.vn",
+    "official_url": "https://www.biwase.com.vn/",
+    "projects_url": "https://biwase.com.vn/du-an",
+    "ir_url": "https://biwase.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "GEX": {
+    "name": "GEX: CTCP Tập đoàn GELEX",
+    "domain": "gelex.vn",
+    "official_url": "https://gelex.vn",
+    "projects_url": "https://gelex.vn/du-an",
+    "ir_url": "https://gelex.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DDV": {
+    "name": "DDV: CTCP DAP",
+    "domain": "dap-vinachem.com.vn",
+    "official_url": "http://www.dap-vinachem.com.vn",
+    "projects_url": "http://dap-vinachem.com.vn/du-an",
+    "ir_url": "http://dap-vinachem.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DHC": {
+    "name": "DHC: CTCP Đông Hải Bến Tre",
+    "domain": "dohacobentre.com.vn",
+    "official_url": "https://dohacobentre.com.vn/",
+    "projects_url": "https://dohacobentre.com.vn/du-an",
+    "ir_url": "https://dohacobentre.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
   }
 }
