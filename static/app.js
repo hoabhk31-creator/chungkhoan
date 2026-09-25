@@ -939,7 +939,7 @@ async function selectTicker(ticker) {
 
     // 2. CHECK CLIENT CACHE (0.00s INSTANT RENDERING)
     const cached = window._CLIENT_TICKER_CACHE[cleanTicker];
-    if (cached && (Date.now() - cached.ts < 120000) && cached.preset) {
+    if (cached && (Date.now() - cached.ts < 300000) && cached.preset) {
         currentReport = cached.preset;
         currentFinancialBundle = cached.fin;
         currentTechnicalData = cached.tech;

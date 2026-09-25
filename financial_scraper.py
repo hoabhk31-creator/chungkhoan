@@ -1688,61 +1688,79 @@ def fetch_multi_period_financials(ticker: str, mode: str = "quarter", count: Uni
                 cached_entry["data"] = data_cleaned
                 return data_cleaned
 
-    # 2. Thu thập dữ liệu thực tế từ CafeF qua nhiều trang
+    # 2. Thu thập dữ liệu thực tế từ CafeF qua nhiều trang (Chạy Song Song Siêu Tốc)
+    from concurrent.futures import ThreadPoolExecutor
+
     if mode == "quarter":
-        # Năm và quý cần quét: 2026 Q2, 2025 Q2, 2024 Q2, 2023 Q2, 2022 Q2, 2021 Q2 (lên đến 24 quý)
-        fetch_targets = [
+        # Năm và quý cần quét: 2026 Q2, 2025 Q2, 2024 Q2, 2023 Q2, 2022 Q2 (lên đến 20 quý - 5 năm)
+        all_targets = [
             (2026, 2),
             (2025, 2),
             (2024, 2),
             (2023, 2),
-            (2022, 2),
-            (2021, 2)
+            (2022, 2)
         ]
     else:
-        # Năm cần quét: 2025 Q0, 2021 Q0, 2017 Q0, 2013 Q0, 2009 Q0, 2005 Q0, 2001 Q0 (lên đến 24 năm)
-        fetch_targets = [
+        # Năm cần quét: 2025 Q0, 2021 Q0, 2017 Q0, 2013 Q0 (lên đến 16 năm lịch sử)
+        all_targets = [
             (2025, 0),
             (2021, 0),
             (2017, 0),
-            (2013, 0),
-            (2009, 0),
-            (2005, 0),
-            (2001, 0)
+            (2013, 0)
         ]
+
+    # Giới hạn số lượng chunk theo target_count cần lấy (mỗi chunk CafeF chứa 4 kỳ)
+    needed_chunks = len(all_targets) if is_all else min(len(all_targets), max(1, (target_count + 3) // 4))
+    fetch_targets = all_targets[:needed_chunks]
+
+    # Lập danh sách task song song toàn bộ các bảng và các chuỗi kỳ
+    tasks = []
+    for idx_chunk, (y, q) in enumerate(fetch_targets):
+        for rt in ["IncSta", "BSheet", "CashFlow"]:
+            tasks.append((idx_chunk, y, q, rt))
+
+    def _parallel_fetch_worker(t):
+        c_idx, y, q, rt = t
+        try:
+            p, items = fetch_cafef_report_raw(clean_ticker, rt, y, q)
+            return (c_idx, rt, p, items)
+        except Exception:
+            return (c_idx, rt, [], {})
+
+    with ThreadPoolExecutor(max_workers=min(12, len(tasks))) as executor:
+        results = list(executor.map(_parallel_fetch_worker, tasks))
+
+    # Tái cấu trúc kết quả theo từng chunk
+    chunk_map = {idx: {"periods": [], "inc": {}, "bs": {}, "cf": {}} for idx in range(len(fetch_targets))}
+    for c_idx, rt, p, items in results:
+        if rt == "IncSta":
+            chunk_map[c_idx]["periods"] = p
+            chunk_map[c_idx]["inc"] = items
+        elif rt == "BSheet":
+            chunk_map[c_idx]["bs"] = items
+        elif rt == "CashFlow":
+            chunk_map[c_idx]["cf"] = items
+
+    # Nếu chunk mới nhất không có dữ liệu, mã không tồn tại trên sàn
+    if not chunk_map.get(0, {}).get("periods"):
+        return {}
 
     collected_chunks = []
     inc_order: List[str] = []
     bs_order: List[str] = []
     cf_order: List[str] = []
 
-    for idx_chunk, (y, q) in enumerate(fetch_targets):
-        inc_p, inc_items = fetch_cafef_report_raw(clean_ticker, "IncSta", y, q)
-        if not inc_p:
-            if idx_chunk == 0:
-                # Nếu mã không tồn tại trên hệ thống BCTC, thoát sớm
-                break
+    for c_idx in range(len(fetch_targets)):
+        c_data = chunk_map[c_idx]
+        if not c_data["periods"]:
             continue
-        bs_p, bs_items = fetch_cafef_report_raw(clean_ticker, "BSheet", y, q)
-        cf_p, cf_items = fetch_cafef_report_raw(clean_ticker, "CashFlow", y, q)
-        
-        for k in inc_items:
-            if k not in inc_order:
-                inc_order.append(k)
-        for k in bs_items:
-            if k not in bs_order:
-                bs_order.append(k)
-        for k in cf_items:
-            if k not in cf_order:
-                cf_order.append(k)
-
-        collected_chunks.append({
-            "periods": inc_p,
-            "inc": inc_items,
-            "bs": bs_items,
-            "cf": cf_items
-        })
-        # Nếu đã đủ số kỳ theo yêu cầu (khi không chọn 'all'), dừng lại để tăng tốc
+        for k in c_data["inc"]:
+            if k not in inc_order: inc_order.append(k)
+        for k in c_data["bs"]:
+            if k not in bs_order: bs_order.append(k)
+        for k in c_data["cf"]:
+            if k not in cf_order: cf_order.append(k)
+        collected_chunks.append(c_data)
         total_p = sum(len(c["periods"]) for c in collected_chunks)
         if not is_all and total_p >= target_count:
             break

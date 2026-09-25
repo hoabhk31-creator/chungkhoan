@@ -591,46 +591,55 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
             except Exception:
                 pass
 
-        prof_res, live_res, _ = await asyncio.gather(_safe_profile(), _safe_price(), _safe_ca(), return_exceptions=True)
-        profile = prof_res if isinstance(prof_res, dict) else {}
-        live_info = live_res if isinstance(live_res, dict) else None
-        market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
-
-        comp_name = profile.get("name") or cached_name
-        sect_name = profile.get("sector") or cached_sector
-        final_comp_name = comp_name
-        final_sect_name = sect_name
-
         base_reports = []
         base_causality = []
         base_disensus = []
+        final_comp_name = cached_name
+        final_sect_name = cached_sector
         if clean_ticker in PRESET_DATASETS:
             report = PRESET_DATASETS[clean_ticker]
-            if comp_name and (report.company_name.startswith("Công ty Cổ phần " + clean_ticker) or report.company_name.startswith("CTCP " + clean_ticker)):
-                report.company_name = comp_name
-            if sect_name and report.sector in ["Doanh nghiệp niêm yết", "Doanh nghiệp Niêm yết"]:
-                report.sector = sect_name
             base_reports = list(report.matrix_table) if report.matrix_table else []
             base_causality = report.causality_analysis or []
             base_disensus = report.disensus_table or []
             final_comp_name = report.company_name
             final_sect_name = report.sector
 
-        # Đồng bộ hóa báo cáo phân tích đa tổ chức với các bài viết mới nhất từ Vietstock eDocs & CTCK
-        try:
-            synced_reports = await asyncio.wait_for(
-                get_synchronized_matrix_reports(
-                    ticker=clean_ticker,
-                    base_reports=base_reports,
-                    comp_name=final_comp_name,
-                    sector_name=final_sect_name,
-                    market_p=market_p,
-                    max_reports=20
-                ),
-                timeout=10.0
-            )
-        except Exception as sync_err:
-            synced_reports = base_reports
+        async def _safe_reports():
+            try:
+                return await asyncio.wait_for(
+                    get_synchronized_matrix_reports(
+                        ticker=clean_ticker,
+                        base_reports=base_reports,
+                        comp_name=final_comp_name,
+                        sector_name=final_sect_name,
+                        market_p=float(stock_meta.get("close", 25000.0)),
+                        max_reports=20
+                    ),
+                    timeout=4.5
+                )
+            except Exception:
+                return base_reports
+
+        prof_res, live_res, _, rep_res = await asyncio.gather(
+            _safe_profile(), _safe_price(), _safe_ca(), _safe_reports(),
+            return_exceptions=True
+        )
+        profile = prof_res if isinstance(prof_res, dict) else {}
+        live_info = live_res if isinstance(live_res, dict) else None
+        market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
+        synced_reports = rep_res if isinstance(rep_res, list) else base_reports
+
+        comp_name = profile.get("name") or final_comp_name
+        sect_name = profile.get("sector") or final_sect_name
+        final_comp_name = comp_name
+        final_sect_name = sect_name
+
+        # Nếu market_p hợp lệ, đồng bộ nhanh upside cho synced_reports
+        if market_p > 0:
+            for r in synced_reports:
+                if r.target_price > 0:
+                    r.current_price_at_report = market_p
+                    r.upside_percent = round(((r.target_price - market_p) / market_p) * 100.0, 1)
 
         reconciled = calculate_consensus(
             reports=synced_reports,
@@ -862,7 +871,7 @@ async def get_financial_overview(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 120.0:
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
         return _FIN_OVERVIEW_CACHE[clean_ticker]
 
     stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
@@ -893,7 +902,8 @@ async def get_financial_overview(ticker: str):
     profile = prof_res if isinstance(prof_res, dict) else {}
     capital_info = cap_res if isinstance(cap_res, dict) else {}
 
-    data = get_financial_data_bundle(
+    data = await asyncio.to_thread(
+        get_financial_data_bundle,
         clean_ticker,
         current_market_price=market_p,
         company_name=profile.get("name") or default_name,
@@ -912,7 +922,7 @@ async def get_peers_comparison(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 120.0:
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
         return _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
 
     data = await get_financial_overview(clean_ticker)
