@@ -3903,5 +3903,37 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "BAF": [
+    {
+      "id": "baf-ca-19062026-dividend_stock",
+      "ex_date": "19/06/2026",
+      "record_date": "22/06/2026",
+      "execution_date": "",
+      "event_type": "dividend_stock",
+      "title": "BAF: Thông báo ngày ĐKCC thực hiện quyền nhận cổ tức bằng CP và nhận CP phát hành thêm để tăng vốn cổ phần từ nguồn vốn CSH",
+      "description": "Trả cổ tức  bằng cổ phiếu, tỷ lệ 10:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "baf-ca-19062026-bonus_share",
+      "ex_date": "19/06/2026",
+      "record_date": "22/06/2026",
+      "execution_date": "",
+      "event_type": "bonus_share",
+      "title": "BAF: Thông báo ngày ĐKCC thực hiện quyền nhận cổ tức bằng CP và nhận CP phát hành thêm để tăng vốn cổ phần từ nguồn vốn CSH",
+      "description": "Thưởng cổ phiếu, tỷ lệ 10:1",
+      "cash_amount": 0.0,
+      "stock_ratio": 0.1,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": 0.9091,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
