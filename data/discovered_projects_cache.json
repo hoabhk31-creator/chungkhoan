@@ -912,7 +912,7 @@
     "total_investment_bil": 0,
     "projects": [
       {
-        "name": "dự án cơ sở hạ tầng qui mô lớn đã được NHNN áp dụng",
+        "name": "dự án cơ sở hạ tầng qui mô lớn đã được NHNN áp dụng cơ c",
         "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VCB",
         "investment_bil": 0,
         "progress_pct": 80,
@@ -924,7 +924,7 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "dự án là lĩnh vực mà VCB từ lâu đã dẫn đầu thị trườn",
+        "name": "dự án là lĩnh vực mà VCB từ lâu đã dẫn đầu thị trường nh",
         "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VCB",
         "investment_bil": 0,
         "progress_pct": 80,
@@ -958,8 +958,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790306803.629545,
-    "scan_time_str": "10:26:43 25/09/2026"
+    "timestamp": 1790329166.0800571,
+    "scan_time_str": "16:39:26 25/09/2026"
   },
   "GEL": {
     "ticker": "GEL",
@@ -1595,8 +1595,8 @@
     "company_name": "Vinhomes",
     "official_website": "vinhomes.vn",
     "website_projects_url": "https://vinhomes.vn/vi/du-an",
-    "total_projects": 22,
-    "total_investment_bil": 1626800.0,
+    "total_projects": 20,
+    "total_investment_bil": 736100.0,
     "projects": [
       {
         "name": "Đại đô thị Vinhomes Royal Island (Vũ Yên, Hải Phòng)",
@@ -1731,31 +1731,7 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "dự án đã mở bán trong giai đoạn 2025-6T 2026",
-        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VHM",
-        "investment_bil": 291000.0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Chúng tôi dự báo doanh số bán B ĐS năm 2026 của VHM sẽ tăng 42% YoY lên 291 nghìn tỷ đồng (nhìn chung giữ nguyên so với dự báo trước đây của chúng tôi), với doanh số nửa cuối năm 2026 được hỗ trợ bởi việc tiếp tục bán hàng tại các dự án đã mở bán trong giai đoạn 2025-6T 2026 (chủ yếu là Green Paradise, Global Gate Hạ Long, Saigon Park) cùng với giả định của chúng tôi về dự án Global Sportia bắt đầu hoạt động kinh doanh (so với năm 2027 trong dự báo trước đây).",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "dự án quy mô lớn",
-        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VHM",
-        "investment_bil": 599700.0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Ngành B ĐS Ngày báo cáo 28/08/2026 Giá hiện tại 73.000 VND Giá mục tiêu 74.000 VND Giá mục tiêu gần nhất^ 76.900 VND TL tăng +1,4% lợi suất cổ tức 0,0% Tổng mức sinh lời +1,4% GT vốn hóa 599,7 nghìn tỷ đồng Room KN 259,0 nghìn tỷ đồng GTGD/ngày (30n) 866,3 tỷ đồng Cổ phần Nhà nước 0,0% SL cổ phiếu lưu hành^ 8,2 tỷ Pha loãng^ 8,2 tỷ ^Đã điều chỉnh cho đợt chi trả cổ tức bằng cổ phiếu tỷ lệ 100% của năm tài chính 2025 VHM VNI P/E (trượt) 7,5x 13,9x P/B (hiện tại) 2,3x 2,0x ROE 33,8% 16,2% ROA 9,6% 2,4% Tổng quan Công ty Vinhomes (VHM), công ty con mà Vingroup (VIC) sở hữu 71,58%, là chủ đầu tư nhàở hàng đầu Việt Nam khi phát triển thành công một số dự án quy mô lớn.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "dự án hạ tầng chiến lược theo hình thức xây dựng-sở",
+        "name": "dự án hạ tầng chiến lược theo hình thức xây dựng",
         "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VHM",
         "investment_bil": 0,
         "progress_pct": 80,
@@ -1827,7 +1803,7 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "dự án và tình hình bán sỉ tốt hơn so với dự báo trướ",
+        "name": "dự án và tình hình bán sỉ tốt hơn so",
         "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của VHM",
         "investment_bil": 0,
         "progress_pct": 80,
@@ -1863,7 +1839,7 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       }
     ],
-    "newly_discovered_count": 12,
+    "newly_discovered_count": 10,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -1873,8 +1849,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790307152.545996,
-    "scan_time_str": "10:32:32 25/09/2026"
+    "timestamp": 1790329332.3599675,
+    "scan_time_str": "16:42:12 25/09/2026"
   },
   "NTL": {
     "ticker": "NTL",
@@ -2485,8 +2461,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790302566.8814065,
-    "scan_time_str": "09:16:06 25/09/2026"
+    "timestamp": 1790329357.9195693,
+    "scan_time_str": "16:42:37 25/09/2026"
   },
   "DXG": {
     "ticker": "DXG",
@@ -2851,8 +2827,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790304435.4009557,
-    "scan_time_str": "09:47:15 25/09/2026"
+    "timestamp": 1790329325.0939066,
+    "scan_time_str": "16:42:05 25/09/2026"
   },
   "HHV": {
     "ticker": "HHV",
