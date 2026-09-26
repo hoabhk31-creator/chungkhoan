@@ -951,10 +951,10 @@ def get_corporate_actions_dilution_factor(
 
     # Danh mục các mã mà cơ sở dữ liệu số lượng cổ phiếu tĩnh đã ghi nhận sẵn đợt chia cổ phiếu cũ
     ALREADY_FACTORED_TICKERS = {
-        "TCB": {"cutoff_date": date(2025, 1, 1)},
-        "HPG": {"cutoff_date": date(2025, 1, 1)},
-        "VCB": {"cutoff_date": date(2025, 1, 1)},
-        "SSI": {"cutoff_date": date(2025, 1, 1)},
+        "TCB": {"cutoff_date": date(2025, 1, 1), "min_shares": 5000.0},
+        "HPG": {"cutoff_date": date(2025, 1, 1), "min_shares": 6000.0},
+        "VCB": {"cutoff_date": date(2025, 4, 1), "min_shares": 7500.0},
+        "SSI": {"cutoff_date": date(2025, 1, 1), "min_shares": 1800.0},
     }
 
     dilution_multiplier = 1.0
@@ -966,6 +966,8 @@ def get_corporate_actions_dilution_factor(
         key=lambda x: parse_action_date(x.get("ex_date", "")) or date(2000, 1, 1)
     )
 
+    base_sh_float = float(base_shares_mil or 0.0)
+
     for ev in sorted_actions:
         ex_d = parse_action_date(ev.get("ex_date", ""))
         if not ex_d:
@@ -974,8 +976,12 @@ def get_corporate_actions_dilution_factor(
         if ex_d <= today:
             # Nếu sự kiện đã được phản ánh trong base_shares tĩnh của CSDL thì bỏ qua
             if clean_ticker in ALREADY_FACTORED_TICKERS:
-                cutoff = ALREADY_FACTORED_TICKERS[clean_ticker]["cutoff_date"]
-                if ex_d < cutoff:
+                af_cfg = ALREADY_FACTORED_TICKERS[clean_ticker]
+                min_sh = af_cfg.get("min_shares")
+                if min_sh and base_sh_float >= min_sh:
+                    continue
+                cutoff = af_cfg.get("cutoff_date")
+                if cutoff and ex_d < cutoff:
                     continue
 
             sr = float(ev.get("stock_ratio") or 0.0)

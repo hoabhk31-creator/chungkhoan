@@ -544,10 +544,10 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     pdf.add_page()
 
     # --- TRANG 1: MA TRẬN ĐỊNH LƯỢNG (QUANTITATIVE RECONCILIATION) ---
-    market_p = cs.get("current_market_price", 0)
-    mean_target = cs.get("mean_target_price", 0)
-    avg_upside = cs.get("average_upside", 0.0)
-    rating = cs.get("consensus_rating", "MUA")
+    market_p = safe_float(cs.get("current_market_price"), 0.0) or 0.0
+    mean_target = safe_float(cs.get("mean_target_price"), 0.0) or 0.0
+    avg_upside = safe_float(cs.get("average_upside"), 0.0) or 0.0
+    rating = str(cs.get("consensus_rating") or "MUA")
 
     # Executive Summary Strip
     pdf.set_fill_color(241, 245, 249)
@@ -567,7 +567,7 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     pdf.set_x(15)
     pdf.set_font(pdf.font_family_bold, "B", 9.5)
     pdf.set_text_color(15, 23, 42)
-    pdf.cell(50, 5.5, f"{market_p:,.0f} VND", align="L")
+    pdf.cell(50, 5.5, f"{market_p:,.0f} VND" if market_p > 0 else "—", align="L")
     pdf.set_text_color(2, 132, 199)
     if mean_target > 0:
         pdf.cell(55, 5.5, f"{mean_target:,.0f} VND", align="L")
@@ -612,32 +612,36 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         h_row = table.row()
         h_row.cell("TIÊU CHÍ ĐỐI CHIẾU", align="L")
         for r in display_reports_p1:
-            inst = r.get("institution", "CTCK")
-            date_str = r.get("report_date", "")
+            inst = str(r.get("institution") or "CTCK")
+            date_str = str(r.get("report_date") or "")
             is_exp = r.get("is_expired", False) or is_report_expired(date_str)
             exp_sub = "\n(Quá 1 năm)" if is_exp else ""
             h_row.cell(f"{inst}\n({date_str}){exp_sub}", align="C")
+        if not display_reports_p1:
+            h_row.cell("DỮ LIỆU CTCK", align="C")
         h_row.cell("CONSENSUS\n& ĐỘ LỆCH", align="C")
 
         # Row 1: Khuyến nghị
         r1 = table.row()
         r1.cell("1. Khuyến nghị đầu tư", align="L")
         for r in display_reports_p1:
-            is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
-            raw_rec = r.get("recommendation", "N/A")
+            is_exp = r.get("is_expired", False) or is_report_expired(str(r.get("report_date") or ""))
+            raw_rec = str(r.get("recommendation") or "N/A")
             if is_exp:
                 r1.cell(f"{raw_rec}\n(Hết hiệu lực)", align="C")
             else:
                 r1.cell(raw_rec, align="C")
-        r1.cell(cs.get("consensus_rating", "MUA"), align="C")
+        if not display_reports_p1:
+            r1.cell("—", align="C")
+        r1.cell(str(cs.get("consensus_rating") or "MUA"), align="C")
 
         # Row 2: Giá mục tiêu
         r2 = table.row()
         r2.cell("2. Giá mục tiêu (VND)", align="L")
         for r in display_reports_p1:
-            is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
-            is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
-            tp = r.get("target_price", 0)
+            is_exp = r.get("is_expired", False) or is_report_expired(str(r.get("report_date") or ""))
+            is_tech = r.get("is_technical", False) or "PTKT" in str(r.get("recommendation") or "").upper()
+            tp = safe_float(r.get("target_price"), 0.0) or 0.0
             if is_exp:
                 r2.cell(f"{tp:,.0f} đ\n(Quá 1 năm)" if tp > 0 else "— (Quá 1 năm)", align="C")
             elif is_tech:
@@ -646,15 +650,17 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                 r2.cell("— (KQKD)", align="C")
             else:
                 r2.cell(f"{tp:,.0f} đ", align="C")
+        if not display_reports_p1:
+            r2.cell("—", align="C")
         r2.cell(f"Mean: {mean_target:,.0f} đ" if mean_target > 0 else "— (Theo dõi thêm)", align="C")
 
         # Row 3: Upside %
         r3 = table.row()
         r3.cell("3. Tiềm năng tăng giá (Upside)", align="L")
         for r in display_reports_p1:
-            is_exp = r.get("is_expired", False) or is_report_expired(r.get("report_date", ""))
-            is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
-            tp = safe_float(r.get("target_price"), 0)
+            is_exp = r.get("is_expired", False) or is_report_expired(str(r.get("report_date") or ""))
+            is_tech = r.get("is_technical", False) or "PTKT" in str(r.get("recommendation") or "").upper()
+            tp = safe_float(r.get("target_price"), 0.0) or 0.0
             up = safe_float(r.get("upside_percent"))
             if is_exp or is_tech or not tp or tp <= 0 or r.get("is_estimated_price", False) or up is None:
                 r3.cell("—", align="C")
@@ -663,6 +669,8 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                     r3.cell(f"Vượt +{abs(up):.1f}%", align="C")
                 else:
                     r3.cell(f"+{up:.1f}%", align="C")
+        if not display_reports_p1:
+            r3.cell("—", align="C")
         avg_up_val = safe_float(avg_upside)
         if mean_target > 0 and avg_up_val is not None and avg_up_val != 0:
             if avg_up_val < 0:
@@ -678,6 +686,8 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         for r in display_reports_p1:
             pe = safe_float(r.get("pe_forward"))
             r4.cell(f"{pe:.1f}x" if pe else "—", align="C")
+        if not display_reports_p1:
+            r4.cell("—", align="C")
         valid_pes = [safe_float(r.get("pe_forward")) for r in display_reports_p1 if safe_float(r.get("pe_forward")) and safe_float(r.get("pe_forward")) > 0]
         avg_pe = sum(valid_pes) / len(valid_pes) if valid_pes else 0
         r4.cell(f"TB: {avg_pe:.1f}x" if avg_pe > 0 else "—", align="C")
@@ -688,6 +698,8 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         for r in display_reports_p1:
             pb = safe_float(r.get("pb_forward"))
             r5.cell(f"{pb:.2f}x" if pb else "—", align="C")
+        if not display_reports_p1:
+            r5.cell("—", align="C")
         valid_pbs = [safe_float(r.get("pb_forward")) for r in display_reports_p1 if safe_float(r.get("pb_forward")) and safe_float(r.get("pb_forward")) > 0]
         avg_pb = sum(valid_pbs) / len(valid_pbs) if valid_pbs else 0
         r5.cell(f"TB: {avg_pb:.2f}x" if avg_pb > 0 else "—", align="C")
@@ -696,30 +708,40 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
         r6 = table.row()
         r6.cell("6. Dự phóng Doanh thu thuần", align="L")
         for r in display_reports_p1:
-            r6.cell(r.get("revenue_forecast", "N/A"), align="C")
+            r6.cell(str(r.get("revenue_forecast") or "N/A"), align="C")
+        if not display_reports_p1:
+            r6.cell("—", align="C")
         r6.cell("Đồng thuận tích cực", align="C")
 
         # Row 7: Dự phóng LNST
         r7 = table.row()
         r7.cell("7. Dự phóng LNST công ty mẹ", align="L")
         for r in display_reports_p1:
-            r7.cell(r.get("npat_forecast", "N/A"), align="C")
-        r7.cell(f"Độ lệch: {cs.get('target_price_spread_percent', 0):.1f}%", align="C")
+            r7.cell(str(r.get("npat_forecast") or "N/A"), align="C")
+        if not display_reports_p1:
+            r7.cell("—", align="C")
+        spread = safe_float(cs.get("target_price_spread_percent"), 0.0) or 0.0
+        r7.cell(f"Độ lệch: {spread:.1f}%", align="C")
 
         # Row 8: Phương pháp định giá
         r8 = table.row()
         r8.cell("8. Phương pháp định giá chính", align="L")
         for r in display_reports_p1:
-            r8.cell(r.get("valuation_method", "DCF & P/E") or "DCF / P/E", align="C")
+            r8.cell(str(r.get("valuation_method") or "DCF & P/E"), align="C")
+        if not display_reports_p1:
+            r8.cell("—", align="C")
         r8.cell("IERM Blended", align="C")
 
         # Row 9: Dẫn chiếu Luận điểm & Rủi ro
         r9 = table.row()
         r9.cell("9. Luận điểm & Rủi ro chi tiết", align="L")
         for r in display_reports_p1:
-            cats = r.get("key_catalysts", [])
-            txt_short = cats[0][:24] + "..." if cats else "Xem Trang 2"
+            cats = r.get("key_catalysts", []) or []
+            first_cat = sanitize_bullet_item(cats[0]) if cats else ""
+            txt_short = (first_cat[:24] + "...") if first_cat else "Xem Trang 2"
             r9.cell(txt_short, align="C")
+        if not display_reports_p1:
+            r9.cell("—", align="C")
         r9.cell("→ Xem chi tiết tại Trang 2", align="C")
 
     pdf.ln(3)
@@ -731,8 +753,8 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
     pdf.set_xy(15, pdf.get_y() + 1.5)
     pdf.set_font(pdf.font_family_bold, "B", 7.8)
     pdf.set_text_color(21, 128, 61)
-    buy_zone = cs.get("recommended_buy_zone", "20,500 - 22,000 VND")
-    stop_loss = cs.get("stop_loss_threshold", "< 19,500 VND")
+    buy_zone = str(cs.get("recommended_buy_zone") or "Vùng giá tích lũy khuyến nghị")
+    stop_loss = str(cs.get("stop_loss_threshold") or "Ngưỡng dừng lỗ kỹ thuật")
     pdf.cell(135, 5, f"CHIẾN LƯỢC: Vùng giải ngân tích lũy khuyến nghị: {buy_zone}", align="L")
     pdf.set_text_color(185, 28, 28)
     pdf.cell(135, 5, f"QUẢN TRỊ RỦI RO: Ngưỡng dừng lỗ: {stop_loss}", align="R")
@@ -764,13 +786,13 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
             h_row2.cell("RỦI RO TRỌNG YẾU CẦN THEO DÕI (KEY RISKS)", align="L")
 
             for r in reports:
-                inst = r.get("institution", "CTCK")
-                date_str = r.get("report_date", "")
-                rec = r.get("recommendation", "MUA")
-                is_tech = r.get("is_technical", False) or "PTKT" in r.get("recommendation", "").upper()
+                inst = str(r.get("institution") or "CTCK")
+                date_str = str(r.get("report_date") or "")
+                rec = str(r.get("recommendation") or "MUA")
+                is_tech = r.get("is_technical", False) or "PTKT" in rec.upper()
                 is_exp = r.get("is_expired", False) or is_report_expired(date_str)
-                tp = r.get("target_price", 0)
-                up = r.get("upside_percent")
+                tp = safe_float(r.get("target_price"), 0.0) or 0.0
+                up = safe_float(r.get("upside_percent"))
                 if is_exp:
                     col1_text = f"{inst}\nNgày: {date_str} (Quá 1 năm)\n{rec} (Quá hạn)\nMục tiêu: {tp:,.0f} đ\nUpside: — (Quá hạn)"
                 elif is_tech:
@@ -799,7 +821,7 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                     if sub_i == 0:
                         row.cell(col1_text, align="L")
                     else:
-                        row.cell(f"{inst}\n(luận điểm {sub_i+1})", align="L")
+                        row.cell(f"{inst}\n(luận cứ {sub_i+1})", align="L")
 
                     c_text = f"• {cats[sub_i]}" if sub_i < len(cats) else ""
                     r_text = f"• {risks[sub_i]}" if sub_i < len(risks) else ""
@@ -807,26 +829,489 @@ def generate_matrix_table_pdf(report_data: dict) -> bytes:
                     row.cell(r_text, align="L")
     except Exception as render_err:
         print(f"[PDF-TABLE-WARN] table_p2 render error, switching to safe fallback: {render_err}")
-        # Safe fallback: vẽ từng box CTCK có kiểm tra page break an toàn
         for r in reports:
-            if pdf.get_y() > 170:
+            if pdf.get_y() > 165:
                 pdf.add_page()
-            inst = r.get("institution", "CTCK")
-            date_str = r.get("report_date", "")
-            rec = r.get("recommendation", "MUA")
+            inst = str(r.get("institution") or "CTCK")
+            date_str = str(r.get("report_date") or "")
+            rec = str(r.get("recommendation") or "MUA")
             pdf.set_font(pdf.font_family_bold, "B", 8)
             pdf.set_fill_color(241, 245, 249)
             pdf.cell(273, 5, f"{inst} ({date_str}) — Khuyến nghị: {rec}", border=1, fill=True)
             pdf.ln()
             pdf.set_font(pdf.font_family_regular, "", 7.5)
-            cats_text = sanitize_cell_bullet_text(r.get("key_catalysts", []), max_items=10)
-            risks_text = sanitize_cell_bullet_text(r.get("key_risks", []), max_items=10)
+            cats_text = sanitize_cell_bullet_text(r.get("key_catalysts", []), max_items=8)
+            risks_text = sanitize_cell_bullet_text(r.get("key_risks", []), max_items=8)
+            cur_y = pdf.get_y()
             pdf.multi_cell(136, 4.5, f"CATALYSTS:\n{cats_text}", border=1)
-            pdf.set_xy(148, pdf.get_y() - 9)
+            end_y1 = pdf.get_y()
+            pdf.set_xy(148, cur_y)
             pdf.multi_cell(137, 4.5, f"RISKS:\n{risks_text}", border=1)
-            pdf.ln(2)
+            end_y2 = pdf.get_y()
+            pdf.set_y(max(end_y1, end_y2) + 2)
 
     return bytes(pdf.output())
+
+
+class SummaryNotePDF(FPDF):
+    """
+    Template A4 Portrait chuyên nghiệp cho Báo cáo Tổng hợp (Synthesized Research Note).
+    Tổng hợp kết quả kinh doanh quý gần nhất, chỉ số định giá, luận điểm tăng trưởng đồng thuận & rủi ro.
+    """
+    def __init__(self, ticker: str, company_name: str, sector: str):
+        super().__init__(orientation="P", unit="mm", format="A4")
+        self.set_auto_page_break(auto=True, margin=14)
+        self.ticker = ticker.upper()
+        self.company_name = company_name
+        self.sector = sector
+
+        setup_pdf_unicode_fonts(self)
+
+    def header(self):
+        self.set_fill_color(15, 23, 42)  # #0F172A Slate 900
+        self.rect(0, 0, 210, 18, "F")
+
+        self.set_xy(12, 3)
+        self.set_font(self.font_family_bold, "B", 10.5)
+        self.set_text_color(255, 255, 255)
+        self.cell(118, 5.5, "IERM RESEARCH NOTE | BÁO CÁO TỔNG HỢP", new_x=XPos.RIGHT, new_y=YPos.TOP, align="L")
+
+        self.set_font(self.font_family_bold, "B", 8)
+        self.set_text_color(56, 189, 248)  # Sky 400
+        self.cell(68, 5.5, f"MÃ CK: {self.ticker}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="R")
+
+        self.set_xy(12, 8.5)
+        self.set_font(self.font_family_regular, "", 7.5)
+        self.set_text_color(203, 213, 225)
+        self.cell(118, 5, f"{self.company_name} | Ngành: {self.sector}", new_x=XPos.RIGHT, new_y=YPos.TOP, align="L")
+
+        self.set_text_color(148, 163, 184)
+        self.cell(68, 5, f"Xuất: {datetime.now().strftime('%d/%m/%Y %H:%M')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="R")
+
+        self.ln(6)
+
+    def footer(self):
+        self.set_y(-11)
+        self.set_draw_color(226, 232, 240)
+        self.line(12, self.get_y(), 198, self.get_y())
+        self.set_y(-9.5)
+        self.set_font(self.font_family_regular, "I", 7.0)
+        self.set_text_color(148, 163, 184)
+        self.cell(130, 4.5, "IERM Financial Intelligence Engine © Dữ liệu chuẩn xác Fact & Data First", new_x=XPos.RIGHT, new_y=YPos.TOP, align="L")
+        self.cell(56, 4.5, f"Trang {self.page_no()}/{{nb}}", new_x=XPos.RIGHT, new_y=YPos.TOP, align="R")
+
+
+def generate_summary_note_pdf(report_data: dict, fin_data: Optional[dict] = None) -> bytes:
+    """
+    Xuất Báo cáo tổng hợp đa tổ chức & phân tích nguyên nhân (Synthesized Research Note) ra file PDF A4 Portrait.
+    Bao gồm:
+    1. Executive Consensus Strip: Thị giá, Định giá TB, Upside, Khuyến nghị đồng thuận.
+    2. Phần 1: Hiệu quả kinh doanh quý gần nhất & Động lực cốt lõi (BCTC, DuPont, P/E, P/B, ROE, ROA, Sector KPIs).
+    3. Phần 2: Điểm giao thoa đồng thuận Luận điểm Tăng trưởng then chốt (Key Catalysts).
+    4. Phần 3: Rủi ro trọng yếu cần giám sát & Vùng giá giải ngân / Ngưỡng dừng lỗ.
+    5. Phần 4: Bảng Tổng hợp Dự phóng Doanh thu - LNST & Giá mục tiêu các Tổ chức nghiên cứu.
+    """
+    report_data = to_dict_safe(report_data)
+    fin_data = to_dict_safe(fin_data) if fin_data else {}
+
+    ticker = report_data.get("ticker", "CP").upper()
+    company_name = report_data.get("company_name", f"Công ty Cổ phần {ticker}")
+    sector = report_data.get("sector", "Doanh nghiệp niêm yết")
+
+    # Tự động nạp financial bundle nếu fin_data bị trống
+    if not fin_data or not fin_data.get("statements_quarterly"):
+        try:
+            from financial_data import get_financial_data_bundle
+            auto_bundle = get_financial_data_bundle(ticker)
+            if auto_bundle:
+                fin_data = to_dict_safe(auto_bundle)
+        except Exception:
+            pass
+
+    cs = to_dict_safe(report_data.get("consensus_summary", {}))
+    raw_reports = report_data.get("matrix_table", [])
+    reports = [to_dict_safe(r) for r in raw_reports]
+    if reports:
+        from engine import get_report_date_sort_key
+        reports = sorted(reports, key=get_report_date_sort_key, reverse=True)
+
+    pdf = SummaryNotePDF(ticker=ticker, company_name=company_name, sector=sector)
+    pdf.alias_nb_pages()
+    pdf.add_page()
+
+    # -------------------------------------------------------------
+    # KHUNG TÓM TẮT ĐIỀU HÀNH (EXECUTIVE CONSENSUS STRIP)
+    # -------------------------------------------------------------
+    market_p = safe_float(cs.get("current_market_price"), 0.0) or 0.0
+    mean_target = safe_float(cs.get("mean_target_price"), 0.0) or 0.0
+    avg_upside = safe_float(cs.get("average_upside"), 0.0) or 0.0
+    rating = str(cs.get("consensus_rating") or "MUA")
+
+    pdf.set_fill_color(241, 245, 249)
+    pdf.set_draw_color(203, 213, 225)
+    pdf.rect(12, 20, 186, 12, "DF")
+
+    pdf.set_xy(15, 21)
+    pdf.set_font(pdf.font_family_bold, "B", 7.2)
+    pdf.set_text_color(100, 116, 139)
+    pdf.cell(38, 3.5, "THỊ GIÁ THAM CHIẾU", align="L")
+    pdf.cell(42, 3.5, "ĐỊNH GIÁ TRUNG BÌNH", align="L")
+    pdf.cell(38, 3.5, "TIỀM NĂNG TĂNG GIÁ", align="L")
+    pdf.cell(45, 3.5, "ĐỒNG THUẬN KHUYẾN NGHỊ", align="L")
+    pdf.cell(23, 3.5, "SỐ BÁO CÁO", align="L")
+    pdf.ln()
+
+    pdf.set_x(15)
+    pdf.set_font(pdf.font_family_bold, "B", 9.0)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(38, 5.5, f"{market_p:,.0f} VND" if market_p > 0 else "—", align="L")
+    pdf.set_text_color(2, 132, 199)
+    if mean_target > 0:
+        pdf.cell(42, 5.5, f"{mean_target:,.0f} VND", align="L")
+        if avg_upside >= 0:
+            pdf.set_text_color(16, 185, 129)
+            pdf.cell(38, 5.5, f"+{avg_upside:.1f}%", align="L")
+        else:
+            pdf.set_text_color(239, 68, 68)
+            pdf.cell(38, 5.5, f"Vượt +{abs(avg_upside):.1f}%", align="L")
+    else:
+        pdf.cell(42, 5.5, "—", align="L")
+        pdf.set_text_color(245, 158, 11)
+        pdf.cell(38, 5.5, "Theo dõi thêm", align="L")
+
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(45, 5.5, rating[:24], align="L")
+    pdf.cell(23, 5.5, f"{len(reports)} CTCK", align="L")
+    pdf.ln(7.5)
+
+    # -------------------------------------------------------------
+    # PHẦN 1: HIỆU QUẢ KINH DOANH & ĐỘNG LỰC QUÁ KHỨ/HIỆN TẠI
+    # -------------------------------------------------------------
+    pdf.set_font(pdf.font_family_bold, "B", 8.8)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(186, 5, "1. HIỆU QUẢ KINH DOANH & ĐỘNG LỰC QUÁ KHỨ / HIỆN TẠI", align="L")
+    pdf.ln(5.2)
+
+    # Trích xuất số liệu BCTC quý gần nhất
+    sq = fin_data.get("statements_quarterly") or {}
+    periods = sq.get("periods") or []
+    latest_period = "—"
+    rev_fmt = "—"
+    rev_growth_fmt = "—"
+    gp_fmt = "—"
+    gm_fmt = "—"
+    np_fmt = "—"
+    np_growth_fmt = "—"
+    nm_fmt = "—"
+    de_fmt = "—"
+
+    if periods:
+        last_idx = len(periods) - 1
+        rev_list = sq.get("revenue") or []
+        gp_list = sq.get("gross_profit") or []
+        np_list = sq.get("net_profit") or []
+
+        while last_idx >= 0 and (last_idx >= len(rev_list) or not rev_list[last_idx]):
+            last_idx -= 1
+        if last_idx < 0:
+            last_idx = len(periods) - 1
+
+        latest_period = periods[last_idx]
+        cur_rev = rev_list[last_idx] if last_idx < len(rev_list) else 0
+        cur_gp = gp_list[last_idx] if last_idx < len(gp_list) else 0
+        cur_np = np_list[last_idx] if last_idx < len(np_list) else 0
+
+        rev_fmt = f"{cur_rev:,.0f} tỷ" if cur_rev else "—"
+        gp_fmt = f"{cur_gp:,.0f} tỷ" if cur_gp else "—"
+        np_fmt = f"{cur_np:,.0f} tỷ" if cur_np else "—"
+
+        if cur_rev and cur_rev > 0:
+            if cur_gp:
+                gm_fmt = f"{(cur_gp / cur_rev) * 100:.1f}%"
+            if cur_np:
+                nm_fmt = f"{(cur_np / cur_rev) * 100:.1f}%"
+
+        # YoY (lùi 4 quý)
+        if last_idx >= 4:
+            prev_rev = rev_list[last_idx - 4] if (last_idx - 4) < len(rev_list) else 0
+            prev_np = np_list[last_idx - 4] if (last_idx - 4) < len(np_list) else 0
+            if prev_rev and prev_rev > 0 and cur_rev:
+                rg = ((cur_rev - prev_rev) / prev_rev) * 100
+                rev_growth_fmt = f"{'+' if rg >= 0 else ''}{rg:.1f}% YoY"
+            if prev_np and prev_np > 0 and cur_np:
+                ng = ((cur_np - prev_np) / prev_np) * 100
+                np_growth_fmt = f"{'+' if ng >= 0 else ''}{ng:.1f}% YoY"
+
+    # Lấy chỉ số định giá P/E, P/B, ROE, ROA, D/E
+    peers_data = fin_data.get("peers_data") or {}
+    target_peer = None
+    if peers_data:
+        peers_list = peers_data.get("peers", [])
+        target_peer = next((p for p in peers_list if (p.get("ticker") or "").upper() == ticker), None)
+        if not target_peer and peers_list:
+            target_peer = peers_list[0]
+    ind_avg = peers_data.get("industry_average") or {}
+
+    pe_val = f"{target_peer.get('pe'):.1f}x" if target_peer and target_peer.get("pe") else "—"
+    pb_val = f"{target_peer.get('pb'):.2f}x" if target_peer and target_peer.get("pb") else "—"
+    roe_val = f"{target_peer.get('roe'):.1f}%" if target_peer and target_peer.get("roe") else "—"
+    roa_val = f"{target_peer.get('roa'):.1f}%" if target_peer and target_peer.get("roa") else "—"
+    de_val = f"{target_peer.get('debt_to_equity'):.2f}x" if target_peer and target_peer.get("debt_to_equity") is not None else "—"
+
+    ind_pe = f"{ind_avg.get('pe'):.1f}x" if ind_avg.get("pe") else "—"
+    ind_pb = f"{ind_avg.get('pb'):.2f}x" if ind_avg.get("pb") else "—"
+    ind_roe = f"{ind_avg.get('roe'):.1f}%" if ind_avg.get("roe") else "—"
+    ind_roa = f"{ind_avg.get('roa'):.1f}%" if ind_avg.get("roa") else "—"
+
+    # Bảng số liệu BCTC quý gần nhất
+    col_w_4 = (46.5, 46.5, 46.5, 46.5)
+    hs_sub = FontFace(family="ArialVN", emphasis="B", size_pt=7.0, color=(255, 255, 255), fill_color=(30, 41, 59))
+    pdf.set_font(pdf.font_family_regular, "", 7.2)
+
+    with pdf.table(col_widths=col_w_4, headings_style=hs_sub, line_height=4.2, padding=1.2, text_align="CENTER") as tbl_bctc:
+        h1 = tbl_bctc.row()
+        h1.cell(f"DOANH THU ({latest_period})")
+        h1.cell("LỢI NHUẬN GỘP")
+        h1.cell("LNST CÔNG TY MẸ")
+        h1.cell("BIÊN RÒNG / ĐÒN BẨY D/E")
+
+        r_val = tbl_bctc.row()
+        r_val.cell(f"{rev_fmt} ({rev_growth_fmt})")
+        r_val.cell(f"{gp_fmt} (Biên: {gm_fmt})")
+        r_val.cell(f"{np_fmt} ({np_growth_fmt})")
+        r_val.cell(f"Biên ròng: {nm_fmt} | D/E: {de_val}")
+
+    pdf.ln(1.5)
+
+    # Bảng chỉ số định giá & sinh lời cốt lõi đối chiếu TB ngành
+    with pdf.table(col_widths=col_w_4, headings_style=hs_sub, line_height=4.2, padding=1.2, text_align="CENTER") as tbl_ratios:
+        h2 = tbl_ratios.row()
+        h2.cell("P/E (vs TB Ngành)")
+        h2.cell("P/B (vs TB Ngành)")
+        h2.cell("ROE (vs TB Ngành)")
+        h2.cell("ROA (vs TB Ngành)")
+
+        r2_val = tbl_ratios.row()
+        r2_val.cell(f"{pe_val} (Ngành: {ind_pe})")
+        r2_val.cell(f"{pb_val} (Ngành: {ind_pb})")
+        r2_val.cell(f"{roe_val} (Ngành: {ind_roe})")
+        r2_val.cell(f"{roa_val} (Ngành: {ind_roa})")
+
+    # Chỉ số đặc thù ngành nếu có (Fleet count, freight rate index, NIM, NPL, CAR...)
+    sector_kpis = peers_data.get("sector_kpi_columns") or []
+    if target_peer and sector_kpis:
+        pdf.ln(1.5)
+        pdf.set_font(pdf.font_family_bold, "B", 7.2)
+        pdf.set_text_color(180, 83, 9)  # Amber 700
+        pdf.cell(186, 4, f"CHỈ SỐ HOẠT ĐỘNG CHUYÊN NGÀNH ({peers_data.get('sector_name') or sector}):", align="L")
+        pdf.ln(3.8)
+
+        kpi_chunks = [sector_kpis[i:i + 3] for i in range(0, min(len(sector_kpis), 6), 3)]
+        pdf.set_font(pdf.font_family_regular, "", 7.0)
+        pdf.set_text_color(15, 23, 42)
+        for chunk in kpi_chunks:
+            w_item = 186 / len(chunk)
+            for col in chunk:
+                val = target_peer.get(col.get("field"))
+                avg_val = ind_avg.get(col.get("field"))
+                unit = col.get("unit", "")
+                val_str = f"{val:,.1f}{unit}" if isinstance(val, (int, float)) else (str(val) if val is not None else "—")
+                avg_str = f"{avg_val:,.1f}{unit}" if isinstance(avg_val, (int, float)) else (str(avg_val) if avg_val is not None else "—")
+                pdf.cell(w_item, 4, f"• {col.get('label')}: {val_str} (TB: {avg_str})", align="L")
+            pdf.ln(4)
+
+    # Động lực phân tích nguyên nhân quá khứ/hiện tại
+    causality_items = report_data.get("causality_analysis", [])
+    past_item = causality_items[0] if causality_items else None
+    if past_item:
+        pdf.ln(1.5)
+        pdf.set_fill_color(248, 250, 252)
+        pdf.set_draw_color(226, 232, 240)
+        pdf.rect(12, pdf.get_y(), 186, 12, "DF")
+        pdf.set_xy(14, pdf.get_y() + 1.2)
+        pdf.set_font(pdf.font_family_bold, "B", 7.2)
+        pdf.set_text_color(15, 23, 42)
+        pdf.cell(182, 3.5, "ĐỘNG LỰC CỐT LÕI (ROOT CAUSES) & BẰNG CHỨNG THỰC TẾ:", align="L")
+        pdf.ln(3.5)
+        pdf.set_x(14)
+        pdf.set_font(pdf.font_family_regular, "", 6.8)
+        pdf.set_text_color(71, 85, 105)
+        root_txt = str(past_item.get("root_causes") or past_item.get("phenomenon") or "Tăng trưởng cốt lõi nhờ tối ưu hóa năng lực hoạt động.")
+        pdf.multi_cell(182, 3.2, root_txt[:260])
+        pdf.set_y(pdf.get_y() + 2)
+
+    # -------------------------------------------------------------
+    # PHẦN 2: ĐIỂM GIAO THOA ĐỒNG THUẬN LUẬN ĐIỂM TĂNG TRƯỞNG (KEY CATALYSTS)
+    # -------------------------------------------------------------
+    pdf.ln(3)
+    pdf.set_font(pdf.font_family_bold, "B", 8.8)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(186, 5, "2. ĐIỂM GIAO THOA ĐỒNG THUẬN LUẬN ĐIỂM TĂNG TRƯỞNG (KEY CATALYSTS)", align="L")
+    pdf.ln(5.2)
+
+    # Lấy catalysts đồng thuận từ consensus_summary hoặc trích xuất từ matrix_table
+    catalysts = []
+    if cs.get("consensual_catalysts"):
+        for c in cs.get("consensual_catalysts"):
+            c_clean = sanitize_bullet_item(c)
+            if c_clean and len(c_clean) >= 15 and c_clean not in catalysts:
+                catalysts.append(c_clean)
+    if not catalysts and reports:
+        for r in reports:
+            for c in (r.get("key_catalysts") or []):
+                c_clean = sanitize_bullet_item(c)
+                if c_clean and len(c_clean) >= 15 and c_clean not in catalysts:
+                    catalysts.append(c_clean)
+                if len(catalysts) >= 8:
+                    break
+            if len(catalysts) >= 8:
+                break
+
+    if not catalysts:
+        catalysts = [f"Kỳ vọng tăng trưởng ổn định theo chu kỳ phục hồi của ngành {sector}."]
+
+    pdf.set_font(pdf.font_family_regular, "", 7.2)
+    pdf.set_text_color(30, 41, 59)
+    for idx, cat in enumerate(catalysts[:8]):
+        if pdf.get_y() > 270:
+            pdf.add_page()
+        pdf.set_x(14)
+        pdf.set_font(pdf.font_family_bold, "B", 7.2)
+        pdf.set_text_color(2, 132, 199)  # Sky 600
+        pdf.cell(8, 4.2, f"[{idx + 1}]", align="L")
+        pdf.set_font(pdf.font_family_regular, "", 7.2)
+        pdf.set_text_color(30, 41, 59)
+        pdf.multi_cell(174, 4.2, cat)
+        pdf.ln(0.8)
+
+    # -------------------------------------------------------------
+    # PHẦN 3: RỦI RO TRỌNG YẾU CẦN GIÁM SÁT (KEY RISKS)
+    # -------------------------------------------------------------
+    if pdf.get_y() > 245:
+        pdf.add_page()
+
+    pdf.ln(2.5)
+    pdf.set_font(pdf.font_family_bold, "B", 8.8)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(186, 5, "3. RỦI RO TRỌNG YẾU CẦN GIÁM SÁT (KEY RISKS & TRIGGERS)", align="L")
+    pdf.ln(5.2)
+
+    risks = []
+    if cs.get("consensual_risks"):
+        for rk in cs.get("consensual_risks"):
+            rk_clean = sanitize_bullet_item(rk)
+            if rk_clean and len(rk_clean) >= 15 and rk_clean not in risks:
+                risks.append(rk_clean)
+    if not risks and reports:
+        for r in reports:
+            for rk in (r.get("key_risks") or []):
+                rk_clean = sanitize_bullet_item(rk)
+                if rk_clean and len(rk_clean) >= 15 and rk_clean not in risks:
+                    risks.append(rk_clean)
+                if len(risks) >= 6:
+                    break
+            if len(risks) >= 6:
+                break
+
+    if not risks:
+        risks = [f"Rủi ro biến động kinh tế vĩ mô và sức cầu thị trường ảnh hưởng tới {ticker}."]
+
+    for idx, rk in enumerate(risks[:6]):
+        if pdf.get_y() > 270:
+            pdf.add_page()
+        pdf.set_x(14)
+        pdf.set_font(pdf.font_family_bold, "B", 7.2)
+        pdf.set_text_color(225, 29, 72)  # Rose 600
+        pdf.cell(8, 4.2, f"[!]", align="L")
+        pdf.set_font(pdf.font_family_regular, "", 7.2)
+        pdf.set_text_color(51, 65, 85)
+        pdf.multi_cell(174, 4.2, rk)
+        pdf.ln(0.8)
+
+    # Khung Chiến lược đầu tư & Quản trị rủi ro
+    pdf.ln(1.5)
+    if pdf.get_y() > 265:
+        pdf.add_page()
+
+    pdf.set_fill_color(240, 253, 244)
+    pdf.set_draw_color(187, 247, 208)
+    pdf.rect(12, pdf.get_y(), 186, 8.5, "DF")
+    pdf.set_xy(14, pdf.get_y() + 1.2)
+    pdf.set_font(pdf.font_family_bold, "B", 7.5)
+    pdf.set_text_color(21, 128, 61)
+    buy_zone = str(cs.get("recommended_buy_zone") or "Vùng giá tích lũy khuyến nghị")
+    stop_loss = str(cs.get("stop_loss_threshold") or "Ngưỡng dừng lỗ kỹ thuật")
+    pdf.cell(93, 4.5, f"VÙNG GIẢI NGÂN KHUYẾN NGHỊ: {buy_zone}", align="L")
+    pdf.set_text_color(185, 28, 28)
+    pdf.cell(89, 4.5, f"NGƯỠNG DỪNG LỖ QUẢN TRỊ: {stop_loss}", align="R")
+    pdf.ln(7.5)
+
+    # -------------------------------------------------------------
+    # PHẦN 4: BẢNG DỰ PHÓNG KQKD & ĐỊNH GIÁ TỪ CÁC TỔ CHỨC
+    # -------------------------------------------------------------
+    if pdf.get_y() > 220:
+        pdf.add_page()
+
+    pdf.set_font(pdf.font_family_bold, "B", 8.8)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(186, 5, "4. TỔNG HỢP DỰ PHÓNG DOANH THU - LNST & GIÁ MỤC TIÊU CÁC CTCK", align="L")
+    pdf.ln(5.2)
+
+    col_w_proj = (42, 28, 36, 40, 40)
+    hs_proj = FontFace(family="ArialVN", emphasis="B", size_pt=7.2, color=(255, 255, 255), fill_color=(15, 23, 42))
+    pdf.set_font(pdf.font_family_regular, "", 7.0)
+
+    with pdf.table(col_widths=col_w_proj, headings_style=hs_proj, line_height=4.4, padding=1.2, text_align="CENTER") as tbl_proj:
+        hp = tbl_proj.row()
+        hp.cell("TỔ CHỨC NGHIÊN CỨU", align="L")
+        hp.cell("KHUYẾN NGHỊ", align="C")
+        hp.cell("GIÁ MỤC TIÊU", align="R")
+        hp.cell("DỰ PHÓNG DOANH THU", align="R")
+        hp.cell("DỰ PHÓNG LNST", align="R")
+
+        for r in reports[:10]:
+            inst = str(r.get("institution") or "CTCK")
+            rec = str(r.get("recommendation") or "MUA")
+            tp = safe_float(r.get("target_price"), 0.0) or 0.0
+            up = safe_float(r.get("upside_percent"))
+            is_exp = r.get("is_expired", False) or is_report_expired(str(r.get("report_date") or ""))
+            is_tech = r.get("is_technical", False) or "PTKT" in rec.upper()
+
+            if is_exp:
+                tp_text = f"{tp:,.0f} đ (Hết hạn)" if tp > 0 else "— (Quá 1 năm)"
+            elif is_tech:
+                tp_text = "— (PTKT)"
+            elif not tp or tp <= 0 or r.get("is_estimated_price", False):
+                tp_text = "— (KQKD)"
+            else:
+                up_sub = f" (+{up:.1f}%)" if (up is not None and up >= 0) else (f" (Vượt +{abs(up):.1f}%)" if up is not None else "")
+                tp_text = f"{tp:,.0f} đ{up_sub}"
+
+            rev_f = str(r.get("revenue_forecast") or "—")
+            npat_f = str(r.get("npat_forecast") or "—")
+
+            rp = tbl_proj.row()
+            rp.cell(inst, align="L")
+            rp.cell(rec, align="C")
+            rp.cell(tp_text, align="R")
+            rp.cell(rev_f, align="R")
+            rp.cell(npat_f, align="R")
+
+        # Dòng tổng hợp đồng thuận
+        cons_row = tbl_proj.row()
+        cons_row.cell("ĐỒNG THUẬN TB (CONSENSUS)", align="L")
+        cons_row.cell(rating[:12], align="C")
+        if mean_target > 0:
+            up_s = f" (+{avg_upside:.1f}%)" if avg_upside >= 0 else f" (Vượt +{abs(avg_upside):.1f}%)"
+            cons_row.cell(f"{mean_target:,.0f} đ{up_s}", align="R")
+        else:
+            cons_row.cell("— (Theo dõi)", align="R")
+        cons_row.cell("Đồng thuận tăng trưởng", align="R")
+        spread = safe_float(cs.get("target_price_spread_percent"), 0.0) or 0.0
+        cons_row.cell(f"Độ lệch: {spread:.1f}%", align="R")
+
+    return bytes(pdf.output())
+
 
 
 class PeerComparisonLandscapePDF(FPDF):

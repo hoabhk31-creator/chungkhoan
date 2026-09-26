@@ -280,6 +280,8 @@ async def _fetch_reconciled_live_price_internal(clean_ticker: str) -> Dict[str, 
                         "foreign_sell": int(ssi_data.get("sellForeignQtty") or 0),
                         "change": float(ssi_data.get("priceChange") or (price_ssi - ref_p)),
                         "change_percent": float(ssi_data.get("priceChangePercent") or 0.0),
+                        "bid_vol": int(ssi_data.get("best1BidVol") or 0) + int(ssi_data.get("best2BidVol") or 0) + int(ssi_data.get("best3BidVol") or 0),
+                        "ask_vol": int(ssi_data.get("best1OfferVol") or 0) + int(ssi_data.get("best2OfferVol") or 0) + int(ssi_data.get("best3OfferVol") or 0),
                         "timestamp": now_ts + 100,  # Luôn có trọng số timestamp ưu tiên cao nhất
                         "priority": 1,
                         "date_str": datetime.fromtimestamp(now_ts).strftime("%d/%m/%Y")

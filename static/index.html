@@ -576,6 +576,10 @@
                                         <span class="text-slate-500">KLGD</span>
                                         <strong class="text-white" id="stat-ov-vol">12,807,500</strong>
                                     </div>
+                                    <div class="flex justify-between items-center text-[11px] bg-slate-900/60 -mx-1 px-1 py-0.5 rounded border border-cyan-800/30">
+                                        <span class="text-cyan-400 font-semibold">Đóng cửa</span>
+                                        <strong class="text-white font-bold" id="stat-ov-close">58,000</strong>
+                                    </div>
                                     <div class="flex justify-between items-center text-[11px]">
                                         <span class="text-slate-500">Mở cửa</span>
                                         <strong class="text-rose-400" id="stat-ov-open">20,850</strong>
@@ -627,6 +631,10 @@
                                     <div class="flex justify-between items-center text-[11px]">
                                         <span class="text-slate-500">NN mua</span>
                                         <strong class="text-emerald-400" id="stat-ov-foreign-buy">+307,600</strong>
+                                    </div>
+                                    <div class="flex justify-between items-center text-[11px]">
+                                        <span class="text-slate-500">NN bán</span>
+                                        <strong class="text-rose-400" id="stat-ov-foreign-sell">-486,800</strong>
                                     </div>
                                     <div class="flex justify-between items-center text-[11px]">
                                         <span class="text-slate-500">% NN sở hữu</span>
@@ -2522,6 +2530,22 @@
 
             <!-- View 2: Causality Deep-Dive -->
             <div id="ierm-causality" class="ierm-subpane hidden space-y-4">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="font-mono font-bold text-sm text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                            BÁO CÁO TỔNG HỢP & PHÂN TÍCH NGUYÊN NHÂN ĐA TỔ CHỨC (SYNTHESIZED NOTE)
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Tổng hợp kết quả kinh doanh, điểm giao thoa đồng thuận catalysts và rủi ro trọng yếu</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Nút Xuất PDF Báo cáo tổng hợp -->
+                        <button onclick="exportCausalityPdf()" class="px-3 py-1.5 rounded text-xs font-bold bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-700/80 hover:border-rose-500 shadow-md flex items-center gap-1.5 transition-all cursor-pointer" title="Xuất toàn bộ Báo cáo tổng hợp ra file PDF A4 chuẩn IERM">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 text-rose-400"></i>
+                            <span>Xuất PDF</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="causality-container">
                     <!-- Causality items dynamically injected -->
                 </div>

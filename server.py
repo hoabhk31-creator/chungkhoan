@@ -97,7 +97,7 @@ from company_database import (
     get_all_sectors_summary,
     sync_from_google_sheets
 )
-from pdf_generator import generate_ctck_report_pdf, generate_matrix_table_pdf, generate_peer_comparison_pdf
+from pdf_generator import generate_ctck_report_pdf, generate_matrix_table_pdf, generate_peer_comparison_pdf, generate_summary_note_pdf
 from ssi_fastconnect import (
     SSI_API_CATALOG,
     SSI_CONFIG,
@@ -553,6 +553,21 @@ _PRESET_LOCKS: Dict[str, asyncio.Lock] = {}
 _FIN_OVERVIEW_CACHE: Dict[str, Dict[str, Any]] = {}
 _FIN_OVERVIEW_CACHE_TS: Dict[str, float] = {}
 
+_PROFILE_CACHE: Dict[str, Dict[str, Any]] = {}
+_PROFILE_CACHE_TS: Dict[str, float] = {}
+
+_STMT_CACHE: Dict[str, Dict[str, Any]] = {}
+_STMT_CACHE_TS: Dict[str, float] = {}
+
+_HEALTH_CACHE: Dict[str, Dict[str, Any]] = {}
+_HEALTH_CACHE_TS: Dict[str, float] = {}
+
+_VALUATION_CACHE: Dict[str, Dict[str, Any]] = {}
+_VALUATION_CACHE_TS: Dict[str, float] = {}
+
+_PEERS_CACHE: Dict[str, Dict[str, Any]] = {}
+_PEERS_CACHE_TS: Dict[str, float] = {}
+
 _TECH_SIGNALS_CACHE: Dict[str, Dict[str, Any]] = {}
 _TECH_SIGNALS_CACHE_TS: Dict[str, float] = {}
 
@@ -940,21 +955,175 @@ async def get_financial_overview(ticker: str):
     )
     _FIN_OVERVIEW_CACHE[clean_ticker] = data
     _FIN_OVERVIEW_CACHE_TS[clean_ticker] = now_ts
+
+    if data:
+        # Tự động đồng bộ sang toàn bộ các bộ nhớ đệm module con
+        _PROFILE_CACHE[clean_ticker] = data.get("company_profile", {})
+        _PROFILE_CACHE_TS[clean_ticker] = now_ts
+        _STMT_CACHE[clean_ticker] = {
+            "ticker": clean_ticker,
+            "industry_model": data.get("industry_model", "generic"),
+            "statements_annual": data.get("statements_annual", {}),
+            "statements_quarterly": data.get("statements_quarterly", {})
+        }
+        _STMT_CACHE_TS[clean_ticker] = now_ts
+        _HEALTH_CACHE[clean_ticker] = {
+            "ticker": clean_ticker,
+            "dupont": data.get("dupont", {}),
+            "piotroski": data.get("piotroski", {}),
+            "altman_z": data.get("altman_z", {})
+        }
+        _HEALTH_CACHE_TS[clean_ticker] = now_ts
+        _VALUATION_CACHE[clean_ticker] = {
+            "ticker": clean_ticker,
+            "valuation": data.get("valuation", {})
+        }
+        _VALUATION_CACHE_TS[clean_ticker] = now_ts
+        _PEERS_CACHE[clean_ticker] = data.get("peers_data", {})
+        _PEERS_CACHE_TS[clean_ticker] = now_ts
+
     return data
+
+
+@app.get("/api/company-profile/{ticker}")
+async def get_company_profile_endpoint(ticker: str):
+    """
+    Module 1: Truy xuất siêu tốc thông tin hồ sơ doanh nghiệp & thị giá (< 30ms).
+    """
+    clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    if clean_ticker in _PROFILE_CACHE and (now_ts - _PROFILE_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        return _PROFILE_CACHE[clean_ticker]
+
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        prof = _FIN_OVERVIEW_CACHE[clean_ticker].get("company_profile", {})
+        if prof:
+            _PROFILE_CACHE[clean_ticker] = prof
+            _PROFILE_CACHE_TS[clean_ticker] = now_ts
+            return prof
+
+    stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
+    from company_database import get_company
+    db = get_company(clean_ticker) or {}
+
+    live_p = 25000.0
+    try:
+        live_p_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=1.0)
+        if live_p_info and live_p_info.get("latest_close"):
+            live_p = float(live_p_info["latest_close"])
+    except Exception:
+        live_p = float(db.get("close_price") or db.get("price") or 25000.0)
+
+    shares = float(stock_meta.get("shares") or db.get("shares_outstanding_mil") or 1000.0)
+    mcap = round(shares * live_p / 1000.0, 1) if live_p > 0 else 25000.0
+
+    profile = {
+        "ticker": clean_ticker,
+        "name": stock_meta.get("name") or db.get("name") or f"CTCP {clean_ticker}",
+        "sector": stock_meta.get("sector") or db.get("fiintrade_sector") or "Doanh nghiệp niêm yết",
+        "market_cap_bil": mcap,
+        "current_market_price": live_p,
+        "shares_outstanding_mil": shares,
+        "shares_listed_mil": float(stock_meta.get("shares_listed") or shares),
+        "charter_capital_bil": round(shares * 10, 1),
+        "beta": float(db.get("beta") or 1.15),
+        "foreign_ownership_pct": float(stock_meta.get("foreign_pct") or 15.0),
+        "domestic_ownership_pct": round(100.0 - float(stock_meta.get("foreign_pct") or 15.0), 1),
+        "dividend_yield_pct": float(stock_meta.get("dividend_yield") or 2.5),
+        "description": db.get("description") or f"Doanh nghiệp niêm yết hàng đầu trong ngành {stock_meta.get('sector', 'Doanh nghiệp niêm yết')}."
+    }
+
+    _PROFILE_CACHE[clean_ticker] = profile
+    _PROFILE_CACHE_TS[clean_ticker] = now_ts
+    return profile
+
+
+@app.get("/api/financial-statements/{ticker}")
+async def get_financial_statements_endpoint(ticker: str):
+    """
+    Module 2: Truy xuất riêng BCTC Năm và Quý cho Tab BCTC & Khung 1 Note (< 100ms).
+    """
+    clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    if clean_ticker in _STMT_CACHE and (now_ts - _STMT_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        return _STMT_CACHE[clean_ticker]
+
+    data = await get_financial_overview(clean_ticker)
+    res = {
+        "ticker": clean_ticker,
+        "industry_model": data.get("industry_model", "generic"),
+        "statements_annual": data.get("statements_annual", {}),
+        "statements_quarterly": data.get("statements_quarterly", {})
+    }
+    _STMT_CACHE[clean_ticker] = res
+    _STMT_CACHE_TS[clean_ticker] = now_ts
+    return res
+
+
+@app.get("/api/financial-health/{ticker}")
+async def get_financial_health_endpoint(ticker: str):
+    """
+    Module 3: Truy xuất riêng bộ chỉ số DuPont, Piotroski, Altman Z phục vụ Tab Sức khỏe tài chính.
+    """
+    clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    if clean_ticker in _HEALTH_CACHE and (now_ts - _HEALTH_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        return _HEALTH_CACHE[clean_ticker]
+
+    data = await get_financial_overview(clean_ticker)
+    res = {
+        "ticker": clean_ticker,
+        "dupont": data.get("dupont", {}),
+        "piotroski": data.get("piotroski", {}),
+        "altman_z": data.get("altman_z", {})
+    }
+    _HEALTH_CACHE[clean_ticker] = res
+    _HEALTH_CACHE_TS[clean_ticker] = now_ts
+    return res
+
+
+@app.get("/api/valuation-bundle/{ticker}")
+async def get_valuation_bundle_endpoint(ticker: str):
+    """
+    Module 4: Truy xuất riêng gói định giá DCF, Graham, Bands phục vụ Tab Định giá (Lazy Loading).
+    """
+    clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    if clean_ticker in _VALUATION_CACHE and (now_ts - _VALUATION_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        return _VALUATION_CACHE[clean_ticker]
+
+    data = await get_financial_overview(clean_ticker)
+    res = {
+        "ticker": clean_ticker,
+        "valuation": data.get("valuation", {})
+    }
+    _VALUATION_CACHE[clean_ticker] = res
+    _VALUATION_CACHE_TS[clean_ticker] = now_ts
+    return res
 
 
 @app.get("/api/peers/{ticker}")
 async def get_peers_comparison(ticker: str):
     """
-    Truy xuất danh sách đối thủ cùng ngành, trung bình ngành, radar chart và mô hình 5 lực lượng cạnh tranh Porter.
+    Module 5: Truy xuất danh sách đối thủ cùng ngành & Radar Chart (Lazy Loading).
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
+    if clean_ticker in _PEERS_CACHE and (now_ts - _PEERS_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+        return _PEERS_CACHE[clean_ticker]
+
     if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
-        return _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
+        peers = _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
+        if peers:
+            _PEERS_CACHE[clean_ticker] = peers
+            _PEERS_CACHE_TS[clean_ticker] = now_ts
+            return peers
 
     data = await get_financial_overview(clean_ticker)
-    return data.get("peers_data", {})
+    peers = data.get("peers_data", {})
+    _PEERS_CACHE[clean_ticker] = peers
+    _PEERS_CACHE_TS[clean_ticker] = now_ts
+    return peers
 
 
 @app.get("/api/company-news-events/{ticker}")
@@ -1007,12 +1176,32 @@ async def get_overview_mini_chart_series(ticker: str):
     if clean_ticker in _FIN_OVERVIEW_CACHE:
         prof = _FIN_OVERVIEW_CACHE[clean_ticker].get("company_profile", {})
         if prof.get("shares_outstanding_mil"):
-            capital_info = {"shares_outstanding_mil": prof["shares_outstanding_mil"]}
+            capital_info = {
+                "shares_outstanding_mil": prof["shares_outstanding_mil"],
+                "is_corporate_action_adjusted": True
+            }
     if not capital_info:
         try:
             capital_info = await asyncio.wait_for(fetch_stock_corporate_capital(clean_ticker), timeout=1.5)
         except Exception:
             pass
+
+    # Truy xuất số liệu thống kê 52 tuần thực tế từ chuỗi nến lịch sử
+    h52 = None
+    l52 = None
+    vol52 = None
+    try:
+        from ssi_fastconnect import fetch_hybrid_ohlcv_data
+        candles_52w = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution="D", count=250), timeout=1.5)
+        if candles_52w and len(candles_52w) >= 20:
+            c_highs = [float(c["high"]) for c in candles_52w if float(c.get("high", 0)) > 0]
+            c_lows = [float(c["low"]) for c in candles_52w if float(c.get("low", 0)) > 0]
+            c_vols = [float(c["volume"]) for c in candles_52w if float(c.get("volume", 0)) > 0]
+            if c_highs: h52 = max(c_highs)
+            if c_lows: l52 = min(c_lows)
+            if c_vols: vol52 = int(sum(c_vols) / len(c_vols))
+    except Exception:
+        pass
 
     return get_mini_chart_series(
         clean_ticker,
@@ -1027,7 +1216,10 @@ async def get_overview_mini_chart_series(ticker: str):
         live_foreign_buy=live_f_buy,
         live_bid_vol=live_bid,
         live_ask_vol=live_ask,
-        corporate_capital=capital_info
+        corporate_capital=capital_info,
+        high_52w=h52,
+        low_52w=l52,
+        avg_vol_52w=vol52
     )
 
 
@@ -2497,18 +2689,64 @@ async def api_export_matrix_pdf(req: ExportRequest):
     """
     Xuất toàn bộ Bảng đối chiếu trực diện đa tổ chức ra file PDF A4 Landscape định dạng chuyên nghiệp.
     """
-    report_dict = normalize_full_matrix_dict(req.report_data)
-    pdf_bytes = generate_matrix_table_pdf(report_dict)
-    ticker = report_dict.get("ticker", "CP")
-    filename = f"IERM_{ticker}_Matrix_Table.pdf"
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": make_content_disposition("attachment", filename),
-            "Cache-Control": "no-cache"
-        }
-    )
+    try:
+        report_dict = normalize_full_matrix_dict(req.report_data)
+        pdf_bytes = generate_matrix_table_pdf(report_dict)
+        ticker = report_dict.get("ticker", "CP")
+        filename = f"IERM_{ticker}_Matrix_Table.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": make_content_disposition("attachment", filename),
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi tạo PDF ma trận: {str(exc)}")
+
+
+class SummaryExportPdfRequest(BaseModel):
+    report_data: dict
+    financial_bundle: Optional[dict] = None
+
+
+@app.post("/api/export-summary-pdf")
+async def api_export_summary_pdf(req: SummaryExportPdfRequest):
+    """
+    Xuất Báo cáo tổng hợp đa tổ chức & phân tích nguyên nhân (Synthesized Research Note) ra file PDF A4 Portrait chuẩn IERM.
+    """
+    try:
+        report_dict = normalize_full_matrix_dict(req.report_data)
+        fin_dict = req.financial_bundle or {}
+        # Nếu fin_dict rỗng hoặc thiếu BCTC, tự động nạp từ backend
+        if not fin_dict or not fin_dict.get("statements_quarterly"):
+            ticker = report_dict.get("ticker", "")
+            if ticker:
+                try:
+                    from financial_data import get_financial_data_bundle
+                    fin_dict = get_financial_data_bundle(ticker) or {}
+                except Exception:
+                    pass
+
+        pdf_bytes = generate_summary_note_pdf(report_dict, fin_dict)
+        ticker = report_dict.get("ticker", "CP")
+        filename = f"IERM_{ticker}_Bao_Cao_Tong_Hop.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": make_content_disposition("attachment", filename),
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi tạo PDF báo cáo tổng hợp: {str(exc)}")
+
 
 
 class PeerExportPdfRequest(BaseModel):

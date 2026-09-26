@@ -623,7 +623,35 @@ function switchTab(tabId) {
         if (chartRevenueProfit) chartRevenueProfit.resize();
         updateBctcTickerInfoBar();
     }
-    if (tabId === "tab-industry" && chartPeerRadar) chartPeerRadar.resize();
+    if (tabId === "tab-dupont") {
+        const activeTicker = getActiveTicker();
+        if (!currentFinancialBundle || !currentFinancialBundle.dupont) {
+            fetch(`/api/financial-health/${activeTicker}`).then(r => r.ok ? r.json() : null).then(h => {
+                if (h && h.dupont) {
+                    if (!currentFinancialBundle) currentFinancialBundle = {};
+                    currentFinancialBundle.dupont = h.dupont;
+                    currentFinancialBundle.piotroski = h.piotroski;
+                    currentFinancialBundle.altman_z = h.altman_z;
+                    renderDupont(h.dupont);
+                    renderPiotroski(h.piotroski);
+                    renderAltmanZ(h.altman_z);
+                }
+            }).catch(e => console.warn("Fetch health error:", e));
+        }
+    }
+    if (tabId === "tab-industry") {
+        const activeTicker = getActiveTicker();
+        if (!currentFinancialBundle || !currentFinancialBundle.peers_data) {
+            fetch(`/api/peers/${activeTicker}`).then(r => r.ok ? r.json() : null).then(p => {
+                if (p && p.peers) {
+                    if (!currentFinancialBundle) currentFinancialBundle = {};
+                    currentFinancialBundle.peers_data = p;
+                    renderPeersSection(p);
+                }
+            }).catch(e => console.warn("Fetch peers error:", e));
+        }
+        if (chartPeerRadar) chartPeerRadar.resize();
+    }
     if (tabId === "tab-valuation") {
         const activeTicker = getActiveTicker();
         if (currentFinancialBundle && currentFinancialBundle.valuation && (currentFinancialBundle.valuation.ticker === activeTicker || !currentFinancialBundle.valuation.ticker)) {
@@ -636,9 +664,10 @@ function switchTab(tabId) {
                 currentFinancialBundle = cachedFin;
                 renderValuationSection(cachedFin.valuation);
             } else {
-                fetch(`/api/financial-overview/${activeTicker}`).then(r => r.json()).then(b => {
+                fetch(`/api/valuation-bundle/${activeTicker}`).then(r => r.ok ? r.json() : null).then(b => {
                     if (b && b.valuation) {
-                        currentFinancialBundle = b;
+                        if (!currentFinancialBundle) currentFinancialBundle = {};
+                        currentFinancialBundle.valuation = b.valuation;
                         renderValuationSection(b.valuation);
                     }
                 }).catch(e => console.warn("Fetch val on tab switch error:", e));
@@ -671,6 +700,9 @@ function switchIermView(subpaneId) {
     if (activeBtn) {
         activeBtn.classList.add("bg-cyan-600", "text-white");
         activeBtn.classList.remove("bg-slate-800", "text-slate-300");
+    }
+    if (subpaneId === "ierm-causality" && currentReport) {
+        try { renderCausality(currentReport); } catch (e) { console.warn("switchIermView renderCausality error:", e); }
     }
     if (window.lucide) lucide.createIcons();
 }
@@ -799,6 +831,8 @@ window._CLIENT_TICKER_CACHE = window._CLIENT_TICKER_CACHE || {};
 
 function renderFinancialBundleData(cleanTicker, bundle) {
     if (!bundle) return;
+    currentFinancialBundle = bundle;
+    currentFinancialTicker = cleanTicker;
     if (bundle.company_profile) {
         const compEl = document.getElementById("display-company");
         const sectEl = document.getElementById("display-sector");
@@ -828,7 +862,7 @@ function renderFinancialBundleData(cleanTicker, bundle) {
     try { renderPeersSection(bundle.peers_data); } catch(e) { console.error("renderPeersSection err", e); }
     try { renderValuationSection(bundle.valuation); } catch(e) { console.error("renderValuationSection err", e); }
     if (currentReport && currentReport.ticker && currentReport.ticker.toUpperCase() === cleanTicker) {
-        try { renderCausality(currentReport); } catch(e) { console.error("re-renderCausality err", e); }
+        try { renderCausality(currentReport, bundle); } catch(e) { console.error("re-renderCausality err", e); }
     }
 }
 
@@ -870,6 +904,47 @@ function renderPresetReportData(cleanTicker, reportData, chip) {
                 tagSpan.className = `text-[9px] ${badgeBg} border px-1 py-0.2 rounded font-semibold`;
             }
         }
+    }
+}
+
+function renderQuickProfileHeader(prof) {
+    if (!prof) return;
+    const cleanT = (prof.ticker || window.currentActiveTicker || "").toUpperCase();
+    if (window.currentActiveTicker && cleanT && cleanT !== window.currentActiveTicker) return;
+
+    const tickEl = document.getElementById("display-ticker");
+    if (tickEl && prof.ticker) tickEl.textContent = prof.ticker;
+
+    const compEl = document.getElementById("display-company");
+    if (compEl && prof.name) compEl.textContent = prof.name;
+
+    const sectEl = document.getElementById("display-sector");
+    if (sectEl && prof.sector) sectEl.textContent = prof.sector;
+
+    const pEl = document.getElementById("display-market-price");
+    if (pEl && prof.current_market_price) {
+        pEl.textContent = `${Number(prof.current_market_price).toLocaleString("vi-VN")} VND`;
+    }
+
+    const matrixTickerEl = document.getElementById("matrix-header-ticker");
+    if (matrixTickerEl && prof.ticker) matrixTickerEl.textContent = prof.ticker;
+
+    const matrixCompEl = document.getElementById("matrix-header-company");
+    if (matrixCompEl && prof.name) {
+        matrixCompEl.textContent = prof.name;
+        matrixCompEl.title = prof.name;
+    }
+
+    const matrixSectEl = document.getElementById("matrix-header-sector");
+    if (matrixSectEl && prof.sector) matrixSectEl.textContent = prof.sector;
+
+    const secTag = document.getElementById("overview-sector-tag");
+    if (secTag && prof.sector) secTag.textContent = prof.sector;
+
+    const desc = document.getElementById("overview-company-desc");
+    if (desc && prof.description) {
+        desc.textContent = prof.description;
+        desc.classList.add("line-clamp-3");
     }
 }
 
@@ -1009,20 +1084,59 @@ async function selectTicker(ticker) {
     showToast(`Đang nạp nhanh dữ liệu tài chính & định giá cho ${cleanTicker}...`);
 
     try {
-        // 3. PROGRESSIVE LOADING: Khởi chạy song song cả 3 API
+        // 3. PROGRESSIVE MODULAR LOADING: Khởi chạy song song các micro-endpoints siêu tốc
+        // Module 0: Hồ sơ doanh nghiệp & Giá khớp (< 10ms) -> Render tức thì Header & Ticker Bar
+        const profilePromise = fetch(`/api/company-profile/${cleanTicker}`)
+            .then(r => r.ok ? r.json() : null)
+            .catch(e => { console.warn("Profile fetch error:", e); return null; });
+
+        // Module 1: BCTC Quý & Năm (< 50ms) -> Render tức thì Tab BCTC & Khung 1 Note
+        const stmPromise = fetch(`/api/financial-statements/${cleanTicker}`)
+            .then(r => r.ok ? r.json() : null)
+            .catch(e => { console.warn("Statements fetch error:", e); return null; });
+
+        // Module 2: Báo cáo đồng thuận định giá CTCK
         const presetPromise = fetch(`/api/preset/${cleanTicker}`)
             .then(r => r.ok ? r.json() : null)
             .catch(e => { console.warn("Preset fetch error:", e); return null; });
 
+        // Module 3: Bundle toàn diện (primed caches & lazy background)
         const finPromise = fetch(`/api/financial-overview/${cleanTicker}`)
             .then(r => r.ok ? r.json() : null)
             .catch(e => { console.warn("Fin fetch error:", e); return null; });
 
+        // Module 4: Dữ liệu kỹ thuật & nến biểu đồ
         const techPromise = fetch(`/api/technical/${cleanTicker}?resolution=${currentTechnicalInterval}&count=150`)
             .then(r => r.ok ? r.json() : null)
             .catch(e => { console.warn("Tech fetch error:", e); return null; });
 
-        // Giai đoạn 1: Khi Preset trả về (thường chỉ 0.5s - 1.2s) -> Render ngay Tab 1 và MỞ KHÓA NÚT TẢI
+        // Giai đoạn 0: Khi Hồ sơ trả về (< 10ms) -> Render Header & Ticker Bar ngay tức thì
+        profilePromise.then(prof => {
+            if (thisReqSeq !== activeRequestSeq || !prof) return;
+            renderQuickProfileHeader(prof);
+            if (!currentFinancialBundle) currentFinancialBundle = {};
+            currentFinancialBundle.company_profile = Object.assign(currentFinancialBundle.company_profile || {}, prof);
+            try { renderOverviewSection(cleanTicker); } catch(e) {}
+        });
+
+        // Giai đoạn 1: Khi BCTC trả về (< 50ms) -> Render Tab BCTC và Khung 1 Note ngay tức thì
+        stmPromise.then(stmData => {
+            if (thisReqSeq !== activeRequestSeq || !stmData) return;
+            if (!currentFinancialBundle) currentFinancialBundle = {};
+            currentFinancialBundle.statements_quarterly = stmData.statements_quarterly;
+            currentFinancialBundle.statements_annual = stmData.statements_annual;
+            if (stmData.industry_model) currentFinancialBundle.industry_model = stmData.industry_model;
+            
+            const activeStm = getActiveStatements();
+            try { renderBctcTable(activeStm, currentBctcSubtab); } catch(e) {}
+            try { renderBctcCharts(activeStm); } catch(e) {}
+            try { updateBctcTickerInfoBar(); } catch(e) {}
+            if (currentReport && (currentReport.ticker || "").toUpperCase() === cleanTicker) {
+                try { renderCausality(currentReport, currentFinancialBundle); } catch(e) {}
+            }
+        });
+
+        // Giai đoạn 2: Khi Preset trả về (thường chỉ 0.5s - 1.2s) -> Render ngay Tab 1 và MỞ KHÓA NÚT TẢI
         presetPromise.then(async (reportData) => {
             if (thisReqSeq !== activeRequestSeq) return;
 
@@ -1342,8 +1456,8 @@ async function selectTicker(ticker) {
             }
         });
 
-        // Đợi tất cả 3 luồng hoàn tất để lưu cache và hoàn tất
-        await Promise.allSettled([presetPromise, finPromise, techPromise]);
+        // Đợi tất cả các luồng hoàn tất để lưu cache và hoàn tất
+        await Promise.allSettled([profilePromise, stmPromise, presetPromise, finPromise, techPromise]);
         if (thisReqSeq !== activeRequestSeq) return;
 
         // Lưu vào Client Cache
@@ -2259,7 +2373,10 @@ async function exportMatrixPdf() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ report_data: currentReport })
         });
-        if (!resp.ok) throw new Error("Lỗi máy chủ khi tạo file PDF");
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || `Lỗi máy chủ (${resp.status}) khi tạo file PDF`);
+        }
         const blob = await resp.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -2275,15 +2392,72 @@ async function exportMatrixPdf() {
     }
 }
 
-function renderCausality(report) {
+async function exportCausalityPdf() {
+    if (!currentReport) {
+        showToast("Chưa có dữ liệu báo cáo để xuất!", true);
+        return;
+    }
+    showToast(`Đang tạo file PDF Báo cáo tổng hợp cho mã ${currentReport.ticker}...`);
+    try {
+        const resp = await fetch("/api/export-summary-pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                report_data: currentReport,
+                financial_bundle: currentFinancialBundle
+            })
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || `Lỗi máy chủ (${resp.status}) khi tạo file PDF`);
+        }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `IERM_${currentReport.ticker}_Bao_Cao_Tong_Hop.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Đã xuất file PDF Báo cáo tổng hợp ${currentReport.ticker} thành công!`);
+    } catch (err) {
+        showToast(`Lỗi xuất PDF: ${err.message}`, true);
+    }
+}
+
+function renderCausality(report, bundleOverride = null) {
     const container = document.getElementById("causality-container");
     if (!container || !report) return;
+
+    const cleanT = (report.ticker || "").toUpperCase();
+    const bundle = bundleOverride || currentFinancialBundle || (window._CLIENT_TICKER_CACHE && cleanT ? window._CLIENT_TICKER_CACHE[cleanT]?.fin : null);
+
+    // Tự động kéo dữ liệu BCTC siêu tốc nếu bundle chưa có sẵn
+    if ((!bundle || !bundle.statements_quarterly) && cleanT) {
+        if (!window._fetching_fin_causality || window._fetching_fin_causality !== cleanT) {
+            window._fetching_fin_causality = cleanT;
+            fetch(`/api/financial-statements/${cleanT}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(stmData => {
+                    window._fetching_fin_causality = null;
+                    if (stmData && currentReport && (currentReport.ticker || "").toUpperCase() === cleanT) {
+                        currentFinancialBundle = currentFinancialBundle || {};
+                        currentFinancialBundle.statements_quarterly = stmData.statements_quarterly;
+                        currentFinancialBundle.statements_annual = stmData.statements_annual;
+                        if (stmData.industry_model) currentFinancialBundle.industry_model = stmData.industry_model;
+                        renderCausality(currentReport, currentFinancialBundle);
+                    }
+                })
+                .catch(() => { window._fetching_fin_causality = null; });
+        }
+    }
 
     // -------------------------------------------------------------
     // KHUNG 1: DỮ LIỆU KQKD QUÝ GẦN NHẤT & CHỈ BÁO TRỌNG YẾU NGÀNH
     // -------------------------------------------------------------
-    const sq = currentFinancialBundle?.statements_quarterly;
-    let latestPeriod = "Q2/2026";
+    const sq = bundle?.statements_quarterly;
+    let latestPeriod = "—";
     let revFormatted = "—";
     let revGrowth = null;
     let gpFormatted = "—";
@@ -2294,8 +2468,14 @@ function renderCausality(report) {
     let deFormatted = "—";
 
     if (sq && sq.periods && sq.periods.length > 0) {
-        const lastIdx = sq.periods.length - 1;
-        latestPeriod = sq.periods[lastIdx];
+        let lastIdx = sq.periods.length - 1;
+        // Đi lùi tìm quý gần nhất có dữ liệu doanh thu thực tế
+        while (lastIdx >= 0 && (!sq.revenue || !sq.revenue[lastIdx])) {
+            lastIdx--;
+        }
+        if (lastIdx < 0) lastIdx = sq.periods.length - 1;
+
+        latestPeriod = sq.periods[lastIdx] || "—";
         const rev = sq.revenue ? sq.revenue[lastIdx] : 0;
         const gp = sq.gross_profit ? sq.gross_profit[lastIdx] : 0;
         const np = sq.net_profit ? sq.net_profit[lastIdx] : 0;
@@ -2305,39 +2485,41 @@ function renderCausality(report) {
         npFormatted = np ? `${Math.round(np).toLocaleString('vi-VN')} tỷ` : "—";
         
         if (rev > 0) {
-            gmPercent = (gp / rev) * 100;
-            nmPercent = (np / rev) * 100;
+            if (gp) gmPercent = (gp / rev) * 100;
+            if (np) nmPercent = (np / rev) * 100;
         }
 
         // So sánh cùng kỳ năm trước YoY (lùi 4 quý)
         if (lastIdx >= 4) {
             const revPrev = sq.revenue ? sq.revenue[lastIdx - 4] : 0;
             const npPrev = sq.net_profit ? sq.net_profit[lastIdx - 4] : 0;
-            if (revPrev > 0) revGrowth = ((rev - revPrev) / revPrev) * 100;
-            if (npPrev > 0) npGrowth = ((np - npPrev) / npPrev) * 100;
+            if (revPrev > 0 && rev > 0) revGrowth = ((rev - revPrev) / revPrev) * 100;
+            if (npPrev > 0 && np > 0) npGrowth = ((np - npPrev) / npPrev) * 100;
         }
     }
 
     // Lấy chỉ số định giá & sinh lời hiện tại (P/E, P/B, ROE, ROA)
-    const peersData = currentFinancialBundle?.peers_data;
+    const peersData = bundle?.peers_data;
     let peVal = "—", pbVal = "—", roeVal = "—", roaVal = "—";
     let indPe = "—", indPb = "—", indRoe = "—", indRoa = "—";
 
     if (peersData) {
-        const targetPeer = peersData.peers?.find(p => p.ticker === peersData.target_ticker) || peersData.peers?.[0];
+        const targetPeer = peersData.peers?.find(p => (p.ticker || "").toUpperCase() === cleanT)
+            || peersData.peers?.find(p => p.ticker === peersData.target_ticker) 
+            || peersData.peers?.[0];
         if (targetPeer) {
-            peVal = targetPeer.pe || "—";
-            pbVal = targetPeer.pb || "—";
-            roeVal = targetPeer.roe || "—";
-            roaVal = targetPeer.roa || "—";
-            deFormatted = targetPeer.debt_to_equity || "—";
+            peVal = targetPeer.pe != null ? targetPeer.pe : "—";
+            pbVal = targetPeer.pb != null ? targetPeer.pb : "—";
+            roeVal = targetPeer.roe != null ? targetPeer.roe : "—";
+            roaVal = targetPeer.roa != null ? targetPeer.roa : "—";
+            deFormatted = targetPeer.debt_to_equity != null ? targetPeer.debt_to_equity : "—";
         }
         const indAvg = peersData.industry_average;
         if (indAvg) {
-            indPe = indAvg.pe || "—";
-            indPb = indAvg.pb || "—";
-            indRoe = indAvg.roe || "—";
-            indRoa = indAvg.roa || "—";
+            indPe = indAvg.pe != null ? indAvg.pe : "—";
+            indPb = indAvg.pb != null ? indAvg.pb : "—";
+            indRoe = indAvg.roe != null ? indAvg.roe : "—";
+            indRoa = indAvg.roa != null ? indAvg.roa : "—";
         }
     }
 
@@ -3387,19 +3569,34 @@ function renderOverviewHeaderAndStats(data) {
     };
 
     setVal("stat-ov-vol", Number(data.volume || 0).toLocaleString("vi-VN"));
+    const curClose = Number(data.current_price || 0);
+    const refClose = Number(data.ref_price || 0);
+    setVal("stat-ov-close", curClose.toLocaleString("vi-VN"));
+    const closeEl = document.getElementById("stat-ov-close");
+    if (closeEl) {
+        if (curClose > refClose && refClose > 0) closeEl.className = "text-emerald-400 font-bold";
+        else if (curClose < refClose && refClose > 0) closeEl.className = "text-rose-400 font-bold";
+        else closeEl.className = "text-amber-400 font-bold";
+    }
+
     setVal("stat-ov-open", Number(data.open_price || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-high", Number(data.high_price || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-low", Number(data.low_price || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-bid", Number(data.bid_vol || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-ask", Number(data.ask_vol || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-cash-div", data.cash_dividend ? `${Number(data.cash_dividend).toLocaleString("vi-VN")} đ` : "0 đ");
-    setVal("stat-ov-div-yield", data.dividend_yield ? `${(Number(data.dividend_yield) * 100).toFixed(2)}%` : "0.00%");
+    
+    let divYieldPct = Number(data.dividend_yield || 0);
+    if (divYieldPct > 0 && divYieldPct < 1.0) divYieldPct = divYieldPct * 100;
+    setVal("stat-ov-div-yield", `${divYieldPct.toFixed(2)}%`);
+
     setVal("stat-ov-beta", data.beta ? Number(data.beta).toFixed(2) : "1.00");
 
     setVal("stat-ov-52high", Number(data.high_52w || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-52low", Number(data.low_52w || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-52vol", Number(data.avg_vol_52w || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-foreign-buy", `${data.foreign_buy >= 0 ? '+' : ''}${Number(data.foreign_buy || 0).toLocaleString("vi-VN")}`);
+    setVal("stat-ov-foreign-sell", data.foreign_sell ? `-${Number(data.foreign_sell).toLocaleString("vi-VN")}` : (data.sell_foreign_qtty ? `-${Number(data.sell_foreign_qtty).toLocaleString("vi-VN")}` : "0"));
     setVal("stat-ov-foreign-room", data.foreign_ownership_pct ? `${Number(data.foreign_ownership_pct).toFixed(2)}%` : "N/A");
     setVal("stat-ov-eps", data.eps ? `${Number(data.eps).toLocaleString("vi-VN")} đ` : "N/A");
     // P/E (TTM) grid — đồng nhất với top card stat-ov-pe
