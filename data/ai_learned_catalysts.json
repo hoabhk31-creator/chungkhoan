@@ -2,6 +2,8 @@
   "HPG": {
     "ticker": "HPG",
     "catalysts": [
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp).",
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
       "Chi phí xây dựng cơ bản dở dang (CIP) đạt 10,721.1 tỷ đồng (tăng +-83.2% YoY), phản ánh chu kỳ đầu tư mở rộng tài sản cố định đang tăng tốc để đón đầu chu kỳ tăng trưởng mới.",
       "VBSE dự phóng lợi nhuận của HPG năm 2026 tăng trưởng 33% so với cùng kỳ, được thúc đẩy bởi dự án Dung Quất.",
       "Lũy kế nửa đầu năm 2026, HPG ghi nhận kết quả hoàn thành 50,2% kế hoạch doanh thu cả năm (179.000 tỷ đồng) và 38,0% mục tiêu lợi nhuận trước thuế cả năm (28.000 tỷ đồng).",
@@ -14,9 +16,7 @@
       "Chi phí xây dựng cơ bản dở dang (CIP) đạt 107.2 tỷ đồng (tăng +-83.2% YoY), phản ánh chu kỳ đầu tư mở rộng tài sản cố định đang tăng tốc để đón đầu chu kỳ tăng trưởng mới.",
       "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
       "Hàng rào thuế chống bán phá giá thép HRC nhập khẩu từ Trung Quốc/Ấn Độ bảo vệ vững chắc thị phần nội địa của doanh nghiệp.",
-      "Biên lợi nhuận gộp mở rộng nhờ giá quặng sắt và than mỡ luyện cốc thế giới hạ nhiệt, trong khi giá bán thép duy trì ổn định.",
-      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ.",
-      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+      "Biên lợi nhuận gộp mở rộng nhờ giá quặng sắt và than mỡ luyện cốc thế giới hạ nhiệt, trong khi giá bán thép duy trì ổn định."
     ],
     "risks": [
       "Biến động sức cầu tiêu thụ trong nước.",
@@ -38,6 +38,13 @@
       "Công ty chứng khoán DSC khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu đạt 26.900 đồng, tiềm năng tăng giá là 22%"
     ],
     "history": [
+      {
+        "source": "VDS",
+        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+        "time": "26/09/2026 23:19",
+        "cats_added": 9,
+        "risks_added": 3
+      },
       {
         "source": "Vietinbank Securities",
         "title": "HPG: Khuyến nghị MUA với giá mục tiêu 25,000 đồng/cổ phiếu",
@@ -170,16 +177,9 @@
         "time": "24/09/2026 17:17",
         "cats_added": 9,
         "risks_added": 3
-      },
-      {
-        "source": "DSC",
-        "title": "HPG: Khuyến nghị MUA với giá mục tiêu 26,900 đồng/cổ phiếu",
-        "time": "24/09/2026 17:17",
-        "cats_added": 8,
-        "risks_added": 4
       }
     ],
-    "last_updated": "25/09/2026 16:49"
+    "last_updated": "26/09/2026 23:19"
   },
   "SSI": {
     "ticker": "SSI",
@@ -531,6 +531,10 @@
   "MWG": {
     "ticker": "MWG",
     "catalysts": [
+      "MWG: Khuyến nghị MUA mạnh với giá mục tiêu 102,500 đồng/cổ phiếu Công ty chứng khoán BSC duy trì khuyến nghị MUA mạnh mã cổ phiếu MWG với giá mục tiêu 102.500 đồng, upside +40% (định giá từng phần SOTP, điều chỉnh -2% phản ánh lãi suất tăng).",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm.",
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
       "Chuỗi Bách Hóa Xanh đóng góp 28.317 tỷ đồng doanh thu và mở mới 632 cửa hàng, ghi nhận lợi nhuận hoạt động dương.",
       "Lũy kế 6 tháng đầu năm 2026, MWG đạt doanh thu 95.213 tỷ đồng và lợi nhuận sau thuế đạt 6.112 tỷ đồng.",
       "Lũy kế 6T2026, MWG đạt doanh thu 95.213 tỷ đồng (+29% YoY) và LNST-C ĐTS đạt 6.017 tỷ đồng (+88% YoY), hoàn thành 51% kế hoạch doanh thu và 66% kế hoạch lợi nhuận cả năm.",
@@ -541,11 +545,7 @@
       "Dòng tiền tự do dồi dào cho phép duy trì chính sách chi trả cổ tức tiền mặt đều đặn và mua lại cổ phiếu quỹ.",
       "Chuỗi bán lẻ điện máy Era Blue tại Indonesia mở rộng nhanh chóng và tiệm cận điểm hòa vốn, mở ra dư địa thị trường 280 triệu dân.",
       "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu.",
-      "Tái cấu trúc chuỗi Thế Giới Di Động & Điện Máy Xanh thành công giúp Tối ưu hóa chi phí vận hành, cải thiện biên lợi nhuận ròng 1.5 - 2 điểm %.",
-      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc.",
-      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng.",
-      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
-      "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện qua từng tháng"
+      "Tái cấu trúc chuỗi Thế Giới Di Động & Điện Máy Xanh thành công giúp Tối ưu hóa chi phí vận hành, cải thiện biên lợi nhuận ròng 1.5 - 2 điểm %."
     ],
     "risks": [
       "FPTS nhận định đà tăng của cổ phiếu suy yếu khi cấu trúc giá chuyển sang sideway up và áp lực cung gia tăng tại vùng kháng cự.",
@@ -567,6 +567,20 @@
     ],
     "history": [
       {
+        "source": "BSC",
+        "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+        "time": "26/09/2026 23:21",
+        "cats_added": 9,
+        "risks_added": 3
+      },
+      {
+        "source": "VNDS",
+        "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+        "time": "26/09/2026 23:19",
+        "cats_added": 7,
+        "risks_added": 3
+      },
+      {
         "source": "KAFI",
         "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 94,400 đồng/cổ phiếu",
         "time": "25/09/2026 16:49",
@@ -691,23 +705,9 @@
         "time": "23/09/2026 22:11",
         "cats_added": 9,
         "risks_added": 3
-      },
-      {
-        "source": "VDS",
-        "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
-        "time": "23/09/2026 22:11",
-        "cats_added": 8,
-        "risks_added": 3
-      },
-      {
-        "source": "FPTS",
-        "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
-        "time": "23/09/2026 22:11",
-        "cats_added": 9,
-        "risks_added": 4
       }
     ],
-    "last_updated": "25/09/2026 16:49"
+    "last_updated": "26/09/2026 23:21"
   },
   "VTO": {
     "ticker": "VTO",
@@ -2724,11 +2724,19 @@
   "PVT": {
     "ticker": "PVT",
     "catalysts": [
+      "Biên lợi nhuận gộp mảng vận tải bứt phá mạnh mẽ lên 28.5% nhờ hiệu suất khai thác cao và giá cước tái ký hợp đồng định hạn tăng 30 - 40%.",
+      "Vị thế độc quyền 100% thị phần vận tải dầu thô và khí LPG nội địa, đảm bảo hợp đồng bao tiêu dài hạn từ BSR (Dung Quất) và NSRP (Nghi Sơn).",
+      "Chiến lược mở rộng thần tốc đội tàu lên 67 chiếc (tăng thêm 8 tàu mới trong 12 tháng), hướng tới mốc 100 tàu hiện đại hóa vào năm 2030.",
+      "Giá cước vận tải hàng lỏng quốc tế (dầu thô BIDY tăng 127%, dầu sản phẩm BITY tăng 151%) neo ở vùng đỉnh chu kỳ do căng thẳng địa chính trị kéo dài hải trình.",
+      "VCBS dự phóng LNST năm 2026F của PVT đạt 2.047 tỷ đồng (+97% YoY) nhờ mở rộng đội tàu đẩy mạnh năng lực vận tải và ký lại hợp đồng giá cước cao trong bối cảnh xung đột địa chính trị Trung Đông kéo dài giá cước vận tải biển.",
       "Quy mô đội tàu mở rộng lên 67 chiếc (tăng thêm 8 tàu mới trong 12 tháng) với tổng trọng tải đạt 2,04 triệu DWT, nâng cao năng lực đón sóng vận tải quốc tế",
       "Vị thế độc quyền 100% thị phần vận tải dầu thô và khí LPG nội địa cho các nhà máy lọc dầu Dung Quất và Nghi Sơn",
       "Tình hình tài chính dồi dào với lượng tiền mặt và tiền gửi ngắn hạn đạt 5.812 tỷ đồng"
     ],
     "risks": [
+      "Rủi ro biến động tỷ giá USD/VND và lãi suất đối với các khoản vay ngoại tệ tài trợ mua sắm mở rộng đội tàu.",
+      "Biến động giá dầu nhiên liệu hàng hải (VLSFO / MGO) làm gia tăng chi phí giá vốn vận hành chuyến tàu.",
+      "Rủi ro hạ nhiệt căng thẳng địa chính trị tại Trung Đông và Biển Đỏ khiến giá cước tàu định hạn trên thị trường quốc tế điều chỉnh giảm.",
       "Rủi ro hạ nhiệt căng thẳng địa chính trị tại Trung Đông và Biển Đỏ khiến giá cước tàu định hạn trên thị trường quốc tế điều chỉnh giảm",
       "Biến động giá dầu nhiên liệu hàng hải (VLSFO / MGO) làm gia tăng chi phí giá vốn vận hành chuyến tàu",
       "Rủi ro biến động tỷ giá USD/VND và lãi suất đối với các khoản vay ngoại tệ tài trợ mua sắm mở rộng đội tàu"
@@ -2740,13 +2748,21 @@
     ],
     "history": [
       {
+        "source": "VCBS",
+        "title": "PVT: Khuyến nghị MUA với giá mục tiêu 30,140 đồng/cổ phiếu",
+        "time": "26/09/2026 23:20",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
         "source": "VPBankS Research",
         "title": "Báo cáo cập nhật KQKD Q2/2026 PVT - Lợi nhuận tăng mạnh nhờ quy mô đội tàu và giá cước",
         "time": "18/09/2026 15:00",
         "cats_added": 4,
         "risks_added": 3
       }
-    ]
+    ],
+    "last_updated": "26/09/2026 23:20"
   },
   "GEE": {
     "ticker": "GEE",
@@ -4625,6 +4641,8 @@
   "BID": {
     "ticker": "BID",
     "catalysts": [
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "ĐHC Đ 2026 đã thông qua kế hoạch nâng vốn điều lệ lên 99.558 tỷ đồng (+36,75%) qua chia cổ tức cổ phiếu 19,19% và phát hành riêng lẻ.",
       "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở",
       "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
       "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
@@ -4637,13 +4655,22 @@
       "Biên lợi nhuận gộp cải thiện nhờ Tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
       "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
       "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
-      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
-      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
-      "Định giáP/E dự phóng 2026Fở mức 9,29x vàP/Bở mức 1,28x với EPS đạt 3.911 đồng, BVPS đạt 28.368 đồng và ROE đạt 17,1%. tỷ suất cổ tức dự phóng đạt 1,2%."
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới"
     ],
-    "risks": [],
-    "theses": [],
+    "risks": [
+      "VNDIRECT hạ P/B mục tiêu xuống 1,6x phản ánh ROE giảm về 17,1%/16,3% giai đoạn 2026-2027 do NIM thu hẹp và chi phí trích lập dự phòng tăng."
+    ],
+    "theses": [
+      "BID: Khuyến nghị KHẢ QUAN với giá mục tiêu 45,100 đồng/cổ phiếu Công ty chứng khoán VNDIRECT duy trì khuyến nghị KHẢ QUAN mã cổ phiếu BID với giá mục tiêu mới 45.100 đồng, tiềm năng tăng giá +24,1%."
+    ],
     "history": [
+      {
+        "source": "VNDS",
+        "title": "BID: Khuyến nghị KHẢ QUAN với giá mục tiêu 45,100 đồng/cổ phiếu",
+        "time": "26/09/2026 23:19",
+        "cats_added": 15,
+        "risks_added": 1
+      },
       {
         "source": "VDS",
         "title": "BID: Khuyến nghị MUA với giá mục tiêu 45,500 đồng/cổ phiếu",
@@ -4715,17 +4742,22 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "23/09/2026 13:55"
+    "last_updated": "26/09/2026 23:19"
   },
   "VPB": {
     "ticker": "VPB",
     "catalysts": [
+      "Hưởng lợi từ nguồn vốn ngoại chi phí thấp từ SMBC để tài trợ các dự án năng lượng xanh và chuỗi cung ứng FDI.",
+      "cổ phiếu VPB giao dịch ở mức P/E dự phóng 6,75x và P/B dự phóng 1,20x. tỷ lệ cổ tức tiền mặt dự kiến là 1,8%.",
+      "VPB: Khuyến nghị TÍCH LỦY với giá mục tiêu 25,300 đồng/cổ phiếu Công ty chứng khoán VDSC đưa ra khuyến nghị TÍCH LỦY đối với mã cổ phiếu VPB với giá mục tiêu 25.300 đồng. Q2/2026, VPB đạt LNTT đỉnh lịch sử 10.959 tỷ đồng (+76,3% YoY) và LNST-C ĐCTM đạt 8.385 tỷ đồng (+72,4% YoY) nhờ tín dụng tăng trưởng mạnh và thu nhập phí bứt phá.",
       "Hưởng lợi từ nguồn vốn ngoại chi phí thấp từ SMBC để tài trợ các dự án năng lượng xanh và chuỗi cungứng FDI.",
       "Công ty tài chính tiêu dùng FE Credit hoàn thành tái cơ cấu, vượt qua đáy chu kỳ và bắt đầu đóng góp lợi nhuận dương trở lại.",
       "Nền tảng vốn chủ sở hữu vững chắc thuộc Top 2 hệ thống sau khi hoàn tất thương vụ bán vốn chiến lược cho SMBC Nhật Bản.",
       "Ngân hàng có kế hoạch tăng vốn kỷ lục từ H2/2026 nhằm gia tăng dư địa tăng trưởng tín dụng."
     ],
     "risks": [
+      "Chi phí trích lập dự phòng rủi ro tín dụng duy trì ở mức cao trong các quý tới.",
+      "VDSC lưu ý chất lượng tài sản và nợ xấu FE Credit là điểm cần theo dõi.",
       "Biên lãi thuần NIM nhạy cảm với biến động lãi suất huy động đầu vào.",
       "Chi phí trích lập dự phòng rủi ro tín dụng duy trìở mức cao trong các quý tới.",
       "tỷ lệ nợ xấu hợp nhất vẫn cần thời gian để xử lý triệt để tại công ty con FE Credit."
@@ -4733,6 +4765,13 @@
     "theses": [],
     "history": [
       {
+        "source": "VDS",
+        "title": "VPB: Khuyến nghị TÍCH LỦY với giá mục tiêu 25,300 đồng/cổ phiếu",
+        "time": "26/09/2026 23:20",
+        "cats_added": 6,
+        "risks_added": 4
+      },
+      {
         "source": "FPTS",
         "title": "VPB: Khuyến nghị MUA với giá mục tiêu 33,500 đồng/cổ phiếu",
         "time": "23/09/2026 13:55",
@@ -4803,11 +4842,14 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 13:55"
+    "last_updated": "26/09/2026 23:20"
   },
   "REE": {
     "ticker": "REE",
     "catalysts": [
+      "NHSV dự báo LNST năm 2026 của REE đạt khoảng 2.800 tỷ đồng (+11% YoY) trên doanh thu dự phóng 12.230 tỷ đồng. tỷ lệ nợ vay ròng/VCSH ở mức 8% giúp REE đảm bảo nguồn lực mở rộng điện gió và duy trì chi trả cổ tức tiền mặt đều đặn.",
+      "Động lực chính đến từ mảng M&E với 5.913 tỷ đồng hợp đồng chuyển tiếp và sự phục hồi của mảng văn phòng cho thuê.",
+      "Năm 2026, REE đặt kế hoạch doanh thu 12.230 tỷ đồng (+22,2%) và LNST 2.814 tỷ đồng (+11,3%).",
       "Cơ cấu tài chính an toàn với dòng tiền mặt dồi dào từ cổ tức các công ty liên kết điện, nước sạch.",
       "Mảng cơ điện lạnh (M&E) ghi nhận các hợp đồng thi công cơ điện tại các đại công trình như Sân bay Long Thành và các nhà ga metro.",
       "Pha thủy văn La Nina mưa nhiều tạo điều kiện thuận lợi cho các nhà máy thủy điện thuộc hệ thống REE vận hành hết công suất.",
@@ -4816,12 +4858,29 @@
       "Qua 2Q2026, REE đã hoàn thành lần lượt 40% kế hoạch doanh thu và 47,8% kế hoạch lợi nhuận sau thuế cả năm 2026."
     ],
     "risks": [
+      "Tiến độ lấp đầy diện tích sàn văn phòng tòa nhà E-Town 6 có thể chậm lại trong bối cảnh nguồn cung văn phòng TP.HCM dồi dào.",
       "Biến động chính sách giá điện và hợp đồng PPA đối với các dự án điện gió mới.",
       "Tiến độ lấp đầy diện tích sàn văn phòng tòa nhàE-Town 6 có thể chậm lại trong bối cảnh nguồn cung văn phòng TP.HCM dồi dào.",
       "Hiện tượng thời tiết chuyển từ La Nina sang El Nino có thể làm giảm sản lượng phát điện của các hồ thủy điện."
     ],
-    "theses": [],
+    "theses": [
+      "REE: Khuyến nghị MUA với giá mục tiêu 62,000 đồng/cổ phiếu Công ty chứng khoán NHSV khuyến nghị MUA mã cổ phiếu REE với giá kỳ vọng 62.000 đồng, upside +33%."
+    ],
     "history": [
+      {
+        "source": "NHSV",
+        "title": "REE: Khuyến nghị  MUA với giá mục tiêu 62,000 đồng/cổ phiếu",
+        "time": "26/09/2026 23:21",
+        "cats_added": 5,
+        "risks_added": 3
+      },
+      {
+        "source": "VIX",
+        "title": "REE: Báo cáo cập nhật 25/09/2026",
+        "time": "26/09/2026 23:21",
+        "cats_added": 6,
+        "risks_added": 3
+      },
       {
         "source": "KBSV",
         "title": "REE: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
@@ -4893,7 +4952,7 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "23/09/2026 13:55"
+    "last_updated": "26/09/2026 23:21"
   },
   "POW": {
     "ticker": "POW",
@@ -5785,6 +5844,9 @@
   "CTD": {
     "ticker": "CTD",
     "catalysts": [
+      "CTD: Báo cáo Phân tích Kỹ thuật 25/09/2026 Công ty chứng khoán Vikki BankS phát hành báo cáo phân tích kỹ thuật đối với mã cổ phiếu CTD.",
+      "Về chỉ số tài chính, P/E quý IV/2026 ước đạt 8,73x và P/B đạt 0,74x;.",
+      "Doanh nghiệp duy trì lượng backlog lớn khoảng 70.000 tỷ đồng hỗ trợ triển vọng dài hạn.",
       "Chất lượng lợi nhuận vượt trội với Dòng tiền thuần hoạt động kinh doanh (CFO) đạt 501.8 tỷ đồng (vượt LNST 456.2 tỷ đồng), khẳng định khả năng thu tiền thực tế dồi dào.",
       "Khoản người mua trả tiền trước ngắn hạn đạt 4,814.0 tỷ đồng, là 'của để dành' bảo đảm chắc chắn cho kế hoạch bàn giao và ghi nhận doanh thu trong các quý tới.",
       "Đẩy mạnh mảng xây dựng công nghiệp đón đầu làn sóng dịch chuyển nhà máy sản xuất công nghệ cao sang Việt Nam.",
@@ -5800,6 +5862,13 @@
     ],
     "theses": [],
     "history": [
+      {
+        "source": "VikkiBankS",
+        "title": "CTD: Báo cáo Phân tích Kỹ thuật 25/09/2026",
+        "time": "26/09/2026 23:21",
+        "cats_added": 7,
+        "risks_added": 3
+      },
       {
         "source": "VDS",
         "title": "CTD: Khuyến nghị MUA với giá mục tiêu 79,400 đồng/cổ phiếu",
@@ -5892,7 +5961,7 @@
         "risks_added": 3
       }
     ],
-    "last_updated": "24/09/2026 17:17"
+    "last_updated": "26/09/2026 23:21"
   },
   "DPG": {
     "ticker": "DPG",
@@ -6068,6 +6137,8 @@
   "SCS": {
     "ticker": "SCS",
     "catalysts": [
+      "Ban lãnh đạo và cổ đông lớn cam kết đồng hành, liên tục gia tăng tỷ lệ sở hữu trên thị trường mở",
+      "cổ phiếu SCS có P/E hiện tại là 6,0x, P/B là 2,7x, ROE đạt 46,0% và dự kiến chi trả cổ tức tiền mặt 5.000 đồng/cp trong 1 năm tới.",
       "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
       "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
       "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
@@ -6080,13 +6151,18 @@
       "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
       "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
       "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
-      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
-      "SCS duy trì chính sách cổ tức tiền mặt ổn định, dự kiến đạt 5.000 đồng/cổ phiếu trong năm 2026 và 3.000 đồng/cổ phiếu từ năm 2027.",
-      "KBSV dự phóng doanh thu năm 2026E đạt 1.181 tỷ đồng và LNTT đạt 951 tỷ đồng, hoàn thành 99% kế hoạch LNTT cả năm (960 tỷ đồng)."
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp"
     ],
     "risks": [],
     "theses": [],
     "history": [
+      {
+        "source": "VDS",
+        "title": "SCS: Báo cáo cập nhật KQKD Q2/2026",
+        "time": "26/09/2026 23:20",
+        "cats_added": 15,
+        "risks_added": 0
+      },
       {
         "source": "KBSV",
         "title": "SCS: Khuyến nghị TRUNG LẬP với giá mục tiêu 50,700 đồng/cổ phiếu",
@@ -6095,7 +6171,7 @@
         "risks_added": 0
       }
     ],
-    "last_updated": "25/09/2026 16:49"
+    "last_updated": "26/09/2026 23:20"
   },
   "VGC": {
     "ticker": "VGC",
@@ -6147,5 +6223,113 @@
       }
     ],
     "last_updated": "25/09/2026 16:49"
+  },
+  "VHC": {
+    "ticker": "VHC",
+    "catalysts": [
+      "Tự chủ hơn 70% vùng nuôi cá nguyên liệu, giúp Vĩnh Hoàn kiểm soát chi phí giá thành tốt nhất toàn ngành thủy sản.",
+      "Mảng Collagen và Gelatin (sản phẩm chế biến sâu có giá trị gia tăng cao) đóng góp dòng tiền ổn định với biên lãi gộp trên 35%.",
+      "Giá bán cá tra xuất khẩu bình quân tăng, trong khi giá thức ăn chăn nuôi hạ nhiệt giúp biên lợi nhuận gộp mở rộng đáng kể.",
+      "Nhu cầu nhập khẩu cá tra phi lê tại các thị trường trọng điểm Mỹ và châu Âu phục hồi mạnh khi lượng tồn kho tại nước sở tại cạn kiệt.",
+      "Lũy kế 6T/2026, VHC đạt 47%/48% dự phóng cả năm của BSC và hoàn thành 45%/46% kế hoạch kinh doanh của doanh nghiệp."
+    ],
+    "risks": [
+      "Nguy cơ dịch bệnh hoặc thời tiết cực đoan ảnh hưởng đến sản lượng cá nuôi tại các vùng nuôi ĐBSCL.",
+      "Biến động chi phí logistics vận tải biển quốc tế làm giảm biên lợi nhuận ròng xuất khẩu.",
+      "Rủi ro các đợt rà soát thuế chống bán phá giá (POR) hàng năm từ Bộ Thương mại Mỹ (DOC)."
+    ],
+    "theses": [],
+    "history": [
+      {
+        "source": "BSC",
+        "title": "VHC: Khuyến nghị MUA với giá mục tiêu 58,100 đồng/cổ phiếu",
+        "time": "26/09/2026 23:21",
+        "cats_added": 5,
+        "risks_added": 3
+      }
+    ],
+    "last_updated": "26/09/2026 23:21"
+  },
+  "PDR": {
+    "ticker": "PDR",
+    "catalysts": [
+      "Tổng giá trị đầu tư vào 2 dự án BT trên của PDR đang ở mức 527 tỷ VND và đã trích lập dự phòng tổng cộng 408 tỷ VND vào năm 1H2026, chúng tôi kỳ vọng 119 tỷ VND còn lại sẽ được trích l ập dự phòng trong năm 2027.",
+      "Đầu năm 2026, UBND TP HCM đã lần lượt chuyển đổi công năng các công trình trên/ch ấm dứt dự án BT do không còn phù hợp quy hoạch mới của thành phố.",
+      "Các dự án BT: Trung tâm TDTT Phan Đình Phùng và Khu Cổ Đại là 2 dự án BT tồn đọng trên BCTC của doanh nghiệp từ 2010 và 2018.",
+      "Theo chia sẻ của ban lãnh đạo, PDR không phát sinh nghĩa vụ phải trả/quyền lợi nào t ại dự án, số dư trên liên quan đ ến hợp đồng dịch vụ mà PDR nhận từ đối tác để hỗ trợ đối tác hoàn thiện pháp lý và sẽ tiếp tục được cấn trừ trong thời gian tới.",
+      "Sau khi cấn trừ giá trị chuyển nhượng dự án với khoản phải trả, số dư khoản phải trả còn lại của PDR đối với Big Gain là 2,421 tỷ VND.",
+      "Vào ngày 21/08/2026, PDR đã hoàn t ất thủ tục chuyển nhượng dự án cho Big Gain với giá trị chuyển nhượng 5,225 tỷ VND.",
+      "The Ever Rich 2: dự án đang chiếm đến 48% Hàng tồn kho và 43% tổng nợ phải trả.",
+      "Nhìn chung , KQKD cốt lõi của doanh nghiệp kém tích cực tuy nhiên hoạt động chuyển nhượng dự án diễn ra mạnh là một điểm sáng trong quá trình tái cấu trúc toàn diện của doanh nghiệp khi mang về dòng tiền thật để tập trung nguồn lực cho các dự án tiềm năng như Lotte Eco Smart City và 239 CMT8.",
+      "Nếu loại trừ các khoản thu nhập từ thoái vốn dự án và chi phí phát sinh liên quan, PDR sẽ ghi nhận lỗ ròng 1H2026 ở mức -874 tỷ VND cho thấy hoạt động phát triển dự án vẫn chưa thực sự tạo ra lợi nhuận.",
+      "Khoản chi phí thuế chủ yếu phát sinh do giao dịch chuyển nhượng CTCP Cao ốc Thiên Long (pháp nhân chủ đầu tư Thuận An 1).",
+      "Trích lập 504 tỷ VND dự phòng , trong đó (2.i) 408 tỷ VND dự phòng chi phí đầu tư tại 2 dự án BT Khu cổ đại, Trung tâm thể dục thể thao Phan Đình Phùng do không còn phù hợp quy hoạch chung của TP HCM và (2.ii) 96 tỷ VND dự phòng các khoản phải thu khó đòi.",
+      "Dòng tiền thu về 4,713 tỷ VND từ thoái vốn 3 dự án: (1.i) 80% công ty chủ đầu tư dự án Thuận An 1 (giá 2,694 tỷ VND, ghi nhận lãi 906 tỷ VND) trong 1Q2026, (1.ii) 99.34% công ty chủ đầu tư dự án Serenity Phước Hải (giá 2,500 tỷ VND , ghi nhận lãi 158 tỷ VND) và (1.iii) 30% dự án nhà ở Tam Hiệp (giá 637.5 tỷ VND, ghi nhận lãi 473 tỷ VND).",
+      "CẬP NHẬT DOANH NGHIỆP Ngày 10/08/2026, PDR đã hoàn tất thanh toán 7,666 tỷ VND để nhận chuyển nhượng 35% phần vốn góp tại Công ty TNHH Lotte Properties HCMC – pháp nhân thực hiện dự án Lotte Eco Smart City có tổng mức đâu tư khoảng 60,000 tỷ VND, trong đó nghĩa vụ đóng tiền sử dụng đất 17,569 tỷ VND đã hoàn thành tháng 7/2026.",
+      "Năm 2026: DTT đạt 654 tỷ VND (-51% YoY) và doanh thu tài chính đạt 1,564 tỷ VND (+145% YoY) từ lợi nhuận thoái vốn nhưng không đủ bù đắp cho (1) 307.3 tỷ VND chi phí dự phòng tại các dự án BT, (2) 196.6 tỷ VND dự phòng phải thu khó đòi và (3) đóng góp từ bàn giao Quy Nhơn Iconic và cung c ấp dịch vụ tại La Pura yếu hơn cùng kỳ.",
+      "Mặc dù vậy, chúng tôi tin rằng đây là thời điểm thích hợp để quan sát và đánh giá cơ hội đầu tư PDR khi (1) định giá về vùng hấp dẫn với 2026F P/B chỉ còn 0.9x, (2) điểm đảo chiều có thể hình thành nhờ dòng tiền thật từ chuyển nhượng dự án và quyết tâm theo đuổi của doanh nghiệp tại Lotte Eco Smart City."
+    ],
+    "risks": [
+      "Do đó, chúng tôi cho rằng áp lực lên thanh khoản của PDR trong giai đo ạn t ới sẽ rất lớn, phụ thuộc nhi ều vào (1) kế hoạch bán s ớm 20,000m2 sàn thương mại, (2) HT ĐT/chuyển nhượng một phần các dự án hiện hữu Bảng 4: Dự phóng dòng tiền của Lotte Properties HCMC từ dự án Đơn vị: tỷ VND 2026 2027 2028 2029 2030 2031 2032 2033 2034 2035 Cấu phần căn hộ Dòng tiền vào - - 1,101 3,324 7,264 10,093 11,226 12,349 7,858 2,807 Dòng tiền ra (10,940) (1,521) (1,373) (2,473) (3,982) (3,363) (2,233) (2,538) (1,266) - Dòng tiền ròng (10,940) (1,521) (273) 851 3,282 6,730 8,993 9,811 6,592 2,807 Cấu phần thương mại Dòng tiền vào - - - 483 754 1,854 2,885 3,499 3,813 4,684 Dòng tiền ra (6,640) (605) (1,716) (1,983) (1,450) (2,068) (1,055) (1,295) (1,418) (1,760) Dòng tiền ròng (6,640) (605) (1,716) (1,500) (696) (213) 1,830 2,203 2,394 2,924 Tổng (17,580) (2,126) (1,989) (649) 2,586 6,516 10,824 12,015 8,987 5,731 Nguồn: PDR, BSC Research Hình 1: kế hoạch triển khai xây dựng Nguồn: PDR, BSC Research Báo cáo cập nhật doanh nghiệp 25/09/2026 – HSX: PDR BSC Equity Research.",
+      "Mặc khác, danh mục dự án gối đầu khác đã bị thu hẹp đáng kể chỉ còn 3 dự án bao gồm Quy Nhơn Iconic (bán ch ậm) và Hàn Riverside, 239 CMT8 (chưa hoàn tất góp vốn).",
+      "Dự án có thể mang về 23,388 tỷ VND dòng tiền ròng và 51,794 tỷ VND doanh thu trong giai đoạn 2026-2035 Tuy nhiên, Lotte Eco Smart City cũng đồng thời tạo ra áp lực tài chính lớn của PDR trong giai đoạn đầu tư 2026-2029 với bối cảnh lãi suất cao và dòng tiền từ dự án chỉ dương từ 2030.",
+      "Dựa trên quan đi ểm thận trọng, chúng tôi giả định giá bán trung bình c ủa 1,143 căn hộ ở mức 250 triệu VND/m2 vào thời điểm mở bán 2028 và quá trình bán hàng ké o dài 6 năm (2028 -2033).",
+      "Tập trung m ọi nguồn lực vào dự án Lotte Eco Smart City có thể đánh dấu bước chuyển mình của doanh nghiệp nhưng đồng thời cũng mang l ại nhiều rủi ro về khả năng thu xếp vốn.",
+      "Bên cạnh đó, chúng tôi kỳ vọng các kho ản hợp tác đ ầu tư t ại các dự án nghỉ dưỡng như Poulo Condo và KDL Sinh thái Đoàn Ánh Dương sẽ được thu h ồi hoặc ngừng góp vốn trong bối cảnh thị trường B ĐS nghỉ dưỡng còn nhiều thách thức về khả năng hấp thụ.",
+      "Việc này có thể gây áp lực đáng kể lên lợi nhuận 2026-2027 nhưng cần thiết để làm mới lại chất lượng tài sản.",
+      "Chúng tôi đánh giá cao năng lực cạnh tranh của PDR khi vượt qua được nhiều đối thủ lớn để hợp tác cùng Lotte, tuy nhiên, áp lực vốn để triển khai dự án Lotte và các dự án gối đầu vấn là điểm lo ngại lớn của thị trường đối với PDR trong bối cảnh lãi suất duy trì ở mức cao.",
+      "BSC hạ khuyến nghị từ MUA xuống còn THEO DÕI với giá mục tiêu 13,100 VND/cp (upside +15.9%) giảm -54% so với giá mục tiêu cũ sau khi đánh giá lại danh mục dự án hiện tại trong bối cảnh mới và phản ánh các rủi ro liên quan đến nhu cầu vốn, khả năng hấp thụ của thị trường.",
+      "Nguyên nhân điều chỉnh do đánh giá lại rủi ro nhu cầu vốn và khả năng hấp thụ thị trường khi PDR tái cấu trúc danh mục, chuyển nhượng các dự án cũ để tập trung vào Lotte Eco Smart City Thủ Thiêm."
+    ],
+    "theses": [],
+    "history": [
+      {
+        "source": "BSC Research",
+        "title": "Báo cáo phân tích PDR",
+        "time": "26/09/2026 23:34",
+        "cats_added": 15,
+        "risks_added": 9
+      },
+      {
+        "source": "BSC",
+        "title": "PDR: Khuyến nghị THEO DÕI với giá mục tiêu 13,100 đồng/cổ phiếu",
+        "time": "26/09/2026 23:21",
+        "cats_added": 6,
+        "risks_added": 1
+      }
+    ],
+    "last_updated": "26/09/2026 23:34"
+  },
+  "SAB": {
+    "ticker": "SAB",
+    "catalysts": [
+      "Cơ cấu tài chính lành mạnh với tỷ lệ nợ vay/vốn chủ sở hữu (D/E) giảm sâu, chi phí lãi vay hạ nhiệt",
+      "Mối quan hệ hợp tác chiến lược liên minh cùng các đối tác toàn cầu nâng tầm năng lực cạnh tranh",
+      "Sản phẩm/dịch vụ mới có biên lợi nhuận cao được thị trường đón nhận với tốc độ tăng trưởng nhanh",
+      "Chu kỳ kinh doanh bước vào pha tăng trưởng mới sau khi hoàn tất chu kỳ trích lập khấu hao tài sản cố định",
+      "Đột biến lợi nhuận từ bàn giao dự án quy mô lớn hoặc thanh lý, thoái vốn các khoản đầu tư tài chính ngoài ngành",
+      "kế hoạch tăng vốn điều lệ, phát hành riêng lẻ cho cổ đông chiến lược nước ngoài hoặc bán vốn công ty con",
+      "kế hoạch chi trả cổ tức bằng tiền mặt tỷ lệ cao hoặc cổ phiếu thưởng tăng tính hấp dẫn của cổ phiếu",
+      "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương mạnh và đều đặn, giảm áp lực nợ vay tài chính",
+      "Biên lợi nhuận gộp cải thiện nhờ tối ưu chi phí nguyên vật liệu đầu vào và chuyển đổi công nghệ sản xuất",
+      "Gia tăng thị phần nội địa hoặc mở rộng thành công kênh phân phối sang các thị trường xuất khẩu mới",
+      "Mở rộng công suất thiết kế hoặc nâng cao hiệu suất vận hành nhà máy vượt kế hoạch ban đầu",
+      "Giá trị hợp đồng ký mới (Backlog / Order Intake) và đơn đặt hàng gối đầu đảm bảo doanh thu trong 1-3 năm tới",
+      "Tiến độ triển khai, nghiệm thu hoặc đưa vào vận hành thương mại các dự án/nhà máy trọng điểm của chính doanh nghiệp",
+      "SAB sở hữu nền tảng tài chính sạch với hơn 20.000 tỷ đồng tiền mặt ròng, duy trì kế hoạch chi trả cổ tức tiền mặt ổn định 5.000 đồng/cp/năm.",
+      "Lũy kế 6T/2026, SAB hoàn thành 48% kế hoạch lợi nhuận năm."
+    ],
+    "risks": [],
+    "theses": [],
+    "history": [
+      {
+        "source": "NHSV",
+        "title": "SAB: Khuyến nghị MUA với giá mục tiêu 55,555 đồng/cổ phiếu",
+        "time": "26/09/2026 23:21",
+        "cats_added": 15,
+        "risks_added": 0
+      }
+    ],
+    "last_updated": "26/09/2026 23:21"
   }
 }
