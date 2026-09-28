@@ -344,8 +344,8 @@
     "company_name": "Hòa Phát",
     "official_website": "hoaphat.com.vn",
     "website_projects_url": "https://hoaphat.com.vn/linh-vuc-hoat-dong",
-    "total_projects": 8,
-    "total_investment_bil": 202000,
+    "total_projects": 11,
+    "total_investment_bil": 303500.0,
     "projects": [
       {
         "name": "Khu liên hợp Gang thép Dung Quất 2 (Quảng Ngãi)",
@@ -442,9 +442,45 @@
         "occupancy_rate": 85,
         "phase_tag": "Đang mở bán & thi công",
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án tại khu vực biển xã Vĩnh H ải",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HPG",
+        "investment_bil": 1500.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Về pháp lý, SHW đề nghị Cần Thơ chấp thuận chủ trương nghiên cứu, khảo sát dự án tại khu vực biển xã Vĩnh H ải, quy mô 20,000 MW, tổng vốn sơ bộ 1,500 nghìn tỷ đồng chia hai phân kỳ 10,000 MW triển khai song song, kèm cam k ết đặt cọc 1,000 tỷ đồng vào Kho b ạc Nhà nước ngay sau khi được chấp thuận.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án hiện chưa có chủ trương",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HPG",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Phản hồi gần nhất từ Chính phủ là giao Bộ Công Thương xem xét đề xuất khi điều chỉnh Quy hoạch điện VIII, trên cơ sở đánh giá tính khả thi và khả năng truyền tải, nên dự án hiện chưa có chủ trương, chưa vào quy hoạch và chưa có cơ chế giá.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Dự án Khu liên hợp gang thép Phú Yên",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của HPG",
+        "investment_bil": 100000.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Dự án Khu liên hợp gang thép Phú Yên với tổng vốn đầu tư 100 nghìn tỷ đồng cho 2 giai đoạn sẽ bổ sung thêm 6 triệu tấn thép/năm, theo tầm nhìn đến năm 2030.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       }
     ],
-    "newly_discovered_count": 2,
+    "newly_discovered_count": 5,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -454,8 +490,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790439563.2422538,
-    "scan_time_str": "23:19:23 26/09/2026"
+    "timestamp": 1790556000.1587102,
+    "scan_time_str": "07:40:00 28/09/2026"
   },
   "HDG": {
     "ticker": "HDG",
@@ -946,8 +982,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790439836.544207,
-    "scan_time_str": "23:23:56 26/09/2026"
+    "timestamp": 1790556039.3888218,
+    "scan_time_str": "07:40:39 28/09/2026"
   },
   "GEL": {
     "ticker": "GEL",
@@ -1837,8 +1873,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790329332.3599675,
-    "scan_time_str": "16:42:12 25/09/2026"
+    "timestamp": 1790556179.8644102,
+    "scan_time_str": "07:42:59 28/09/2026"
   },
   "NTL": {
     "ticker": "NTL",
@@ -3000,7 +3036,7 @@
     "official_website": "mwg.vn",
     "website_projects_url": "https://mwg.vn",
     "total_projects": 5,
-    "total_investment_bil": 6614.0,
+    "total_investment_bil": 6500,
     "projects": [
       {
         "name": "Tối ưu hóa & Mở rộng Chuỗi Bách Hóa Xanh (BHX)",
@@ -3051,16 +3087,16 @@
         "source": "Website chính thức (mwg.vn) & BCTN"
       },
       {
-        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (MWG)",
-        "scale": "Giá trị công trình dở dang lũy kế 90.9 tỷ đồng trên BCTC kiểm toán",
-        "investment_bil": 114.0,
+        "name": "nhà máy P5 tại Pyeongtaek trong 1H27 và SK Hynix hoàn tất",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của MWG",
+        "investment_bil": 0,
         "progress_pct": 80,
-        "commercial_date": "Hoàn thiện 2025 - 2026",
-        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
-        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Xu hướng giá cao được kỳ vọng kéo dài đến cuối 2027, khi Samsung hoàn tất nhà máy P5 tại Pyeongtaek trong 1H27 và SK Hynix hoàn tất nhà máy Y1 tại Yongin vào tháng 2/2027.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
         "occupancy_rate": 85,
-        "phase_tag": "Đang thi công xây dựng",
-        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       }
     ],
     "newly_discovered_count": 1,
@@ -3073,8 +3109,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790307181.6411061,
-    "scan_time_str": "10:33:01 25/09/2026"
+    "timestamp": 1790556147.798336,
+    "scan_time_str": "07:42:27 28/09/2026"
   },
   "LDG": {
     "ticker": "LDG",
@@ -3173,7 +3209,7 @@
     "company_name": "IDICO",
     "official_website": "idico.com.vn",
     "website_projects_url": "https://idico.com.vn/du-an",
-    "total_projects": 14,
+    "total_projects": 18,
     "total_investment_bil": 16600,
     "projects": [
       {
@@ -3343,9 +3379,57 @@
         "occupancy_rate": 85,
         "phase_tag": "Đang mở bán & thi công",
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp sẵn sàng cho thuê gia tăng đáng kể so",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của IDC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "với triển vọng dòng vốn FDI duy trì tích cực và diện tích đất KCN sẵn sàng cho thuê gia tăng đáng kể so với cùng kỳ, IDC được kỳ vọng sẽ tiếp tục tăng trưởng ổn định trong tương lai.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp trong năm 2025",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của IDC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Quỹ đất lớn và dòng tiền ổn định từ mảng điện đảm bảo triển vọng tăng trưởng với việc mở rộng thêm gần 1,400 ha đất KCN trong năm 2025, cùng với KCN Tân Phước 1 dự kiến chính thức mở bán từ Q4/2026, chúng tôi đánh giá triển vọng cho thuê đất tiếp tục duy trì khả quan.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp đạt VND 1",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của IDC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Lũy kế 6T2026 doanh thu đạt VND 3,756 tỷ (+6% YoY), lợi nhuận sau thuế đạt VND 1,001 tỷ (+20% YoY), trong đó: Mảng cho thuê đất KCN: Doanh thu từ hoạt động cho thuê đất KCN đạt VND 1,190 tỷ (+43% YoY) trong đó diện tích mà IDC đã bàn giao trong Q2/2026 đạt khoảng 27 ha.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp Hựu Thạnh và Phú Mỹ 2 mở rộng",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của IDC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Doanh thu mảng cho thuê đất khởi sắc trở lại nhờ đẩy mạnh bàn giao các hợp đồng tại KCN Hựu Thạnh và Phú Mỹ 2 mở rộng, trong bối cảnh nhu cầu thuê đất cải thiện và doanh nghiệp tiếp tục ghi nhận các hợp đồng ký kết mới với nhóm khách hàng trong nước và nước ngoài.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       }
     ],
-    "newly_discovered_count": 9,
+    "newly_discovered_count": 13,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -3355,8 +3439,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790439770.501827,
-    "scan_time_str": "23:22:50 26/09/2026"
+    "timestamp": 1790556261.3038723,
+    "scan_time_str": "07:44:21 28/09/2026"
   },
   "CKG": {
     "ticker": "CKG",
@@ -3437,8 +3521,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790309058.2096038,
-    "scan_time_str": "11:04:18 25/09/2026"
+    "timestamp": 1790556201.402447,
+    "scan_time_str": "07:43:21 28/09/2026"
   },
   "CTI": {
     "ticker": "CTI",
@@ -5479,5 +5563,47 @@
     ],
     "timestamp": 1790440370.9977741,
     "scan_time_str": "23:32:50 26/09/2026"
+  },
+  "BID": {
+    "ticker": "BID",
+    "company_name": "BIDV",
+    "official_website": "bidv.com.vn",
+    "website_projects_url": "https://bidv.com.vn",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: bidv.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790556088.8698008,
+    "scan_time_str": "07:41:28 28/09/2026"
+  },
+  "VIC": {
+    "ticker": "VIC",
+    "company_name": "VinGroup",
+    "official_website": "vingroup.net",
+    "website_projects_url": "https://vingroup.net",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: vingroup.net",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790556158.1088576,
+    "scan_time_str": "07:42:38 28/09/2026"
   }
 }
