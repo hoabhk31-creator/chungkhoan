@@ -1893,6 +1893,8 @@ function renderAll(report) {
     renderCausality(report);
     renderDisensus(report);
     renderStrategy(report);
+    // Async: hiển thị badge "AI đã học" nếu mã này có dữ liệu trong kho tri thức
+    updateAiKnowledgeBadge(report.ticker).catch(() => {});
     if (window.lucide) lucide.createIcons();
 }
 
@@ -2246,6 +2248,44 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
     }
 
     if (window.lucide) lucide.createIcons();
+}
+
+// ---------------------------------------------------------------------------
+// AI KNOWLEDGE BADGE — hiển thị indicator "AI đã học" trong Hero Card
+// ---------------------------------------------------------------------------
+async function updateAiKnowledgeBadge(ticker) {
+    const badgeEl = document.getElementById("ai-knowledge-badge");
+    if (!badgeEl) return;
+    if (!ticker) {
+        badgeEl.classList.add("hidden");
+        return;
+    }
+    try {
+        const res = await fetch(`/api/ai-learning/knowledge/${ticker.toUpperCase()}`);
+        if (!res.ok) throw new Error("api error");
+        const data = await res.json();
+        // Kiểm tra ticker còn active không (tránh race condition khi switch nhanh)
+        if ((getActiveTicker() || "").toUpperCase() !== (ticker || "").toUpperCase()) return;
+        if (!data.has_knowledge) {
+            badgeEl.classList.add("hidden");
+            return;
+        }
+        const cats = data.catalysts ? data.catalysts.length : 0;
+        const risks = data.risks ? data.risks.length : 0;
+        const src = data.total_sources || 0;
+        const lastUpd = data.last_updated || "";
+        badgeEl.innerHTML = `
+            <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-violet-950/70 border border-violet-700/60 text-violet-300 font-mono font-semibold cursor-default"
+                  title="AI đã học từ ${src} nguồn báo cáo | ${cats} luận điểm tăng trưởng, ${risks} rủi ro | Cập nhật: ${lastUpd}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 001.357 2.059l.41.182M14.25 3.104c.251.023.501.05.75.082M19.5 6.75l-7.5 7.5-7.5-7.5"/>
+                </svg>
+                AI: ${cats}🚀 ${risks}⚠️ · ${src} nguồn
+            </span>`;
+        badgeEl.classList.remove("hidden");
+    } catch (e) {
+        badgeEl.classList.add("hidden");
+    }
 }
 
 function parseDateToTimestamp(dStr) {

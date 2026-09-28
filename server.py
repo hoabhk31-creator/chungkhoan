@@ -114,15 +114,26 @@ from ai_learning_engine import (
     analyze_template_image_ai,
     apply_learned_catalysts_to_report,
     save_learned_ticker_catalysts,
-    get_learned_ticker_catalysts
+    get_learned_ticker_catalysts,
+    AI_LEARNED_CATALYSTS_FILE
 )
 
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Institutional Equity Research Matrix (IERM)",
     description="Fintech Research Co-Pilot & WebApp Engine for Vietnam Financial Market",
     version="1.0.0"
+)
+
+# Kích hoạt CORS toàn diện để hỗ trợ localhost, 127.0.0.1 và truy cập qua LAN
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Kích hoạt nén GZip toàn cục cho toàn bộ phản hồi API và Static Files (> 1KB)
@@ -2179,6 +2190,58 @@ async def api_get_ai_learning_history(limit: int = 30):
 async def api_get_ai_learning_stats():
     """Thống kê tổng quan năng lực tự học: tổng mẫu, số catalysts tích lũy, độ tin cậy."""
     return ai_scheduler.get_stats()
+
+
+@app.get("/api/ai-learning/knowledge/{ticker}")
+async def api_get_ticker_knowledge(ticker: str):
+    """
+    Lấy toàn bộ kiến thức AI đã học được cho một mã cổ phiếu cụ thể.
+    Trả về: catalysts, risks, theses, lịch sử nguồn học, thống kê.
+    """
+    clean_ticker = ticker.upper().strip()
+    learned = get_learned_ticker_catalysts(clean_ticker)
+    if not learned:
+        return {
+            "ticker": clean_ticker,
+            "has_knowledge": False,
+            "catalysts": [],
+            "risks": [],
+            "theses": [],
+            "history": [],
+            "last_updated": None,
+            "total_sources": 0
+        }
+    return {
+        "ticker": clean_ticker,
+        "has_knowledge": True,
+        "catalysts": learned.get("catalysts", []),
+        "risks": learned.get("risks", []),
+        "theses": learned.get("theses", []),
+        "history": learned.get("history", []),
+        "last_updated": learned.get("last_updated"),
+        "total_sources": len(learned.get("history", []))
+    }
+
+
+@app.delete("/api/ai-learning/knowledge/{ticker}")
+async def api_delete_ticker_knowledge(ticker: str):
+    """Xóa toàn bộ kiến thức AI đã học cho một mã cổ phiếu. Hỗ trợ reset và học lại từ đầu."""
+    clean_ticker = ticker.upper().strip()
+    import json as _json
+    if not os.path.exists(AI_LEARNED_CATALYSTS_FILE):
+        return {"ticker": clean_ticker, "deleted": False, "message": "File không tồn tại"}
+    try:
+        with open(AI_LEARNED_CATALYSTS_FILE, "r", encoding="utf-8") as f:
+            data = _json.load(f)
+        existed = clean_ticker in data
+        if existed:
+            del data[clean_ticker]
+            with open(AI_LEARNED_CATALYSTS_FILE, "w", encoding="utf-8") as f:
+                _json.dump(data, f, ensure_ascii=False, indent=2)
+        return {"ticker": clean_ticker, "deleted": existed, "message": "Đã xóa thành công" if existed else "Không tìm thấy dữ liệu"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi xóa knowledge: {str(e)}")
+
 
 
 @app.post("/api/reconcile")

@@ -1177,14 +1177,15 @@ class AutonomousLearningScheduler:
                         except Exception:
                             pass
 
+                    _is_valid_tk = (2 < len(clean_ticker) <= 5) and clean_ticker not in {"TOÀN THỊ TRƯỜNG", "BCN", "KQKD", "PTKT", "CTCK", "USD", "VND", "HRC", "GDP", "FDI", "KRX"}
                     knowledge = extract_advanced_knowledge(
                         raw_text=f"{title}\n{content}",
-                        ticker=clean_ticker if len(clean_ticker) == 3 else "CP",
+                        ticker=clean_ticker if _is_valid_tk else "CP",
                         current_market_price=market_p
                     )
 
                     # Tự động lưu Catalysts & Risks vào kho AI (tối đa 15 catalysts và 10 rủi ro)
-                    if len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
+                    if _is_valid_tk:
                         save_learned_ticker_catalysts(
                             ticker=clean_ticker,
                             catalysts=knowledge.get("key_catalysts", []),
@@ -1341,7 +1342,8 @@ class AutonomousLearningScheduler:
                         knowledge["key_risks"] = risks_list[:10]
 
                         # Tự động lưu Catalysts & Risks vào kho AI
-                        if len(clean_ticker) == 3:
+                        _is_valid_tk2 = (2 < len(clean_ticker) <= 5) and clean_ticker not in {"TOÀN THỊ TRƯỜNG", "BCN", "KQKD", "PTKT", "CTCK", "USD", "VND", "HRC", "GDP", "FDI", "KRX"}
+                        if _is_valid_tk2:
                             save_learned_ticker_catalysts(
                                 ticker=clean_ticker,
                                 catalysts=knowledge.get("key_catalysts", []),
