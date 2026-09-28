@@ -1097,6 +1097,8 @@ async def get_valuation_bundle_endpoint(ticker: str):
         "ticker": clean_ticker,
         "valuation": data.get("valuation", {})
     }
+    if res["valuation"] and isinstance(res["valuation"], dict):
+        res["valuation"]["ticker"] = clean_ticker
     _VALUATION_CACHE[clean_ticker] = res
     _VALUATION_CACHE_TS[clean_ticker] = now_ts
     return res

@@ -654,20 +654,22 @@ function switchTab(tabId) {
     }
     if (tabId === "tab-valuation") {
         const activeTicker = getActiveTicker();
-        if (currentFinancialBundle && currentFinancialBundle.valuation && (currentFinancialBundle.valuation.ticker === activeTicker || !currentFinancialBundle.valuation.ticker)) {
+        if (currentFinancialBundle && currentFinancialBundle.valuation && currentFinancialBundle.valuation.ticker && currentFinancialBundle.valuation.ticker.toUpperCase() === activeTicker) {
             renderValuationSection(currentFinancialBundle.valuation);
-        } else if (currentMultiValuationState && currentMultiValuationState.ticker === activeTicker) {
+        } else if (currentMultiValuationState && currentMultiValuationState.ticker && currentMultiValuationState.ticker.toUpperCase() === activeTicker) {
             renderValuationSection(currentMultiValuationState);
         } else {
             const cachedFin = window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[activeTicker]?.fin;
-            if (cachedFin && cachedFin.valuation) {
+            if (cachedFin && cachedFin.valuation && cachedFin.valuation.ticker && cachedFin.valuation.ticker.toUpperCase() === activeTicker) {
                 currentFinancialBundle = cachedFin;
                 renderValuationSection(cachedFin.valuation);
             } else {
                 fetch(`/api/valuation-bundle/${activeTicker}`).then(r => r.ok ? r.json() : null).then(b => {
+                    if (getActiveTicker() !== activeTicker) return;
                     if (b && b.valuation) {
                         if (!currentFinancialBundle) currentFinancialBundle = {};
                         currentFinancialBundle.valuation = b.valuation;
+                        currentFinancialBundle.valuation.ticker = activeTicker;
                         renderValuationSection(b.valuation);
                     }
                 }).catch(e => console.warn("Fetch val on tab switch error:", e));
@@ -831,8 +833,15 @@ window._CLIENT_TICKER_CACHE = window._CLIENT_TICKER_CACHE || {};
 
 function renderFinancialBundleData(cleanTicker, bundle) {
     if (!bundle) return;
+    if (cleanTicker && getActiveTicker() && cleanTicker.toUpperCase() !== getActiveTicker()) {
+        console.warn(`[Bundle Guard] cleanTicker ${cleanTicker} !== active ${getActiveTicker()}`);
+        return;
+    }
     currentFinancialBundle = bundle;
     currentFinancialTicker = cleanTicker;
+    if (bundle.valuation && !bundle.valuation.ticker) {
+        bundle.valuation.ticker = cleanTicker;
+    }
     if (bundle.company_profile) {
         const compEl = document.getElementById("display-company");
         const sectEl = document.getElementById("display-sector");
@@ -948,38 +957,20 @@ function renderQuickProfileHeader(prof) {
     }
 }
 
-async function selectTicker(ticker) {
-    const cleanTicker = (ticker || "HPG").trim().toUpperCase();
+/**
+ * Làm mới và chuyển toàn bộ các Tab sang trạng thái Skeleton Loading cho mã mới.
+ * Khắc phục dứt điểm hiện tượng hiển thị sót dữ liệu / BCTC / Luận điểm của doanh nghiệp trước đó.
+ */
+function resetUiToSkeletonLoading(cleanTicker) {
     if (!cleanTicker) return;
 
-    window.currentActiveTicker = cleanTicker;
-    window.currentSymbol = cleanTicker;
-    currentReport = null;
-    currentFinancialBundle = null;
-    currentTechnicalData = null;
-    currentMultiValuationState = null;
-    const thisReqSeq = ++activeRequestSeq;
-    isSwitchingTicker = true;
-
-    // 1. Loading UI on Central Search button
-    const btnSearch = document.getElementById("btn-central-search");
-    const btnSearchText = document.getElementById("btn-search-text");
-    if (btnSearch && btnSearchText) {
-        btnSearch.disabled = true;
-        btnSearchText.innerHTML = `<span class="inline-block animate-spin mr-1">⌛</span>Tải...`;
-    }
-
-    // Cập nhật ngay lập tức ô tìm kiếm trung tâm
-    const input = document.getElementById("central-ticker-input");
-    if (input) input.value = cleanTicker;
-
-    // Phản hồi trực quan tức thì trên Header & Hero Card (Đồng bộ tuyệt đối mã đang chọn)
+    // 1. Phản hồi trực quan tức thì trên Header & Hero Card
     const dispTicker = document.getElementById("display-ticker");
     if (dispTicker) dispTicker.textContent = cleanTicker;
     const dispComp = document.getElementById("display-company");
     if (dispComp) dispComp.textContent = `Công ty Cổ phần ${cleanTicker}`;
     const dispSector = document.getElementById("display-sector");
-    if (dispSector) dispSector.textContent = "Đang tải dữ liệu...";
+    if (dispSector) dispSector.textContent = "Đang đồng bộ dữ liệu...";
     const dispPrice = document.getElementById("display-market-price");
     if (dispPrice) dispPrice.textContent = "— VND";
     const dispCount = document.getElementById("display-report-count");
@@ -992,6 +983,7 @@ async function selectTicker(ticker) {
     if (matrixSectEl) matrixSectEl.textContent = "Đang tải dữ liệu...";
     const techToolbarTicker = document.getElementById("tech-toolbar-ticker");
     if (techToolbarTicker) techToolbarTicker.textContent = cleanTicker;
+
     const vietstockBtn = document.getElementById("btn-vietstock-docs-link");
     const vietstockText = document.getElementById("btn-vietstock-docs-text");
     if (vietstockBtn) {
@@ -1000,7 +992,205 @@ async function selectTicker(ticker) {
         if (vietstockText) vietstockText.textContent = `Tài liệu ${cleanTicker}`;
     }
 
-    // Reset ngay lập tức các Badge dự án & Banner quét BCTN để tránh rò rỉ dữ liệu của mã trước
+    // 2. HERO CONSENSUS METRICS (Khung định giá đồng thuận phía trên)
+    const ratingEl = document.getElementById("stat-rating");
+    const ratingIcon = document.getElementById("stat-rating-icon");
+    if (ratingEl) {
+        ratingEl.className = "text-xs font-bold text-amber-400 font-mono";
+        ratingEl.innerHTML = `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>Đang phân tích [${cleanTicker}]...</span>`;
+    }
+    if (ratingIcon) {
+        ratingIcon.className = "w-3.5 h-3.5 text-amber-400 animate-spin";
+        ratingIcon.setAttribute("data-lucide", "loader-2");
+    }
+    const scoreEl = document.getElementById("stat-score");
+    if (scoreEl) scoreEl.textContent = "—";
+    const meanPriceEl = document.getElementById("stat-mean-price");
+    if (meanPriceEl) meanPriceEl.innerHTML = `<span class="text-xs text-slate-400 font-mono animate-pulse">Đang nạp định giá...</span>`;
+    const upsideEl = document.getElementById("stat-upside");
+    if (upsideEl) upsideEl.textContent = "—";
+    const upsideLabelEl = document.getElementById("stat-upside-label");
+    if (upsideLabelEl) upsideLabelEl.textContent = "Upside:";
+    const upsideWrapper = document.getElementById("stat-upside-wrapper");
+    if (upsideWrapper) upsideWrapper.className = "text-[10px] text-slate-500 mt-1 font-semibold";
+    const medianEl = document.getElementById("stat-median-price");
+    if (medianEl) medianEl.textContent = "—";
+    const minMaxEl = document.getElementById("stat-min-max");
+    if (minMaxEl) minMaxEl.textContent = "—";
+    const spreadEl = document.getElementById("stat-spread");
+    if (spreadEl) spreadEl.textContent = "—";
+    const expUpsideEl = document.getElementById("stat-expectation-upside");
+    if (expUpsideEl) expUpsideEl.innerHTML = `<span class="text-xs text-amber-400 font-mono animate-pulse">Đang tổng hợp báo cáo...</span>`;
+    const priceToFairEl = document.getElementById("stat-price-to-fair");
+    if (priceToFairEl) priceToFairEl.textContent = "—";
+    const targetRangeEl = document.getElementById("stat-target-range");
+    if (targetRangeEl) targetRangeEl.textContent = `Đang cập nhật theo ${cleanTicker}...`;
+    const buyZoneEl = document.getElementById("stat-buy-zone");
+    if (buyZoneEl) buyZoneEl.textContent = `Đang cập nhật...`;
+    const stopLossEl = document.getElementById("stat-stop-loss");
+    if (stopLossEl) stopLossEl.textContent = `Đang cập nhật...`;
+    const adjContainer = document.getElementById("stat-mean-adjusted-container");
+    if (adjContainer) {
+        adjContainer.classList.add("hidden");
+        adjContainer.innerHTML = "";
+    }
+
+    // 3. TAB 1: MA TRẬN ĐỒNG THUẬN ĐỊNH GIÁ CTCK
+    const matrixHead = document.getElementById("matrix-table-head");
+    if (matrixHead) {
+        matrixHead.innerHTML = `
+            <tr>
+                <th class="p-3 sticky top-0 left-0 z-30 bg-slate-950 font-mono text-cyan-400 font-bold border-b border-r border-slate-800 whitespace-nowrap min-w-[220px]">
+                    TIÊU CHÍ ĐỐI CHIẾU
+                </th>
+                <th class="p-3 sticky top-0 z-20 bg-slate-950 font-mono font-bold text-amber-400 border-b border-slate-800 text-center" colspan="4">
+                    <span class="inline-flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        ĐANG NẠP BÁO CÁO PHÂN TÍCH & ĐỊNH GIÁ CHO [${cleanTicker}]...
+                    </span>
+                </th>
+            </tr>
+        `;
+    }
+    const matrixBody = document.getElementById("matrix-table-body");
+    if (matrixBody) {
+        matrixBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="p-8 text-center bg-slate-900/60 border-b border-slate-800">
+                    <div class="max-w-md mx-auto space-y-3 py-2">
+                        <div class="inline-flex items-center justify-center p-3 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800 animate-pulse">
+                            <span class="animate-spin text-base">⏳</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-200">Đang đồng bộ hóa dữ liệu phân tích của <span class="text-cyan-400 font-mono">${cleanTicker}</span></div>
+                        <div class="space-y-2 pt-2">
+                            <div class="h-3.5 bg-slate-800/80 rounded animate-pulse w-full"></div>
+                            <div class="h-3.5 bg-slate-800/60 rounded animate-pulse w-4/5 mx-auto"></div>
+                            <div class="h-3.5 bg-slate-800/40 rounded animate-pulse w-3/5 mx-auto"></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    // 4. TAB 1: NOTE KQKD & PHÂN TÍCH NGUYÊN NHÂN (causality-container)
+    const causalityCont = document.getElementById("causality-container");
+    if (causalityCont) {
+        causalityCont.innerHTML = `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 col-span-1 md:col-span-2">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                        <h3 class="font-mono font-bold text-sm text-cyan-300">
+                            Đang phân tích BCTC & Tổng hợp Luận điểm cho [${cleanTicker}]...
+                        </h3>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-800 animate-pulse">
+                        Đang nạp dữ liệu
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2">
+                    <div class="h-16 bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 space-y-2 animate-pulse">
+                        <div class="h-2.5 bg-slate-800 rounded w-16"></div>
+                        <div class="h-4 bg-slate-700 rounded w-20"></div>
+                    </div>
+                    <div class="h-16 bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 space-y-2 animate-pulse">
+                        <div class="h-2.5 bg-slate-800 rounded w-16"></div>
+                        <div class="h-4 bg-slate-700 rounded w-20"></div>
+                    </div>
+                    <div class="h-16 bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 space-y-2 animate-pulse">
+                        <div class="h-2.5 bg-slate-800 rounded w-16"></div>
+                        <div class="h-4 bg-slate-700 rounded w-20"></div>
+                    </div>
+                    <div class="h-16 bg-slate-950/80 border border-slate-800 rounded-lg p-2.5 space-y-2 animate-pulse">
+                        <div class="h-2.5 bg-slate-800 rounded w-16"></div>
+                        <div class="h-4 bg-slate-700 rounded w-20"></div>
+                    </div>
+                </div>
+                <div class="space-y-2 pt-1">
+                    <div class="h-3.5 bg-slate-800/80 rounded animate-pulse w-full"></div>
+                    <div class="h-3.5 bg-slate-800/60 rounded animate-pulse w-5/6"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 5. TAB 1: DISENSUS BULLS VS BEARS
+    const disensusCont = document.getElementById("disensus-container");
+    if (disensusCont) {
+        disensusCont.innerHTML = `
+            <div class="p-6 text-center text-slate-400 font-mono text-xs">
+                <span class="inline-block animate-spin mr-2">⏳</span>Đang phân tích góc nhìn đối nghịch Bulls vs Bears cho [${cleanTicker}]...
+            </div>
+        `;
+    }
+
+    // 6. TAB 1: STRATEGY & TRIGGERS
+    const triggersCont = document.getElementById("triggers-list-container");
+    if (triggersCont) {
+        triggersCont.innerHTML = `
+            <div class="p-4 text-center text-slate-400 font-mono text-xs">
+                <span class="inline-block animate-spin mr-2">⏳</span>Đang nạp danh mục triggers cho [${cleanTicker}]...
+            </div>
+        `;
+    }
+
+    // 7. TAB 2: BÁO CÁO TÀI CHÍNH (BCTC)
+    const bctcInfoTicker = document.getElementById("bctc-info-ticker");
+    if (bctcInfoTicker) {
+        bctcInfoTicker.textContent = cleanTicker;
+        bctcInfoTicker.className = "px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-bold text-xs shadow-sm animate-pulse";
+    }
+    const bctcInfoName = document.getElementById("bctc-info-name");
+    if (bctcInfoName) bctcInfoName.textContent = `Đang tải BCTC ${cleanTicker}...`;
+    const bctcInfoSector = document.getElementById("bctc-info-sector");
+    if (bctcInfoSector) bctcInfoSector.textContent = `(Đang kết nối BCTC kiểm toán)`;
+    const bctcInfoBadge = document.getElementById("bctc-info-industry-badge");
+    if (bctcInfoBadge) bctcInfoBadge.classList.add("hidden");
+
+    const bctcTable = document.getElementById("bctc-table-element");
+    if (bctcTable) {
+        bctcTable.innerHTML = `
+            <thead>
+                <tr class="bg-slate-950 text-slate-400 font-mono border-b border-slate-800">
+                    <th class="p-3 text-left min-w-[200px] text-cyan-400 font-bold">CHỈ TIÊU TÀI CHÍNH</th>
+                    <th class="p-3 text-center" colspan="4">
+                        <span class="inline-flex items-center gap-2 text-amber-400 font-bold">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                            ĐANG TẢI BÁO CÁO TÀI CHÍNH CHO [${cleanTicker}]...
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80">
+                <tr>
+                    <td colspan="5" class="p-8 text-center bg-slate-900/60">
+                        <div class="max-w-md mx-auto space-y-3">
+                            <div class="w-8 h-8 mx-auto text-cyan-400 animate-spin">⏳</div>
+                            <div class="text-sm font-bold text-slate-200">Đang nạp dữ liệu BCTC Quý & Năm cho <span class="text-cyan-400 font-mono">${cleanTicker}</span></div>
+                            <div class="space-y-2 pt-2">
+                                <div class="h-3.5 bg-slate-800/80 rounded animate-pulse w-full"></div>
+                                <div class="h-3.5 bg-slate-800/60 rounded animate-pulse w-4/5 mx-auto"></div>
+                                <div class="h-3.5 bg-slate-800/40 rounded animate-pulse w-3/5 mx-auto"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        `;
+    }
+
+    // Xóa/hủy các chart cũ của BCTC
+    if (typeof chartRevenueProfit !== "undefined" && chartRevenueProfit) {
+        try { chartRevenueProfit.destroy(); } catch(e) {}
+        chartRevenueProfit = null;
+    }
+    if (typeof chartAssetBreakdown !== "undefined" && chartAssetBreakdown) {
+        try { chartAssetBreakdown.destroy(); } catch(e) {}
+        chartAssetBreakdown = null;
+    }
+
+    // 8. TAB TỔNG QUAN (OVERVIEW): Projects, Catalysts, AI Moat, AI Risks & BCTC Thu gọn
     const initProjCont = document.getElementById("overview-projects-container");
     const initCountBadge = document.getElementById("overview-projects-count-badge");
     const initCapexBadge = document.getElementById("overview-projects-total-capex");
@@ -1027,6 +1217,173 @@ async function selectTicker(ticker) {
     if (initProjCont) {
         initProjCont.innerHTML = `<div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800 text-center text-slate-400 text-xs"><span class="animate-spin inline-block mr-1">⏳</span>Đang đồng bộ hóa dự án & động lực tăng trưởng của ${cleanTicker}...</div>`;
     }
+
+    const catCont = document.getElementById("overview-catalysts-container");
+    if (catCont) {
+        catCont.innerHTML = `
+            <div class="p-3 rounded-lg bg-slate-950/60 border border-slate-800 text-center text-slate-400 text-xs font-mono space-y-1.5">
+                <div class="flex items-center justify-center gap-2 text-cyan-400">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span>Đang trích xuất Catalysts & Luận điểm cho [${cleanTicker}]...</span>
+                </div>
+                <div class="h-2.5 bg-slate-800/60 rounded animate-pulse w-3/4 mx-auto"></div>
+            </div>
+        `;
+    }
+    const moatEl = document.getElementById("overview-ai-moat");
+    if (moatEl) moatEl.textContent = `Đang phân tích lợi thế cạnh tranh cho ${cleanTicker}...`;
+    const risksEl = document.getElementById("overview-ai-risks");
+    if (risksEl) risksEl.textContent = `Đang tổng hợp rủi ro cho ${cleanTicker}...`;
+
+    const ovKqkdTable = document.getElementById("table-ov-kqkd");
+    if (ovKqkdTable) {
+        ovKqkdTable.innerHTML = `<tbody><tr><td class="p-4 text-center text-slate-400 font-mono text-xs">Đang nạp KQKD [${cleanTicker}]...</td></tr></tbody>`;
+    }
+    const ovCdktTable = document.getElementById("table-ov-cdkt");
+    if (ovCdktTable) {
+        ovCdktTable.innerHTML = `<tbody><tr><td class="p-4 text-center text-slate-400 font-mono text-xs">Đang nạp CĐKT [${cleanTicker}]...</td></tr></tbody>`;
+    }
+    if (typeof chartOverviewKqkd !== "undefined" && chartOverviewKqkd) {
+        try { chartOverviewKqkd.destroy(); } catch(e) {}
+        chartOverviewKqkd = null;
+    }
+    if (typeof chartOverviewCdkt !== "undefined" && chartOverviewCdkt) {
+        try { chartOverviewCdkt.destroy(); } catch(e) {}
+        chartOverviewCdkt = null;
+    }
+
+    // 9. TAB 3 DUPONT / SỨC KHỎE
+    const roeBadge = document.getElementById("dupont-roe-badge");
+    if (roeBadge) roeBadge.textContent = "ROE: —";
+    const netM = document.getElementById("dupont-net-margin");
+    if (netM) netM.textContent = "—";
+    const turnover = document.getElementById("dupont-asset-turnover");
+    if (turnover) turnover.textContent = "—";
+    const mult = document.getElementById("dupont-equity-mult");
+    if (mult) mult.textContent = "—";
+
+    // 10. TAB 4 NGÀNH & ĐỐI THỦ
+    const secTitle = document.getElementById("peer-sector-title");
+    if (secTitle) secTitle.textContent = `Đang phân tích ngành cho ${cleanTicker}...`;
+    const peerTable = document.getElementById("peer-table-body");
+    if (peerTable) {
+        peerTable.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400 font-mono text-xs"><span class="inline-block animate-spin mr-2">⏳</span>Đang nạp dữ liệu so sánh ngành & đối thủ cho [${cleanTicker}]...</td></tr>`;
+    }
+
+    // 11. TAB 5 ĐỊNH GIÁ CHUYÊN SÂU
+    const valBadge = document.getElementById("val-header-ticker-badge");
+    if (valBadge) {
+        valBadge.textContent = `${cleanTicker} • Đang nạp...`;
+        valBadge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800 font-bold animate-pulse";
+    }
+
+    const valSectorName = document.getElementById("val-sector-name-display");
+    if (valSectorName) valSectorName.textContent = `Đang đồng bộ [${cleanTicker}]...`;
+    const valSectorRationale = document.getElementById("val-sector-rationale-text");
+    if (valSectorRationale) valSectorRationale.textContent = `Đang phân tích cấu trúc tài sản và chu kỳ dòng tiền của ${cleanTicker}...`;
+    const valPrimaryBox = document.getElementById("val-primary-models-container");
+    if (valPrimaryBox) valPrimaryBox.innerHTML = "";
+
+    const dilutionBanner = document.getElementById("val-dilution-adjustment-banner");
+    if (dilutionBanner) dilutionBanner.classList.add("hidden");
+
+    const valTbody = document.getElementById("body-multi-valuation");
+    if (valTbody) {
+        valTbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="p-8 text-center bg-slate-900/60">
+                    <div class="max-w-md mx-auto space-y-3 py-2">
+                        <div class="inline-flex items-center justify-center p-3 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800 animate-pulse">
+                            <span class="animate-spin text-base">⏳</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-200">Đang tổng hợp 6 mô hình định giá cho <span class="text-cyan-400 font-mono">${cleanTicker}</span></div>
+                        <div class="space-y-2 pt-2">
+                            <div class="h-3.5 bg-slate-800/80 rounded animate-pulse w-full"></div>
+                            <div class="h-3.5 bg-slate-800/60 rounded animate-pulse w-4/5 mx-auto"></div>
+                            <div class="h-3.5 bg-slate-800/40 rounded animate-pulse w-3/5 mx-auto"></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    const pEps = document.getElementById("val-param-eps");
+    if (pEps) pEps.textContent = "--";
+    const pBvps = document.getElementById("val-param-bvps");
+    if (pBvps) pBvps.textContent = "--";
+    const pPe = document.getElementById("val-param-pe");
+    if (pPe) pPe.textContent = "--";
+    const pPb = document.getElementById("val-param-pb");
+    if (pPb) pPb.textContent = "--";
+    const lblEps = document.getElementById("val-param-eps-label");
+    if (lblEps) lblEps.textContent = "EPS 4 Quý (VND)";
+    const lblBvps = document.getElementById("val-param-bvps-label");
+    if (lblBvps) lblBvps.textContent = "BVPS Sổ sách (VND)";
+
+    const valBlendedK = document.getElementById("val-multi-blended-k");
+    if (valBlendedK) valBlendedK.innerHTML = `<span class="text-2xl text-slate-500 animate-pulse font-mono">Đang tính...</span>`;
+    const valBlendedFull = document.getElementById("val-multi-blended-full");
+    if (valBlendedFull) valBlendedFull.textContent = "— đ";
+    const valCurrentPrice = document.getElementById("val-multi-current-price");
+    if (valCurrentPrice) valCurrentPrice.textContent = "— đ";
+    const valMosBadge = document.getElementById("val-multi-mos-badge");
+    if (valMosBadge) {
+        valMosBadge.textContent = "—";
+        valMosBadge.className = "px-2.5 py-0.5 rounded font-bold text-xs bg-slate-800 text-slate-400";
+    }
+
+    const valSlidersBox = document.getElementById("valuation-weights-sliders-container");
+    if (valSlidersBox) {
+        valSlidersBox.innerHTML = `<div class="p-3 text-center text-slate-500 font-mono text-xs animate-pulse">Đang nạp ma trận trọng số [${cleanTicker}]...</div>`;
+    }
+
+    const dynDcf = document.getElementById("dynamic-dcf-price");
+    if (dynDcf) dynDcf.textContent = "— VND";
+    const dynMos = document.getElementById("dynamic-dcf-mos");
+    if (dynMos) dynMos.textContent = "—";
+
+    const copilotValBox = document.getElementById("copilot-valuation-insight-box");
+    if (copilotValBox) copilotValBox.classList.add("hidden");
+
+    if (typeof chartPeBands !== "undefined" && chartPeBands) {
+        try { chartPeBands.destroy(); } catch(e) {}
+        chartPeBands = null;
+    }
+    if (typeof chartPbBands !== "undefined" && chartPbBands) {
+        try { chartPbBands.destroy(); } catch(e) {}
+        chartPbBands = null;
+    }
+
+    if (window.lucide && window.lucide.createIcons) {
+        try { window.lucide.createIcons(); } catch(e) {}
+    }
+}
+
+async function selectTicker(ticker) {
+    const cleanTicker = (ticker || "HPG").trim().toUpperCase();
+    if (!cleanTicker) return;
+
+    window.currentActiveTicker = cleanTicker;
+    window.currentSymbol = cleanTicker;
+    currentReport = null;
+    currentFinancialBundle = null;
+    currentTechnicalData = null;
+    currentMultiValuationState = null;
+    const thisReqSeq = ++activeRequestSeq;
+    isSwitchingTicker = true;
+
+    // 1. Loading UI on Central Search button
+    const btnSearch = document.getElementById("btn-central-search");
+    const btnSearchText = document.getElementById("btn-search-text");
+    if (btnSearch && btnSearchText) {
+        btnSearch.disabled = true;
+        btnSearchText.innerHTML = `<span class="inline-block animate-spin mr-1">⌛</span>Tải...`;
+    }
+
+    // Cập nhật ngay lập tức ô tìm kiếm trung tâm
+    const input = document.getElementById("central-ticker-input");
+    if (input) input.value = cleanTicker;
 
     // Dynamically ensure chip exists in Quick Chips Bar
     let chip = document.getElementById(`chip-${cleanTicker}`);
@@ -1060,7 +1417,7 @@ async function selectTicker(ticker) {
 
     // 2. CHECK CLIENT CACHE (0.00s INSTANT RENDERING)
     const cached = window._CLIENT_TICKER_CACHE[cleanTicker];
-    if (cached && (Date.now() - cached.ts < 300000) && (cached.preset || cached.fin)) {
+    if (cached && (Date.now() - cached.ts < 300000) && cached.preset && cached.fin) {
         currentReport = cached.preset;
         currentFinancialBundle = cached.fin;
         currentTechnicalData = cached.tech;
@@ -1080,6 +1437,9 @@ async function selectTicker(ticker) {
         showToast(`Đã đồng bộ Dashboard cho ${cleanTicker} ngay tức thì (Bộ nhớ đệm)!`);
         return;
     }
+
+    // 2.5 RESET GIAO DIỆN SANG TRẠNG THÁI SKELETON LOADING (Chống hoàn toàn việc hiển thị số liệu cũ của mã trước)
+    resetUiToSkeletonLoading(cleanTicker);
 
     showToast(`Đang nạp nhanh dữ liệu tài chính & định giá cho ${cleanTicker}...`);
 
@@ -1112,7 +1472,7 @@ async function selectTicker(ticker) {
 
         // Giai đoạn 0: Khi Hồ sơ trả về (< 10ms) -> Render Header & Ticker Bar ngay tức thì
         profilePromise.then(prof => {
-            if (thisReqSeq !== activeRequestSeq || !prof) return;
+            if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker || !prof) return;
             renderQuickProfileHeader(prof);
             if (!currentFinancialBundle) currentFinancialBundle = {};
             currentFinancialBundle.company_profile = Object.assign(currentFinancialBundle.company_profile || {}, prof);
@@ -1121,7 +1481,7 @@ async function selectTicker(ticker) {
 
         // Giai đoạn 1: Khi BCTC trả về (< 50ms) -> Render Tab BCTC và Khung 1 Note ngay tức thì
         stmPromise.then(stmData => {
-            if (thisReqSeq !== activeRequestSeq || !stmData) return;
+            if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker || !stmData) return;
             if (!currentFinancialBundle) currentFinancialBundle = {};
             currentFinancialBundle.statements_quarterly = stmData.statements_quarterly;
             currentFinancialBundle.statements_annual = stmData.statements_annual;
@@ -1131,6 +1491,10 @@ async function selectTicker(ticker) {
             try { renderBctcTable(activeStm, currentBctcSubtab); } catch(e) {}
             try { renderBctcCharts(activeStm); } catch(e) {}
             try { updateBctcTickerInfoBar(); } catch(e) {}
+            try {
+                const ovStm = currentOverviewFinancialPeriod === 'quarter' ? stmData.statements_quarterly : stmData.statements_annual;
+                renderOverviewFinancials(ovStm, currentOverviewFinancialPeriod);
+            } catch(e) {}
             if (currentReport && (currentReport.ticker || "").toUpperCase() === cleanTicker) {
                 try { renderCausality(currentReport, currentFinancialBundle); } catch(e) {}
             }
@@ -1138,7 +1502,7 @@ async function selectTicker(ticker) {
 
         // Giai đoạn 2: Khi Preset trả về (thường chỉ 0.5s - 1.2s) -> Render ngay Tab 1 và MỞ KHÓA NÚT TẢI
         presetPromise.then(async (reportData) => {
-            if (thisReqSeq !== activeRequestSeq) return;
+            if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker) return;
 
             if (reportData && reportData.ticker && reportData.ticker.toUpperCase() !== cleanTicker) {
                 console.warn(`[Integrity Warning] Preset ticker ${reportData.ticker} !== ${cleanTicker}`);
@@ -1434,7 +1798,7 @@ async function selectTicker(ticker) {
 
         // Giai đoạn 2: Khi Báo cáo Tài chính trả về -> Render Profile, BCTC, DuPont, Altman Z, Peers, Valuation
         finPromise.then(finBundle => {
-            if (thisReqSeq !== activeRequestSeq) return;
+            if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker) return;
             if (finBundle) {
                 currentFinancialBundle = finBundle;
                 window._CLIENT_TICKER_CACHE[cleanTicker] = window._CLIENT_TICKER_CACHE[cleanTicker] || { ts: Date.now() };
@@ -1446,7 +1810,7 @@ async function selectTicker(ticker) {
 
         // Giai đoạn 3: Khi Dữ liệu Kỹ thuật trả về -> Render Tab Kỹ thuật & Biểu đồ
         techPromise.then(techData => {
-            if (thisReqSeq !== activeRequestSeq) return;
+            if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker) return;
             if (techData) {
                 currentTechnicalData = techData;
                 window._CLIENT_TICKER_CACHE[cleanTicker] = window._CLIENT_TICKER_CACHE[cleanTicker] || { ts: Date.now() };
@@ -1458,7 +1822,7 @@ async function selectTicker(ticker) {
 
         // Đợi tất cả các luồng hoàn tất để lưu cache và hoàn tất
         await Promise.allSettled([profilePromise, stmPromise, presetPromise, finPromise, techPromise]);
-        if (thisReqSeq !== activeRequestSeq) return;
+        if (thisReqSeq !== activeRequestSeq || cleanTicker !== window.currentActiveTicker) return;
 
         // Lưu vào Client Cache
         window._CLIENT_TICKER_CACHE[cleanTicker] = {
@@ -1901,6 +2265,12 @@ function parseDateToTimestamp(dStr) {
 function renderMatrixTable(report) {
     const table = document.getElementById("matrix-table-element");
     if (!table || !report) return;
+    const cleanT = (report.ticker || "").toUpperCase();
+    const activeTicker = getActiveTicker();
+    if (cleanT && activeTicker && cleanT !== activeTicker) {
+        console.warn(`[Integrity Guard] Refusing renderMatrixTable for ${cleanT} because active ticker is ${activeTicker}`);
+        return;
+    }
     // Sắp xếp ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
     const reports = (report.matrix_table || []).slice().sort((a, b) => parseDateToTimestamp(b.report_date) - parseDateToTimestamp(a.report_date));
     report.matrix_table = reports;
@@ -2431,6 +2801,12 @@ function renderCausality(report, bundleOverride = null) {
     if (!container || !report) return;
 
     const cleanT = (report.ticker || "").toUpperCase();
+    const activeTicker = getActiveTicker();
+    if (cleanT && activeTicker && cleanT !== activeTicker) {
+        console.warn(`[Integrity Guard] Refusing renderCausality for ${cleanT} because active ticker is ${activeTicker}`);
+        return;
+    }
+
     const bundle = bundleOverride || currentFinancialBundle || (window._CLIENT_TICKER_CACHE && cleanT ? window._CLIENT_TICKER_CACHE[cleanT]?.fin : null);
 
     // Tự động kéo dữ liệu BCTC siêu tốc nếu bundle chưa có sẵn
@@ -2778,10 +3154,10 @@ function renderCausality(report, bundleOverride = null) {
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
                     <h3 class="font-mono font-bold text-sm text-cyan-400 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-4 h-4 text-cyan-400"></i>
-                        <span>1. Hiệu quả kinh doanh & Động lực quá khứ/hiện tại</span>
+                        <span>1. Hiệu quả kinh doanh & Động lực quá khứ/hiện tại <strong class="text-cyan-300 font-mono">(${cleanT})</strong></span>
                     </h3>
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
-                        KQKD Quý gần nhất: ${latestPeriod}
+                        KQKD Quý gần nhất (${cleanT}): ${latestPeriod}
                     </span>
                 </div>
 
@@ -2892,10 +3268,10 @@ function renderCausality(report, bundleOverride = null) {
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
                     <h3 class="font-mono font-bold text-sm text-emerald-400 flex items-center gap-2">
                         <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
-                        <span>2. Động lực tăng trưởng tương lai và rủi ro</span>
+                        <span>2. Động lực tăng trưởng tương lai và rủi ro <strong class="text-emerald-300 font-mono">(${cleanT})</strong></span>
                     </h3>
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
-                        Đồng bộ từ Điểm giao thoa đồng thuận (Bảng Ma trận 1)
+                        Đồng thuận ${cleanT} từ Bảng Ma trận 1
                     </span>
                 </div>
 
@@ -2964,6 +3340,12 @@ function renderCausality(report, bundleOverride = null) {
 
 function renderDisensus(report) {
     const container = document.getElementById("disensus-container");
+    if (!container || !report) return;
+    const cleanT = (report.ticker || "").toUpperCase();
+    const activeTicker = getActiveTicker();
+    if (cleanT && activeTicker && cleanT !== activeTicker) {
+        return;
+    }
     let html = "";
     report.disensus_table.forEach(item => {
         html += `<div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -3008,6 +3390,12 @@ function renderDisensus(report) {
 }
 
 function renderStrategy(report) {
+    if (!report || !report.consensus_summary) return;
+    const cleanT = (report.ticker || "").toUpperCase();
+    const activeTicker = getActiveTicker();
+    if (cleanT && activeTicker && cleanT !== activeTicker) {
+        return;
+    }
     const cs = report.consensus_summary;
     document.getElementById("strat-consensus-rating").textContent = cs.consensus_rating;
     document.getElementById("strat-buy-zone").textContent = cs.recommended_buy_zone;
@@ -5844,7 +6232,8 @@ function renderBctcTable(stm, subtab) {
         else if (indModel === "insurance") modelDesc = "Thông tư 125/2018/TT-BTC (Bảo hiểm)";
         else if (indModel === "real_estate") modelDesc = "Mẫu Bất động sản (Dự án dở dang & Cọc tiến độ)";
         const sortText = currentPeriodSortOrder === "desc" ? "Mới nhất trước (Mới → Cũ)" : "Cũ nhất trước (Cũ → Mới)";
-        subtitle.textContent = `Dữ liệu tài chính ${periodStr} • ${sortText} (Tỷ VND) • ${modelDesc}`;
+        const activeSym = getActiveTicker();
+        subtitle.textContent = `Dữ liệu tài chính [${activeSym}] • ${periodStr} • ${sortText} (Tỷ VND) • ${modelDesc}`;
     }
 
     // Cắt số kỳ hiển thị theo currentPeriodCount (4, 8, 10 hoặc 'all')
@@ -5853,9 +6242,10 @@ function renderBctcTable(stm, subtab) {
     const activeStm = orderStatementsForTable(slicedStm, currentPeriodSortOrder);
     if (!activeStm || !activeStm.periods) return;
 
+    const activeSym = getActiveTicker();
     let headers = `<tr class="sticky top-0 z-30 shadow-md"><th class="p-2.5 bctc-sticky-col text-cyan-400 border-b-2 border-cyan-800/80 sticky left-0 top-0 z-40 min-w-[280px] max-w-[380px] shadow-sm whitespace-normal">
         <div class="flex items-center justify-between gap-1">
-            <span>CHỈ TIÊU (TỶ VND)</span>
+            <span>CHỈ TIÊU (${activeSym} • TỶ VND)</span>
             <button onclick="togglePeriodSortOrder()" class="text-[10px] text-cyan-300 bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-700/80 px-1.5 py-0.5 rounded font-normal transition-all flex items-center gap-1 shadow-sm cursor-pointer" title="Nhấp để đổi thứ tự sắp xếp thời gian (Mới → Cũ hoặc Cũ → Mới)">
                 <span>${currentPeriodSortOrder === 'desc' ? 'Mới → Cũ ◄' : 'Cũ → Mới ►'}</span>
             </button>
@@ -6219,7 +6609,10 @@ function updateBctcTickerInfoBar() {
                      (currentReport && currentReport.exchange) ||
                      "HOSE";
 
-    if (tickerEl) tickerEl.textContent = ticker;
+    if (tickerEl) {
+        tickerEl.textContent = ticker;
+        tickerEl.className = "px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/80 font-bold text-xs shadow-sm";
+    }
     if (nameEl) {
         nameEl.textContent = compName;
         nameEl.title = `${ticker} - ${compName}`;
@@ -7920,6 +8313,22 @@ let valWeightDebounceTimeout = null;
 
 function renderValuationSection(val) {
     if (!val) return;
+    const activeTicker = getActiveTicker();
+    if (val.ticker && activeTicker && val.ticker.toUpperCase() !== activeTicker) {
+        console.warn(`[Valuation Integrity] Data ticker (${val.ticker}) does not match active ticker (${activeTicker}). Skipping render.`);
+        return;
+    }
+    if (!val.ticker && activeTicker) {
+        val.ticker = activeTicker;
+    }
+
+    // Cập nhật nhãn nhận diện mã trên tiêu đề Tab Định giá chuyên sâu
+    const valBadge = document.getElementById("val-header-ticker-badge");
+    if (valBadge) {
+        valBadge.textContent = activeTicker || val.ticker || "";
+        valBadge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold";
+    }
+
     let liveCmp = 0;
     const heroPriceEl = document.getElementById("display-market-price");
     if (heroPriceEl && heroPriceEl.textContent) {
