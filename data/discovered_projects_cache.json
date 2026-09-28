@@ -1302,8 +1302,8 @@
     "company_name": "Hạ tầng Kỹ thuật TP.HCM",
     "official_website": "cii.com.vn",
     "website_projects_url": "https://cii.com.vn",
-    "total_projects": 17,
-    "total_investment_bil": 37831.0,
+    "total_projects": 13,
+    "total_investment_bil": 78073.0,
     "projects": [
       {
         "name": "Dự án BOT Mở rộng Xa lộ Hà Nội & Quốc lộ 1 (Cửa ngõ phía Đông TP.HCM)",
@@ -1378,8 +1378,8 @@
         "source": "Website chính thức (cii.com.vn) & BCTN"
       },
       {
-        "name": "Dòng tiền từ hoạt động kinh doanh của ngành tăng 37% YoY , nhờ mức lợi nhuận cao trong năm...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án đầu tư công diễn ra nhanh hơn",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1390,8 +1390,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Một số dự án hạ tầng lớn đã hoàn thành trước tiến độ, giúp củng cố dòng tiền cho doanh ngh...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án hạ tầng lớn đã hoàn thành trước tiến độ",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1402,8 +1402,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Trong đó tập trung chủ yếu ở 2 mảng là Khai thác và thu phí các dự án BOT và Bất động sản.",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án BOT và Bất động sản",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1414,20 +1414,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Thu phí BOT - Dòng tiền ổn định, triển vọng trên các dự án mới với các dự án BOT đang v ận...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Thu phí BOT - Dòng tiền ổn định, triển vọng trên các dự án mới với các dự án BOT đang v ận hành, chúng tôi v ẫn đánh giá TÍCH CỰC với 2 dự án BOT quan tr ọng nhất là BOT cao t ốc Trung Lương - Mỹ Thuận (TL - MT) và BOT đầu tư mở rộng XLHN.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Song song với đó, CII cũng đang tri ển khai giai đo ạn chuẩn bị và khởi công xây dựng 2 dự...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án BOT mới",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1438,9 +1426,9 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Đặc biệt là dự án BOT mở rộng cao tốc TL - MT - HCMC, với quy mô v ốn lên đ ến hơn 41.000 ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
-        "investment_bil": 41.0,
+        "name": "dự án BOT mở rộng cao tốc TL",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
+        "investment_bil": 41000.0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
         "impact": "Đặc biệt là dự án BOT mở rộng cao tốc TL - MT - HCMC, với quy mô v ốn lên đ ến hơn 41.000 tỷ đồng.",
@@ -1450,20 +1438,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Những dự án này được dự kiến thông xe và đóng góp vào KQKD kể từ 2H.2028 và đầu năm 2029.",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Những dự án này được dự kiến thông xe và đóng góp vào KQKD kể từ 2H.2028 và đầu năm 2029.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Bất động sản - Bức tranh trái chiều giữa dự án tại Thủ Thiêm và của NBB Đối với các dự án ...",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án tại Thủ Thiêm và của NBB Đối",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1474,8 +1450,8 @@
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Đây là những dự án hiệu quả với lợi nhuận lớn nếu được triển khai.",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
+        "name": "dự án hiệu quả",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của CII",
         "investment_bil": 0,
         "progress_pct": 80,
         "commercial_date": "Giai đoạn 2025 - 2027",
@@ -1484,33 +1460,9 @@
         "occupancy_rate": 85,
         "phase_tag": "Đang mở bán & thi công",
         "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Đối với các dự án của NBB, là các dự án có pháp lý sạch sẽ và minh bạch.",
-        "scale": "Ghi nhận trong Báo cáo phân tích chuyên sâu & Công bố thông tin của CII",
-        "investment_bil": 0,
-        "progress_pct": 80,
-        "commercial_date": "Giai đoạn 2025 - 2027",
-        "impact": "Đối với các dự án của NBB, là các dự án có pháp lý sạch sẽ và minh bạch.",
-        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang mở bán & thi công",
-        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
-      },
-      {
-        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (CII)",
-        "scale": "Giá trị công trình dở dang lũy kế 573.3 tỷ đồng trên BCTC kiểm toán",
-        "investment_bil": 717.0,
-        "progress_pct": 80,
-        "commercial_date": "Hoàn thiện 2025 - 2026",
-        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
-        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
-        "occupancy_rate": 85,
-        "phase_tag": "Đang thi công xây dựng",
-        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
       }
     ],
-    "newly_discovered_count": 11,
+    "newly_discovered_count": 7,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -1520,8 +1472,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790233175.009724,
-    "scan_time_str": "13:59:35 24/09/2026"
+    "timestamp": 1790571530.2650366,
+    "scan_time_str": "11:58:50 28/09/2026"
   },
   "TNG": {
     "ticker": "TNG",
@@ -5605,5 +5557,144 @@
     ],
     "timestamp": 1790556158.1088576,
     "scan_time_str": "07:42:38 28/09/2026"
+  },
+  "REE": {
+    "ticker": "REE",
+    "company_name": "Cơ Điện Lạnh REE",
+    "official_website": "reecorp.com",
+    "website_projects_url": "https://reecorp.com/vi/linh-vuc-kinh-doanh",
+    "total_projects": 8,
+    "total_investment_bil": 17151.0,
+    "projects": [
+      {
+        "name": "Tòa nhà Văn phòng Hạng A E-Town 6 (Tân Bình, TP.HCM)",
+        "scale": "Quy mô 80.000 m2 sàn văn phòng Hạng A, đạt chứng chỉ công trình xanh LEED Platinum",
+        "investment_bil": 2200,
+        "progress_pct": 95,
+        "commercial_date": "Bắt đầu cho thuê 2024 - 2025",
+        "impact": "Tăng thêm 30% tổng diện tích sàn văn phòng cho thuê của REE, mang lại dòng tiền ròng 400 tỷ/năm.",
+        "legal_status": "Đã nghiệm thu PCCC và đưa vào vận hành khai thác thương mại",
+        "occupancy_rate": 70,
+        "phase_tag": "Đang cho thuê",
+        "source": "Website chính thức (reecorp.com) & BCTN"
+      },
+      {
+        "name": "Cụm Nhà máy Điện gió Trà Vinh V1-3 & Duyên Hải",
+        "scale": "Tổng công suất 96 MW điện gió ven biển và ngoài khơi",
+        "investment_bil": 4500,
+        "progress_pct": 95,
+        "commercial_date": "Đang vận hành COD",
+        "impact": "Hưởng giá FIT ưu đãi, cung ứng hơn 300 triệu kWh điện sạch mỗi năm lên lưới điện quốc gia.",
+        "legal_status": "Đầy đủ hợp đồng PPA dài hạn với EVN",
+        "occupancy_rate": 95,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (reecorp.com) & BCTN"
+      },
+      {
+        "name": "Cụm Thủy điện Vĩnh Sơn - Sông Hinh & Nhà máy Thác Bà 2",
+        "scale": "Thủy điện Thượng Kon Tum 220 MW và Thác Bà 2 công suất 18.9 MW",
+        "investment_bil": 3800,
+        "progress_pct": 90,
+        "commercial_date": "Đang vận hành",
+        "impact": "Tận dụng chu kỳ La Nina mưa nhiều mang lại sản lượng điện và lợi nhuận kỷ lục.",
+        "legal_status": "Nghiệm thu công trình năng lượng cấp quốc gia",
+        "occupancy_rate": 98,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (reecorp.com) & BCTN"
+      },
+      {
+        "name": "dự án hạ tầng sẽ thúc đẩy doanh thu mảng M",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của REE",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Tham khảo trong báo cáo kỳ trước tại đây Nguồn việc dồi dào đến từ các dự án hạ tầng sẽ thúc đẩy doanh thu mảng M&E đạt 4,499/5,190 tỷ VND (+28%/15% YoY) trong 2026/2027.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án hạ tầng trọng điểm Đầu năm 2026",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của REE",
+        "investment_bil": 786.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Mảng cơ điện lạnh tăng tốc nhờ loạt dự án hạ tầng trọng điểm Đầu năm 2026, REE trúng gói thầu cơ điện cho Trung tâm dữ liệu An Khánh - trung tâm dữ liệu lớn nhất miền Bắc khi hoàn thành - trị giá hơn 786 tỷ đồng, tiết kiệm 25,4% so với dự toán.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án trọng điểm khác gồm Nhà hát Ngọc Trai",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của REE",
+        "investment_bil": 5865.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Đây là một trong loạt hợp đồng giúp mảng M&E tăng tốc: giá trị ký mới 6T2026 đạt 5.865 tỷ đồng, gần chạm mục tiêu 7.000 - 8.000 tỷ đồng cho cả năm, với các dự án trọng điểm khác gồm Nhà hát Ngọc Trai, sân bay Long Thành (đã khởi động lại sau thanh tra), Phú Quốc và Tân Sơn Nhất.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án điện gió khác của công ty là Duyên Hải 2 và Duyên",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của REE",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Ngoài ra, dự kiến ngay trong cuối năm nay, hai dự án điện gió khác của công ty là Duyên Hải 2 và Duyên Hải 3 với tổng công suất 128 MW sẽ tiếp tục đi vào hoạt động sẽ đóng góp thêm vào lợi nhuận của REE trong tương lai gần.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án văn phòng cho thuê",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của REE",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Công ty chưa có kế hoạch đầu tư thêm dự án văn phòng cho thuê và.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 5,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: reecorp.com",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790571436.233925,
+    "scan_time_str": "11:57:16 28/09/2026"
+  },
+  "HSG": {
+    "ticker": "HSG",
+    "company_name": "Tập đoàn Hoa Sen",
+    "official_website": "hoasengroup.vn",
+    "website_projects_url": "https://hoasengroup.vn",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: hoasengroup.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790571510.652366,
+    "scan_time_str": "11:58:30 28/09/2026"
   }
 }
