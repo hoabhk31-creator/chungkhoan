@@ -792,6 +792,123 @@ def get_ticker_corporate_actions(ticker: str, auto_sync: bool = True) -> List[Di
     return sorted(dedup_events, key=_sort_key, reverse=True)
 
 
+def calculate_realized_dividend_yield(
+    ticker: str,
+    current_price: float,
+    lookback_days: int = 365
+) -> float:
+    """
+    Tính Cổ tức Thực tế (%) từ lịch sử sự kiện quyền đã xác nhận.
+
+    Phương pháp:
+    - Chỉ tính cổ tức bằng TIỀN MẶT (cash_amount > 0) đã được chi trả trong vòng
+      `lookback_days` ngày tính từ hôm nay (mặc định 12 tháng ~ 365 ngày).
+    - Cổ tức bằng cổ phiếu (stock_ratio), quyền mua (rights_issue) KHÔNG được tính vào
+      dividend yield vì không mang lại dòng tiền mặt cho cổ đông.
+    - Nếu không có sự kiện tiền mặt nào trong khoảng thời gian → trả 0.0 (KHÔNG suy diễn).
+    - Chia tổng tiền mặt thực nhận cho giá thị trường hiện tại.
+
+    Nguồn dữ liệu: corporate_actions cache (HOSE/HNX/Vietstock, đã verify).
+    KHÔNG fallback sang hardcode — đảm bảo không tự suy diễn số liệu.
+
+    Args:
+        ticker: Mã cổ phiếu.
+        current_price: Giá thị trường hiện tại (VND/CP) để tính %.
+        lookback_days: Số ngày nhìn lại (mặc định 365 = 12 tháng).
+
+    Returns:
+        float: Tỷ lệ cổ tức tiền mặt thực tế (%), ví dụ 2.5 = 2.5%.
+               Trả 0.0 nếu không có cổ tức tiền mặt trong kỳ.
+               Trả None nếu hoàn toàn không có dữ liệu (chưa sync).
+    """
+    clean_ticker = ticker.upper().strip()
+    events = get_ticker_corporate_actions(clean_ticker, auto_sync=True)
+    if not events:
+        return None  # Không có dữ liệu → không suy diễn
+
+    cutoff = date.today()
+    lookback_date = date(cutoff.year - 1, cutoff.month, cutoff.day)  # ~365 ngày trước
+
+    total_cash_per_share = 0.0
+    has_data_in_window = False
+
+    for ev in events:
+        ev_type = str(ev.get("event_type", "")).lower()
+        # Chỉ tính các sự kiện có cổ tức tiền mặt
+        if ev_type not in ("dividend_cash", "dividend_both", "dividend_and_rights"):
+            continue
+        cash_amt = float(ev.get("cash_amount") or 0.0)
+        if cash_amt <= 0:
+            continue
+
+        # Parse ngày GDKHQ
+        ex_d = parse_action_date(ev.get("ex_date", ""))
+        if ex_d is None:
+            continue
+
+        # Chỉ tính trong cửa sổ lookback_days ngày gần nhất
+        if ex_d >= lookback_date and ex_d <= cutoff:
+            total_cash_per_share += cash_amt
+            has_data_in_window = True
+
+    if not has_data_in_window:
+        return 0.0  # Không có cổ tức tiền mặt trong 12 tháng qua → 0%
+
+    if current_price and current_price > 0:
+        return round((total_cash_per_share / current_price) * 100.0, 2)
+    return 0.0
+
+
+def calculate_stock_dividend_ratio(
+    ticker: str,
+    lookback_days: int = 365
+) -> float:
+    """
+    Tính tỷ lệ cổ phiếu thưởng / cổ tức bằng cổ phiếu (%) trong vòng lookback_days ngày.
+
+    Phương pháp:
+    - Tính tổng stock_ratio từ các sự kiện dividend_stock / dividend_both trong kỳ.
+    - Ví dụ: HPG 2024 thưởng 10% cổ phiếu → stock_ratio = 0.10 → trả về 10.0
+    - KHÔNG tính quyền mua (rights_issue) — cổ đông phải bỏ tiền mua thêm, không phải thưởng.
+    - Trả None nếu không có dữ liệu sync.
+    - Trả 0.0 nếu có dữ liệu nhưng không có sự kiện cổ phiếu thưởng trong kỳ.
+
+    Nguồn: corporate_actions cache (HOSE/HNX/Vietstock).
+    """
+    clean_ticker = ticker.upper().strip()
+    events = get_ticker_corporate_actions(clean_ticker, auto_sync=False)  # Dùng cache sẵn, không sync lại
+    if events is None or len(events) == 0:
+        return None  # Không có dữ liệu → không suy diễn
+
+    cutoff = date.today()
+    lookback_date = date(cutoff.year - 1, cutoff.month, cutoff.day)
+
+    total_stock_ratio = 0.0
+    has_data_in_window = False
+
+    for ev in events:
+        ev_type = str(ev.get("event_type", "")).lower()
+        # Chỉ tính cổ phiếu thưởng, KHÔNG tính quyền mua
+        if ev_type not in ("dividend_stock", "dividend_both"):
+            continue
+        s_ratio = float(ev.get("stock_ratio") or 0.0)
+        if s_ratio <= 0:
+            continue
+
+        ex_d = parse_action_date(ev.get("ex_date", ""))
+        if ex_d is None:
+            continue
+
+        if ex_d >= lookback_date and ex_d <= cutoff:
+            total_stock_ratio += s_ratio
+            has_data_in_window = True
+
+    if not has_data_in_window:
+        return 0.0  # Không có cổ phiếu thưởng trong kỳ
+
+    return round(total_stock_ratio * 100.0, 1)  # Chuyển từ 0.10 → 10.0%
+
+
 def adjust_target_price_for_corporate_actions(
     ticker: str,
     report_date_str: str,

@@ -2253,6 +2253,10 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
 // ---------------------------------------------------------------------------
 // AI KNOWLEDGE BADGE — hiển thị indicator "AI đã học" trong Hero Card
 // ---------------------------------------------------------------------------
+// Client-side cache cho AI knowledge badge (TTL 120 giây, per session)
+const _aiKnowledgeCache = new Map(); // ticker -> {data, ts}
+const _AI_KNOWLEDGE_TTL_MS = 120_000; // 2 phút
+
 async function updateAiKnowledgeBadge(ticker) {
     const badgeEl = document.getElementById("ai-knowledge-badge");
     if (!badgeEl) return;
@@ -2260,12 +2264,21 @@ async function updateAiKnowledgeBadge(ticker) {
         badgeEl.classList.add("hidden");
         return;
     }
+    const tkUpper = ticker.toUpperCase();
+    let data;
     try {
-        const res = await fetch(`/api/ai-learning/knowledge/${ticker.toUpperCase()}`);
-        if (!res.ok) throw new Error("api error");
-        const data = await res.json();
+        // Đọc cache client-side trước
+        const cached = _aiKnowledgeCache.get(tkUpper);
+        if (cached && (Date.now() - cached.ts) < _AI_KNOWLEDGE_TTL_MS) {
+            data = cached.data;
+        } else {
+            const res = await fetch(`/api/ai-learning/knowledge/${tkUpper}`);
+            if (!res.ok) throw new Error("api error");
+            data = await res.json();
+            _aiKnowledgeCache.set(tkUpper, { data, ts: Date.now() });
+        }
         // Kiểm tra ticker còn active không (tránh race condition khi switch nhanh)
-        if ((getActiveTicker() || "").toUpperCase() !== (ticker || "").toUpperCase()) return;
+        if ((getActiveTicker() || "").toUpperCase() !== tkUpper) return;
         if (!data.has_knowledge) {
             badgeEl.classList.add("hidden");
             return;
@@ -7912,7 +7925,43 @@ function renderPeersSection(peersData) {
             let kpiCells = "";
             visibleKpiCols.forEach(col => {
                 const val = p[col.field];
-                const formatted = formatSectorKpiValue(val, col.unit);
+                let formatted;
+                // Xử lý đặc biệt cho cột cổ tức: kiểm tra nguồn dữ liệu
+                if (col.field === "dividend_yield_pct") {
+                    const src = p["dividend_yield_source"];
+                    if (src === "estimate") {
+                        // Dữ liệu ước tính (chưa có dữ liệu xác nhận) → hiển thị "—*"
+                        formatted = `<span class="text-slate-500 italic" title="Dữ liệu chưa được xác nhận — cần cập nhật từ HOSE/HNX">—*</span>`;
+                    } else if (src === "corporate_actions") {
+                        // Dữ liệu từ lịch sử sự kiện quyền đã xác nhận
+                        const numVal = Number(val);
+                        if (numVal === 0) {
+                            formatted = `<span class="text-slate-400" title="Không có cổ tức tiền mặt trong 12 tháng qua (Nguồn: HOSE/HNX)">0% <span class="text-[10px] text-slate-500">(KCT)</span></span>`;
+                        } else {
+                            formatted = `<span title="Cổ tức thực tế 12 tháng qua (Nguồn: HOSE/HNX)">${numVal.toFixed(1)}%</span>`;
+                        }
+                    } else {
+                        // Không có trường source (dữ liệu cũ) → dùng format thông thường
+                        formatted = formatSectorKpiValue(val, col.unit);
+                    }
+                } else if (col.field === "stock_bonus_pct") {
+                    // Cột CP Thưởng (%)
+                    const src = p["stock_bonus_source"];
+                    if (src === "estimate") {
+                        formatted = `<span class="text-slate-500 italic" title="Dữ liệu chưa được xác nhận">—*</span>`;
+                    } else if (src === "corporate_actions") {
+                        const numVal = Number(val);
+                        if (numVal === 0) {
+                            formatted = `<span class="text-slate-400" title="Không có cổ phiếu thưởng trong 12 tháng qua">0%</span>`;
+                        } else {
+                            formatted = `<span class="text-amber-300 font-bold" title="Cổ phiếu thưởng/cổ tức CP trong 12 tháng qua (Nguồn: HOSE/HNX)">+${numVal.toFixed(1)}% ★</span>`;
+                        }
+                    } else {
+                        formatted = formatSectorKpiValue(val, col.unit);
+                    }
+                } else {
+                    formatted = formatSectorKpiValue(val, col.unit);
+                }
                 const colorClass = col.color === "emerald" ? "text-emerald-300" :
                                    col.color === "amber" ? "text-amber-300" :
                                    col.color === "rose" ? "text-rose-300" :
@@ -11574,15 +11623,54 @@ async function performSearch() {
 
         window._lastDiscoveredReports = { ticker: ticker, results: data.results };
 
+        // Đếm báo cáo mới (chưa trong ma trận) và đã có
+        let newCount = 0, existingCount = 0;
+        data.results.forEach(item => {
+            const rawInst = item.institution || "CTCK";
+            let alreadyAdded = false;
+            try {
+                if (currentReport && Array.isArray(currentReport.matrix_table)) {
+                    const instKeyword = rawInst.toLowerCase().split(' ')[0];
+                    alreadyAdded = currentReport.matrix_table.some(r =>
+                        r && r.institution && typeof r.institution === "string" &&
+                        r.institution.toLowerCase().includes(instKeyword)
+                    );
+                }
+            } catch (e) {}
+            alreadyAdded ? existingCount++ : newCount++;
+        });
+
+        // Đọc trạng thái auto-extract từ localStorage
+        let autoExtractEnabled = false;
+        try { autoExtractEnabled = localStorage.getItem("ierm_auto_extract") === "true"; } catch(e) {}
+
         let html = `
-        <div class="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-800 rounded-lg mb-3">
-            <div class="text-xs text-slate-300 font-medium">
-                Tìm thấy <span class="text-cyan-400 font-bold">${data.results.length}</span> báo cáo phân tích cho mã <span class="text-cyan-300 font-bold">${ticker}</span>
+        <div class="flex flex-col gap-2 p-2.5 bg-slate-900 border border-slate-800 rounded-lg mb-3">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-slate-300 font-medium">
+                    Tìm thấy <span class="text-cyan-400 font-bold">${data.results.length}</span> báo cáo cho mã <span class="text-cyan-300 font-bold">${ticker}</span>
+                    ${newCount > 0 ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded font-mono">${newCount} mới</span>` : ''}
+                    ${existingCount > 0 ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded font-mono">${existingCount} đã có</span>` : ''}
+                </div>
+                <button id="btn-extract-all-reports" onclick="extractAllDiscoveredReports('${encodeURIComponent(ticker)}')" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+                    <span>⚡ Tự Động Bóc Tách Toàn Bộ Vào Ma Trận</span>
+                </button>
             </div>
-            <button id="btn-extract-all-reports" onclick="extractAllDiscoveredReports('${encodeURIComponent(ticker)}')" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all">
-                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
-                <span>⚡ Tự Động Bóc Tách Toàn Bộ Vào Ma Trận</span>
-            </button>
+            <!-- Toggle Auto-Extract -->
+            <div class="flex items-center gap-2 pt-1 border-t border-slate-800/60">
+                <label class="flex items-center gap-2 cursor-pointer select-none group" title="Nếu bật, mỗi lần Quét Báo Cáo xong sẽ tự động bóc tách toàn bộ báo cáo mới vào Ma Trận">
+                    <div class="relative">
+                        <input type="checkbox" id="toggle-auto-extract" class="sr-only" ${autoExtractEnabled ? 'checked' : ''} onchange="toggleAutoExtractSetting(this.checked)">
+                        <div id="toggle-auto-extract-track" class="w-8 h-4 rounded-full transition-colors ${autoExtractEnabled ? 'bg-cyan-600' : 'bg-slate-700'} border ${autoExtractEnabled ? 'border-cyan-500' : 'border-slate-600'}"></div>
+                        <div id="toggle-auto-extract-thumb" class="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${autoExtractEnabled ? 'translate-x-4' : 'translate-x-0'}"></div>
+                    </div>
+                    <span class="text-[11px] ${autoExtractEnabled ? 'text-cyan-300 font-semibold' : 'text-slate-400'} font-mono group-hover:text-cyan-300 transition-colors">
+                        ${autoExtractEnabled ? '⚡ Tự động bóc tách: BẬT' : 'Tự động bóc tách sau khi quét'}
+                    </span>
+                </label>
+                <span class="text-[10px] text-slate-600 italic">— bóc tách ngay khi tìm thấy báo cáo mới</span>
+            </div>
         </div>
         <div id="extract-all-progress-box" class="hidden mb-3 p-2.5 bg-slate-950 rounded-lg border border-cyan-800/80 text-xs text-cyan-300 font-mono shadow-inner"></div>
         <div class="space-y-2.5">`;
@@ -11645,6 +11733,12 @@ async function performSearch() {
         html += `</div>`;
         if (box) box.innerHTML = html;
         if (window.lucide) lucide.createIcons();
+
+        // === AUTO-EXTRACT: Nếu toggle bật VÀ có báo cáo mới → tự động bóc tách ===
+        if (autoExtractEnabled && newCount > 0) {
+            showToast(`⚡ Tự động bóc tách ${newCount} báo cáo mới cho ${ticker}...`);
+            setTimeout(() => extractAllDiscoveredReports(encodeURIComponent(ticker)), 600);
+        }
     } catch (err) {
         const isFetchFail = err.message && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError"));
         const errMsg = isFetchFail
@@ -12820,6 +12914,8 @@ async function integrateNewReport(newReportItem, ticker) {
     }
     
     currentReport = await resp.json();
+    // Invalidate client-side AI knowledge cache cho mã này — badge sẽ fetch lại dữ liệu học mới nhất
+    _aiKnowledgeCache.delete(cleanTicker);
     renderAll(currentReport);
 }
 
@@ -15250,5 +15346,40 @@ setTimeout(syncStickyHeaderHeight, 100);
 setTimeout(syncStickyHeaderHeight, 600);
 
 
+// ─── AUTO-EXTRACT TOGGLE ────────────────────────────────────────────────────
+// Lưu trạng thái toggle "Tự động bóc tách sau khi quét" vào localStorage.
+// Cập nhật giao diện toggle (track màu, thumb vị trí, label text) ngay lập tức.
+function toggleAutoExtractSetting(enabled) {
+    try {
+        localStorage.setItem("ierm_auto_extract", enabled ? "true" : "false");
+    } catch(e) {}
 
+    // Cập nhật giao diện track (nền)
+    const track = document.getElementById("toggle-auto-extract-track");
+    if (track) {
+        track.className = `w-8 h-4 rounded-full transition-colors border ${
+            enabled
+                ? "bg-cyan-600 border-cyan-500"
+                : "bg-slate-700 border-slate-600"
+        }`;
+    }
+    // Cập nhật vị trí thumb
+    const thumb = document.getElementById("toggle-auto-extract-thumb");
+    if (thumb) {
+        thumb.className = `absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${
+            enabled ? "translate-x-4" : "translate-x-0"
+        }`;
+    }
+    // Cập nhật label text
+    const label = document.querySelector("label[for='toggle-auto-extract'] span, label:has(#toggle-auto-extract) span.font-mono");
+    if (label) {
+        label.className = `text-[11px] ${enabled ? "text-cyan-300 font-semibold" : "text-slate-400"} font-mono group-hover:text-cyan-300 transition-colors`;
+        label.textContent = enabled ? "⚡ Tự động bóc tách: BẬT" : "Tự động bóc tách sau khi quét";
+    }
+
+    showToast(enabled
+        ? "⚡ Đã bật: Tự động bóc tách toàn bộ sau khi quét!"
+        : "Đã tắt tự động bóc tách. Bấm thủ công khi cần."
+    );
+}
 

@@ -582,6 +582,23 @@ _PEERS_CACHE_TS: Dict[str, float] = {}
 _TECH_SIGNALS_CACHE: Dict[str, Dict[str, Any]] = {}
 _TECH_SIGNALS_CACHE_TS: Dict[str, float] = {}
 
+# Cache riêng cho /api/ai-learning/knowledge/{ticker} — tránh đọc file disk mỗi request
+_KNOWLEDGE_CACHE: Dict[str, Dict[str, Any]] = {}
+_KNOWLEDGE_CACHE_TS: Dict[str, float] = {}
+
+# -----------------------------------------------------------------------
+# TTL CONSTANTS — điều chỉnh tại một nơi, áp dụng toàn bộ server
+# -----------------------------------------------------------------------
+_TTL_PRESET       = 300.0   # Báo cáo đồng thuận CTCK — 5 phút
+_TTL_FIN_OVERVIEW = 600.0   # BCTC bundle (Dupont, Piotroski, DCF) — 10 phút (ít thay đổi)
+_TTL_PROFILE      = 600.0   # Company profile — 10 phút
+_TTL_STMT         = 600.0   # Financial statements — 10 phút
+_TTL_HEALTH       = 600.0   # Health scores — 10 phút
+_TTL_VALUATION    = 600.0   # Valuation bundle — 10 phút
+_TTL_PEERS        = 600.0   # Peer comparison — 10 phút
+_TTL_KNOWLEDGE    = 120.0   # AI knowledge per ticker — 2 phút (cập nhật thường xuyên hơn)
+
+
 
 @app.get("/api/preset/{ticker}")
 async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refresh: bool = False):
@@ -925,7 +942,7 @@ async def get_financial_overview(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < _TTL_FIN_OVERVIEW:
         return _FIN_OVERVIEW_CACHE[clean_ticker]
 
     stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
@@ -1003,10 +1020,10 @@ async def get_company_profile_endpoint(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _PROFILE_CACHE and (now_ts - _PROFILE_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _PROFILE_CACHE and (now_ts - _PROFILE_CACHE_TS.get(clean_ticker, 0)) < _TTL_PROFILE:
         return _PROFILE_CACHE[clean_ticker]
 
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < _TTL_FIN_OVERVIEW:
         prof = _FIN_OVERVIEW_CACHE[clean_ticker].get("company_profile", {})
         if prof:
             _PROFILE_CACHE[clean_ticker] = prof
@@ -1056,7 +1073,7 @@ async def get_financial_statements_endpoint(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _STMT_CACHE and (now_ts - _STMT_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _STMT_CACHE and (now_ts - _STMT_CACHE_TS.get(clean_ticker, 0)) < _TTL_STMT:
         return _STMT_CACHE[clean_ticker]
 
     data = await get_financial_overview(clean_ticker)
@@ -1078,7 +1095,7 @@ async def get_financial_health_endpoint(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _HEALTH_CACHE and (now_ts - _HEALTH_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _HEALTH_CACHE and (now_ts - _HEALTH_CACHE_TS.get(clean_ticker, 0)) < _TTL_HEALTH:
         return _HEALTH_CACHE[clean_ticker]
 
     data = await get_financial_overview(clean_ticker)
@@ -1100,7 +1117,7 @@ async def get_valuation_bundle_endpoint(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _VALUATION_CACHE and (now_ts - _VALUATION_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _VALUATION_CACHE and (now_ts - _VALUATION_CACHE_TS.get(clean_ticker, 0)) < _TTL_VALUATION:
         return _VALUATION_CACHE[clean_ticker]
 
     data = await get_financial_overview(clean_ticker)
@@ -1122,10 +1139,10 @@ async def get_peers_comparison(ticker: str):
     """
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-    if clean_ticker in _PEERS_CACHE and (now_ts - _PEERS_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _PEERS_CACHE and (now_ts - _PEERS_CACHE_TS.get(clean_ticker, 0)) < _TTL_PEERS:
         return _PEERS_CACHE[clean_ticker]
 
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < 300.0:
+    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < _TTL_FIN_OVERVIEW:
         peers = _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
         if peers:
             _PEERS_CACHE[clean_ticker] = peers
@@ -1134,6 +1151,92 @@ async def get_peers_comparison(ticker: str):
 
     data = await get_financial_overview(clean_ticker)
     peers = data.get("peers_data", {})
+
+    # === ENRICH: Cập nhật cổ tức thực tế từ lịch sử sự kiện quyền (SONG SONG) ===
+    # Thay thế dividend_yield_pct hardcode bằng dữ liệu từ corporate_actions (HOSE/HNX).
+    # Nguyên tắc: KHÔNG suy diễn — nếu không có dữ liệu đã xác nhận → hiển thị "estimate".
+    try:
+        from corporate_actions import calculate_realized_dividend_yield, calculate_stock_dividend_ratio
+        from crawler import fetch_reconciled_live_price
+
+        peer_list = peers.get("peers", []) if isinstance(peers, dict) else []
+        if peer_list:
+            # Lấy giá tất cả peer song song với timeout tổng 4s
+            peer_tickers = [p.get("ticker", "") for p in peer_list]
+
+            async def _safe_price(tk: str):
+                if not tk:
+                    return None
+                try:
+                    return await asyncio.wait_for(fetch_reconciled_live_price(tk), timeout=1.5)
+                except Exception:
+                    return None
+
+            price_results = await asyncio.gather(*[_safe_price(tk) for tk in peer_tickers])
+
+            for peer, price_info in zip(peer_list, price_results):
+                peer_tk = peer.get("ticker", "")
+                if not peer_tk:
+                    continue
+                try:
+                    peer_price = float(price_info.get("latest_close", 0)) if price_info else 0
+                    if peer_price <= 0:
+                        # Fallback: ước tính từ market_cap / shares
+                        shares_m = float(peer.get("shares_outstanding_mil", 1000) or 1000)
+                        mcap = float(peer.get("market_cap_bil", 0) or 0)
+                        peer_price = (mcap * 1e9) / (shares_m * 1e6) if shares_m > 0 and mcap > 0 else 0
+
+                    # 1. Cổ tức tiền mặt thực tế
+                    realized_yield = calculate_realized_dividend_yield(peer_tk, peer_price)
+                    if realized_yield is not None:
+                        peer["dividend_yield_pct"] = realized_yield
+                        peer["dividend_yield_source"] = "corporate_actions"
+                    else:
+                        peer["dividend_yield_source"] = "estimate"
+
+                    # 2. Cổ phiếu thưởng / cổ tức bằng CP (%)
+                    stock_ratio = calculate_stock_dividend_ratio(peer_tk)
+                    if stock_ratio is not None:
+                        peer["stock_bonus_pct"] = stock_ratio
+                        peer["stock_bonus_source"] = "corporate_actions"
+                    else:
+                        peer["stock_bonus_source"] = "estimate"
+                except Exception:
+                    peer["dividend_yield_source"] = "estimate"
+                    peer["stock_bonus_source"] = "estimate"
+
+            # === Inject cột "CP Thưởng (%)" vào sector_kpi_columns nếu chưa có ===
+            kpi_cols = peers.get("sector_kpi_columns", []) if isinstance(peers, dict) else []
+            has_dividend_col = any(c.get("field") == "dividend_yield_pct" for c in kpi_cols)
+            has_stock_bonus_col = any(c.get("field") == "stock_bonus_pct" for c in kpi_cols)
+
+            if has_dividend_col and not has_stock_bonus_col:
+                # Chèn cột "CP Thưởng (%)" ngay sau cột "Cổ tức TM (%)"
+                div_idx = next(i for i, c in enumerate(kpi_cols) if c.get("field") == "dividend_yield_pct")
+                kpi_cols.insert(div_idx + 1, {
+                    "field": "stock_bonus_pct",
+                    "label": "CP Thưởng (%)",
+                    "unit": "%",
+                    "color": "amber"
+                })
+            elif not has_dividend_col and not has_stock_bonus_col:
+                # Sector không có cột cổ tức → thêm cả 2 vào cuối
+                kpi_cols.append({
+                    "field": "dividend_yield_pct",
+                    "label": "Cổ tức TM (%)",
+                    "unit": "%",
+                    "color": "emerald"
+                })
+                kpi_cols.append({
+                    "field": "stock_bonus_pct",
+                    "label": "CP Thưởng (%)",
+                    "unit": "%",
+                    "color": "amber"
+                })
+    except Exception:
+        pass  # Nếu enrich lỗi → giữ nguyên data từ sector_peers_matrix
+
+
     _PEERS_CACHE[clean_ticker] = peers
     _PEERS_CACHE_TS[clean_ticker] = now_ts
     return peers
@@ -1865,8 +1968,29 @@ async def api_crawl_url(
     )
     try:
         clean_ticker = (req.ticker or "HPG").upper().strip()
-        data = await crawl_url_content(req.url, ticker=clean_ticker, institution=req.institution or "CTCK")
-        
+        institution = req.institution or "CTCK"
+
+        # === CHỐNG TRÙNG LẶP: kiểm tra URL fingerprint đã học chưa ===
+        try:
+            from ai_learning_engine import is_report_already_learned, mark_report_as_learned, learn_analyst_writing_style
+            if is_report_already_learned(ticker=clean_ticker, url=req.url, institution=institution):
+                # Báo cáo đã học → trả ngay kết quả cũ, không crawl lại mạng
+                print(f"[Crawl URL] Bỏ qua (đã học): {institution} - {req.url[:80]}")
+                return {
+                    "source_info": {"url": req.url, "text": "", "already_learned": True},
+                    "extracted_report": {
+                        "institution": institution,
+                        "ticker": clean_ticker,
+                        "already_learned": True,
+                        "skip_reason": f"Báo cáo từ {institution} với URL này đã được học trước đó"
+                    },
+                    "already_learned": True
+                }
+        except ImportError:
+            pass
+
+        data = await crawl_url_content(req.url, ticker=clean_ticker, institution=institution)
+
         market_p = 25000.0
         try:
             p_info = await fetch_reconciled_live_price(clean_ticker)
@@ -1877,21 +2001,46 @@ async def api_crawl_url(
 
         extracted_report = extract_financial_data_from_text(
             raw_text=data["text"],
-            default_institution=req.institution or "CTCK",
+            default_institution=institution,
             ticker=clean_ticker,
             current_market_price=market_p
         )
         extracted_report.source_url = req.url
 
         # Tự động lưu trữ các Catalysts và Rủi ro mà AI bóc tách được vào kho tri thức
+        raw_text = data.get("text", "")
         try:
             save_learned_ticker_catalysts(
                 ticker=clean_ticker,
                 catalysts=extracted_report.key_catalysts,
                 risks=extracted_report.key_risks,
-                source=req.institution or "Bóc tách URL",
+                source=institution,
                 title=f"Báo cáo phân tích {clean_ticker}"
             )
+
+            # === HỌC NGỮ ĐIỆU PHÂN TÍCH của CTCK ===
+            try:
+                learn_analyst_writing_style(
+                    institution=institution,
+                    raw_text=raw_text,
+                    extracted_catalysts=extracted_report.key_catalysts or [],
+                    extracted_risks=extracted_report.key_risks or []
+                )
+            except Exception as style_err:
+                print(f"[Crawl URL] Lỗi học ngữ điệu {institution}: {style_err}")
+
+            # === ĐÁNH DẤU FINGERPRINT đã học ===
+            try:
+                mark_report_as_learned(
+                    ticker=clean_ticker,
+                    url=req.url,
+                    raw_text=raw_text,
+                    institution=institution,
+                    title=getattr(extracted_report, "report_title", "") or ""
+                )
+            except Exception as fp_err:
+                print(f"[Crawl URL] Lỗi đánh dấu fingerprint: {fp_err}")
+
             # Làm mới cache
             from crawler import _SYNCED_MATRIX_REPORTS_CACHE
             keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
@@ -1903,10 +2052,12 @@ async def api_crawl_url(
 
         return {
             "source_info": data,
-            "extracted_report": extracted_report
+            "extracted_report": extracted_report,
+            "already_learned": False
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi tải hoặc bóc tách URL: {str(e)}")
+
 
 
 @app.post("/api/upload-pdf")
@@ -2197,11 +2348,17 @@ async def api_get_ticker_knowledge(ticker: str):
     """
     Lấy toàn bộ kiến thức AI đã học được cho một mã cổ phiếu cụ thể.
     Trả về: catalysts, risks, theses, lịch sử nguồn học, thống kê.
+    Cached _TTL_KNOWLEDGE giây để giảm I/O — get_learned_ticker_catalysts() tự handle mtime.
     """
     clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    # Trả về từ cache nếu còn mới
+    if clean_ticker in _KNOWLEDGE_CACHE and (now_ts - _KNOWLEDGE_CACHE_TS.get(clean_ticker, 0)) < _TTL_KNOWLEDGE:
+        return _KNOWLEDGE_CACHE[clean_ticker]
+
     learned = get_learned_ticker_catalysts(clean_ticker)
     if not learned:
-        return {
+        result = {
             "ticker": clean_ticker,
             "has_knowledge": False,
             "catalysts": [],
@@ -2211,16 +2368,20 @@ async def api_get_ticker_knowledge(ticker: str):
             "last_updated": None,
             "total_sources": 0
         }
-    return {
-        "ticker": clean_ticker,
-        "has_knowledge": True,
-        "catalysts": learned.get("catalysts", []),
-        "risks": learned.get("risks", []),
-        "theses": learned.get("theses", []),
-        "history": learned.get("history", []),
-        "last_updated": learned.get("last_updated"),
-        "total_sources": len(learned.get("history", []))
-    }
+    else:
+        result = {
+            "ticker": clean_ticker,
+            "has_knowledge": True,
+            "catalysts": learned.get("catalysts", []),
+            "risks": learned.get("risks", []),
+            "theses": learned.get("theses", []),
+            "history": learned.get("history", []),
+            "last_updated": learned.get("last_updated"),
+            "total_sources": len(learned.get("history", []))
+        }
+    _KNOWLEDGE_CACHE[clean_ticker] = result
+    _KNOWLEDGE_CACHE_TS[clean_ticker] = now_ts
+    return result
 
 
 @app.delete("/api/ai-learning/knowledge/{ticker}")
@@ -2238,6 +2399,9 @@ async def api_delete_ticker_knowledge(ticker: str):
             del data[clean_ticker]
             with open(AI_LEARNED_CATALYSTS_FILE, "w", encoding="utf-8") as f:
                 _json.dump(data, f, ensure_ascii=False, indent=2)
+        # Invalidate server-side knowledge cache ngay lập tức
+        _KNOWLEDGE_CACHE.pop(clean_ticker, None)
+        _KNOWLEDGE_CACHE_TS.pop(clean_ticker, None)
         return {"ticker": clean_ticker, "deleted": existed, "message": "Đã xóa thành công" if existed else "Không tìm thấy dữ liệu"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi xóa knowledge: {str(e)}")

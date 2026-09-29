@@ -1871,12 +1871,29 @@ def parse_edocs_item_to_report(
     _title_lower = title.lower()
     _content_lower = content.lower()
     _report_type_lower = (item.get("ReportTypeName") or "").lower()
+    # Kết hợp tất cả các field để detect — KHÔNG giới hạn ký tự content
+    _full_check = _title_lower + " " + _report_type_lower + " " + _content_lower
 
-    is_technical = any(k in _title_lower or k in _report_type_lower or k in _content_lower[:140] for k in [
+    _TECH_KEYWORDS = [
         "phân tích kỹ thuật", "ptkt", "kỹ thuật ngày", "góc nhìn kỹ thuật",
         "chiến lược kỹ thuật", "tín hiệu kỹ thuật", "báo cáo kỹ thuật", "nhận định kỹ thuật",
-        "technical analysis", "technical report", "khuyến nghị kỹ thuật", "lướt sóng", "điểm mua kỹ thuật"
-    ])
+        "technical analysis", "technical report", "khuyến nghị kỹ thuật", "lướt sóng",
+        "điểm mua kỹ thuật", "trading strategy", "trading time", "trading report",
+        "thời gian giao dịch",
+    ]
+    is_technical = any(k in _full_check for k in _TECH_KEYWORDS)
+
+    # Dấu hiệu bổ sung: "Trading time: N-M tháng" hoặc "Tỷ suất lợi nhuận kỳ vọng" kết hợp với
+    # không có từ khóa cơ bản (DCF, P/E, P/B mục tiêu, EPS, định giá) → khả năng là PTKT
+    if not is_technical:
+        _has_trading_time = bool(re.search(r'trading\s*time\s*[:\-–]?\s*\d', _content_lower, re.I))
+        _has_fundamental_kw = any(k in _content_lower for k in [
+            "dcf", "p/e mục tiêu", "p/b mục tiêu", "eps dự phóng", "định giá", "ebitda",
+            "dòng tiền chiết khấu", "giá trị doanh nghiệp"
+        ])
+        if _has_trading_time and not _has_fundamental_kw:
+            is_technical = True
+
 
     # 1. Khuyến nghị
     if is_technical:

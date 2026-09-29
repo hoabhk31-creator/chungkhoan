@@ -694,22 +694,37 @@ def extract_advanced_knowledge(
 
 # -------------------------------------------------------------
 # 3.5. AI LEARNED CATALYSTS & MULTI-INSTITUTIONAL KNOWLEDGE STORE
+# In-memory cache: tránh đọc file 299KB mỗi request API
 # -------------------------------------------------------------
 
-def get_learned_ticker_catalysts(ticker: str) -> Dict[str, Any]:
-    """Truy xuất danh sách Catalysts, Luận điểm và Rủi ro mà AI đã tích lũy theo mã."""
-    if not ticker:
-        return {}
-    clean_ticker = ticker.upper().strip()
+_LEARNED_CATALYSTS_CACHE: Dict[str, Any] = {}
+_LEARNED_CATALYSTS_CACHE_MTIME: float = 0.0
+
+
+def _load_learned_catalysts_store() -> Dict[str, Any]:
+    """Load ai_learned_catalysts.json vào RAM; chỉ reload khi file thực sự thay đổi (mtime check)."""
+    global _LEARNED_CATALYSTS_CACHE, _LEARNED_CATALYSTS_CACHE_MTIME
     if not os.path.exists(AI_LEARNED_CATALYSTS_FILE):
         return {}
     try:
+        mtime = os.path.getmtime(AI_LEARNED_CATALYSTS_FILE)
+        if mtime == _LEARNED_CATALYSTS_CACHE_MTIME and _LEARNED_CATALYSTS_CACHE:
+            return _LEARNED_CATALYSTS_CACHE
         with open(AI_LEARNED_CATALYSTS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return data.get(clean_ticker, {})
+        _LEARNED_CATALYSTS_CACHE = data
+        _LEARNED_CATALYSTS_CACHE_MTIME = mtime
+        return data
     except Exception as e:
         print(f"[AI Learning] Lỗi đọc kho catalysts: {e}")
+        return _LEARNED_CATALYSTS_CACHE
+
+
+def get_learned_ticker_catalysts(ticker: str) -> Dict[str, Any]:
+    """Truy xuất Catalysts/Risks/Theses AI đã học theo mã. Dùng RAM cache — O(1) thay vì I/O disk."""
+    if not ticker:
         return {}
+    return _load_learned_catalysts_store().get(ticker.upper().strip(), {})
 
 
 def save_learned_ticker_catalysts(
@@ -793,6 +808,295 @@ def save_learned_ticker_catalysts(
         print(f"[AI Learning] Lỗi ghi store catalysts: {e}")
 
     return ticker_entry
+
+
+# -------------------------------------------------------------
+# 3.6. CHỐNG TRÙNG LẶP BÁO CÁO & HỌC NGỮ ĐIỆU PHÂN TÍCH
+# Mỗi báo cáo được nhận diện qua fingerprint (URL hash + content hash).
+# Ngữ điệu của từng CTCK được học và lưu để normalize ý nghĩa.
+# -------------------------------------------------------------
+
+_SEEN_REPORTS_FILE = os.path.join(os.path.dirname(AI_LEARNED_CATALYSTS_FILE), "ai_seen_reports.json")
+_ANALYST_STYLE_FILE = os.path.join(os.path.dirname(AI_LEARNED_CATALYSTS_FILE), "ai_analyst_styles.json")
+
+# In-memory cache
+_SEEN_REPORTS_CACHE: Dict[str, Any] = {}
+_SEEN_REPORTS_MTIME: float = 0.0
+_ANALYST_STYLE_CACHE: Dict[str, Any] = {}
+_ANALYST_STYLE_MTIME: float = 0.0
+
+
+def _make_report_fingerprint(url: str = "", raw_text: str = "", institution: str = "", ticker: str = "") -> str:
+    """
+    Tạo fingerprint duy nhất cho một báo cáo.
+    Ưu tiên: URL → hash 32 ký tự đầu text → (institution + ticker + date).
+    """
+    import hashlib
+    if url and url.strip():
+        return hashlib.sha256(url.strip().lower().encode()).hexdigest()[:16]
+    if raw_text and len(raw_text) > 100:
+        # Hash 2000 ký tự đầu (đủ phân biệt, không phụ thuộc giá/ngày cuối)
+        snippet = raw_text[:2000].strip()
+        return hashlib.sha256(snippet.encode("utf-8", errors="ignore")).hexdigest()[:16]
+    # Fallback: institution + ticker (chấp nhận false-negative)
+    combo = f"{institution.lower().strip()}_{ticker.upper().strip()}"
+    return hashlib.md5(combo.encode()).hexdigest()[:12]
+
+
+def _load_seen_reports() -> Dict[str, Any]:
+    """Load seen reports cache với mtime check."""
+    global _SEEN_REPORTS_CACHE, _SEEN_REPORTS_MTIME
+    if not os.path.exists(_SEEN_REPORTS_FILE):
+        return {}
+    try:
+        mtime = os.path.getmtime(_SEEN_REPORTS_FILE)
+        if mtime == _SEEN_REPORTS_MTIME and _SEEN_REPORTS_CACHE:
+            return _SEEN_REPORTS_CACHE
+        with open(_SEEN_REPORTS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        _SEEN_REPORTS_CACHE = data
+        _SEEN_REPORTS_MTIME = mtime
+        return data
+    except Exception:
+        return _SEEN_REPORTS_CACHE
+
+
+def is_report_already_learned(
+    ticker: str,
+    url: str = "",
+    raw_text: str = "",
+    institution: str = ""
+) -> bool:
+    """
+    Kiểm tra báo cáo đã được học chưa dựa trên fingerprint (URL hash / content hash).
+    Trả True nếu đã học → caller nên bỏ qua, không học lại.
+    """
+    fp = _make_report_fingerprint(url=url, raw_text=raw_text, institution=institution, ticker=ticker)
+    seen = _load_seen_reports()
+    ticker_seen = seen.get(ticker.upper().strip(), {})
+    return fp in ticker_seen
+
+
+def mark_report_as_learned(
+    ticker: str,
+    url: str = "",
+    raw_text: str = "",
+    institution: str = "",
+    title: str = ""
+) -> str:
+    """
+    Đánh dấu báo cáo đã học vào store. Trả về fingerprint.
+    """
+    global _SEEN_REPORTS_CACHE, _SEEN_REPORTS_MTIME
+    fp = _make_report_fingerprint(url=url, raw_text=raw_text, institution=institution, ticker=ticker)
+    clean_ticker = ticker.upper().strip()
+
+    seen = _load_seen_reports()
+    if clean_ticker not in seen:
+        seen[clean_ticker] = {}
+
+    seen[clean_ticker][fp] = {
+        "fp": fp,
+        "url": url[:200] if url else "",
+        "institution": institution[:60] if institution else "",
+        "title": title[:120] if title else "",
+        "learned_at": datetime.now().strftime("%d/%m/%Y %H:%M")
+    }
+
+    # Giữ tối đa 200 fingerprints mỗi mã (tránh file phình to)
+    ticker_fps = seen[clean_ticker]
+    if len(ticker_fps) > 200:
+        # Xóa 50 cái cũ nhất
+        sorted_fps = sorted(ticker_fps.items(), key=lambda x: x[1].get("learned_at", ""), reverse=True)
+        seen[clean_ticker] = dict(sorted_fps[:150])
+
+    try:
+        os.makedirs(os.path.dirname(_SEEN_REPORTS_FILE), exist_ok=True)
+        with open(_SEEN_REPORTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(seen, f, ensure_ascii=False, indent=2)
+        _SEEN_REPORTS_CACHE = seen
+        _SEEN_REPORTS_MTIME = os.path.getmtime(_SEEN_REPORTS_FILE)
+    except Exception as e:
+        print(f"[AI Learning] Lỗi lưu seen_reports: {e}")
+
+    return fp
+
+
+def learn_analyst_writing_style(
+    institution: str,
+    raw_text: str,
+    extracted_catalysts: List[str],
+    extracted_risks: List[str]
+) -> None:
+    """
+    Học ngữ điệu và cách viết của từng CTCK (analyst writing style).
+
+    Phương pháp:
+    - Trích các cụm từ đặc trưng xuất hiện quanh từ khoá định giá/luận điểm.
+    - Tích lũy tần suất: cụm nào xuất hiện nhiều lần → trọng số cao hơn.
+    - Dùng để normalize ý nghĩa: "khuyến nghị MUA" vs "recommends BUY" vs "tích lũy".
+    - Lưu per institution vào ai_analyst_styles.json.
+
+    Không lưu thông tin nhạy cảm — chỉ lưu pattern, không lưu raw text.
+    """
+    global _ANALYST_STYLE_CACHE, _ANALYST_STYLE_MTIME
+
+    if not institution or not raw_text or len(raw_text) < 200:
+        return
+
+    inst_key = institution.strip().lower()
+
+    # Patterns đặc trưng: cụm từ chỉ khuyến nghị, định giá, rủi ro
+    BUY_PATTERNS = [
+        r"khuyến nghị\s*(mua|tích lũy|outperform|buy)",
+        r"recommend\s*(buy|accumulate|outperform)",
+        r"nâng\s*giá\s*mục\s*tiêu",
+        r"tăng\s*khuyến\s*nghị",
+        r"duy trì\s*(mua|buy|tích lũy)",
+        r"nên\s*mua",
+    ]
+    RISK_PATTERNS = [
+        r"rủi ro\s*(chính|lớn|quan trọng|đáng chú ý)",
+        r"key\s*risk",
+        r"downside\s*risk",
+        r"áp\s*lực\s*(cạnh tranh|lãi suất|tỷ giá|chi phí)",
+        r"thách thức\s*(từ|trong|về)",
+    ]
+    VALUATION_PATTERNS = [
+        r"p/?e\s*(?:forward|mục tiêu|dự phóng)?\s*(?:khoảng|~|≈)?\s*(\d+(?:[.,]\d+)?)\s*(?:lần|x)",
+        r"giá\s*mục\s*tiêu\s*(?:12\s*tháng)?\s*(?:là|:)?\s*([\d,\.]+)",
+        r"target\s*price\s*(?:of|:)?\s*([\d,\.]+)",
+        r"dcf\s*(?:cho|yield|value)?",
+        r"định giá\s*(theo|bằng|qua|dựa)",
+    ]
+
+    text_lower = raw_text.lower()
+
+    # Đếm pattern matches
+    buy_hits, risk_hits, val_hits = [], [], []
+    for pat in BUY_PATTERNS:
+        matches = re.findall(pat, text_lower)
+        buy_hits.extend(matches)
+    for pat in RISK_PATTERNS:
+        matches = re.findall(pat, text_lower)
+        risk_hits.extend(matches)
+    for pat in VALUATION_PATTERNS:
+        matches = re.findall(pat, text_lower)
+        val_hits.extend(matches)
+
+    # Trích phrase patterns từ catalysts đã extract (ngữ liệu thực tế)
+    catalyst_phrases = []
+    for cat in (extracted_catalysts or []):
+        if len(cat) > 15:
+            # Lấy 6 từ đầu làm phrase đặc trưng
+            words = cat.strip().split()[:6]
+            phrase = " ".join(words).lower()
+            if len(phrase) > 8:
+                catalyst_phrases.append(phrase)
+
+    # Load style store
+    styles: Dict[str, Any] = {}
+    if os.path.exists(_ANALYST_STYLE_FILE):
+        try:
+            mtime = os.path.getmtime(_ANALYST_STYLE_FILE)
+            if mtime == _ANALYST_STYLE_MTIME and _ANALYST_STYLE_CACHE:
+                styles = _ANALYST_STYLE_CACHE
+            else:
+                with open(_ANALYST_STYLE_FILE, "r", encoding="utf-8") as f:
+                    styles = json.load(f)
+                _ANALYST_STYLE_CACHE = styles
+                _ANALYST_STYLE_MTIME = mtime
+        except Exception:
+            styles = {}
+
+    if inst_key not in styles:
+        styles[inst_key] = {
+            "institution": institution,
+            "reports_learned": 0,
+            "buy_signal_phrases": {},
+            "risk_signal_phrases": {},
+            "valuation_patterns": {},
+            "catalyst_phrase_freq": {},
+            "last_updated": ""
+        }
+
+    entry = styles[inst_key]
+    entry["reports_learned"] = entry.get("reports_learned", 0) + 1
+    entry["last_updated"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # Tích lũy tần suất phrase (weighted count)
+    for ph in buy_hits:
+        k = str(ph).strip()
+        if k:
+            entry["buy_signal_phrases"][k] = entry["buy_signal_phrases"].get(k, 0) + 1
+    for ph in risk_hits:
+        k = str(ph).strip()
+        if k:
+            entry["risk_signal_phrases"][k] = entry["risk_signal_phrases"].get(k, 0) + 1
+    for ph in val_hits:
+        k = str(ph).strip()
+        if k:
+            entry["valuation_patterns"][k] = entry["valuation_patterns"].get(k, 0) + 1
+    for ph in catalyst_phrases:
+        entry["catalyst_phrase_freq"][ph] = entry["catalyst_phrase_freq"].get(ph, 0) + 1
+
+    # Trim: chỉ giữ top-100 phrases mỗi loại
+    for field in ("buy_signal_phrases", "risk_signal_phrases", "valuation_patterns", "catalyst_phrase_freq"):
+        d = entry.get(field, {})
+        if len(d) > 100:
+            sorted_items = sorted(d.items(), key=lambda x: x[1], reverse=True)[:80]
+            entry[field] = dict(sorted_items)
+
+    styles[inst_key] = entry
+
+    try:
+        os.makedirs(os.path.dirname(_ANALYST_STYLE_FILE), exist_ok=True)
+        with open(_ANALYST_STYLE_FILE, "w", encoding="utf-8") as f:
+            json.dump(styles, f, ensure_ascii=False, indent=2)
+        _ANALYST_STYLE_CACHE = styles
+        _ANALYST_STYLE_MTIME = os.path.getmtime(_ANALYST_STYLE_FILE)
+    except Exception as e:
+        print(f"[AI Learning] Lỗi ghi analyst_styles: {e}")
+
+
+def get_analyst_style_summary(institution: str) -> Dict[str, Any]:
+    """
+    Trả về tóm tắt ngữ điệu của một CTCK: top phrases, số báo cáo đã học.
+    Dùng để hiển thị trên dashboard AI Learning.
+    """
+    global _ANALYST_STYLE_CACHE, _ANALYST_STYLE_MTIME
+    styles: Dict[str, Any] = {}
+    if os.path.exists(_ANALYST_STYLE_FILE):
+        try:
+            mtime = os.path.getmtime(_ANALYST_STYLE_FILE)
+            if mtime == _ANALYST_STYLE_MTIME and _ANALYST_STYLE_CACHE:
+                styles = _ANALYST_STYLE_CACHE
+            else:
+                with open(_ANALYST_STYLE_FILE, "r", encoding="utf-8") as f:
+                    styles = json.load(f)
+                _ANALYST_STYLE_CACHE = styles
+                _ANALYST_STYLE_MTIME = mtime
+        except Exception:
+            pass
+
+    inst_key = institution.strip().lower()
+    entry = styles.get(inst_key, {})
+    if not entry:
+        return {"institution": institution, "reports_learned": 0, "style_learned": False}
+
+    # Top 5 phrases mỗi loại
+    def top5(d: dict) -> List[str]:
+        return [k for k, _ in sorted(d.items(), key=lambda x: x[1], reverse=True)[:5]]
+
+    return {
+        "institution": institution,
+        "reports_learned": entry.get("reports_learned", 0),
+        "style_learned": entry.get("reports_learned", 0) >= 2,
+        "top_buy_phrases": top5(entry.get("buy_signal_phrases", {})),
+        "top_risk_phrases": top5(entry.get("risk_signal_phrases", {})),
+        "top_catalyst_phrases": top5(entry.get("catalyst_phrase_freq", {})),
+        "last_updated": entry.get("last_updated", "")
+    }
 
 
 def apply_learned_catalysts_to_report(report: Any) -> Any:
