@@ -366,5 +366,21 @@
     ],
     "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
     "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "VIX": {
+    "name": "VIX: CTCP Chứng khoán VIX",
+    "domain": "vixs.vn",
+    "official_url": "https://www.vixs.vn",
+    "projects_url": "https://vixs.vn/du-an",
+    "ir_url": "https://vixs.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
   }
 }
