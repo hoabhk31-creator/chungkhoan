@@ -4076,5 +4076,52 @@
       "adjustment_factor": null,
       "source": "Sở GDCK / Simplize Open API"
     }
+  ],
+  "SCS": [
+    {
+      "id": "scs-ca-23072026-dividend_cash",
+      "ex_date": "23/07/2026",
+      "record_date": "24/07/2026",
+      "execution_date": "06/08/2026",
+      "event_type": "dividend_cash",
+      "title": "SCS: Thông báo ngày ĐKCC trả cổ tức đợt 2 năm 2025 bằng tiền",
+      "description": "Trả cổ tức  đợt 2/2025 bằng tiền, 2,500 đồng/CP",
+      "cash_amount": 2500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "scs-ca-19122025-dividend_cash",
+      "ex_date": "19/12/2025",
+      "record_date": "22/12/2025",
+      "execution_date": "26/01/2026",
+      "event_type": "dividend_cash",
+      "title": "SCS: Thông báo ngày ĐKCC tạm ứng cổ tức đợt 1 năm 2025 bằng tiền",
+      "description": "Trả cổ tức  đợt 1/2025 bằng tiền, 2,500 đồng/CP",
+      "cash_amount": 2500.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    },
+    {
+      "id": "scs-ca-29082025-dividend_cash",
+      "ex_date": "29/08/2025",
+      "record_date": "03/09/2025",
+      "execution_date": "15/09/2025",
+      "event_type": "dividend_cash",
+      "title": "SCS: Thông báo ngày ĐKCC chi trả cổ tức còn lại năm 2024 bằng tiền cho CĐHH",
+      "description": "Trả cổ tức  đợt 2/2024 bằng tiền, 3,000 đồng/CP",
+      "cash_amount": 3000.0,
+      "stock_ratio": 0.0,
+      "rights_ratio": 0.0,
+      "rights_price": 0.0,
+      "adjustment_factor": null,
+      "source": "Sở GDCK / Simplize Open API"
+    }
   ]
 }
