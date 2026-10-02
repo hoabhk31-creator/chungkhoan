@@ -1,0 +1,704 @@
+# -*- coding: utf-8 -*-
+"""
+HỆ THỐNG MẪU BÓC TÁCH CATALYSTS & RỦI RO VI MÔ ĐỘC BẢN TOÀN THỊ TRƯỜNG
+Chuẩn mực: 15 Quy tắc Catalysts Chuyên sâu • 5 Luận điểm Đầu tư • 10 Quy tắc Rủi ro Trọng yếu mỗi ngành.
+Hỗ trợ Few-Shot Learning thoát ly hoàn toàn khỏi văn mẫu rỗng và bảo đảm chất lượng dữ liệu bóc tách.
+"""
+from typing import List, Dict, Any
+
+DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
+    {
+        "id": "tpl-doanh-nghiep-doc-ban",
+        "name": "Bóc Tách Độc Bản Doanh Nghiệp (Thoát Ly Khuôn Mẫu Ngành)",
+        "sector": "Toàn Thị Trường & Độc Bản Doanh Nghiệp",
+        "is_system": True,
+        "keywords": [
+            "doanh nghiệp", "dự án", "hợp đồng", "công suất", "thị phần", "dở dang",
+            "backlog", "doanh thu", "lợi nhuận", "biên gộp", "dòng tiền", "cổ tức",
+            "tăng vốn", "mở rộng", "nhà máy", "khách hàng", "đơn hàng", "tái cơ cấu",
+            "giá vốn", "chi phí", "nợ vay", "đáo hạn", "tỷ giá", "pháp lý"
+        ],
+        "catalyst_rules": [
+            "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới",
+            "Giá trị hợp đồng ký mới (Order Intake) hoặc khối lượng đơn hàng tồn đọng (Backlog) chuyển tiếp",
+            "Tối ưu hóa giá vốn hàng bán, chi phí nguyên vật liệu đầu vào và mở rộng biên lãi ròng (NIM/Gross Margin)",
+            "Chuyển biến tích cực trong cơ cấu nợ vay: giảm tỷ lệ đòn bẩy D/E và tiết giảm chi phí lãi vay",
+            "Chính sách bảo hộ thương mại, thuế chống bán phá giá hoặc ưu đãi thuế thu nhập doanh nghiệp",
+            "Ghi nhận doanh thu/lợi nhuận đột biến từ bàn giao dự án gối đầu hoặc chuyển nhượng tài sản",
+            "Kế hoạch chi trả cổ tức tiền mặt tỷ lệ cao và phát hành tăng vốn cho cổ đông chiến lược",
+            "Dòng tiền thuần từ hoạt động kinh doanh (CFO) dương lớn và tỷ lệ thặng dư vốn dồi dào",
+            "Ký kết hợp tác chiến lược, liên doanh M&A với các tập đoàn công nghệ/tài chính đa quốc gia",
+            "Mở rộng thị phần trong nước hoặc xuất khẩu bứt phá vào các thị trường lớn (Mỹ, EU, Nhật Bản)",
+            "Khả năng chuyển chi phí tăng thêm sang giá bán bình quân (ASP) nhờ vị thế độc quyền nhóm",
+            "Đạt các chứng chỉ xanh tiêu chuẩn quốc tế (ESG, CBAM, IFRS) mở đường cho dòng vốn ngoại",
+            "Tiến trình tái cơ cấu thành công, thoái vốn khỏi các mảng kinh doanh ngoài ngành thua lỗ",
+            "Kỳ vọng hưởng lợi từ nâng hạng thị trường chứng khoán (FTSE/MSCI) và hệ thống giao dịch KRX",
+            "Ban lãnh đạo và cổ đông nội bộ đăng ký mua gom khối lượng lớn cổ phiếu khẳng định triển vọng"
+        ],
+        "thesis_rules": [
+            "Lợi thế cạnh tranh kinh tế bền vững (Economic Moat) dựa trên quy mô chi phí thấp nhất ngành",
+            "Vị thế dẫn đầu thị phần tuyệt đối trong phân khúc cốt lõi tạo rào cản gia nhập thị trường cao",
+            "Đội ngũ lãnh đạo có năng lực quản trị minh bạch, định hướng chiến lược dài hạn xuất sắc",
+            "Mô hình kinh doanh tạo dòng tiền tự do vững chắc, khả năng tự tài trợ vốn mở rộng mà không phụ thuộc đòn bẩy",
+            "Định giá P/E và P/B đang chiết khấu sâu so với tiềm năng tăng trưởng EPS và ROE trung dài hạn"
+        ],
+        "risk_rules": [
+            "Tiến độ cấp phép pháp lý, thẩm định quy hoạch hoặc giải phóng mặt bằng dự án kéo dài hơn dự kiến",
+            "Biến động bất lợi của giá nguyên vật liệu đầu vào và chi phí logistics ăn mòn biên lợi nhuận ròng",
+            "Áp lực đáo hạn nợ vay, trái phiếu doanh nghiệp hoặc chi phí tài chính gia tăng trong môi trường lãi suất cao",
+            "Cạnh tranh khốc liệt về giá từ các đối thủ cùng ngành hoặc hàng nhập khẩu giá rẻ gây xói mòn thị phần",
+            "Biến động tỷ giá hối đoái gây lỗ chênh lệch tỷ giá đối với các khoản nợ vay ngoại tệ hoặc chi phí nhập khẩu nguyên liệu",
+            "Rủi ro suy giảm sức mua của thị trường tiêu thụ chính do suy thoái kinh tế hoặc thu nhập khách hàng giảm",
+            "Rủi ro pha loãng giá trị cổ phiếu từ các đợt phát hành tăng vốn quy mô lớn hoặc phát hành ESOP giá thấp",
+            "Rủi ro thay đổi chính sách điều hành, siết chặt quản lý thuế, môi trường hoặc tiêu chuẩn chất lượng kỹ thuật",
+            "Hiệu suất khai thác tài sản hoặc công suất vận hành sau đầu tư không đạt mức hòa vốn như tính toán ban đầu",
+            "Rủi ro tập trung khách hàng hoặc nhà cung cấp chủ lực làm suy giảm năng lực đàm phán thương mại"
+        ],
+        "sample_text": "Doanh nghiệp ghi nhận tiến độ bàn giao dự án trọng điểm vượt kế hoạch 15%, mang lại dòng tiền bán hàng đột biến đạt hơn 2,500 tỷ đồng trong quý. Tỷ lệ nợ vay trên vốn chủ sở hữu giảm từ 0.8x xuống 0.35x. Kế hoạch chia cổ tức tiền mặt 20% đã được ĐHĐCĐ thông qua.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Bàn giao dự án trọng điểm vượt tiến độ 15%, ghi nhận dòng tiền đột biến 2,500 tỷ đồng."},
+                {"category": "Cơ cấu tài chính", "text": "Tỷ lệ nợ vay D/E giảm mạnh về 0.35x giúp hạ gánh nặng chi phí lãi vay."},
+                {"category": "Cổ tức & Sự kiện", "text": "Chi trả cổ tức tiền mặt tỷ lệ 20% mang lại lợi suất hấp dẫn cho cổ đông."}
+            ],
+            "theses": ["Dòng tiền bán hàng đột biến củng cố năng lực tài chính và chu kỳ lợi nhuận bứt phá."],
+            "risks": ["Tiến độ bàn giao các phân kỳ tiếp theo phụ thuộc vào tốc độ hoàn công của nhà thầu."]
+        }
+    },
+    {
+        "id": "tpl-thep-vat-lieu",
+        "name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+        "sector": "Thép & Vật liệu xây dựng",
+        "is_system": True,
+        "keywords": ["thép", "hrc", "quặng sắt", "than cốc", "dung quất", "lò cao", "tôn mạ", "chống bán phá giá", "xây dựng", "hpg", "nkg", "hsg"],
+        "catalyst_rules": [
+            "Tiến độ giải ngân Capex và vận hành các phân kỳ lò cao (Dung Quất 2, nâng công suất HRC lên 14+ triệu tấn/năm)",
+            "Biến động chênh lệch giá (Spread) HRC - Quặng sắt & Than mỡ luyện cốc nới rộng",
+            "Chính sách bảo hộ, thuế tự vệ chống bán phá giá (AD01, AD03) đối với thép cán nóng HRC nhập khẩu từ Trung Quốc/Ấn Độ",
+            "Sự phục hồi nhu cầu đầu tư công hạ tầng giao thông và thị trường bất động sản xây dựng dân dụng",
+            "Gia tăng sản lượng xuất khẩu sang thị trường EU, Bắc Mỹ và ASEAN đáp ứng tiêu chuẩn xanh CBAM",
+            "Tối ưu hóa chuỗi giá trị khép kín từ quặng sắt, than coke tới phôi thép và thép thành phẩm chất lượng cao",
+            "Vận hành nhà máy sản xuất vỏ container và thép ray đường sắt tốc độ cao mở ra thị trường ngách mới",
+            "Biên lợi nhuận gộp phục hồi mạnh mẽ từ vùng đáy chu kỳ nhờ quản trị tồn kho nguyên liệu giá thấp",
+            "Giảm mạnh dư nợ vay và chi phí lãi vay sau khi hoàn thành chu kỳ giải ngân dự án lớn",
+            "Dòng tiền kinh doanh thặng dư dồi dào tài trợ vốn lưu động mà không cần phát hành pha loãng",
+            "Thuế chống bán phá giá tôn mạ và ống thép tại các thị trường xuất khẩu được gỡ bỏ hoặc áp thuế thấp",
+            "Tăng thị phần nội địa vượt trội (trên 35% thép xây dựng và trên 30% ống thép) củng cố quyền định giá",
+            "Đổi mới công nghệ luyện kim xanh sử dụng hydro và điện hồ quang giúp giảm phát thải carbon",
+            "Tỷ lệ cổ tức tiền mặt đều đặn và duy trì thặng dư vốn cổ phần lớn",
+            "Hưởng lợi từ làn sóng tái thiết hạ tầng và nhu cầu nhà ở xã hội quy mô 1 triệu căn hộ"
+        ],
+        "thesis_rules": [
+            "Lợi thế quy mô dẫn đầu với giá thành sản xuất cạnh tranh nhất khu vực Đông Nam Á",
+            "Chuỗi giá trị khép kín từ thượng nguồn phôi thép đến hạ nguồn thép chế tạo chất lượng cao",
+            "Dòng tiền tự do dồi dào, tỷ lệ đòn bẩy tài chính duy trì ở mức an toàn",
+            "Năng lực R&D phát triển các mác thép kỹ thuật cao thay thế hàng nhập khẩu",
+            "Vị thế thống lĩnh mạng lưới phân phối đại lý cấp 1 rộng khắp cả nước"
+        ],
+        "risk_rules": [
+            "Biến động giá nguyên vật liệu đầu vào (quặng sắt, than mỡ coke) tăng đột biến",
+            "Thị trường bất động sản nội địa hồi phục chậm hơn kỳ vọng kéo theo tiêu thụ thép xây dựng sụt giảm",
+            "Rủi ro áp thuế phòng vệ thương mại từ các thị trường xuất khẩu lớn (Mỹ, EU)",
+            "Thép giá rẻ từ các nước dư thừa công suất tràn vào cạnh tranh gay gắt làm xói mòn giá bán nội địa",
+            "Rủi ro tỷ giá USD/VND gia tăng chi phí nhập khẩu nguyên liệu quặng sắt và than cốc",
+            "Chi phí năng lượng (giá điện sản xuất) điều chỉnh tăng ảnh hưởng giá thành luyện thép lò điện",
+            "Tiến độ nghiệm thu và chạy thử các giai đoạn mở rộng nhà máy bị đình trệ",
+            "Áp lực tuân thủ các quy định môi trường và cơ chế điều chỉnh biên giới carbon (CBAM) của EU",
+            "Rủi ro trích lập giảm giá hàng tồn kho khi giá thép thành phẩm thế giới lao dốc đột ngột",
+            "Chi phí lãi vay tăng cao trong giai đoạn đầu tư mở rộng nhà máy chưa phát sinh doanh thu"
+        ],
+        "sample_text": "HPG chuẩn bị đưa phân kỳ 1 dự án Dung Quất 2 vào vận hành từ cuối 2024 - đầu 2025, nâng tổng công suất thép thô lên 14 triệu tấn/năm. Động lực chính đến từ sản phẩm HRC chất lượng cao cung cấp cho các nhà sản xuất tôn mạ và ống thép trong nước. Lợi nhuận kỳ vọng phục hồi mạnh nhờ biên gộp nới rộng khi giá than cốc hạ nhiệt.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Dung Quất 2 vận hành phân kỳ 1, nâng công suất thép thô thêm 5.6 triệu tấn HRC/năm."},
+                {"category": "Biên lợi nhuận", "text": "Nới rộng biên lãi gộp nhờ giá than cốc và quặng sắt nguyên liệu duy trì vùng đáy chu kỳ."},
+                {"category": "Vĩ mô & Chính sách", "text": "Đề xuất điều tra và áp thuế chống bán phá giá HRC nhập khẩu tạo lợi thế sân nhà."}
+            ],
+            "theses": ["Doanh nghiệp dẫn đầu tuyệt đối thị phần thép xây dựng và HRC với chuỗi sản xuất khép kín."],
+            "risks": ["Sức cầu thị trường BĐS phục hồi chậm ảnh hưởng sản lượng tiêu thụ thép xây dựng."]
+        }
+    },
+    {
+        "id": "tpl-ban-le-tieu-dung",
+        "name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+        "sector": "Bán lẻ & Tiêu dùng",
+        "is_system": True,
+        "keywords": ["bán lẻ", "chuỗi", "bách hóa xanh", "long châu", "ict", "điện thoại", "vàng bạc", "doanh thu/cửa hàng", "ebitda", "mwg", "frt", "pnj"],
+        "catalyst_rules": [
+            "Điểm hòa vốn cấp công ty và tăng trưởng lợi nhuận ròng của chuỗi Bách Hóa Xanh / Long Châu",
+            "Doanh thu trung bình trên mỗi cửa hàng (Rev/store) cải thiện liên tục qua từng quý",
+            "Tối ưu hóa chi phí vận hành (OPEX), đóng bớt các điểm bán không hiệu quả và tái cấu trúc mạng lưới",
+            "Phục hồi nhu cầu tiêu dùng các mặt hàng giá trị cao (ICT, Điện máy gia dụng, Vàng trang sức)",
+            "Kế hoạch huy động vốn cổ phần hoặc IPO/bán vốn chuỗi con cho nhà đầu tư chiến lược quốc tế",
+            "Tăng biên lợi nhuận gộp nhờ cải thiện đàm phán thương mại với các nhà cung cấp lớn (rebates)",
+            "Mở rộng chuỗi nhà thuốc đạt quy mô bao phủ toàn quốc và chiếm lĩnh thị phần bán lẻ dược phẩm",
+            "Ứng dụng AI và số hóa chuỗi cung ứng, tự động hóa quản trị tồn kho và giảm tỷ lệ hủy hàng",
+            "Phát triển các nhãn hàng riêng (Private Label) có biên lợi nhuận gộp vượt trội trên 30%",
+            "Tăng trưởng doanh thu từ các kênh thương mại điện tử, Omnichannel và ứng dụng di động",
+            "Tỷ lệ dòng tiền tự do (FCF) chuyển biến dương mạnh mẽ hỗ trợ chi trả cổ tức tiền mặt",
+            "Hưởng lợi từ chính sách giảm thuế VAT 2% và các gói kích cầu tiêu dùng nội địa của Chính phủ",
+            "Mở rộng hệ thống bán lẻ trang sức cao cấp và dịch vụ chế tác theo yêu cầu cá nhân hóa",
+            "Xu hướng người tiêu dùng chuyển dịch từ chợ truyền thống sang cửa hàng hiện đại và chuỗi tiện ích",
+            "Cơ cấu nợ vay ngắn hạn giảm mạnh, chỉ số thanh toán hiện hành được củng cố vững chắc"
+        ],
+        "thesis_rules": [
+            "Hưởng lợi dài hạn từ xu hướng chuyển dịch tiêu dùng từ chợ truyền thống sang kênh hiện đại",
+            "Hệ thống logistics và kho bãi quy mô lớn tạo rào cản gia nhập ngành vững chắc",
+            "Năng lực quản trị tồn kho và số hóa chuỗi cung ứng vượt trội so với đối thủ",
+            "Sức mạnh thương hiệu uy tín hàng đầu trong tâm trí người tiêu dùng Việt Nam",
+            "Mạng lưới cửa hàng phủ kín khắp 63 tỉnh thành mang lại lợi thế tiện lợi tối đa"
+        ],
+        "risk_rules": [
+            "Sức mua tiêu dùng phục hồi chậm trong bối cảnh thu nhập thực tế của người dân chưa bứt phá",
+            "Cạnh tranh gay gắt về giá từ các nền tảng thương mại điện tử (Shopee, TikTok Shop) và hàng xách tay",
+            "Chi phí thuê mặt bằng bán lẻ tại các vị trí đắc địa tăng cao gây áp lực lên chi phí bán hàng",
+            "Tồn kho lỗi thời hoặc hàng điện tử điện máy mất giá nhanh đòi hỏi trích lập giảm giá lớn",
+            "Rủi ro gián đoạn chuỗi cung ứng hàng nhập khẩu hoặc biến động giá vàng nguyên liệu",
+            "Chi phí nhân công và chi phí logistics giao hàng chặng cuối (last-mile) gia tăng",
+            "Tốc độ mở mới chuỗi cửa hàng thuốc hoặc bách hóa chậm hơn so với kế hoạch đề ra",
+            "Rủi ro bị xử phạt về tiêu chuẩn an toàn thực phẩm hoặc nguồn gốc xuất xứ hàng hóa",
+            "Áp lực nợ vay tài trợ vốn lưu động khi mở rộng quy mô tồn kho mùa cao điểm lễ tết",
+            "Cạnh tranh hạ giá khốc liệt giữa các chuỗi bán lẻ dẫn đến chiến tranh giá làm co hẹp biên lãi"
+        ],
+        "sample_text": "MWG ghi nhận chuỗi Bách Hóa Xanh đạt điểm hòa vốn sau thuế và bắt đầu đóng góp lợi nhuận tích cực. Mảng ICT Thế Giới Di Động & Điện Máy Xanh tăng trưởng ổn định sau chiến dịch tái cơ cấu giảm số lượng cửa hàng kém hiệu quả. Kế hoạch mở rộng mới thận trọng tập trung nâng cao doanh thu trên từng mét vuông sàn.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Chuỗi Bách Hóa Xanh đạt mốc hòa vốn sau thuế toàn chuỗi và mở rộng thận trọng miền Trung."},
+                {"category": "Biên lợi nhuận", "text": "Tối ưu hóa biên lãi gộp mảng ICT thông qua đàm phán hợp đồng độc quyền với các hãng công nghệ."},
+                {"category": "Xúc tác sự kiện", "text": "Kế hoạch phát hành riêng lẻ cổ phần chuỗi Bách Hóa Xanh củng cố nguồn vốn dài hạn."}
+            ],
+            "theses": ["Thị phần bán lẻ hàng tiêu dùng thiết yếu tiếp tục mở rộng vững chắc sang kênh hiện đại."],
+            "risks": ["Sức mua các sản phẩm điện thoại - điện máy hồi phục chậm hơn dự báo."]
+        }
+    },
+    {
+        "id": "tpl-chung-khoan-tai-chinh",
+        "name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+        "sector": "Chứng khoán & Tài chính",
+        "is_system": True,
+        "keywords": ["chứng khoán", "krx", "nâng hạng", "ftse", "msci", "margin", "môi giới", "thanh khoản", "tự doanh", "tăng vốn", "ssi", "hcm", "vnd", "vci"],
+        "catalyst_rules": [
+            "Hệ thống công nghệ KRX vận hành chính thức, triển khai giao dịch trong ngày (T+0) và bán khống",
+            "Tiến trình nâng hạng thị trường từ Cận biên lên Mới nổi (FTSE Secondary Emerging / MSCI)",
+            "Thanh khoản bình quân phiên trên 3 sàn (HOSE, HNX, UPCoM) bùng nổ vượt 25,000 - 30,000 tỷ/phiên",
+            "Quy mô dư nợ cho vay ký quỹ (Margin) lập đỉnh mới và biên lãi suất cho vay duy trì ổn định",
+            "Kế hoạch tăng vốn điều lệ thông qua phát hành quyền mua hoặc trả cổ tức bằng cổ phiếu thành công",
+            "Cơ chế Non-prefunding (không yêu cầu ký quỹ 100% trước giao dịch) thu hút mạnh mẽ dòng vốn ngoại",
+            "Danh mục tự doanh cổ phiếu và trái phiếu ghi nhận lãi đột biến từ hoàn nhập dự phòng FVTPL",
+            "Mảng ngân hàng đầu tư (IB), tư vấn IPO, phát hành trái phiếu và thương vụ M&A phục hồi mạnh",
+            "Nâng hạng tín nhiệm quốc tế và tiếp cận các khoản vay hợp vốn nước ngoài với lãi suất ưu đãi",
+            "Phát triển các sản phẩm tài chính phái sinh, chứng quyền có bảo đảm (CW) và chứng chỉ quỹ ETF",
+            "Thị phần môi giới mở rộng vững chắc nhờ hệ thống giao dịch hiện đại và đội ngũ tư vấn chuyên nghiệp",
+            "Số lượng tài khoản nhà đầu tư cá nhân mở mới trong nước tiếp tục gia tăng kỷ lục",
+            "Doanh thu hoạt động quản lý tài sản (Wealth Management) và phân phối chứng chỉ quỹ tăng trưởng",
+            "Tỷ lệ an toàn tài chính (CAR) vượt trội trên 300% cho phép nới rộng hạn mức cấp margin tối đa",
+            "Chính sách chi trả cổ tức tiền mặt kết hợp cổ phiếu thưởng với tỷ lệ hấp dẫn cho cổ đông"
+        ],
+        "thesis_rules": [
+            "Thị phần môi giới nằm trong Top đầu giúp tạo nguồn thu phí giao dịch và lãi vay margin bền vững",
+            "Mảng ngân hàng đầu tư (IB) và tư vấn phát hành trái phiếu/cổ phiếu phục hồi theo chu kỳ vốn",
+            "Danh mục tự doanh nắm giữ các cổ phiếu cơ bản đầu ngành có định giá hấp dẫn",
+            "Hệ thống công nghệ giao dịch tiên tiến và khả năng quản trị rủi ro danh mục tự động hóa",
+            "Nguồn vốn chủ sở hữu lớn cho phép tài trợ dư nợ cho vay margin quy mô hàng chục nghìn tỷ đồng"
+        ],
+        "risk_rules": [
+            "Thị trường chung điều chỉnh sâu làm sụt giảm thanh khoản và thu hẹp dư nợ margin",
+            "Biến động danh mục tự doanh cổ phiếu gây áp lực trích lập dự phòng giảm giá tài sản tài chính",
+            "Cạnh tranh chính sách Zero-fee (miễn phí giao dịch) làm xói mòn biên lợi nhuận mảng môi giới",
+            "Rủi ro thanh khoản hoặc chậm thanh toán gốc/lãi của các lô trái phiếu doanh nghiệp tư vấn phát hành",
+            "Rủi ro nghẽn lệnh hoặc sự cố an ninh mạng đối với hệ thống giao dịch trực tuyến",
+            "Ngân hàng siết hạn mức cấp tín dụng cho vay kinh doanh chứng khoán hoặc chi phí vốn vay ngắn hạn tăng",
+            "Tỷ lệ đòn bẩy margin quá cao dẫn đến làn sóng Force Sell (bán giải chấp) diện rộng khi thị trường giảm",
+            "Trì hoãn tiến độ nâng hạng thị trường do các tiêu chuẩn định lượng và thủ tục kỹ thuật",
+            "Thay đổi chính sách thuế giao dịch chứng khoán hoặc quy định pháp lý về tỷ lệ an toàn vốn",
+            "Chi phí đầu tư cho hạ tầng công nghệ thông tin và bản quyền phần mềm giao dịch tăng vọt"
+        ],
+        "sample_text": "SSI được kỳ vọng hưởng lợi trực tiếp khi hệ thống KRX vận hành và giải pháp giải quyết ký quỹ trước giao dịch (Non-prefunding) cho nhà đầu tư ngoại được phê duyệt, mở đường nâng hạng thị trường FTSE. Hoạt động tăng vốn điều lệ lên gần 19,600 tỷ đồng giúp nới rộng room cấp margin trong bối cảnh thanh khoản thị trường đạt 20,000-25,000 tỷ/phiên.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Vĩ mô & Chính sách", "text": "Triển khai Non-prefunding cho khối ngoại và vận hành KRX thúc đẩy nâng hạng FTSE Emerging."},
+                {"category": "Dự án & Capex", "text": "Hoàn tất tăng vốn điều lệ giúp mở rộng hạn mức cho vay margin lên mức kỷ lục."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Thanh khoản thị trường duy trì ở mức cao trên 20,000 tỷ đồng/phiên kích thích doanh thu phí."}
+            ],
+            "theses": ["Vị thế CTCK đầu ngành thu hút dòng vốn ngoại và nhà đầu tư tổ chức tham gia thị trường."],
+            "risks": ["Cạnh tranh hạ phí giao dịch từ các CTCK ngoại làm giảm biên lợi nhuận mảng môi giới."]
+        }
+    },
+    {
+        "id": "tpl-cong-nghe-thong-tin",
+        "name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+        "sector": "Công nghệ thông tin",
+        "is_system": True,
+        "keywords": ["công nghệ", "fpt", "cmg", "chuyển đổi số", "dx", "ai", "trí tuệ nhân tạo", "phần mềm", "nhật bản", "mỹ", "hợp đồng", "doanh số ký mới", "giáo dục"],
+        "catalyst_rules": [
+            "Doanh số ký mới (Order Intake) mảng dịch vụ CNTT thị trường nước ngoài tăng trưởng mạnh",
+            "Hợp tác chiến lược xây dựng AI Factory, liên minh cùng Nvidia và các hãng chip toàn cầu",
+            "Mở rộng thị phần tại thị trường Nhật Bản (nhờ thiếu hụt kỹ sư IT) và thị trường Mỹ, APAC",
+            "Khối giáo dục FPT Education duy trì tỷ lệ tuyển sinh mới tăng trưởng 2 con số",
+            "Dịch vụ chuyển đổi số (Cloud, Big Data, GenAI) chiếm tỷ trọng doanh thu ngày càng lớn với biên gộp cao",
+            "Ký kết các hợp đồng quy mô lớn (Mega Deals) giá trị trên 50 triệu - 100 triệu USD",
+            "Mảng dịch vụ viễn thông và Data Center (Trung tâm dữ liệu đạt chuẩn Tier III) tăng trưởng ổn định",
+            "Phát triển mảng công nghệ bán dẫn (Semiconductor Chips), thiết kế vi mạch nguồn cho thiết bị IoT",
+            "Mua bán sáp nhập (M&A) các công ty công nghệ chuyên sâu tại Mỹ, Pháp, Nhật Bản để mở rộng tệp khách hàng",
+            "Dòng tiền kinh doanh thặng dư dồi dào, tỷ lệ chi trả cổ tức tiền mặt duy trì đều đặn 20%",
+            "Năng suất lao động trên mỗi kỹ sư công nghệ tăng nhờ ứng dụng các công cụ lập trình AI tự động",
+            "Doanh thu phần mềm nhúng ô tô (Automotive Software) bùng nổ theo xu hướng xe điện và xe thông minh",
+            "Vị thế thương hiệu quốc tế gia tăng lọt vào Top 50 công ty dịch vụ CNTT hàng đầu châu Á",
+            "Tỷ lệ duy trì khách hàng (Retention Rate) thuộc nhóm Fortune 500 đạt trên 90%",
+            "Lợi thế chi phí nhân sự công nghệ cạnh tranh hơn 30-40% so với thị trường Ấn Độ và Đông Âu"
+        ],
+        "thesis_rules": [
+            "Đội ngũ kỹ sư phần mềm dồi dào với chi phí cạnh tranh so với Ấn Độ và Đông Âu",
+            "Mối quan hệ đối tác tin cậy lâu năm với hàng trăm khách hàng thuộc danh sách Fortune 500",
+            "Mô hình kinh doanh phòng thủ vững chắc, dòng tiền kinh doanh đều đặn và nợ vay rất thấp",
+            "Hệ sinh thái công nghệ - viễn thông - giáo dục khép kín bổ trợ nguồn lực tối ưu",
+            "Tiên phong trong các xu hướng công nghệ mới như Trí tuệ nhân tạo (GenAI) và Điện toán đám mây"
+        ],
+        "risk_rules": [
+            "Đồng Yên Nhật (JPY) suy yếu kéo dài ảnh hưởng đến doanh thu quy đổi sang VND",
+            "Tình trạng thiếu hụt nhân sự cấp cao trong lĩnh vực bán dẫn và trí tuệ nhân tạo chuyên sâu",
+            "Kinh tế toàn cầu giảm tốc khiến các doanh nghiệp lớn trì hoãn ngân sách đầu tư cho CNTT",
+            "Rủi ro bảo mật thông tin, rò rỉ dữ liệu hoặc sự cố an ninh mạng đối với hạ tầng Data Center",
+            "Cạnh tranh gay gắt từ các tập đoàn công nghệ khổng lồ của Ấn Độ (TCS, Infosys, Wipro)",
+            "Chi phí tiền lương kỹ sư công nghệ chất lượng cao có xu hướng leo thang nhanh",
+            "Rủi ro tỷ giá đối với các thị trường thanh toán phi USD (EUR, JPY, GBP)",
+            "Sự thay đổi đột ngột về chính sách visa làm việc cho kỹ sư Việt Nam tại thị trường nước ngoài",
+            "Khách hàng lớn hủy hợp đồng hoặc thu hẹp quy mô dự án do tái cơ cấu nội bộ",
+            "Chi phí đầu tư Capex cho trung tâm dữ liệu AI và chip tính toán GPU đòi hỏi vốn đầu tư ban đầu rất lớn"
+        ],
+        "sample_text": "FPT ký mới các hợp đồng chuyển đổi số quy mô hàng trăm triệu USD tại thị trường Bắc Mỹ và Châu Á. Dự án hợp tác cùng Nvidia xây dựng AI Factory tại Việt Nam mở ra hướng phát triển công nghệ cao mới. Mảng giáo dục đào tạo mở rộng phân hiệu tại nhiều tỉnh thành giúp củng cố nguồn nhân lực đầu vào cho các chi nhánh toàn cầu.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Hợp tác Nvidia triển khai nhà máy AI Factory cung cấp hạ tầng tính toán đám mây thế hệ mới."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Nhu cầu chuyển đổi số toàn cầu bùng nổ giúp doanh số ký mới CNTT duy trì tăng trưởng trên 25% YoY."},
+                {"category": "Biên lợi nhuận", "text": "Khối giáo dục FPT Education duy trì biên EBITDA trên 30% và cung ứng kỹ sư IT nội bộ."}
+            ],
+            "theses": ["Khả năng mở rộng quy mô toàn cầu và cung ứng dịch vụ phần mềm trọn gói chất lượng cao."],
+            "risks": ["Biến động tỷ giá JPY/VND ảnh hưởng tốc độ tăng trưởng doanh thu từ thị trường Nhật Bản."]
+        }
+    },
+    {
+        "id": "tpl-bat-dong-san-kcn",
+        "name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+        "sector": "Bất động sản & KCN",
+        "is_system": True,
+        "keywords": ["bất động sản", "bđs", "kcn", "khu công nghiệp", "pháp lý", "luật đất đai", "mở bán", "trái phiếu", "quỹ đất", "fdi", "thuê đất", "pdr", "tch", "kbc", "lhg"],
+        "catalyst_rules": [
+            "Hoàn tất thủ tục pháp lý, phê duyệt quy hoạch 1/500 và cấp giấy phép xây dựng cho các dự án trọng điểm",
+            "Các luật mới (Luật Đất đai, Nhà ở, Kinh doanh BĐS) có hiệu lực giúp tháo gỡ điểm nghẽn nguồn cung",
+            "Mở bán đợt mới các phân khu và tỷ lệ hấp thụ đạt mức cao (tiền người mua trả trước tăng mạnh)",
+            "Dòng vốn đầu tư trực tiếp nước ngoài (FDI) đổ mạnh vào các khu kinh tế, nhu cầu thuê đất KCN tăng cao",
+            "Tái cơ cấu thành công nợ vay và xóa bỏ hoàn toàn áp lực đáo hạn trái phiếu doanh nghiệp",
+            "Bàn giao các dự án đại đô thị mang lại lợi nhuận đột biến và dòng tiền mặt dồi dào",
+            "Kế hoạch hợp tác phát triển dự án với các tập đoàn bất động sản quốc tế (Nhật Bản, Singapore)",
+            "Chấp thuận chủ trương đầu tư mở rộng diện tích KCN mới (100 - 500 ha) tại các vị trí chiến lược",
+            "Giá thuê đất KCN bình quân tăng 5-10% hàng năm nhờ nguồn cung đất sạch sẵn sàng bàn giao khan hiếm",
+            "Ghi nhận doanh thu từ mảng dịch vụ tiện ích khu công nghiệp (cung cấp điện, nước sạch, xử lý nước thải)",
+            "Kế hoạch phát hành cổ phiếu tăng vốn hoặc thu hút cổ đông chiến lược tài trợ Capex dự án",
+            "Đẩy nhanh tiến độ thi công hạ tầng kết nối (đường cao tốc, cảng biển) nâng cao giá trị quỹ đất",
+            "Tỷ lệ đòn bẩy nợ ròng/vốn chủ sở hữu giảm xuống vùng an toàn dưới 0.5x",
+            "Hưởng lợi từ chính sách thúc đẩy phân khúc nhà ở thương mại giá vừa túi tiền và nhà ở công nhân",
+            "Kế hoạch chi trả cổ tức tiền mặt sau khi dòng tiền bán hàng các dự án trọng điểm được hiện thực hóa"
+        ],
+        "thesis_rules": [
+            "Sở hữu quỹ đất sạch quy mô lớn tại các vị trí kết nối hạ tầng giao thông chiến lược",
+            "Chi phí giải phóng mặt bằng thấp tạo biên lợi nhuận gộp vượt trội khi mở bán dự án",
+            "Cơ cấu tài chính sạch, đòn bẩy an toàn sau giai đoạn chủ động thanh toán trái phiếu trước hạn",
+            "Mối quan hệ chặt chẽ với các khách hàng FDI lớn công nghệ cao từ Mỹ, Hàn Quốc, Đài Loan",
+            "Năng lực phát triển dự án trọn gói từ đền bù giải tỏa đến xây dựng hoàn thiện tiện ích"
+        ],
+        "risk_rules": [
+            "Thời gian hoàn thiện thủ tục pháp lý và tính tiền sử dụng đất kéo dài hơn kế hoạch",
+            "Lãi suất cho vay mua nhà tăng ảnh hưởng tâm lý và khả năng tiếp cận vốn của khách hàng",
+            "Cạnh tranh thu hút FDI công nghiệp từ các quốc gia trong khu vực như Indonesia, Ấn Độ",
+            "Áp lực thanh khoản ngắn hạn nếu tiến độ bán hàng và thu tiền của khách hàng bị chậm trễ",
+            "Chi phí đền bù giải phóng mặt bằng tăng cao tại các dự án mở rộng giai đoạn mới",
+            "Rủi ro tranh chấp hợp đồng xây dựng hoặc nhà thầu thi công chậm tiến độ",
+            "Thị trường bất động sản phân khúc cao cấp hoặc nghỉ dưỡng đóng băng kéo dài",
+            "Quy định kiểm soát chặt chẽ hoạt động phát hành trái phiếu doanh nghiệp riêng lẻ",
+            "Biến động giá nguyên vật liệu xây dựng (cát, đá, thép) làm tăng tổng mức đầu tư dự án",
+            "Rủi ro chính sách thay đổi khung giá đất mới tiệm cận giá thị trường làm tăng tiền sử dụng đất"
+        ],
+        "sample_text": "PDR đã sạch nợ trái phiếu và tập trung đẩy nhanh tiến độ pháp lý tại các dự án trọng điểm như Bắc Hà Thanh (Bình Định) và Thuận An 1 & 2 (Bình Dương). Dự kiến các dự án này sẽ đủ điều kiện mở bán trong năm 2025, mang lại dòng tiền mặt dồi dào ước tính hàng nghìn tỷ đồng. Luật Đất đai sửa đổi hỗ trợ rút ngắn thời gian phê duyệt định giá đất.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Mở bán dự án trọng điểm Bắc Hà Thanh và cụm căn hộ Thuận An 1&2 khi hoàn thành pháp lý."},
+                {"category": "Vĩ mô & Chính sách", "text": "Luật Đất đai và Luật Kinh doanh BĐS mới tháo gỡ điểm nghẽn thẩm định tiền sử dụng đất."},
+                {"category": "Cơ cấu tài chính", "text": "Đưa dư nợ trái phiếu về 0, giải tỏa hoàn toàn áp lực thanh khoản và tái cơ cấu nợ."}
+            ],
+            "theses": ["Quỹ đất sạch ven biển và vùng ven các đô thị vệ tinh đón đầu chu kỳ hồi phục nguồn cung."],
+            "risks": ["Tiến độ cấp phép xây dựng thực tế phụ thuộc vào tốc độ giải quyết thủ tục của địa phương."]
+        }
+    },
+    {
+        "id": "tpl-ngan-hang-tai-chinh",
+        "name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+        "sector": "Ngân hàng",
+        "is_system": True,
+        "keywords": ["ngân hàng", "bank", "vcb", "mbb", "tcb", "ctg", "acb", "vpb", "tín dụng", "nim", "casa", "nợ xấu", "dự phòng", "llr", "bảo phủ nợ xấu"],
+        "catalyst_rules": [
+            "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành",
+            "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp",
+            "Tỷ lệ tiền gửi không kỳ hạn (CASA) dẫn đầu giúp duy trì lợi thế nguồn vốn giá rẻ",
+            "Áp lực trích lập dự phòng rủi ro tín dụng giảm dần khi nợ xấu được kiểm soát và xử lý",
+            "Tỷ lệ bao phủ nợ xấu (LLR) cao tạo bộ đệm an toàn vững chắc trước các rủi ro vĩ mô",
+            "Thu nhập ngoài lãi (NFI) tăng trưởng mạnh từ phí dịch vụ thanh toán, thẻ và tài trợ thương mại",
+            "Kế hoạch phát hành riêng lẻ cho nhà đầu tư ngoại hoặc bán vốn công ty con tài chính tiêu dùng",
+            "Chuyển đổi số toàn diện giúp tối ưu hóa tỷ lệ chi phí trên thu nhập (CIR) về dưới 30%",
+            "Hoàn nhập dự phòng các khoản nợ đã xử lý rủi ro hoặc thu hồi nợ xấu tồn đọng từ VAMC",
+            "Tỷ lệ an toàn vốn (CAR) theo chuẩn Basel II/III duy trì mức cao trên 11-13%",
+            "Mở rộng cho vay phân khúc bán lẻ và SME có biên lợi nhuận cao và rủi ro phân tán",
+            "Hưởng lợi từ việc khơi thông dòng vốn tín dụng vào các dự án hạ tầng giao thông và năng lượng",
+            "Kế hoạch chi trả cổ tức bằng tiền mặt kết hợp cổ phiếu thưởng với tỷ lệ trên 20-30%",
+            "Mở rộng quy mô tệp khách hàng cá nhân năng động lên hàng chục triệu người dùng",
+            "Tham gia tái cơ cấu tổ chức tín dụng yếu kém để nhận ưu đãi nới room tín dụng ngoại"
+        ],
+        "thesis_rules": [
+            "Chất lượng tài sản hàng đầu hệ thống với khẩu vị rủi ro thận trọng và tỷ lệ nợ xấu dưới 1.5%",
+            "Hệ sinh thái dịch vụ tài chính đa dạng (bảo hiểm, chứng khoán, quản lý quỹ) mang lại thu nhập ngoài lãi cao",
+            "Nền tảng ngân hàng số hiện đại thu hút hàng triệu khách hàng cá nhân và doanh nghiệp trẻ",
+            "Lợi thế chi phí vốn thấp nhất hệ thống nhờ thương hiệu quốc doanh hoặc tệp CASA vượt trội",
+            "Năng lực quản trị rủi ro thanh khoản và quản trị vốn đạt tiêu chuẩn quốc tế Basel III"
+        ],
+        "risk_rules": [
+            "Nợ xấu tiềm ẩn từ nhóm khách hàng bất động sản và trái phiếu doanh nghiệp phát sinh",
+            "Cạnh tranh gay gắt về lãi suất cho vay đầu ra làm thu hẹp biên lãi ròng NIM",
+            "Thu nhập từ phí bảo hiểm qua ngân hàng (Bancassurance) phục hồi chậm sau giai đoạn thanh kiểm tra",
+            "Áp lực trích lập dự phòng gia tăng khi Thông tư giãn hoãn nợ hết hiệu lực",
+            "Rủi ro tập trung tín dụng vào một số tập đoàn kinh tế lớn hoặc dự án quy mô siêu lớn",
+            "Chi phí vốn (COF) tăng nếu lãi suất tiền gửi huy động trên thị trường liên ngân hàng đảo chiều",
+            "Rủi ro gian lận công nghệ cao hoặc an ninh mạng đối với các giao dịch tài chính số",
+            "Tăng trưởng tín dụng chậm hơn kế hoạch do nhu cầu hấp thụ vốn của nền kinh tế yếu",
+            "Quy định pháp lý siết chặt tỷ lệ an toàn vốn và tỷ lệ dư nợ cho vay trên tổng tiền gửi (LDR)",
+            "Rủi ro suy giảm giá trị tài sản bảo đảm là bất động sản trong giai đoạn thị trường đóng băng"
+        ],
+        "sample_text": "MBB duy trì mức tăng trưởng tín dụng ấn tượng trên 15% nhờ dòng vốn giải ngân vào phân khúc sản xuất kinh doanh và doanh nghiệp vừa và nhỏ. Tỷ lệ CASA duy trì trong Top 1 hệ thống ngân hàng (khoảng 38-40%) giúp kiểm soát chi phí vốn tối ưu. Tỷ lệ bao phủ nợ xấu đạt trên 115% tạo bộ đệm vững vàng cho ngân hàng trong năm nay.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Chu kỳ & Vĩ mô", "text": "Hạn mức tăng trưởng tín dụng được giao ở mức cao nhờ tham gia hỗ trợ tái cơ cấu hệ thống."},
+                {"category": "Lợi thế chi phí", "text": "Tỷ lệ CASA dẫn đầu toàn ngành trên 38% giúp giảm mạnh chi phí huy động vốn và mở rộng NIM."},
+                {"category": "Chất lượng tài sản", "text": "Tỷ lệ trích lập dự phòng bao phủ nợ xấu (LLR) vững chắc trên 115% bảo toàn lợi nhuận."}
+            ],
+            "theses": ["Ngân hàng số toàn diện thu hút quy mô tệp khách hàng cá nhân năng động lớn nhất."],
+            "risks": ["Rủi ro nợ xấu phát sinh từ phân khúc khách hàng cá nhân vay tiêu dùng."]
+        }
+    },
+    {
+        "id": "tpl-hoa-chat-phan-bon",
+        "name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
+        "sector": "Hóa chất & Phân bón",
+        "is_system": True,
+        "keywords": ["hóa chất", "phân bón", "phốt pho", "p4", "đạm", "ure", "dgc", "dcm", "dpm", "nghi sơn", "apatit", "hết khấu hao"],
+        "catalyst_rules": [
+            "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
+            "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới",
+            "Nhà máy phân bón hoàn tất hết khấu hao (như Đạm Cà Mau) giúp tiết kiệm 800 - 1,000 tỷ đ/năm phản ánh vào LNST",
+            "Tự chủ nguồn quặng Apatit nguyên liệu đầu vào giúp nới rộng biên lợi nhuận gộp lên trên 35%",
+            "Dòng tiền cổ tức tiền mặt cao và đều đặn nhờ nền tảng thặng dư tiền mặt ròng dồi dào",
+            "Giá phân bón Ure thế giới phục hồi khi các nhà máy tại châu Âu và Trung Quốc hạn chế xuất khẩu",
+            "Phát triển các dòng sản phẩm hóa chất tinh khiết có giá trị gia tăng cao (Axit Phosphoric điện tử)",
+            "Mở rộng thị trường xuất khẩu sang các thị trường khó tính như Nhật Bản, Hàn Quốc, Đài Loan",
+            "Luật Thuế VAT sửa đổi đưa phân bón vào diện chịu thuế 5% giúp doanh nghiệp được hoàn thuế đầu vào",
+            "Dự án bất động sản hoặc khai thác mỏ mới được cấp phép tạo nguồn doanh thu bổ sung",
+            "Cơ cấu tài chính siêu an toàn với lượng tiền gửi ngân hàng chiếm tỷ trọng áp đảo trong tổng tài sản",
+            "Tối ưu hóa định mức tiêu hao khí thiên nhiên và điện năng trong quá trình vận hành nhà máy",
+            "Kế hoạch M&A các công ty hóa chất cùng ngành để hoàn thiện chuỗi giá trị chế biến sâu",
+            "Hưởng lợi từ xu hướng an ninh lương thực toàn cầu thúc đẩy nhu cầu canh tác nông nghiệp",
+            "Doanh số bán các sản phẩm NPK phức hợp công nghệ cao tăng trưởng vượt bậc"
+        ],
+        "thesis_rules": [
+            "Công nghệ tinh chế hóa chất cơ bản hàng đầu thế giới với giá thành sản xuất cạnh tranh",
+            "Hưởng lợi từ chu kỳ thiếu hụt nguồn cung hóa chất tinh khiết phục vụ công nghệ cao",
+            "Cơ cấu tài chính siêu an toàn với lượng tiền mặt lớn và tỷ lệ đòn bẩy vay nợ gần như bằng 0",
+            "Tự chủ mỏ quặng nguyên liệu đầu vào tạo lợi thế chi phí bền vững không thể sao chép",
+            "Vị thế thống lĩnh thị trường phân bón trong nước với mạng lưới phân phối sâu rộng"
+        ],
+        "risk_rules": [
+            "Biến động giá phốt pho vàng và phân bón ure thế giới đảo chiều giảm mạnh",
+            "Tiến độ hoàn tất cấp phép và nghiệm thu môi trường tại các dự án hóa chất mới kéo dài",
+            "Chi phí nguyên liệu khí đầu vào điều chỉnh tăng theo cơ chế thị trường",
+            "Rủi ro gián đoạn nguồn cung cấp quặng Apatit hoặc sự cố kỹ thuật tại lò điện phốt pho",
+            "Chính sách hạn chế xuất khẩu hoặc áp thuế xuất khẩu đối với các sản phẩm tài nguyên thô",
+            "Chi phí cước vận tải biển quốc tế tăng cao ảnh hưởng đến khả năng cạnh tranh xuất khẩu",
+            "Rủi ro tỷ giá ảnh hưởng đến doanh thu xuất khẩu định giá bằng USD",
+            "Cạnh tranh từ phân bón nhập khẩu giá rẻ từ Nga và Trung Quốc vào thị trường nội địa",
+            "Yêu cầu khắt khe về xử lý chất thải phốt pho thạch cao (Gypsum) và bảo vệ môi trường",
+            "Nhu cầu sản xuất chip bán dẫn toàn cầu suy giảm chu kỳ ảnh hưởng sức tiêu thụ P4"
+        ],
+        "sample_text": "DGC xúc tiến triển khai Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 tổng mức đầu tư 12,000 tỷ đồng. Nhu cầu P4 phục vụ sản xuất chip bán dẫn và pin AI bùng nổ giúp duy trì biên lãi gộp trên 35%. DCM ghi nhận lợi nhuận tăng mạnh nhờ nhà máy đạm hết khấu hao hoàn toàn.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 đi vào vận hành bổ sung doanh thu 4,000 tỷ đ/năm."},
+                {"category": "Biên lợi nhuận", "text": "Nhà máy đạm Cà Mau hết khấu hao giúp tiết kiệm chi phí khấu hao 800-1,000 tỷ đồng/năm."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Nhu cầu phốt pho vàng P4 toàn cầu phục hồi mạnh mẽ từ ngành công nghiệp bán dẫn."}
+            ],
+            "theses": ["Vị thế độc tôn về công nghệ tinh chế hóa chất cơ bản và tự chủ nguồn quặng apatit."],
+            "risks": ["Biến động giá bán phân bón và hóa chất trên thị trường quốc tế."]
+        }
+    },
+    {
+        "id": "tpl-dau-khi-nang-luong",
+        "name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+        "sector": "Dầu khí & Năng lượng",
+        "is_system": True,
+        "keywords": ["dầu khí", "lô b", "ô môn", "giàn khoan", "lng", "pvs", "pvd", "gas", "bsr", "giá dầu", "brent", "thượng nguồn", "fso", "fpswo"],
+        "catalyst_rules": [
+            "Đại dự án khí - điện Lô B Ô Môn có Quyết định đầu tư cuối cùng (FID) và trao các gói thầu EPCI lớn",
+            "Giá thuê ngày giàn khoan tự nâng (Jack-up) tăng cao vượt 120,000 - 150,000 USD/ngày",
+            "Tỷ lệ lấp đầy giàn khoan đạt 100% với các hợp đồng khoan dài hạn đã ký đến 2026 - 2028",
+            "Khối lượng công việc mảng xây lắp cơ khí điện gió ngoài khơi (Offshore Wind) xuất khẩu cho đối tác quốc tế",
+            "Vận hành chuỗi kho cảng nhập khẩu khí thiên nhiên hóa lỏng (LNG Thị Vải, Sơn Mỹ)",
+            "Dự án nâng cấp mở rộng Nhà máy Lọc dầu Dung Quất được phê duyệt tiến độ đầu tư",
+            "Biên lọc dầu (Crack Spread) sản phẩm Diesel và Xăng duy trì ở mức cao trên trung bình lịch sử",
+            "Thu hồi công nợ và hoàn nhập dự phòng các khoản phải thu khó đòi từ các đối tác dầu khí",
+            "Giá dầu thô Brent thế giới duy trì ổn định ở vùng hấp dẫn từ 75 - 90 USD/thùng",
+            "Đóng góp lợi nhuận ổn định từ các liên doanh kho nổi chứa và xử lý dầu FSO/FPSO",
+            "Chính sách chuyển đổi năng lượng xanh thúc đẩy đầu tư các dự án cáp ngầm biển và trạm biến áp ngoài khơi",
+            "Kế hoạch chuyển sàn HOSE hoặc chi trả cổ tức tiền mặt thặng dư cao cho cổ đông",
+            "Nâng cao năng lực thi công các cấu kiện cơ khí siêu trường siêu trọng đạt chuẩn quốc tế",
+            "Hưởng lợi từ cơ chế giá bán điện khí LNG mới được Thủ tướng Chính phủ và Bộ Công Thương ban hành",
+            "Dòng tiền kinh doanh dồi dào, vị thế tiền mặt ròng lớn hưởng lãi suất tiền gửi hấp dẫn"
+        ],
+        "thesis_rules": [
+            "Vị thế nhà thầu xây lắp công trình dầu khí và năng lượng ngoài khơi số 1 Việt Nam",
+            "Đội giàn khoan tự nâng hiện đại có khả năng cạnh tranh quốc tế tại thị trường Trung Đông và Đông Nam Á",
+            "Hạ tầng vận chuyển khí và kho chứa LNG độc quyền tạo dòng tiền kinh doanh ổn định",
+            "Năng lực thi công kết cấu điện gió ngoài khơi tiên phong tại khu vực châu Á - Thái Bình Dương",
+            "Cơ cấu tài chính vững chắc với thặng dư tiền mặt ròng hàng nghìn tỷ đồng"
+        ],
+        "risk_rules": [
+            "Tiến độ trao thầu và phê duyệt thủ tục pháp lý tại dự án Lô B - Ô Môn bị trì hoãn",
+            "Giá dầu thô thế giới giảm sâu xuống dưới mức hòa vốn của các dự án thăm dò khai thác",
+            "Rủi ro chậm thanh toán hoặc hủy hợp đồng thuê giàn khoan từ các nhà thầu dầu khí quốc tế",
+            "Chi phí nguyên vật liệu thép và thiết bị chuyên dụng phục vụ thi công EPCI tăng vọt",
+            "Rủi ro thời tiết bất lợi, bão lũ ngoài khơi làm gián đoạn tiến độ lắp đặt trên biển",
+            "Biến động tỷ giá USD/VND ảnh hưởng đến nghĩa vụ nợ vay đầu tư giàn khoan",
+            "Chính sách chuyển đổi năng lượng có thể làm giảm ưu tiên đầu tư vào các dự án nhiên liệu hóa thạch",
+            "Rủi ro biên lọc dầu Crack Spread sụt giảm khi các nhà máy lọc dầu lớn trong khu vực tăng công suất",
+            "Rủi ro địa chính trị phức tạp tại các vùng biển thăm dò dầu khí",
+            "Sự cố kỹ thuật tại hệ thống đường ống dẫn khí hoặc dừng máy đột xuất để bảo dưỡng định kỳ"
+        ],
+        "sample_text": "PVS ghi nhận giá trị hợp đồng chờ thực hiện (Backlog) đạt mức kỷ lục trên 5 tỷ USD nhờ các gói thầu EPCI dự án Lô B Ô Môn và các dự án điện gió ngoài khơi tại Đài Loan. PVD đã ký kín lịch hoạt động toàn bộ 4 giàn khoan tự nâng với đơn giá thuê ngày vượt 130,000 USD.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Backlog EPCI đạt kỷ lục 5 tỷ USD nhờ đại dự án Lô B Ô Môn và các gói thầu điện gió ngoài khơi."},
+                {"category": "Đơn hàng & Doanh thu", "text": "Ký kín hợp đồng giàn khoan tự nâng đến năm 2026 với giá thuê ngày tăng hơn 35%."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Giá dầu Brent duy trì trên 80 USD/thùng thúc đẩy hoạt động E&P toàn cầu."}
+            ],
+            "theses": ["Doanh nghiệp dẫn đầu thị phần dịch vụ dầu khí thượng nguồn với năng lực thi công quốc tế."],
+            "risks": ["Tiến độ triển khai thực tế dự án Lô B phụ thuộc vào việc hoàn thiện hợp đồng mua bán khí GSPA."]
+        }
+    },
+    {
+        "id": "tpl-cang-bien-logistics",
+        "name": "Cảng biển & Vận tải biển (GMD, HAH, VSC)",
+        "sector": "Cảng biển & Logistics",
+        "is_system": True,
+        "keywords": ["cảng biển", "logistics", "container", "gemalink", "cước tàu", "hải phòng", "cái mép", "gmd", "hah", "vsc", "cụm cảng", "thông quan"],
+        "catalyst_rules": [
+            "Tiến độ giải ngân và đưa vào khai thác Cảng Gemalink giai đoạn 2A nâng công suất lên 3 triệu TEU/năm",
+            "Sản lượng hàng hóa container thông qua các cụm cảng nước sâu Cái Mép - Thị Vải và Lạch Huyện tăng mạnh",
+            "Giá cước vận tải biển container nội địa và quốc tế tăng do xung đột địa chính trị và đứt gãy tuyến hàng hải",
+            "Thoái vốn khỏi các dự án cảng nhánh hoặc bất động sản ngoài ngành thu về lợi nhuận đột biến",
+            "Bổ sung đội tàu container đóng mới (1,800 TEU) đi vào vận hành giúp gia tăng thị phần vận tải",
+            "Hưởng lợi từ làn sóng dịch chuyển chuỗi cung ứng sản xuất toàn cầu sang Việt Nam thúc đẩy kim ngạch XNK",
+            "Tối ưu hóa hệ thống cảng cạn ICD và dịch vụ logistics trọn gói nâng cao biên lợi nhuận gộp",
+            "Dự án nạo vét luồng hàng hải vào luồng Cái Mép và luồng Hải Phòng đón tàu mẹ trọng tải lớn 200,000 DWT",
+            "Mở rộng các tuyến vận tải biển liên kết quốc tế sang thị trường Trung Quốc, Ấn Độ, Trung Đông",
+            "Áp dụng biểu giá dịch vụ bốc dỡ cảng biển mới (Thông tư 39/BGTVT) tăng giá cước dịch vụ bốc xếp",
+            "Dòng tiền tự do dồi dào, duy trì tỷ lệ trả cổ tức tiền mặt đều đặn cho cổ đông",
+            "Ứng dụng chuyển đổi số cảng thông minh SmartPort giúp giảm thời gian quay vòng tàu và chi phí vận hành",
+            "Hợp tác liên doanh với các hãng tàu hàng đầu thế giới (CMA-CGM, Maersk, MSC) bảo đảm nguồn hàng ổn định",
+            "Hưởng lợi từ các hiệp định thương mại tự do thế hệ mới (CPTPP, EVFTA, RCEP) gia tăng lưu lượng hàng hóa",
+            "Cơ cấu nợ vay dài hạn giảm dần, năng lực tự chủ tài trợ Capex mở rộng cảng vững chắc"
+        ],
+        "thesis_rules": [
+            "Sở hữu hệ thống cảng nước sâu chiến lược có khả năng đón tàu container kích cỡ lớn nhất thế giới",
+            "Mô hình khép kín chuỗi logistics từ cảng biển, kho bãi ICD đến đội tàu vận tải ven biển",
+            "Lợi thế đối tác chiến lược là các hãng tàu toàn cầu cam kết lượng hàng hóa cố định lâu dài",
+            "Hưởng lợi bền vững từ vị thế trung tâm sản xuất và xuất khẩu hàng đầu khu vực của Việt Nam",
+            "Hiệu quả sinh lời trên vốn đầu tư (ROIC) cao nhờ công suất khai thác luôn đạt mức tối ưu"
+        ],
+        "risk_rules": [
+            "Kim ngạch xuất nhập khẩu toàn cầu sụt giảm do suy thoái kinh tế tại các thị trường tiêu thụ chính",
+            "Giá cước vận tải biển đảo chiều lao dốc khi nguồn cung tàu đóng mới trên thế giới tăng đột biến",
+            "Cạnh tranh gay gắt về giá bốc xếp giữa các cảng biển trong cùng khu vực Hải Phòng hoặc Cái Mép",
+            "Chi phí nhiên liệu dầu Bunker (VLSFO) tăng cao ăn mòn biên lợi nhuận mảng đội tàu",
+            "Tiến độ đầu tư hạ tầng giao thông kết nối sau cảng (đường cao tốc, cầu vượt) chậm hoàn thành",
+            "Biến động tỷ giá USD/VND đối với các khoản nợ vay đầu tư thiết bị cẩu bốc dỡ cảng",
+            "Rủi ro tắc nghẽn cảng biển hoặc đình công tại các cảng trung chuyển quốc tế lớn",
+            "Thời gian hoàn tất thủ tục pháp lý để triển khai các giai đoạn mở rộng cảng kéo dài",
+            "Rủi ro dư cung cục bộ tại phân khúc tàu container cỡ nhỏ chạy tuyến nội địa",
+            "Các quy định mới về giảm phát thải carbon hàng hải quốc tế (CII, EEXI) làm phát sinh chi phí cải hoán tàu"
+        ],
+        "sample_text": "GMD ghi nhận sản lượng thông qua cụm cảng Cái Mép tăng trưởng hơn 30% YoY. Cảng nước sâu Gemalink giai đoạn 2A đang hoàn tất chuẩn bị khởi công để nâng gấp đôi công suất đón các siêu tàu mẹ. HAH đưa thêm 2 tàu container mới vào khai thác trên các tuyến nội Á, ghi nhận doanh thu tăng trưởng tích cực.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Dự án & Capex", "text": "Gemalink giai đoạn 2A nâng công suất cụm cảng Cái Mép lên 3 triệu TEU/năm."},
+                {"category": "Đơn hàng & Doanh thu", "text": "Sản lượng hàng hóa thông qua hệ thống cảng biển tăng trưởng hơn 30% YoY."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Biểu giá dịch vụ bốc dỡ cảng biển mới hỗ trợ tăng biên lợi nhuận mảng khai thác cảng."}
+            ],
+            "theses": ["Vị thế doanh nghiệp khai thác cảng tư nhân hàng đầu với hệ sinh thái logistics hoàn thiện."],
+            "risks": ["Biến động giá cước vận tải biển thế giới và lưu lượng hàng xuất khẩu đi thị trường Mỹ."]
+        }
+    },
+    {
+        "id": "tpl-xay-dung-dau-tu-cong",
+        "name": "Xây dựng hạ tầng & Đầu tư công (VCG, HHV, C4G, LCG)",
+        "sector": "Xây dựng & Đầu tư công",
+        "is_system": True,
+        "keywords": ["đầu tư công", "hạ tầng", "cao tốc", "sân bay", "long thành", "backlog", "trúng thầu", "giải ngân", "vcg", "hhv", "c4g", "lcg", "bot"],
+        "catalyst_rules": [
+            "Chính phủ đẩy mạnh giải ngân vốn đầu tư công ngân sách nhà nước đạt trên 95% kế hoạch năm",
+            "Trúng thầu các gói thầu hạ tầng quy mô lớn: Đại dự án Sân bay Long Thành, Cao tốc Bắc - Nam giai đoạn 2",
+            "Khối lượng công việc chờ thực hiện (Backlog) xây lắp hạ tầng lập đỉnh mới bảo đảm doanh thu 2-3 năm tới",
+            "Chính sách gỡ vướng mỏ vật liệu đất đắp và cấp phép khai thác khoáng sản trực tiếp cho nhà thầu thi công",
+            "Nghiệm thu thanh toán và thu hồi công nợ các phân đoạn cao tốc đã thông xe kỹ thuật",
+            "Nhà nước ban hành cơ chế chia sẻ giảm doanh thu đối với các dự án BOT giao thông theo luật PPP",
+            "Tối ưu hóa chi phí vận hành máy móc thiết bị và ứng dụng công nghệ thi công hầm/cầu hiện đại",
+            "Phát triển quỹ đất đối ứng đô thị và khu dân cư thương mại dọc theo các tuyến đường cao tốc đi qua",
+            "Doanh thu thu phí BOT giao thông tăng trưởng ổn định theo lưu lượng phương tiện lưu thông gia tăng",
+            "Kế hoạch tăng vốn điều lệ thông qua chào bán cổ phiếu cho cổ đông hiện hữu để tài trợ máy móc",
+            "Giảm chi phí lãi vay nhờ các gói tín dụng ưu đãi từ các ngân hàng thương mại quốc doanh",
+            "Mở rộng sang các dự án xây dựng hạ tầng công nghiệp, đường sắt đô thị và cảng hàng không mới",
+            "Dòng tiền thuần từ hoạt động kinh doanh (CFO) chuyển sang dương lớn khi được tạm ứng vốn hợp đồng",
+            "Tỷ lệ cổ tức tiền mặt được khôi phục sau giai đoạn dồn lực đầu tư thiết bị cơ giới",
+            "Tiến độ thi công vượt mốc cam kết giúp nhận tiền thưởng tiến độ từ Ban Quản lý Dự án"
+        ],
+        "thesis_rules": [
+            "Năng lực thi công hạ tầng giao thông quy mô lớn hàng đầu với đội ngũ kỹ sư và máy móc hiện đại",
+            "Hưởng lợi trực tiếp từ chu kỳ đầu tư công lớn nhất lịch sử với hàng trăm nghìn tỷ đồng được phân bổ",
+            "Kinh nghiệm quản lý và vận hành hiệu quả chuỗi trạm thu phí BOT mang lại dòng tiền mặt đều đặn",
+            "Mối quan hệ uy tín lâu năm với Bộ Giao thông Vận tải và các chủ đầu tư dự án trọng điểm quốc gia",
+            "Năng lực phát triển cộng hưởng giữa mảng xây lắp hạ tầng và bất động sản thương mại"
+        ],
+        "risk_rules": [
+            "Tiến độ giải ngân vốn đầu tư công thực tế chậm hơn mục tiêu do vướng mắc giải phóng mặt bằng",
+            "Biến động giá nguyên vật liệu xây dựng (cát đắp nền, đá, nhựa đường, xi măng, thép) tăng đột biến",
+            "Rủi ro chậm thanh quyết toán vốn từ các Ban Quản lý Dự án gây áp lực dòng tiền vốn lưu động",
+            "Áp lực nợ vay và chi phí lãi vay cao do phải đầu tư dàn máy móc thiết bị cơ giới chuyên dụng",
+            "Cạnh tranh bỏ thầu giá thấp làm co hẹp biên lợi nhuận gộp của các gói thầu xây lắp",
+            "Rủi ro thời tiết mưa bão kéo dài làm đình trệ công tác thi công ngoài hiện trường",
+            "Rủi ro cơ chế hoàn vốn tại các dự án BOT nếu chính sách phân luồng giao thông thay đổi",
+            "Rủi ro phạt vi phạm hợp đồng nếu không hoàn thành đúng các mốc tiến độ khắt khe",
+            "Thiếu hụt nguồn nhân lực kỹ sư và công nhân vận hành máy chuyên trách tại các địa bàn vùng sâu",
+            "Rủi ro pha loãng giá trị cổ phiếu khi doanh nghiệp phát hành tăng vốn quy mô lớn"
+        ],
+        "sample_text": "VCG liên tiếp trúng các gói thầu lớn tại dự án Sân bay Long Thành và các dự án thành phần cao tốc Bắc - Nam giai đoạn 2, nâng tổng giá trị Backlog xây lắp lên trên 30,000 tỷ đồng. Doanh thu xây lắp dự kiến tăng trưởng mạnh mẽ trong 2 năm tới khi các dự án bước vào giai đoạn tăng tốc thi công.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Đơn hàng & Doanh thu", "text": "Tổng giá trị Backlog xây lắp đạt trên 30,000 tỷ đồng nhờ các gói thầu Sân bay Long Thành và cao tốc."},
+                {"category": "Chu kỳ & Vĩ mô", "text": "Chính phủ đẩy mạnh giải ngân đầu tư công tạo động lực ghi nhận doanh thu xây lắp kỷ lục."},
+                {"category": "Dự án & Capex", "text": "Bàn giao các đoạn tuyến cao tốc trọng điểm và thanh quyết toán khối lượng nghiệm thu."}
+            ],
+            "theses": ["Doanh nghiệp xây lắp hạ tầng đầu ngành với năng lực thi công dự án quy mô quốc gia."],
+            "risks": ["Biến động giá nguyên vật liệu cát đắp và thép xây dựng ảnh hưởng biên lợi nhuận ròng."]
+        }
+    },
+    {
+        "id": "tpl-tien-ich-dien-nuoc",
+        "name": "Tiện ích Năng lượng, Điện & Nước (REE, PC1, POW, GEG)",
+        "sector": "Tiện ích & Năng lượng",
+        "is_system": True,
+        "keywords": ["điện", "năng lượng", "thủy điện", "nhiệt điện", "điện gió", "quy hoạch điện 8", "giá điện", "cơ chế giá", "ree", "pc1", "pow", "geg"],
+        "catalyst_rules": [
+            "Chu kỳ thời tiết chuyển sang pha La Nina mang lại lượng mưa dồi dào thúc đẩy sản lượng thủy điện",
+            "Quy hoạch phát triển điện lực quốc gia (Quy hoạch Điện 8) ban hành cơ chế giá chuyển tiếp cho NLTT",
+            "Dự án nhà máy điện Nhơn Trạch 3 & 4 (sử dụng khí LNG nhập khẩu) hoàn thành hòa lưới điện quốc gia",
+            "Doanh nghiệp được thanh toán dứt điểm các khoản nợ tiền mua điện tồn đọng từ Tập đoàn Điện lực EVN",
+            "Ký kết hợp đồng mua bán điện trực tiếp (DPPA) giữa đơn vị phát năng lượng tái tạo và khách hàng lớn",
+            "Mảng tổng thầu xây lắp điện và đường dây truyền tải 500kV mạch 3 ghi nhận doanh thu kỷ lục",
+            "Nhà máy nhiệt điện than hoàn tất đại tu máy móc và khắc phục sự cố kỹ thuật vận hành tối đa công suất",
+            "Biên lợi nhuận gộp mảng thủy điện duy trì ở mức cao vượt trội trên 50-60%",
+            "Khởi công các dự án năng lượng tái tạo mới (điện gió ngoài khơi, điện mặt trời mái nhà công nghiệp)",
+            "Chính sách giá bán điện bán lẻ bình quân tăng giúp cải thiện dòng tiền thanh toán của toàn ngành điện",
+            "Dòng tiền thặng dư tiền mặt dồi dào, duy trì chính sách trả cổ tức tiền mặt ổn định và an toàn",
+            "Dự án cấp nước sinh hoạt mở rộng mạng lưới đường ống cấp nước và tăng giá bán nước sạch",
+            "Tỷ lệ đòn bẩy nợ vay giảm dần theo tiến độ hoàn trả nợ gốc các khoản vay tài trợ dự án nguồn điện",
+            "Hưởng lợi từ xu hướng các doanh nghiệp FDI cam kết sử dụng 100% điện năng lượng xanh (RE100)",
+            "Doanh thu từ mảng bất động sản cho thuê văn phòng xanh và cho thuê hạ tầng phụ trợ tăng trưởng"
+        ],
+        "thesis_rules": [
+            "Cơ cấu danh mục nguồn điện đa dạng (thủy điện, điện gió, điện mặt trời, điện khí) giúp phân tán rủi ro thời tiết",
+            "Mô hình kinh doanh phòng thủ bền vững với nhu cầu tiêu thụ điện năng luôn tăng trưởng 8-10%/năm theo GDP",
+            "Dòng tiền tự do dồi dào và ổn định từ các nhà máy điện đã hết khấu hao máy móc",
+            "Năng lực EPC xây lắp đường dây truyền tải và trạm biến áp điện cao thế hàng đầu Việt Nam",
+            "Lợi thế tài chính lành mạnh, tỷ lệ chi trả cổ tức tiền mặt đều đặn qua nhiều năm"
+        ],
+        "risk_rules": [
+            "Thời tiết chuyển biến sang El Nino gây hạn hán làm sụt giảm nghiêm trọng sản lượng phát của thủy điện",
+            "Tập đoàn Điện lực Việt Nam (EVN) gặp khó khăn tài chính dẫn đến chậm trễ thanh toán tiền điện",
+            "Cơ chế giá mua điện mới (cho điện khí LNG hoặc NLTT) thấp hơn kỳ vọng của chủ đầu tư",
+            "Rủi ro cắt giảm công suất phát điện (Curtailment) do hệ thống lưới truyền tải bị quá tải cục bộ",
+            "Biến động giá nguyên liệu khí LNG hoặc than nhập khẩu tăng cao làm giảm tính cạnh tranh của nhiệt điện",
+            "Rủi ro tỷ giá hối đoái đối với các khoản nợ vay bằng USD, EUR hoặc JPY tài trợ mua turbine",
+            "Tiến độ cấp phép đầu tư và đàm phán hợp đồng PPA cho các dự án nguồn điện mới bị kéo dài",
+            "Sự cố hỏng hóc kỹ thuật bất ngờ tại các tổ máy phát điện đòi hỏi chi phí bảo dưỡng sửa chữa lớn",
+            "Lãi suất cho vay thả nổi tăng cao làm tăng gánh nặng chi phí tài chính của các dự án điện mới",
+            "Rủi ro chính sách thay đổi khung giá phát điện hồi tố đối với các dự án năng lượng tái tạo"
+        ],
+        "sample_text": "REE hưởng lợi lớn khi hiện tượng La Nina quay trở lại giúp các hồ chứa thủy điện đầy nước, đẩy sản lượng phát điện tăng vọt với biên lãi gộp trên 60%. POW tập trung đưa dự án điện khí Nhơn Trạch 3 & 4 vào chạy thử thương mại, mở ra động lực tăng trưởng doanh thu dài hạn.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Chu kỳ & Vĩ mô", "text": "Pha La Nina thúc đẩy sản lượng thủy điện tăng trưởng mạnh với biên lãi gộp trên 60%."},
+                {"category": "Dự án & Capex", "text": "Nhà máy điện khí LNG Nhơn Trạch 3&4 hoàn thành chạy thử và hòa lưới quốc gia."},
+                {"category": "Tài chính & Dòng tiền", "text": "EVN cải thiện thanh toán công nợ mua điện giúp khơi thông dòng tiền hoạt động."}
+            ],
+            "theses": ["Doanh nghiệp hạ tầng năng lượng tiện ích với mô hình phòng thủ và dòng tiền ổn định."],
+            "risks": ["Rủi ro đàm phán giá bán điện PPA tại các dự án nguồn điện mới."]
+        }
+    },
+    {
+        "id": "tpl-thuy-san-nong-nghiep",
+        "name": "Thủy sản & Nông nghiệp xuất khẩu (VHC, ANV, BAF, DBC)",
+        "sector": "Thủy sản & Nông nghiệp",
+        "is_system": True,
+        "keywords": ["thủy sản", "cá tra", "tôm", "thịt lợn", "heo", "nông nghiệp", "xuất khẩu", "giá cá", "giá heo", "vhc", "anv", "baf", "dbc"],
+        "catalyst_rules": [
+            "Giá xuất khẩu cá tra fillet và tôm phục hồi mạnh mẽ tại thị trường Mỹ, EU và Trung Quốc",
+            "Nhu cầu tiêu thụ thủy sản tại các thị trường xuất khẩu tăng vọt chuẩn bị cho mùa lễ hội cuối năm",
+            "Giá heo hơi nội địa phục hồi và duy trì ở mức cao trên 65,000 - 70,000 đ/kg mang lại biên lợi nhuận bứt phá",
+            "Giá nguyên liệu thức ăn chăn nuôi (ngô, đậu tương, khô dầu) thế giới hạ nhiệt giúp giảm mạnh giá vốn",
+            "Doanh nghiệp được hưởng mức thuế chống bán phá giá 0% trong các kỳ rà soát hành chính (POR) của Bộ Thương mại Mỹ",
+            "Chuỗi giá trị chăn nuôi khép kín 3F (Feed - Farm - Food) mở rộng đàn và gia tăng thị phần thịt sạch",
+            "Đạt chứng nhận xuất khẩu vào thị trường khó tính (như USDA, FDA, BAP) mở đường cho sản phẩm giá trị gia tăng",
+            "Nhà máy chế biến collagen và gelatin từ da cá tra gia tăng công suất đóng góp biên lợi nhuận ròng trên 30%",
+            "Tự chủ vùng nuôi nguyên liệu đạt trên 70-80% giúp kiểm soát chất lượng con giống và dịch bệnh",
+            "Hưởng lợi từ xu hướng dịch chuyển nguồn cung thủy sản toàn cầu khi các nước đối thủ gặp thời tiết bất lợi",
+            "Luật Chăn nuôi có hiệu lực quy định cấm chăn nuôi trong khu dân cư thúc đẩy loại bỏ các hộ nuôi nhỏ lẻ",
+            "Tăng trưởng doanh thu từ các kênh phân phối bán lẻ hiện đại (siêu thị, cửa hàng tiện lợi)",
+            "Dòng tiền tự do dồi dào hỗ trợ chi trả cổ tức tiền mặt tỷ lệ cao cho cổ đông",
+            "Ký kết các hợp đồng cung ứng dài hạn với các tập đoàn phân phối thực phẩm hàng đầu quốc tế",
+            "Chi phí cước vận tải biển container lạnh xuất khẩu hạ nhiệt từ vùng đỉnh"
+        ],
+        "thesis_rules": [
+            "Vị thế xuất khẩu thủy sản cá tra/tôm hàng đầu thế giới với thương hiệu uy tín lâu năm",
+            "Chuỗi giá trị tích hợp hoàn chỉnh từ con giống, thức ăn chăn nuôi đến nhà máy chế biến hiện đại",
+            "Năng lực phát triển các sản phẩm phụ trợ có giá trị kinh tế cao (collagen, dầu cá) tối ưu hóa giá trị tài sản",
+            "Hệ thống trang trại chăn nuôi công nghệ cao an toàn sinh học kiểm soát dịch bệnh vượt trội",
+            "Thị phần tiêu thụ thịt sạch và thủy sản chế biến sâu không ngừng mở rộng theo xu hướng tiêu dùng hiện đại"
+        ],
+        "risk_rules": [
+            "Giá xuất khẩu thủy sản giảm do tồn kho tại các thị trường nhập khẩu lớn vẫn ở mức cao",
+            "Rủi ro dịch bệnh trên gia súc, gia cầm (như dịch tả lợn châu Phi ASF) hoặc dịch bệnh trên cá tra/tôm",
+            "Biến động giá nguyên liệu thức ăn chăn nuôi nhập khẩu tăng trở lại do căng thẳng địa chính trị",
+            "Rủi ro áp thuế chống bán phá giá hoặc các rào cản kỹ thuật thương mại mới từ các thị trường xuất khẩu",
+            "Chi phí cước vận tải biển container lạnh tăng vọt làm giảm khả năng cạnh tranh giao hàng",
+            "Thời tiết cực đoan, xâm nhập mặn và biến đổi khí hậu tại vùng Đồng bằng sông Cửu Long ảnh hưởng vùng nuôi",
+            "Cạnh tranh gay gắt từ các nước sản xuất thủy sản chi phí thấp như Ecuador, Ấn Độ",
+            "Rủi ro tỷ giá USD/VND hoặc biến động lãi suất vay vốn lưu động tài trợ chu kỳ nuôi trồng",
+            "Sức mua thực phẩm tại thị trường nội địa giảm nếu thu nhập người dân bị ảnh hưởng suy thoái",
+            "Rủi ro vi phạm các quy định an toàn vệ sinh thực phẩm hoặc quy chuẩn truy xuất nguồn gốc xuất xứ"
+        ],
+        "sample_text": "VHC ghi nhận sản lượng xuất khẩu cá tra sang thị trường Mỹ tăng trưởng mạnh nhờ lượng hàng tồn kho của các nhà bán lẻ Mỹ đã giải phóng hết. Mảng sản phẩm giá trị gia tăng Collagen và Gelatin tiếp tục đóng góp biên lợi nhuận ấn tượng trên 35%. DBC và BAF hưởng lợi khi giá heo hơi nội địa tăng vượt 65,000 đ/kg trong khi giá nguyên liệu thức ăn chăn nuôi hạ nhiệt.",
+        "sample_output": {
+            "catalysts": [
+                {"category": "Đơn hàng & Doanh thu", "text": "Kim ngạch xuất khẩu cá tra sang Mỹ và EU phục hồi mạnh mẽ sau chu kỳ xả kho."},
+                {"category": "Biên lợi nhuận", "text": "Giá heo hơi tăng cao kết hợp chi phí thức ăn chăn nuôi giảm giúp nới rộng biên lãi ròng."},
+                {"category": "Dự án & Capex", "text": "Mở rộng nhà máy Collagen & Gelatin gia tăng tỷ trọng sản phẩm biên lợi nhuận cao."}
+            ],
+            "theses": ["Doanh nghiệp xuất khẩu cá tra số 1 thế giới với chuỗi nuôi trồng khép kín."],
+            "risks": ["Biến động giá nguyên liệu thức ăn chăn nuôi và chi phí logistics container lạnh."]
+        }
+    }
+]

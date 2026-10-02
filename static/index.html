@@ -510,11 +510,11 @@
                                 <span class="block text-xs font-bold">1M</span>
                                 <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-1M">0.00%</span>
                             </button>
-                            <button onclick="changeOverviewTimeframe('3M')" id="btn-tf-3M" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
+                            <button onclick="changeOverviewTimeframe('3M')" id="btn-tf-3M" class="overview-tf-btn active p-1.5 rounded bg-slate-950 border border-cyan-700 text-cyan-300 font-bold transition-all shadow-sm">
                                 <span class="block text-xs font-bold">3M</span>
                                 <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-3M">0.00%</span>
                             </button>
-                            <button onclick="changeOverviewTimeframe('6M')" id="btn-tf-6M" class="overview-tf-btn active p-1.5 rounded bg-slate-950 border border-cyan-700 text-cyan-300 font-bold transition-all shadow-sm">
+                            <button onclick="changeOverviewTimeframe('6M')" id="btn-tf-6M" class="overview-tf-btn p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-400 font-bold hover:text-white transition-all">
                                 <span class="block text-xs font-bold">6M</span>
                                 <span class="block text-[10px] text-slate-400 mt-0.5" id="tf-pct-6M">0.00%</span>
                             </button>
@@ -2049,6 +2049,12 @@
                                     </span>
                                     <input type="checkbox" id="chk-ind-rsi" checked onchange="toggleIndicator('rsi', this.checked)" class="rounded text-cyan-500 focus:ring-0">
                                 </label>
+                                <div class="pt-1.5 border-t border-slate-800">
+                                    <button onclick="restoreAllIndicatorsDefault()" class="w-full text-center py-1 rounded bg-slate-800/80 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 text-[10px] font-semibold transition-all flex items-center justify-center gap-1.5">
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                        <span>↺ Khôi phục chỉ báo mặc định</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -2091,7 +2097,7 @@
                 </div>
 
                 <!-- 2. MAIN WORKSPACE: LEFT DRAWING TOOLBAR + CHART WORKSPACE -->
-                <div class="flex flex-1 w-full relative min-h-[640px] bg-[#090d16]">
+                <div id="tech-workspace-container" class="flex flex-1 w-full relative bg-[#090d16]">
                     
                     <!-- LEFT DRAWING TOOLBAR (FIREANT / TRADINGVIEW STYLE) -->
                     <div class="w-10 bg-[#101625] border-r border-slate-800/90 flex flex-col items-center py-2.5 space-y-2 z-20 shrink-0 select-none">
@@ -2148,7 +2154,7 @@
                     <div class="flex-1 flex flex-col w-full relative overflow-hidden" id="tech-chart-stack-container">
                         
                         <!-- Realtime Legend Header (OHLC + Volume + Indicators) -->
-                        <div id="tech-fireant-legend" class="px-4 py-1.5 bg-[#0d121e] border-b border-slate-800/80 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] select-none z-10">
+                        <div id="tech-fireant-legend" class="px-4 py-1.5 bg-[#0d121e] border-b border-slate-800/80 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] select-none z-10 shrink-0">
                             <div class="flex items-center gap-1.5 font-bold">
                                 <span class="text-cyan-400 text-xs" id="legend-ticker">HPG</span>
                                 <span class="text-slate-400 text-[10px]" id="legend-interval">D</span>
@@ -2166,6 +2172,10 @@
                                 <span class="text-amber-400" id="legend-box-ma20">SMA20 <strong id="legend-ma20" class="text-amber-300">21,730</strong></span>
                                 <span class="text-sky-400" id="legend-box-ma50">SMA50 <strong id="legend-ma50" class="text-sky-300">22,050</strong></span>
                             </div>
+                            <button onclick="toggleMaximizePane('main')" id="btn-max-pane-main" class="ml-auto px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-slate-700/80 text-[10px] font-mono flex items-center gap-1 transition-all" title="Phóng to biểu đồ nến chính (Click lại để thu nhỏ)">
+                                <span id="icon-max-pane-main">⛶</span>
+                                <span id="label-max-pane-main">Phóng to nến</span>
+                            </button>
                         </div>
 
                         <!-- Active Drawing Tool Status Toast (khi đang chọn công cụ vẽ) -->
@@ -2175,60 +2185,140 @@
                             <button onclick="setDrawingTool('crosshair')" class="text-slate-400 hover:text-white text-xs ml-1">✕</button>
                         </div>
 
-                        <!-- 1. MAIN PRICE CANDLES PANE (VÙNG NẾN CHÍNH) -->
-                        <div id="pane-main-chart" class="relative w-full h-[380px] bg-[#090d16] overflow-hidden">
+                        <!-- 1. MAIN PRICE CANDLES PANE (VÙNG NẾN CHÍNH - AUTO CO GIÃN) -->
+                        <div id="pane-main-chart" class="relative w-full bg-[#090d16] overflow-hidden transition-[height] duration-150">
                             <div id="tech-tv-render-box" class="w-full h-full"></div>
                             <!-- Interactive Drawing Overlay Canvas (cho phép vẽ đường, hình hộp cản, text...) -->
                             <canvas id="tech-drawing-canvas" class="absolute inset-0 w-full h-full pointer-events-none cursor-crosshair z-10"></canvas>
                         </div>
 
                         <!-- 2. SUB-PANE: KHỐI LƯỢNG GIAO DỊCH (VOLUME & VOLUME MA20) -->
-                        <div id="pane-volume" class="relative w-full h-[90px] bg-[#080b13] border-t border-slate-800/80">
-                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono text-slate-400 flex items-center gap-2">
+                        <div id="pane-volume" class="relative w-full bg-[#080b13] border-t border-slate-800/80 group transition-[height] duration-150">
+                            <!-- Drag Handle Resizer -->
+                            <div class="pane-resizer absolute top-0 left-0 right-0 h-2.5 -mt-1 cursor-row-resize z-30 hover:bg-cyan-500/40 active:bg-cyan-400 transition-colors flex items-center justify-center group/resizer" data-pane="vol" title="Kéo lên/xuống để điều chỉnh độ cao chỉ báo Khối lượng (Nhấp đúp để đặt lại mặc định)">
+                                <div class="w-10 h-1 rounded-full bg-slate-600/60 group-hover/resizer:bg-cyan-300 transition-colors pointer-events-none"></div>
+                            </div>
+                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono text-slate-400 flex items-center gap-2 pointer-events-none select-none">
                                 <span class="font-bold text-slate-300">Khối lượng (Volume)</span>
                                 <span class="text-cyan-400 font-semibold" id="pane-vol-latest">13,387,600</span>
                                 <span class="text-amber-400" id="pane-vol-ma">MA20: 16.2M</span>
                             </div>
+                            <!-- Sub-pane Action Toolbar: Move Up/Down, Maximize, Close -->
+                            <div class="absolute top-1 right-2 z-20 flex items-center gap-0.5 bg-slate-950/85 backdrop-blur-sm px-1 py-0.5 rounded border border-slate-800/80 opacity-80 group-hover:opacity-100 transition-opacity select-none shadow-md">
+                                <button onclick="moveIndicatorPane('vol', 'up')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo Khối lượng lên trên (▲)">
+                                    ▲
+                                </button>
+                                <button onclick="moveIndicatorPane('vol', 'down')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo Khối lượng xuống dưới (▼)">
+                                    ▼
+                                </button>
+                                <button onclick="toggleMaximizePane('vol')" id="btn-max-pane-vol" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors" title="Phóng to chỉ báo Khối lượng (Click lại để thu nhỏ)">
+                                    ⛶
+                                </button>
+                                <div class="h-3 w-px bg-slate-700/80 mx-0.5"></div>
+                                <button onclick="removeIndicatorPane('vol')" class="p-0.5 px-1 rounded hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-[11px] leading-none font-bold transition-colors" title="Xóa/Tắt chỉ báo Khối lượng (Thêm lại tại menu fx Các chỉ báo)">
+                                    ✕
+                                </button>
+                            </div>
                             <canvas id="canvas-sub-volume" class="w-full h-full"></canvas>
                         </div>
 
-                        <!-- 3. SUB-PANE: MCDX - DÒNG TIỀN TẠO LẬP CÁ MẬP (SIGNATURE CỦA FIREANT) -->
-                        <div id="pane-mcdx" class="relative w-full h-[110px] bg-[#070a11] border-t border-slate-800/80">
-                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3">
-                                <span class="font-bold text-slate-200">MCDX (Dòng tiền tạo lập)</span>
+                        <!-- 3. SUB-PANE: MCDX - DÒNG TIỀN TẠO LẬP CÁ MẬP -->
+                        <div id="pane-mcdx" class="relative w-full bg-[#070a11] border-t border-slate-800/80 group transition-[height] duration-150">
+                            <!-- Drag Handle Resizer -->
+                            <div class="pane-resizer absolute top-0 left-0 right-0 h-2.5 -mt-1 cursor-row-resize z-30 hover:bg-cyan-500/40 active:bg-cyan-400 transition-colors flex items-center justify-center group/resizer" data-pane="mcdx" title="Kéo lên/xuống để điều chỉnh độ cao chỉ báo MCDX (Nhấp đúp để đặt lại mặc định)">
+                                <div class="w-10 h-1 rounded-full bg-slate-600/60 group-hover/resizer:bg-cyan-300 transition-colors pointer-events-none"></div>
+                            </div>
+                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3 pointer-events-none select-none">
+                                <span class="font-bold text-slate-200">MCDX</span>
                                 <span class="flex items-center gap-1 text-rose-400 font-bold">
                                     <span class="w-2 h-2 rounded-sm bg-rose-500"></span>
-                                    <span>Cá Mập (Banker): <strong id="mcdx-banker-val">42%</strong></span>
+                                    <span>Cá Mập: <strong id="mcdx-banker-val">42%</strong></span>
                                 </span>
                                 <span class="flex items-center gap-1 text-amber-400">
                                     <span class="w-2 h-2 rounded-sm bg-amber-400"></span>
-                                    <span>Đầu cơ (Hot Money): <strong id="mcdx-hot-val">31%</strong></span>
+                                    <span>Đầu cơ: <strong id="mcdx-hot-val">31%</strong></span>
                                 </span>
                                 <span class="flex items-center gap-1 text-emerald-400">
                                     <span class="w-2 h-2 rounded-sm bg-emerald-500"></span>
-                                    <span>Nhỏ lẻ (Retail): <strong id="mcdx-retail-val">27%</strong></span>
+                                    <span>Nhỏ lẻ: <strong id="mcdx-retail-val">27%</strong></span>
                                 </span>
+                            </div>
+                            <!-- Sub-pane Action Toolbar: Move Up/Down, Maximize, Close -->
+                            <div class="absolute top-1 right-2 z-20 flex items-center gap-0.5 bg-slate-950/85 backdrop-blur-sm px-1 py-0.5 rounded border border-slate-800/80 opacity-80 group-hover:opacity-100 transition-opacity select-none shadow-md">
+                                <button onclick="moveIndicatorPane('mcdx', 'up')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo MCDX lên trên (▲)">
+                                    ▲
+                                </button>
+                                <button onclick="moveIndicatorPane('mcdx', 'down')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo MCDX xuống dưới (▼)">
+                                    ▼
+                                </button>
+                                <button onclick="toggleMaximizePane('mcdx')" id="btn-max-pane-mcdx" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors" title="Phóng to chỉ báo MCDX (Click lại để thu nhỏ)">
+                                    ⛶
+                                </button>
+                                <div class="h-3 w-px bg-slate-700/80 mx-0.5"></div>
+                                <button onclick="removeIndicatorPane('mcdx')" class="p-0.5 px-1 rounded hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-[11px] leading-none font-bold transition-colors" title="Xóa/Tắt chỉ báo MCDX Dòng tiền (Thêm lại tại menu fx Các chỉ báo)">
+                                    ✕
+                                </button>
                             </div>
                             <canvas id="canvas-sub-mcdx" class="w-full h-full"></canvas>
                         </div>
 
                         <!-- 4. SUB-PANE: MACD (12, 26, 9) -->
-                        <div id="pane-macd" class="relative w-full h-[90px] bg-[#070a11] border-t border-slate-800/80">
-                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3">
+                        <div id="pane-macd" class="relative w-full bg-[#070a11] border-t border-slate-800/80 group transition-[height] duration-150">
+                            <!-- Drag Handle Resizer -->
+                            <div class="pane-resizer absolute top-0 left-0 right-0 h-2.5 -mt-1 cursor-row-resize z-30 hover:bg-cyan-500/40 active:bg-cyan-400 transition-colors flex items-center justify-center group/resizer" data-pane="macd" title="Kéo lên/xuống để điều chỉnh độ cao chỉ báo MACD (Nhấp đúp để đặt lại mặc định)">
+                                <div class="w-10 h-1 rounded-full bg-slate-600/60 group-hover/resizer:bg-cyan-300 transition-colors pointer-events-none"></div>
+                            </div>
+                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3 pointer-events-none select-none">
                                 <span class="font-bold text-slate-300">MACD (12, 26, 9)</span>
                                 <span class="text-sky-400">MACD: <strong id="pane-macd-line">0.45</strong></span>
                                 <span class="text-amber-400">Signal: <strong id="pane-macd-signal">0.32</strong></span>
                                 <span class="text-emerald-400">Hist: <strong id="pane-macd-hist">+0.13</strong></span>
                             </div>
+                            <!-- Sub-pane Action Toolbar: Move Up/Down, Maximize, Close -->
+                            <div class="absolute top-1 right-2 z-20 flex items-center gap-0.5 bg-slate-950/85 backdrop-blur-sm px-1 py-0.5 rounded border border-slate-800/80 opacity-80 group-hover:opacity-100 transition-opacity select-none shadow-md">
+                                <button onclick="moveIndicatorPane('macd', 'up')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo MACD lên trên (▲)">
+                                    ▲
+                                </button>
+                                <button onclick="moveIndicatorPane('macd', 'down')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo MACD xuống dưới (▼)">
+                                    ▼
+                                </button>
+                                <button onclick="toggleMaximizePane('macd')" id="btn-max-pane-macd" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors" title="Phóng to chỉ báo MACD (Click lại để thu nhỏ)">
+                                    ⛶
+                                </button>
+                                <div class="h-3 w-px bg-slate-700/80 mx-0.5"></div>
+                                <button onclick="removeIndicatorPane('macd')" class="p-0.5 px-1 rounded hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-[11px] leading-none font-bold transition-colors" title="Xóa/Tắt chỉ báo MACD (Thêm lại tại menu fx Các chỉ báo)">
+                                    ✕
+                                </button>
+                            </div>
                             <canvas id="canvas-sub-macd" class="w-full h-full"></canvas>
                         </div>
 
                         <!-- 5. SUB-PANE: RSI (14) -->
-                        <div id="pane-rsi" class="relative w-full h-[85px] bg-[#070a11] border-t border-slate-800/80">
-                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3">
+                        <div id="pane-rsi" class="relative w-full bg-[#070a11] border-t border-slate-800/80 group transition-[height] duration-150">
+                            <!-- Drag Handle Resizer -->
+                            <div class="pane-resizer absolute top-0 left-0 right-0 h-2.5 -mt-1 cursor-row-resize z-30 hover:bg-cyan-500/40 active:bg-cyan-400 transition-colors flex items-center justify-center group/resizer" data-pane="rsi" title="Kéo lên/xuống để điều chỉnh độ cao chỉ báo RSI (Nhấp đúp để đặt lại mặc định)">
+                                <div class="w-10 h-1 rounded-full bg-slate-600/60 group-hover/resizer:bg-cyan-300 transition-colors pointer-events-none"></div>
+                            </div>
+                            <div class="absolute top-1 left-3 z-10 text-[10px] font-mono flex items-center gap-3 pointer-events-none select-none">
                                 <span class="font-bold text-purple-400">RSI (14)</span>
                                 <span class="text-slate-200 font-bold" id="pane-rsi-val">58.4</span>
                                 <span class="text-slate-500 text-[9px]">(30 - 70 Zone)</span>
+                            </div>
+                            <!-- Sub-pane Action Toolbar: Move Up/Down, Maximize, Close -->
+                            <div class="absolute top-1 right-2 z-20 flex items-center gap-0.5 bg-slate-950/85 backdrop-blur-sm px-1 py-0.5 rounded border border-slate-800/80 opacity-80 group-hover:opacity-100 transition-opacity select-none shadow-md">
+                                <button onclick="moveIndicatorPane('rsi', 'up')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo RSI lên trên (▲)">
+                                    ▲
+                                </button>
+                                <button onclick="moveIndicatorPane('rsi', 'down')" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[10px] leading-none transition-colors" title="Đưa chỉ báo RSI xuống dưới (▼)">
+                                    ▼
+                                </button>
+                                <button onclick="toggleMaximizePane('rsi')" id="btn-max-pane-rsi" class="p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors" title="Phóng to chỉ báo RSI (Click lại để thu nhỏ)">
+                                    ⛶
+                                </button>
+                                <div class="h-3 w-px bg-slate-700/80 mx-0.5"></div>
+                                <button onclick="removeIndicatorPane('rsi')" class="p-0.5 px-1 rounded hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-[11px] leading-none font-bold transition-colors" title="Xóa/Tắt chỉ báo RSI (Thêm lại tại menu fx Các chỉ báo)">
+                                    ✕
+                                </button>
                             </div>
                             <canvas id="canvas-sub-rsi" class="w-full h-full"></canvas>
                         </div>
@@ -2239,8 +2329,8 @@
                                 <button onclick="setChartTimeRange('1D')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">1n</button>
                                 <button onclick="setChartTimeRange('5D')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">5n</button>
                                 <button onclick="setChartTimeRange('1M')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">1t</button>
-                                <button onclick="setChartTimeRange('3M')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">3t</button>
-                                <button onclick="setChartTimeRange('6M')" class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold text-[11px]">6t</button>
+                                <button onclick="setChartTimeRange('3M')" class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold text-[11px]">3t</button>
+                                <button onclick="setChartTimeRange('6M')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">6t</button>
                                 <button onclick="setChartTimeRange('1Y')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">1y</button>
                                 <button onclick="setChartTimeRange('5Y')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">5y</button>
                                 <button onclick="setChartTimeRange('ALL')" class="px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]">Tất cả</button>
@@ -2519,7 +2609,7 @@
                     </div>
 
                     <div class="overflow-x-auto max-h-[620px] overflow-y-auto relative rounded-b-xl border-t border-slate-800/80 shadow-inner cursor-grab select-none" id="matrix-table-container">
-                        <table class="w-full text-left text-xs border-separate border-spacing-0 min-w-[1100px]" id="matrix-table-element">
+                        <table class="w-full text-left text-xs border-separate border-spacing-0" id="matrix-table-element">
                             <thead class="bg-slate-950 text-slate-400 font-mono sticky top-0 z-20 shadow-md" id="matrix-table-head">
                                 <!-- Headers dynamically injected -->
                             </thead>
@@ -2642,17 +2732,17 @@
                     <i data-lucide="search" class="w-3.5 h-3.5"></i>
                     <span>1. Quét Vietstock / CafeF</span>
                 </button>
-                <button onclick="switchIngestMode('mode-url')" id="btn-mode-url" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Admin (325396)">
+                <button onclick="switchIngestMode('mode-url')" id="btn-mode-url" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Quản trị viên">
                     <i data-lucide="link" class="w-3.5 h-3.5"></i>
                     <span>2. Nhập URL Trực Tiếp</span>
                     <i data-lucide="lock" class="w-3 h-3 text-amber-400/80 admin-lock-indicator"></i>
                 </button>
-                <button onclick="switchIngestMode('mode-pdf')" id="btn-mode-pdf" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Admin (325396)">
+                <button onclick="switchIngestMode('mode-pdf')" id="btn-mode-pdf" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Quản trị viên">
                     <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                     <span>3. Tải File PDF</span>
                     <i data-lucide="lock" class="w-3 h-3 text-amber-400/80 admin-lock-indicator"></i>
                 </button>
-                <button onclick="switchIngestMode('mode-raw')" id="btn-mode-raw" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Admin (325396)">
+                <button onclick="switchIngestMode('mode-raw')" id="btn-mode-raw" class="ingest-tab px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-1.5" title="Yêu cầu quyền Quản trị viên">
                     <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
                     <span>4. Dán Text Thô</span>
                     <i data-lucide="lock" class="w-3 h-3 text-amber-400/80 admin-lock-indicator"></i>
@@ -2854,14 +2944,14 @@
                             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
                             <span class="font-bold text-white text-xs">HỆ THỐNG MẪU BÓC TÁCH CATALYSTS & RỦI RO VI MÔ ĐỘC BẢN (THOÁT LY KHUÔN MẪU NGÀNH)</span>
                             <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">🛡️ Thoát Ly Văn Mẫu</span>
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">📊 Tối Đa 15 Catalysts / 10 Rủi Ro</span>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">📊 Trần Bóc Tách: Tối Đa 15 Catalysts / 10 Rủi Ro / CP</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="resetTemplatesToDefaults()" class="text-[10px] text-slate-400 hover:text-slate-200 underline flex items-center gap-1" title="Yêu cầu quyền Quản trị viên (Admin: 325396)">
+                            <button onclick="resetTemplatesToDefaults()" class="text-[10px] text-slate-400 hover:text-slate-200 underline flex items-center gap-1" title="Yêu cầu quyền Quản trị viên">
                                 <span>Khôi phục mặc định</span>
                                 <i data-lucide="lock" class="w-2.5 h-2.5 text-amber-400/80 admin-lock-indicator"></i>
                             </button>
-                            <button onclick="openAddTemplateModal()" id="btn-open-add-template" class="px-2.5 py-1 bg-cyan-700/80 hover:bg-cyan-600 text-cyan-100 rounded text-[11px] font-bold flex items-center gap-1 border border-cyan-600/60 shadow transition-all" title="Yêu cầu quyền Quản trị viên (Admin: 325396)">
+                            <button onclick="openAddTemplateModal()" id="btn-open-add-template" class="px-2.5 py-1 bg-cyan-700/80 hover:bg-cyan-600 text-cyan-100 rounded text-[11px] font-bold flex items-center gap-1 border border-cyan-600/60 shadow transition-all" title="Yêu cầu quyền Quản trị viên">
                                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                                 <span>+ Thêm Mẫu Mới</span>
                                 <i data-lucide="lock" class="w-3 h-3 text-amber-300 admin-lock-indicator"></i>
@@ -4251,6 +4341,6 @@
     </footer>
 
     <script src="/static/vendor/pdf.min.js"></script>
-    <script src="/static/app.js?v=10.48-overview-layout-reorder"></script>
+    <script src="/static/app.js?v=10.52-consensus-width-2x"></script>
 </body>
 </html>

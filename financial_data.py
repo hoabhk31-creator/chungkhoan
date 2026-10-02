@@ -4,7 +4,7 @@ Chuyên sâu: BCTC 4-8 kỳ, Dupont 3 & 5 bước, Piotroski F-Score, Altman Z-S
 Peer Comparison Radar, Mô hình 5 Lực lượng cạnh tranh Porter, và Định giá DCF tương tác.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import os
 import json
 import re
@@ -1758,6 +1758,7 @@ VIETNAM_STOCK_DIRECTORY: Dict[str, Dict[str, Any]] = {
     "REE": {"name": "CTCP Cơ Điện Lạnh", "sector": "Cơ điện & Năng lượng tái tạo", "shares": 409.50, "shares_listed": 409.50, "foreign_pct": 49.0, "dividend_yield": 2.5, "pe": 12.5, "pb": 1.45},
     "HSG": {"name": "CTCP Tập đoàn Hoa Sen", "sector": "Thép & Vật liệu Xây dựng", "shares": 615.97, "shares_listed": 615.97, "foreign_pct": 9.5, "dividend_yield": 0.0, "pe": 15.2, "pb": 1.15},
     "NKG": {"name": "CTCP Thép Nam Kim", "sector": "Thép & Vật liệu Xây dựng", "shares": 263.28, "shares_listed": 263.28, "foreign_pct": 6.8, "dividend_yield": 0.0, "pe": 16.4, "pb": 1.05},
+    "VGS": {"name": "CTCP Ống thép Việt Đức VG PIPE", "sector": "Thép & Vật liệu Xây dựng", "shares": 53.3, "shares_listed": 53.3, "foreign_pct": 5.0, "dividend_yield": 7.0, "pe": 14.2, "pb": 1.35},
     "FRT": {"name": "CTCP Bán lẻ Kỹ thuật số FPT", "sector": "Bán lẻ Dược phẩm & Công nghệ", "shares": 136.24, "shares_listed": 136.24, "foreign_pct": 14.2, "dividend_yield": 0.5, "pe": 45.0, "pb": 8.50},
     "PNJ": {"name": "CTCP Vàng bạc Đá quý Phú Nhuận", "sector": "Bán lẻ Trang sức", "shares": 334.56, "shares_listed": 334.56, "foreign_pct": 49.0, "dividend_yield": 2.0, "pe": 16.8, "pb": 3.25},
     "DGW": {"name": "CTCP Thế Giới Số (Digiworld)", "sector": "Phân phối Công nghệ", "shares": 167.07, "shares_listed": 167.07, "foreign_pct": 18.5, "dividend_yield": 1.5, "pe": 18.2, "pb": 3.10},
@@ -2999,6 +3000,7 @@ def calculate_live_financial_multiples(
     if base_shares <= 0:
         base_shares = 1000.0
 
+    dilution_info = {}
     if cap.get("is_corporate_action_adjusted"):
         has_dilution = False
         dilution_multiplier = 1.0

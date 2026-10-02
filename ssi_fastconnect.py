@@ -382,7 +382,7 @@ def aggregate_daily_to_period(daily_candles: List[Dict[str, Any]], target_res: s
     return aggregated
 
 
-async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int = 120) -> List[Dict[str, Any]]:
+async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int = 1500) -> List[Dict[str, Any]]:
     """
     Lấy chuỗi nến lịch sử OHLCV thực tế từ VNDirect DChart, Vietstock và DNSE Entrade API.
     Hỗ trợ đa khung thời gian: 1m, 5m, 15m, 1h, 1D, 1W, 1M.
@@ -513,7 +513,7 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
     return candles
 
 
-async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int = 120) -> List[Dict[str, Any]]:
+async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int = 1500) -> List[Dict[str, Any]]:
     """
     Truy xuất nến kỹ thuật theo cơ chế kết hợp:
     1. Thử lấy từ SSI FastConnect (DailyOhlc hoặc IntradayOhlc) nếu đã có token
@@ -820,7 +820,7 @@ def calculate_technical_indicators(candles: List[Dict[str, Any]], current_price:
         "overall_signal": overall_signal,
         "signal_color": signal_color,
         "trend_summary": f"Xu hướng {'Tăng giá' if current_price >= ma20 else 'Điều chỉnh tích lũy'} trên MA20; Kháng cự gần nhất tại {r1:,.0f} đ, Hỗ trợ then chốt tại {s1:,.0f} đ.",
-        "candles_history": candles[-60:]
+        "candles_history": candles
     }
 
 

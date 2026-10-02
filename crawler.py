@@ -14,7 +14,13 @@ import urllib.parse
 import httpx
 from bs4 import BeautifulSoup
 import unicodedata
-from pypdf import PdfReader
+try:
+    from pypdf import PdfReader
+except Exception:
+    try:
+        from PyPDF2 import PdfReader
+    except Exception:
+        PdfReader = None
 from engine import ReportItem, extract_financial_data_from_text, is_report_expired, PRESET_DATASETS
 from financial_data import VIETNAM_STOCK_DIRECTORY
 
@@ -2136,6 +2142,13 @@ def generate_sector_institutional_reports(
 
 def parse_date_to_timestamp(d_str: str) -> float:
     try:
+        from engine import parse_report_date
+        d = parse_report_date(d_str)
+        if d:
+            return datetime(d.year, d.month, d.day).timestamp()
+    except Exception:
+        pass
+    try:
         p = d_str.strip().split('/')
         if len(p) == 3:
             return datetime(int(p[2]), int(p[1]), int(p[0])).timestamp()
@@ -2166,6 +2179,7 @@ async def get_synchronized_matrix_reports(
     - Tự động cập nhật báo cáo mới nhất của từng CTCK.
     - Tự động bổ sung các CTCK mới có bài viết phân tích về mã đang xem.
     - Giữ lại các báo cáo cơ sở chưa có báo cáo mới hơn.
+    - LOẠI BỎ TOÀN BỘ BÁO CÁO ĐÃ QUÁ 1.5 NĂM (> 548 NGÀY) ĐỂ TRÁNH DỮ LIỆU LỖI THỜI.
     """
     clean_ticker = ticker.upper().strip()
     cache_key = f"{clean_ticker}_{round(market_p, -2)}"
@@ -2173,13 +2187,17 @@ async def get_synchronized_matrix_reports(
     if cache_key in _SYNCED_MATRIX_REPORTS_CACHE:
         cached_time, cached_items = _SYNCED_MATRIX_REPORTS_CACHE[cache_key]
         if (now - cached_time) < 600.0 and cached_items:
-            return cached_items
+            valid_cached = [r for r in cached_items if not is_report_expired(r.report_date, max_days=548)]
+            if valid_cached:
+                return valid_cached
 
     inst_map: Dict[str, ReportItem] = {}
 
-    # 1. Nạp danh sách báo cáo cơ sở (nếu có từ preset)
+    # 1. Nạp danh sách báo cáo cơ sở (nếu có từ preset) - LỌC BỎ BÁO CÁO QUÁ 1.5 NĂM (> 548 NGÀY)
     if base_reports:
         for r in base_reports:
+            if is_report_expired(r.report_date, max_days=548):
+                continue
             key = normalize_institution_name(r.institution)
             inst_map[key] = r
 
@@ -2211,6 +2229,10 @@ async def get_synchronized_matrix_reports(
             }
             parsed = parse_edocs_item_to_report(item, clean_ticker, comp_name, sector_name, market_p)
             if not parsed:
+                continue
+
+            # LỌC BỎ BÁO CÁO QUÁ 1.5 NĂM (> 548 NGÀY)
+            if is_report_expired(parsed.report_date, max_days=548):
                 continue
 
             parsed_ts = parse_date_to_timestamp(parsed.report_date)
@@ -2259,6 +2281,9 @@ async def get_synchronized_matrix_reports(
                     }
                     parsed = parse_edocs_item_to_report(item, clean_ticker, comp_name, sector_name, market_p)
                     if parsed:
+                        # LỌC BỎ BÁO CÁO QUÁ 1.5 NĂM (> 548 NGÀY)
+                        if is_report_expired(parsed.report_date, max_days=548):
+                            continue
                         if key not in inst_map or (inst_map[key].target_price <= 0 and parsed.target_price > 0):
                             inst_map[key] = parsed
         except Exception as e_cr:
@@ -2267,6 +2292,8 @@ async def get_synchronized_matrix_reports(
     # Bổ sung dự phóng DT & LNST từ base_reports nếu báo cáo cào về chưa có số liệu chi tiết
     if base_reports:
         for r_base in base_reports:
+            if is_report_expired(r_base.report_date, max_days=548):
+                continue
             b_key = normalize_institution_name(r_base.institution)
             if b_key in inst_map:
                 curr = inst_map[b_key]
@@ -2281,7 +2308,8 @@ async def get_synchronized_matrix_reports(
                     curr.upside_percent = r_base.upside_percent
                 # KHÔNG copy key_catalysts và key_risks từ CTCK khác — mỗi CTCK phải có nội dung riêng
 
-    merged = list(inst_map.values())
+    # Lọc lại toàn bộ danh sách để đảm bảo 100% không có báo cáo quá 1.5 năm (> 548 ngày)
+    merged = [r for r in inst_map.values() if not is_report_expired(r.report_date, max_days=548)]
     if not merged and not base_reports:
         return []
 
@@ -2379,13 +2407,21 @@ def ingest_report_item_to_matrix_cache(
 ):
     """
     Tự động bóc tách và đưa trực tiếp báo cáo phân tích mới vào Bảng ma trận ngang của mã cổ phiếu.
+    TUYỆT ĐỐI KHÔNG ĐƯA VÀO NẾU BÁO CÁO ĐÃ QUÁ 1.5 NĂM (> 548 NGÀY).
     """
+    if is_report_expired(report_item.report_date, max_days=548):
+        print(f"[Matrix Ingest] Báo cáo quá 1.5 năm ({report_item.report_date}) không đưa vào Ma trận ngang.")
+        return
+
     clean_ticker = ticker.upper().strip()
     cache_key = f"{clean_ticker}_{round(market_p, -2)}"
     now = time.time()
     existing_items: List[ReportItem] = []
     if cache_key in _SYNCED_MATRIX_REPORTS_CACHE:
         _, existing_items = _SYNCED_MATRIX_REPORTS_CACHE[cache_key]
+
+    # Lọc bỏ các mục cũ trong cache nếu đã quá 1.5 năm
+    existing_items = [r for r in existing_items if not is_report_expired(r.report_date, max_days=548)]
 
     inst_key = normalize_institution_name(report_item.institution)
     updated = False

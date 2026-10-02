@@ -644,6 +644,78 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
             "adjustment_factor": 0.5,
             "source": "HOSE & Vietstock"
         }
+    ],
+    "MSN": [
+        {
+            "id": "msn-ca-04072022-dividend_cash",
+            "ex_date": "04/07/2022",
+            "record_date": "05/07/2022",
+            "execution_date": "04/07/2022",
+            "event_type": "dividend_cash",
+            "title": "MSN: Trả cổ tức năm 2022 bằng tiền, 800 đồng/CP",
+            "description": "Trả cổ tức năm 2022 bằng tiền mặt, 800 đồng/cổ phiếu",
+            "cash_amount": 800.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "msn-ca-12042022-bonus_share",
+            "ex_date": "12/04/2022",
+            "record_date": "13/04/2022",
+            "execution_date": "12/04/2022",
+            "event_type": "dividend_stock",
+            "title": "MSN: Thưởng cổ phiếu, tỷ lệ 5:1",
+            "description": "Thưởng cổ phiếu tỷ lệ 5:1 (cổ đông sở hữu 5 cổ phiếu được nhận 1 cổ phiếu mới)",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.20,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "msn-ca-15122021-dividend_cash",
+            "ex_date": "15/12/2021",
+            "record_date": "16/12/2021",
+            "execution_date": "15/12/2021",
+            "event_type": "dividend_cash",
+            "title": "MSN: Trả cổ tức đợt 2/2021 bằng tiền, 250 đồng/CP",
+            "description": "Trả cổ tức đợt 2/2021 bằng tiền, 250 đồng/CP",
+            "cash_amount": 250.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "msn-ca-01072021-dividend_cash",
+            "ex_date": "01/07/2021",
+            "record_date": "02/07/2021",
+            "execution_date": "01/07/2021",
+            "event_type": "dividend_cash",
+            "title": "MSN: Trả cổ tức đợt 1/2021 bằng tiền, 950 đồng/CP",
+            "description": "Trả cổ tức đợt 1/2021 bằng tiền, 950 đồng/CP",
+            "cash_amount": 950.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "msn-ca-17122020-dividend_cash",
+            "ex_date": "17/12/2020",
+            "record_date": "18/12/2020",
+            "execution_date": "17/12/2020",
+            "event_type": "dividend_cash",
+            "title": "MSN: Trả cổ tức năm 2019 bằng tiền, 1,000 đồng/CP",
+            "description": "Trả cổ tức năm 2019 bằng tiền, 1,000 đồng/CP",
+            "cash_amount": 1000.0,
+            "stock_ratio": 0.0,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "source": "HOSE & Vietstock"
+        }
     ]
 }
 
@@ -888,8 +960,8 @@ def calculate_stock_dividend_ratio(
 
     for ev in events:
         ev_type = str(ev.get("event_type", "")).lower()
-        # Chỉ tính cổ phiếu thưởng, KHÔNG tính quyền mua
-        if ev_type not in ("dividend_stock", "dividend_both"):
+        # Chỉ tính cổ phiếu thưởng & cổ tức cổ phiếu, KHÔNG tính quyền mua
+        if ev_type not in ("dividend_stock", "dividend_both", "bonus_share"):
             continue
         s_ratio = float(ev.get("stock_ratio") or 0.0)
         if s_ratio <= 0:
@@ -907,6 +979,111 @@ def calculate_stock_dividend_ratio(
         return 0.0  # Không có cổ phiếu thưởng trong kỳ
 
     return round(total_stock_ratio * 100.0, 1)  # Chuyển từ 0.10 → 10.0%
+
+
+def get_detailed_corporate_actions_dividend_summary(
+    ticker: str,
+    current_price: float = 0.0,
+    lookback_days: int = 365
+) -> Dict[str, Any]:
+    """
+    Trích xuất tổng hợp chi tiết chính xác về Cổ tức Tiền mặt, Cổ tức Cổ phiếu và Cổ phiếu thưởng.
+
+    Phân loại rõ ràng:
+    1. Cổ tức tiền mặt (cash_amount): ví dụ 1.000 đ/CP hoặc 500 đ/CP.
+       - Kèm tỷ suất cổ tức / thị giá (%) và tỷ lệ theo mệnh giá 10.000 đ (%).
+    2. Cổ phiếu thưởng (bonus_shares_pct): ví dụ Thưởng 10% hoặc Thưởng 30% (tăng vốn từ NVCSH/thặng dư/quỹ).
+    3. Cổ tức bằng cổ phiếu (stock_dividend_pct): ví dụ Cổ tức CP 20% hoặc Cổ tức CP 10% (chia từ LNST).
+    4. Chuỗi text hiển thị trực quan (cash_display, stock_display) phục vụ bảng so sánh đối thủ ngành.
+    """
+    clean_ticker = ticker.upper().strip()
+    events = get_ticker_corporate_actions(clean_ticker, auto_sync=False) or []
+    if not events:
+        return {
+            "ticker": clean_ticker,
+            "cash_amount": 0.0,
+            "yield_pct": 0.0,
+            "par_pct": 0.0,
+            "bonus_pct": 0.0,
+            "stock_div_pct": 0.0,
+            "total_stock_pct": 0.0,
+            "cash_display": "0 đ (KCT)",
+            "stock_display": "0%",
+            "source": "none"
+        }
+
+    cutoff = date.today()
+    lookback_date = date(cutoff.year - 1, cutoff.month, cutoff.day)
+
+    cash_amount = 0.0
+    stock_dividend_ratio = 0.0
+    bonus_share_ratio = 0.0
+    has_event_in_window = False
+
+    for ev in events:
+        ex_d = parse_action_date(ev.get("ex_date", ""))
+        if not ex_d or ex_d < lookback_date or ex_d > cutoff:
+            continue
+
+        has_event_in_window = True
+        ev_type = str(ev.get("event_type", "")).lower()
+        title_desc = (str(ev.get("title", "")) + " " + str(ev.get("description", ""))).lower()
+
+        # 1. Cổ tức tiền mặt
+        c = float(ev.get("cash_amount") or 0.0)
+        if c > 0 and ev_type in ("dividend_cash", "dividend_both", "dividend_and_rights"):
+            cash_amount += c
+
+        # 2. Cổ phiếu thưởng vs Cổ tức cổ phiếu
+        s = float(ev.get("stock_ratio") or 0.0)
+        if s > 0:
+            is_bonus = (
+                ev_type == "bonus_share" or
+                "thưởng" in title_desc or
+                "tăng vốn" in title_desc or
+                "nvcsh" in title_desc or
+                "thực hiện tăng vốn cổ phần" in title_desc
+            )
+            if is_bonus:
+                bonus_share_ratio += s
+            else:
+                stock_dividend_ratio += s
+
+    yield_pct = round((cash_amount / current_price) * 100.0, 2) if current_price > 0 and cash_amount > 0 else 0.0
+    par_pct = round((cash_amount / 10000.0) * 100.0, 1) if cash_amount > 0 else 0.0
+    bonus_pct = round(bonus_share_ratio * 100.0, 1)
+    stock_div_pct = round(stock_dividend_ratio * 100.0, 1)
+    total_stock_pct = round((bonus_share_ratio + stock_dividend_ratio) * 100.0, 1)
+
+    # Chuỗi hiển thị tiền mặt
+    if cash_amount > 0:
+        cash_display = f"{int(cash_amount):,} đ" if cash_amount.is_integer() else f"{cash_amount:,.1f} đ"
+    else:
+        cash_display = "0 đ (KCT)"
+
+    # Chuỗi hiển thị cổ phiếu thưởng / cổ tức cổ phiếu
+    stock_parts = []
+    if bonus_pct > 0:
+        b_str = f"{int(bonus_pct)}" if bonus_pct.is_integer() else f"{bonus_pct:.1f}"
+        stock_parts.append(f"Thưởng {b_str}%")
+    if stock_div_pct > 0:
+        s_str = f"{int(stock_div_pct)}" if stock_div_pct.is_integer() else f"{stock_div_pct:.1f}"
+        stock_parts.append(f"Cổ tức CP {s_str}%")
+
+    stock_display = " + ".join(stock_parts) if stock_parts else "0%"
+
+    return {
+        "ticker": clean_ticker,
+        "cash_amount": cash_amount,
+        "yield_pct": yield_pct,
+        "par_pct": par_pct,
+        "bonus_pct": bonus_pct,
+        "stock_div_pct": stock_div_pct,
+        "total_stock_pct": total_stock_pct,
+        "cash_display": cash_display,
+        "stock_display": stock_display,
+        "source": "corporate_actions" if has_event_in_window else "none"
+    }
 
 
 def adjust_target_price_for_corporate_actions(

@@ -1642,7 +1642,10 @@ def calculate_consensus(
     if current_market_price is None or current_market_price <= 0:
         current_market_price = valid_current_prices[0] if valid_current_prices else 25000.0
 
-    # LỌC BÁO CÁO CƠ BẢN:
+    # LỌC BÁO CÁO CƠ BẢN & ĐA TỔ CHỨC:
+    # 0. Loại bỏ hoàn toàn các báo cáo đã quá 1.5 năm (> 548 ngày) để không đưa vào Ma trận ngang (tránh số liệu quá lỗi thời)
+    reports = [r for r in reports if not is_report_expired(r.report_date, max_days=548)]
+
     # 1. Tuyệt đối không sử dụng định giá trong báo cáo phân tích kỹ thuật (PTKT)
     # 2. Tuyệt đối không sử dụng định giá và so sánh trong các báo cáo quá 1 năm (> 365 ngày) kể từ ngày đăng
     def _is_tech_report(r: ReportItem) -> bool:
@@ -1656,9 +1659,9 @@ def calculate_consensus(
     def _is_expired_report(r: ReportItem) -> bool:
         if getattr(r, "is_expired", False):
             return True
-        return is_report_expired(r.report_date)
+        return is_report_expired(r.report_date, max_days=365)
 
-    # Đánh dấu is_expired cho từng báo cáo
+    # Đánh dấu is_expired (> 1 năm) cho từng báo cáo
     for r in reports:
         if _is_expired_report(r):
             r.is_expired = True

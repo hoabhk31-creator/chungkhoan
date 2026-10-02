@@ -1507,8 +1507,21 @@ def generate_peer_comparison_pdf(peers_data: dict, radar_img_base64: Optional[st
             row.cell(fmt_num(p.get("debt_to_equity"), "x"), style=row_style, align="R")
 
             for col in kpi_cols:
-                val = p.get(col.get("field"))
-                val_str = f"{val:,.1f}" if isinstance(val, (int, float)) else str(val) if val is not None else "—"
+                field = col.get("field")
+                if field == "dividend_yield_pct":
+                    cash = p.get("dividend_cash_amount")
+                    y = p.get("dividend_yield_pct")
+                    if cash and cash > 0:
+                        val_str = f"{int(cash):,} đ" if float(cash).is_integer() else f"{cash:,.1f} đ"
+                        if y and y > 0:
+                            val_str += f" ({y:.1f}%)"
+                    else:
+                        val_str = p.get("dividend_cash_display") or "0 đ (KCT)"
+                elif field == "stock_bonus_pct":
+                    val_str = p.get("stock_bonus_display") or (f"{p.get(field):.1f}%" if p.get(field) else "0%")
+                else:
+                    val = p.get(field)
+                    val_str = f"{val:,.1f}" if isinstance(val, (int, float)) else str(val) if val is not None else "—"
                 row.cell(val_str, style=row_style, align="R")
 
         avg_style = FontFace(family="ArialVN", emphasis="B", size_pt=7.5, color=(15, 23, 42), fill_color=(226, 232, 240))

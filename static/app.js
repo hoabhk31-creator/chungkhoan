@@ -255,7 +255,7 @@ let chartOverviewMiniPrice = null;
 let chartOverviewMiniDonut = null;
 let chartOverviewKqkd = null;
 let chartOverviewCdkt = null;
-let currentOverviewTimeframe = "6M";
+let currentOverviewTimeframe = "3M";
 let currentOverviewFinancialPeriod = "quarter";
 let currentMiniChartData = null;
 let currentNewsEventsData = null;
@@ -1465,8 +1465,9 @@ async function selectTicker(ticker) {
             .then(r => r.ok ? r.json() : null)
             .catch(e => { console.warn("Fin fetch error:", e); return null; });
 
-        // Module 4: Dữ liệu kỹ thuật & nến biểu đồ
-        const techPromise = fetch(`/api/technical/${cleanTicker}?resolution=${currentTechnicalInterval}&count=150`)
+        // Module 4: Dữ liệu kỹ thuật & nến biểu đồ (1500 nến cho 5-6 năm lịch sử)
+        const techCount = (currentTechnicalInterval === "D" || currentTechnicalInterval === "W" || currentTechnicalInterval === "M") ? 1500 : 350;
+        const techPromise = fetch(`/api/technical/${cleanTicker}?resolution=${currentTechnicalInterval}&count=${techCount}`)
             .then(r => r.ok ? r.json() : null)
             .catch(e => { console.warn("Tech fetch error:", e); return null; });
 
@@ -1931,8 +1932,8 @@ function renderHero(report) {
 
     const displayDateEl = document.getElementById("display-date");
     if (displayDateEl) displayDateEl.textContent = report.analysis_date || `Tháng 09/2026`;
-    const repCountEl = document.getElementById("display-report-count");
-    if (repCountEl) repCountEl.textContent = `${report.matrix_table ? report.matrix_table.length : 0} Báo cáo`;
+    const activeCount = (report.matrix_table || []).filter(r => !isReportOlderThanDays(r.report_date, 548)).length;
+    if (repCountEl) repCountEl.textContent = `${activeCount} Báo cáo`;
 
 function getConsensusRecommendationText(upside, hasValidValuation) {
     if (!hasValidValuation || upside === null || upside === undefined || isNaN(Number(upside))) {
@@ -2315,6 +2316,13 @@ function parseDateToTimestamp(dStr) {
     return 0;
 }
 
+function isReportOlderThanDays(dStr, maxDays = 548) {
+    const ts = parseDateToTimestamp(dStr);
+    if (!ts) return false;
+    const diffDays = (Date.now() - ts) / (1000 * 60 * 60 * 24);
+    return diffDays > maxDays;
+}
+
 function renderMatrixTable(report) {
     const table = document.getElementById("matrix-table-element");
     if (!table || !report) return;
@@ -2325,7 +2333,11 @@ function renderMatrixTable(report) {
         return;
     }
     // Sắp xếp ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
-    const reports = (report.matrix_table || []).slice().sort((a, b) => parseDateToTimestamp(b.report_date) - parseDateToTimestamp(a.report_date));
+    // Tự động lọc ẩn toàn bộ các báo cáo đã quá 1.5 năm (> 548 ngày) để tránh khuyến nghị lỗi thời
+    const reports = (report.matrix_table || [])
+        .filter(r => !isReportOlderThanDays(r.report_date, 548))
+        .slice()
+        .sort((a, b) => parseDateToTimestamp(b.report_date) - parseDateToTimestamp(a.report_date));
     report.matrix_table = reports;
     const cs = report.consensus_summary || {};
 
@@ -2353,10 +2365,10 @@ function renderMatrixTable(report) {
                     <div class="flex flex-col items-center justify-center space-y-3">
                         <i data-lucide="file-search" class="w-10 h-10 text-slate-500"></i>
                         <div class="text-sm font-bold text-slate-300">
-                            Chưa có báo cáo phân tích định giá từ các CTCK cho mã cổ phiếu <span class="text-cyan-400">${report.ticker}</span>
+                            Chưa có báo cáo phân tích định giá mới trong vòng 1.5 năm qua từ các CTCK cho mã cổ phiếu <span class="text-cyan-400">${report.ticker}</span>
                         </div>
                         <div class="text-xs text-slate-400 max-w-lg leading-relaxed">
-                            Hệ thống tuân thủ nguyên tắc <strong>Fact & Data First</strong>: Không tự bịa đặt khuyến nghị, giá mục tiêu hay các số liệu dự phóng khi chưa có bài viết phân tích chính thức từ các công ty chứng khoán.
+                            Hệ thống tuân thủ nguyên tắc <strong>Fact & Data First</strong>: Tự động ẩn các báo cáo đã quá 1.5 năm (18 tháng) để tránh sử dụng các khuyến nghị và dự phóng lỗi thời không còn phù hợp với bối cảnh kinh doanh hiện tại của doanh nghiệp.
                         </div>
                     </div>
                 </td>
@@ -2379,8 +2391,8 @@ function renderMatrixTable(report) {
             ${expiredBadge}
         </th>`;
     });
-    theadHtml += `<th class="p-3 sticky top-0 z-20 bg-slate-950 font-mono font-bold text-emerald-400 border-b border-slate-800 text-center min-w-[210px] shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]">
-        ĐỘ LỆCH & ĐỒNG THUẬN (CONSENSUS)
+    theadHtml += `<th class="p-3 sticky top-0 z-20 bg-slate-950 font-mono font-bold text-emerald-400 border-b border-slate-800 text-center shadow-[0_2px_5px_-1px_rgba(0,0,0,0.5)]" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">ĐỘ LỆCH & ĐỒNG THUẬN (CONSENSUS)</div>
     </th></tr>`;
     
     if (theadEl) theadEl.innerHTML = theadHtml;
@@ -2446,10 +2458,14 @@ function renderMatrixTable(report) {
         rangeDisplay = `Vùng [${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")}]`;
         spreadDisplay = cs.target_price_spread_percent > 0 ? `Độ lệch spread: ${cs.target_price_spread_percent.toFixed(1)}%` : 'Độ lệch spread: —';
     }
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[210px]">
-        <div class="text-cyan-400 font-bold">${meanDisplay}</div>
-        <div class="text-slate-400 text-[11px]">${rangeDisplay}</div>
-        <div class="text-amber-400 text-[10px] mt-0.5">${spreadDisplay}</div>
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="text-cyan-400 font-bold text-sm">${meanDisplay}</div>
+                <div class="text-slate-400 text-xs">${rangeDisplay}</div>
+                <div class="text-amber-400 text-xs font-semibold">${spreadDisplay}</div>
+            </div>
+        </div>
     </td></tr>`;
 
     // 2. Định giá P/E & P/B forward
@@ -2471,9 +2487,13 @@ function renderMatrixTable(report) {
     });
     const validPes = reports.filter(r => !r.is_expired).map(r => r.pe_forward).filter(v => typeof v === 'number' && v > 0 && v < 100);
     const avgPe = validPes.length > 0 ? validPes.reduce((a, b) => a + b, 0) / validPes.length : 0;
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[210px]">
-        <div class="text-white font-semibold">P/E forward TB: <span class="text-cyan-400 font-bold">${avgPe > 0 ? avgPe.toFixed(1) + 'x' : '—'}</span></div>
-        <div class="text-slate-400 text-[10px]">Định giá phản ánh chu kỳ phục hồi</div>
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="text-white font-semibold">P/E forward TB: <span class="text-cyan-400 font-bold text-sm">${avgPe > 0 ? avgPe.toFixed(1) + 'x' : '—'}</span></div>
+                <div class="text-slate-400 text-xs">(Định giá phản ánh chu kỳ phục hồi theo consensus)</div>
+            </div>
+        </div>
     </td></tr>`;
 
     // 3. Dự phóng Doanh thu & LNST
@@ -2503,7 +2523,7 @@ function renderMatrixTable(report) {
     const validNpats = reports.filter(r => r.npat_forecast && r.npat_forecast !== '—' && r.npat_forecast !== 'N/A');
     let npatsContentHtml = '';
     if (validNpats.length > 0) {
-        npatsContentHtml = `<div class="space-y-1 max-h-[220px] overflow-y-auto pr-1">` +
+        npatsContentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[220px] overflow-y-auto pr-1">` +
             validNpats.map(r => {
                 const inst = r.institution ? r.institution.split(' ')[0] : 'CTCK';
                 return `<div class="flex items-start justify-between gap-2 py-1 px-1.5 rounded bg-slate-900/60 border border-slate-800/60 hover:border-slate-700 transition-colors">
@@ -2515,12 +2535,14 @@ function renderMatrixTable(report) {
     } else {
         npatsContentHtml = `<div class="text-slate-500 text-[10px] italic">Chưa có đủ số liệu dự phóng</div>`;
     }
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 min-w-[240px] align-top">
-        <div class="flex items-center justify-between gap-1 mb-2 pb-1 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>Dự phóng LNST các CTCK</span>
-            <span class="text-cyan-400 font-normal bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800/60">${validNpats.length} CTCK</span>
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/40 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">
+            <div class="flex items-center justify-between gap-1 mb-2 pb-1 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span>Dự phóng LNST các CTCK</span>
+                <span class="text-cyan-400 font-normal bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800/60">${validNpats.length} CTCK</span>
+            </div>
+            ${npatsContentHtml}
         </div>
-        ${npatsContentHtml}
     </td></tr>`;
 
     // 4. Luận điểm tăng trưởng then chốt (Key Catalysts)
@@ -2601,19 +2623,21 @@ function renderMatrixTable(report) {
             report.consensus_summary.consensual_catalysts = cCats;
         }
     }
-    consensualCatsHtml += `<ul class="space-y-1 text-slate-300 text-[10px]">`;
+    consensualCatsHtml += `<ul class="space-y-1.5 text-slate-300 text-[11px] leading-relaxed">`;
     if (cCats.length === 0) {
         consensualCatsHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
     } else {
         cCats.forEach(c => {
-            consensualCatsHtml += `<li class="flex items-start gap-1">
+            consensualCatsHtml += `<li class="flex items-start gap-1.5">
                 <span class="text-cyan-400 font-bold shrink-0">•</span>
                 <span>${c}</span>
             </li>`;
         });
     }
     consensualCatsHtml += `</ul>`;
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 min-w-[240px] align-top">${consensualCatsHtml}</td></tr>`;
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">${consensualCatsHtml}</div>
+    </td></tr>`;
 
     // 5. Rủi ro trọng yếu (Key Downside Risks)
     tbodyHtml += `<tr>
@@ -2693,19 +2717,21 @@ function renderMatrixTable(report) {
             report.consensus_summary.consensual_risks = cRisks;
         }
     }
-    consensualRisksHtml += `<ul class="space-y-1 text-rose-300/90 text-[10px]">`;
+    consensualRisksHtml += `<ul class="space-y-1.5 text-rose-300/90 text-[11px] leading-relaxed">`;
     if (cRisks.length === 0) {
         consensualRisksHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
     } else {
         cRisks.forEach(k => {
-            consensualRisksHtml += `<li class="flex items-start gap-1">
+            consensualRisksHtml += `<li class="flex items-start gap-1.5">
                 <span class="text-rose-500 font-bold shrink-0">•</span>
                 <span>${k}</span>
             </li>`;
         });
     }
     consensualRisksHtml += `</ul>`;
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 min-w-[240px] align-top">${consensualRisksHtml}</td></tr>`;
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">${consensualRisksHtml}</div>
+    </td></tr>`;
 
     // 6. Tài liệu báo cáo phân tích gốc (Bản PDF từng CTCK)
     tbodyHtml += `<tr>
@@ -2740,13 +2766,15 @@ function renderMatrixTable(report) {
             </div>
         </td>`;
     });
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 min-w-[210px] text-center align-middle">
-        <button onclick="openCtckReportsModal()" class="px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-800/80 hover:border-cyan-500 inline-flex items-center gap-1.5 text-xs font-bold transition-all shadow-sm cursor-pointer" title="Mở danh sách đối chiếu và đọc toàn bộ các báo cáo CTCK">
-            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-cyan-400"></i>
-            <span>Báo cáo CTCK: ${reports.length} Báo cáo</span>
-            <i data-lucide="external-link" class="w-3 h-3 text-cyan-400"></i>
-        </button>
-        <div class="text-[10px] text-slate-400 mt-1 font-mono">Bản tổng hợp đa tổ chức</div>
+    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 text-center align-middle" style="width: 420px; min-width: 420px; max-width: 450px;">
+        <div style="width: 420px; min-width: 420px; max-width: 450px;">
+            <button onclick="openCtckReportsModal()" class="px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-800/80 hover:border-cyan-500 inline-flex items-center gap-1.5 text-xs font-bold transition-all shadow-sm cursor-pointer" title="Mở danh sách đối chiếu và đọc toàn bộ các báo cáo CTCK">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>Báo cáo CTCK: ${reports.length} Báo cáo</span>
+                <i data-lucide="external-link" class="w-3 h-3 text-cyan-400"></i>
+            </button>
+            <div class="text-[10px] text-slate-400 mt-1 font-mono">Bản tổng hợp đa tổ chức</div>
+        </div>
     </td></tr>`;
 
     if (tbodyEl) tbodyEl.innerHTML = tbodyHtml;
@@ -4114,7 +4142,10 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
             timeScale: {
                 borderColor: gridColor,
                 timeVisible: resolution !== "D" && resolution !== "W" && resolution !== "M",
-                secondsVisible: false
+                secondsVisible: false,
+                rightOffset: 12,
+                fixLeftEdge: false,
+                lockVisibleTimeRangeOnResize: true
             },
             handleScroll: {
                 mouseWheel: true,
@@ -4282,33 +4313,37 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
             }
         }
 
-        // 3. MA Indicators
+        // 3. MA Indicators (Không chèn chữ che nến & đường chỉ báo)
         chartOverviewMa20Series = createSeries("LineSeries", {
             color: isDark ? "#f59e0b" : "#d97706",
             lineWidth: 1.5,
-            title: "SMA20",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
         chartOverviewMa50Series = createSeries("LineSeries", {
             color: isDark ? "#38bdf8" : "#0284c7",
             lineWidth: 1.5,
-            title: "SMA50",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
 
-        // 4. Bollinger Bands
+        // 4. Bollinger Bands (Không chèn chữ che nến & đường chỉ báo)
         chartOverviewBbUpperSeries = createSeries("LineSeries", {
             color: "rgba(129, 140, 248, 0.6)",
             lineWidth: 1,
             lineStyle: 2,
-            title: "BB Upper",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
         chartOverviewBbLowerSeries = createSeries("LineSeries", {
             color: "rgba(129, 140, 248, 0.6)",
             lineWidth: 1,
             lineStyle: 2,
-            title: "BB Lower",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
 
@@ -4458,7 +4493,7 @@ function updateTimeframeReturnBadges(rawCandles) {
     if (closeAll > 0) setPct("tf-pct-ALL", ((lastClose - closeAll) / closeAll) * 100);
 }
 
-function populateOverviewTvChartData(rawCandles, timeframe = "6M") {
+function populateOverviewTvChartData(rawCandles, timeframe = "3M") {
     if (!chartOverviewCandleSeries || !rawCandles || !rawCandles.length) return;
     currentOverviewCandles = rawCandles;
 
@@ -7829,7 +7864,7 @@ function formatSectorKpiValue(val, unit) {
     }
     if (unit === "ha") return `${num.toLocaleString('vi-VN')} ha`;
     if (unit === "x") return `${num.toFixed(1)}x`;
-    if (unit === "VND") return `${num.toLocaleString('vi-VN')} đ`;
+    if (unit === "VND" || unit === "đ/CP" || unit === "đ") return `${num.toLocaleString('vi-VN')} đ`;
     if (unit === "CH" || unit === "điểm") return `${num.toLocaleString('vi-VN')} điểm`;
     if (unit === "chiếc" || unit === "tàu") return `${num} tàu`;
     if (unit === "ngày") return `${num} ngày`;
@@ -7926,38 +7961,48 @@ function renderPeersSection(peersData) {
             visibleKpiCols.forEach(col => {
                 const val = p[col.field];
                 let formatted;
-                // Xử lý đặc biệt cho cột cổ tức: kiểm tra nguồn dữ liệu
+                // Xử lý đặc biệt cho cột cổ tức tiền mặt
                 if (col.field === "dividend_yield_pct") {
                     const src = p["dividend_yield_source"];
+                    const cashAmt = Number(p["dividend_cash_amount"] !== undefined ? p["dividend_cash_amount"] : (p["cash_dividend"] || 0));
+                    const yieldPct = Number(val || 0);
+                    const cashDisp = p["dividend_cash_display"];
+
                     if (src === "estimate") {
-                        // Dữ liệu ước tính (chưa có dữ liệu xác nhận) → hiển thị "—*"
-                        formatted = `<span class="text-slate-500 italic" title="Dữ liệu chưa được xác nhận — cần cập nhật từ HOSE/HNX">—*</span>`;
-                    } else if (src === "corporate_actions") {
-                        // Dữ liệu từ lịch sử sự kiện quyền đã xác nhận
-                        const numVal = Number(val);
-                        if (numVal === 0) {
-                            formatted = `<span class="text-slate-400" title="Không có cổ tức tiền mặt trong 12 tháng qua (Nguồn: HOSE/HNX)">0% <span class="text-[10px] text-slate-500">(KCT)</span></span>`;
-                        } else {
-                            formatted = `<span title="Cổ tức thực tế 12 tháng qua (Nguồn: HOSE/HNX)">${numVal.toFixed(1)}%</span>`;
-                        }
+                        formatted = `<span class="text-slate-500 italic" title="Dữ liệu ước tính chưa được xác nhận từ HOSE/HNX">—*</span>`;
+                    } else if (cashAmt > 0 || (cashDisp && !cashDisp.startsWith("0"))) {
+                        const fmtCash = cashDisp || (cashAmt.toLocaleString('vi-VN') + " đ");
+                        const subYield = yieldPct > 0 ? `(${yieldPct.toFixed(1)}%)` : '';
+                        formatted = `<div class="font-mono text-emerald-400 font-bold leading-tight" title="Cổ tức tiền mặt thực tế 12 tháng: ${fmtCash}${subYield ? ' - Tỷ suất: ' + yieldPct.toFixed(1) + '%' : ''} (Nguồn: HOSE/HNX)">
+                            <div class="text-xs font-bold text-emerald-300">${fmtCash}</div>
+                            ${subYield ? `<div class="text-[10px] text-emerald-500/80 font-normal">${subYield}</div>` : ''}
+                        </div>`;
+                    } else if (yieldPct > 0) {
+                        formatted = `<span class="font-mono text-emerald-400 font-semibold" title="Tỷ suất cổ tức">${yieldPct.toFixed(1)}%</span>`;
                     } else {
-                        // Không có trường source (dữ liệu cũ) → dùng format thông thường
-                        formatted = formatSectorKpiValue(val, col.unit);
+                        formatted = `<span class="text-slate-400 font-normal" title="Không có cổ tức tiền mặt trong 12 tháng qua (Nguồn: HOSE/HNX / Vietstock)">0 đ <span class="text-[10px] text-slate-500">(KCT)</span></span>`;
                     }
                 } else if (col.field === "stock_bonus_pct") {
-                    // Cột CP Thưởng (%)
+                    // Cột CP Thưởng & Cổ tức CP (Ví dụ: Thưởng tỷ lệ 30%, Cổ tức 20%...)
                     const src = p["stock_bonus_source"];
+                    const stockDisp = p["stock_bonus_display"];
+                    const bonusPct = Number(p["bonus_shares_pct"] || 0);
+                    const stockDivPct = Number(p["stock_dividend_pct"] || 0);
+                    const totalPct = Number(p["total_stock_pct"] || val || 0);
+
                     if (src === "estimate") {
                         formatted = `<span class="text-slate-500 italic" title="Dữ liệu chưa được xác nhận">—*</span>`;
-                    } else if (src === "corporate_actions") {
-                        const numVal = Number(val);
-                        if (numVal === 0) {
-                            formatted = `<span class="text-slate-400" title="Không có cổ phiếu thưởng trong 12 tháng qua">0%</span>`;
-                        } else {
-                            formatted = `<span class="text-amber-300 font-bold" title="Cổ phiếu thưởng/cổ tức CP trong 12 tháng qua (Nguồn: HOSE/HNX)">+${numVal.toFixed(1)}% ★</span>`;
-                        }
+                    } else if (stockDisp && stockDisp !== "0%") {
+                        formatted = `<span class="text-amber-300 font-bold font-mono text-[11px] whitespace-normal inline-block max-w-[130px]" title="Cổ phiếu thưởng / Cổ tức cổ phiếu thực tế 12 tháng qua (Nguồn: HOSE/HNX)">${stockDisp} <span class="text-amber-400">★</span></span>`;
+                    } else if (bonusPct > 0 || stockDivPct > 0) {
+                        let parts = [];
+                        if (bonusPct > 0) parts.push(`Thưởng ${bonusPct}%`);
+                        if (stockDivPct > 0) parts.push(`Cổ tức CP ${stockDivPct}%`);
+                        formatted = `<span class="text-amber-300 font-bold font-mono text-[11px] whitespace-normal inline-block max-w-[130px]">${parts.join(' + ')} <span class="text-amber-400">★</span></span>`;
+                    } else if (totalPct > 0) {
+                        formatted = `<span class="text-amber-300 font-bold font-mono text-[11px]" title="Cổ phiếu thưởng / Cổ tức CP (Nguồn: HOSE/HNX)">+${totalPct.toFixed(1)}% ★</span>`;
                     } else {
-                        formatted = formatSectorKpiValue(val, col.unit);
+                        formatted = `<span class="text-slate-400 font-normal" title="Không có cổ phiếu thưởng / cổ tức cổ phiếu trong 12 tháng qua">0%</span>`;
                     }
                 } else {
                     formatted = formatSectorKpiValue(val, col.unit);
@@ -9262,6 +9307,11 @@ let currentFireantBbUpperSeries = null;
 let currentFireantBbLowerSeries = null;
 
 currentTechnicalInterval = "D"; // reuse declared variable from line 28
+let currentFireantRange = "3M";
+let userManuallyScrolledRange = null;
+let isInternalRangeSetting = false;
+let currentFireantIndicators = null;
+let currentCrosshairX = null;
 let currentCandleType = "candlestick";
 let currentDrawingTool = "crosshair";
 let isDrawingsLocked = false;
@@ -9276,6 +9326,21 @@ let activeIndicators = {
     macd: true,
     rsi: true
 };
+let lastFireantCandles = [];
+let customPaneHeights = {};
+try {
+    const savedHeights = localStorage.getItem("fireant_custom_pane_heights");
+    if (savedHeights) customPaneHeights = JSON.parse(savedHeights);
+} catch(e) {}
+let maximizedPaneKey = null;
+let indicatorOrder = ['vol', 'mcdx', 'macd', 'rsi'];
+try {
+    const savedOrder = localStorage.getItem("fireant_indicator_order");
+    if (savedOrder) {
+        const parsed = JSON.parse(savedOrder);
+        if (Array.isArray(parsed) && parsed.length === 4) indicatorOrder = parsed;
+    }
+} catch(e) {}
 
 // Bộ lưu trữ các nét vẽ (Drawings Store)
 let drawingsList = [];
@@ -9415,7 +9480,8 @@ async function syncTechnicalDataRealtime(ticker) {
     const clean = (ticker || currentTechnicalTicker || "HPG").toUpperCase();
     isSyncingTechnical = true;
     try {
-        const res = await fetch(`/api/technical/${clean}?resolution=${currentTechnicalInterval}&count=150`);
+        const fetchCount = (currentTechnicalInterval === "D" || currentTechnicalInterval === "W" || currentTechnicalInterval === "M") ? 1500 : 350;
+        const res = await fetch(`/api/technical/${clean}?resolution=${currentTechnicalInterval}&count=${fetchCount}`);
         if (res.ok) {
             const data = await res.json();
             currentTechnicalData = data;
@@ -9439,13 +9505,7 @@ function onSwitchToTechnicalTab() {
     const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
     setTimeout(() => {
         initFireantChart(ticker, currentTechnicalInterval);
-        if (currentFireantChart) {
-            const box = document.getElementById("tech-tv-render-box");
-            if (box && box.clientWidth > 0 && box.clientHeight > 0) {
-                currentFireantChart.resize(box.clientWidth, box.clientHeight);
-                currentFireantChart.timeScale().fitContent();
-            }
-        }
+        adjustTechnicalChartLayout();
     }, 80);
 }
 
@@ -9512,23 +9572,181 @@ function toggleIndicatorsMenu() {
     if (menu) menu.classList.toggle("hidden");
 }
 
+function removeIndicatorPane(key) {
+    toggleIndicator(key, false);
+    const names = {
+        vol: "Khối lượng (Volume)",
+        mcdx: "MCDX Dòng tiền Cá mập",
+        macd: "Chỉ báo MACD (12, 26, 9)",
+        rsi: "Chỉ báo RSI (14)"
+    };
+    showToast(`Đã xóa ${names[key] || key}. Thêm lại tại menu [fx Các chỉ báo]`);
+}
+
+function applyIndicatorOrder() {
+    const container = document.getElementById("tech-chart-stack-container");
+    if (!container) return;
+    const paneMap = { vol: "pane-volume", mcdx: "pane-mcdx", macd: "pane-macd", rsi: "pane-rsi" };
+    indicatorOrder.forEach(key => {
+        const el = document.getElementById(paneMap[key]);
+        if (el && el.parentElement === container) {
+            container.appendChild(el);
+        }
+    });
+    try {
+        localStorage.setItem("fireant_indicator_order", JSON.stringify(indicatorOrder));
+    } catch(e) {}
+}
+
+function moveIndicatorPane(key, direction) {
+    if (maximizedPaneKey) {
+        toggleMaximizePane(maximizedPaneKey); // Thoát phóng to trước khi đổi thứ tự
+    }
+
+    const idx = indicatorOrder.indexOf(key);
+    if (idx === -1) return;
+    const names = { vol: "Khối lượng", mcdx: "MCDX Dòng tiền", macd: "MACD", rsi: "RSI" };
+
+    if (direction === "up") {
+        if (idx === 0) {
+            showToast(`Chỉ báo ${names[key] || key} đã ở vị trí trên cùng`);
+            return;
+        }
+        const temp = indicatorOrder[idx - 1];
+        indicatorOrder[idx - 1] = indicatorOrder[idx];
+        indicatorOrder[idx] = temp;
+        applyIndicatorOrder();
+        adjustTechnicalChartLayout();
+        showToast(`Đã chuyển chỉ báo ${names[key] || key} lên trên ▲`);
+    } else if (direction === "down") {
+        if (idx === indicatorOrder.length - 1) {
+            showToast(`Chỉ báo ${names[key] || key} đã ở vị trí dưới cùng`);
+            return;
+        }
+        const temp = indicatorOrder[idx + 1];
+        indicatorOrder[idx + 1] = indicatorOrder[idx];
+        indicatorOrder[idx] = temp;
+        applyIndicatorOrder();
+        adjustTechnicalChartLayout();
+        showToast(`Đã chuyển chỉ báo ${names[key] || key} xuống dưới ▼`);
+    }
+}
+
+function toggleMaximizePane(key) {
+    const names = {
+        main: "Biểu đồ nến chính",
+        vol: "Khối lượng (Volume)",
+        mcdx: "MCDX Dòng tiền Cá mập",
+        macd: "MACD (12, 26, 9)",
+        rsi: "RSI (14)"
+    };
+
+    const keys = ['main', 'vol', 'mcdx', 'macd', 'rsi'];
+
+    if (maximizedPaneKey === key) {
+        // Thoát chế độ phóng to -> Trở về xem tất cả
+        maximizedPaneKey = null;
+        keys.forEach(k => {
+            const btn = document.getElementById(`btn-max-pane-${k}`);
+            if (btn) {
+                btn.className = k === 'main'
+                    ? "ml-auto px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-slate-700/80 text-[10px] font-mono flex items-center gap-1 transition-all"
+                    : "p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors";
+                btn.title = k === 'main' ? "Phóng to biểu đồ nến chính (Click lại để thu nhỏ)" : `Phóng to chỉ báo ${names[k] || k} (Click lại để thu nhỏ)`;
+                if (k === 'main') {
+                    const icon = document.getElementById("icon-max-pane-main");
+                    const label = document.getElementById("label-max-pane-main");
+                    if (icon) icon.textContent = "⛶";
+                    if (label) label.textContent = "Phóng to nến";
+                } else {
+                    btn.textContent = "⛶";
+                }
+            }
+        });
+
+        // Khôi phục hiển thị cho các thanh resizer
+        document.querySelectorAll(".pane-resizer").forEach(r => r.style.display = "");
+
+        adjustTechnicalChartLayout();
+        showToast(`Đã thu nhỏ lại chế độ xem đầy đủ các chỉ báo`);
+    } else {
+        // Bật phóng to pane được chọn
+        maximizedPaneKey = key;
+
+        keys.forEach(k => {
+            const btn = document.getElementById(`btn-max-pane-${k}`);
+            if (!btn) return;
+            if (k === key) {
+                btn.className = k === 'main'
+                    ? "ml-auto px-2 py-0.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold border border-cyan-400 text-[10px] font-mono flex items-center gap-1 transition-all shadow-md"
+                    : "p-0.5 px-1 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] leading-none transition-colors shadow-md";
+                btn.title = "Thu nhỏ lại chế độ xem ban đầu (Click để hoàn tác)";
+                if (k === 'main') {
+                    const icon = document.getElementById("icon-max-pane-main");
+                    const label = document.getElementById("label-max-pane-main");
+                    if (icon) icon.textContent = "🗗";
+                    if (label) label.textContent = "Thu nhỏ nến";
+                } else {
+                    btn.textContent = "🗗";
+                }
+            } else {
+                btn.className = k === 'main'
+                    ? "ml-auto px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-slate-700/80 text-[10px] font-mono flex items-center gap-1 transition-all"
+                    : "p-0.5 px-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] leading-none transition-colors";
+                if (k === 'main') {
+                    const icon = document.getElementById("icon-max-pane-main");
+                    const label = document.getElementById("label-max-pane-main");
+                    if (icon) icon.textContent = "⛶";
+                    if (label) label.textContent = "Phóng to nến";
+                } else {
+                    btn.textContent = "⛶";
+                }
+            }
+        });
+
+        adjustTechnicalChartLayout();
+        showToast(`Đã phóng to ${names[key] || key}. Bấm 🗗 để thu nhỏ.`);
+    }
+}
+
+function restoreAllIndicatorsDefault() {
+    ['vol', 'mcdx', 'macd', 'rsi', 'ma'].forEach(k => {
+        activeIndicators[k] = true;
+        const chk = document.getElementById("chk-ind-" + k);
+        if (chk) chk.checked = true;
+    });
+    activeIndicators.bb = false;
+    const chkBb = document.getElementById("chk-ind-bb");
+    if (chkBb) chkBb.checked = false;
+
+    if (currentFireantMa20Series) currentFireantMa20Series.applyOptions({ visible: true });
+    if (currentFireantMa50Series) currentFireantMa50Series.applyOptions({ visible: true });
+    if (currentFireantBbUpperSeries) currentFireantBbUpperSeries.applyOptions({ visible: false });
+    if (currentFireantBbLowerSeries) currentFireantBbLowerSeries.applyOptions({ visible: false });
+    const b20 = document.getElementById("legend-box-ma20");
+    const b50 = document.getElementById("legend-box-ma50");
+    if (b20) b20.style.display = "inline";
+    if (b50) b50.style.display = "inline";
+
+    customPaneHeights = {};
+    try { localStorage.removeItem("fireant_custom_pane_heights"); } catch(e) {}
+
+    indicatorOrder = ['vol', 'mcdx', 'macd', 'rsi'];
+    try { localStorage.removeItem("fireant_indicator_order"); } catch(e) {}
+    applyIndicatorOrder();
+
+    if (maximizedPaneKey) {
+        toggleMaximizePane(maximizedPaneKey);
+    } else {
+        adjustTechnicalChartLayout();
+    }
+    showToast("Đã khôi phục các chỉ báo kỹ thuật mặc định");
+}
+
 function toggleIndicator(indicatorKey, isChecked) {
     activeIndicators[indicatorKey] = isChecked;
 
-    // Toggle sub-panes visibility
-    if (indicatorKey === "vol") {
-        const p = document.getElementById("pane-volume");
-        if (p) p.style.display = isChecked ? "block" : "none";
-    } else if (indicatorKey === "mcdx") {
-        const p = document.getElementById("pane-mcdx");
-        if (p) p.style.display = isChecked ? "block" : "none";
-    } else if (indicatorKey === "macd") {
-        const p = document.getElementById("pane-macd");
-        if (p) p.style.display = isChecked ? "block" : "none";
-    } else if (indicatorKey === "rsi") {
-        const p = document.getElementById("pane-rsi");
-        if (p) p.style.display = isChecked ? "block" : "none";
-    } else if (indicatorKey === "ma") {
+    if (indicatorKey === "ma") {
         if (currentFireantMa20Series) currentFireantMa20Series.applyOptions({ visible: isChecked });
         if (currentFireantMa50Series) currentFireantMa50Series.applyOptions({ visible: isChecked });
         const b20 = document.getElementById("legend-box-ma20");
@@ -9540,7 +9758,11 @@ function toggleIndicator(indicatorKey, isChecked) {
         if (currentFireantBbLowerSeries) currentFireantBbLowerSeries.applyOptions({ visible: isChecked });
     }
 
-    resizeFireantChartLayout();
+    // Đồng bộ checkbox trên dropdown fx
+    const chk = document.getElementById("chk-ind-" + indicatorKey);
+    if (chk && chk.checked !== isChecked) chk.checked = isChecked;
+
+    adjustTechnicalChartLayout();
 }
 
 function toggleMaCrossAlert() {
@@ -9747,7 +9969,21 @@ function initFireantChart(symbol, interval = "D") {
             timeScale: {
                 borderColor: gridColor,
                 timeVisible: interval !== "D" && interval !== "W" && interval !== "M",
-                secondsVisible: false
+                secondsVisible: false,
+                rightOffset: 12,
+                fixLeftEdge: false,
+                lockVisibleTimeRangeOnResize: true
+            },
+            handleScroll: {
+                mouseWheel: true,
+                pressedMouseMove: true,
+                horzTouchDrag: true,
+                vertTouchDrag: true
+            },
+            handleScale: {
+                axisPressedMouseMove: true,
+                mouseWheel: true,
+                pinch: true
             }
         });
 
@@ -9813,33 +10049,37 @@ function initFireantChart(symbol, interval = "D") {
         }
         currentFireantCandleSeries = mainSeries;
 
-        // 2. Đường trung bình MA (SMA20, SMA50)
+        // 2. Đường trung bình MA (SMA20, SMA50) - Không chèn chữ che nến & đường chỉ báo
         currentFireantMa20Series = createSeries("LineSeries", {
             color: isDark ? "#f59e0b" : "#d97706",
             lineWidth: 1.5,
-            title: "SMA20",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
         currentFireantMa50Series = createSeries("LineSeries", {
             color: isDark ? "#38bdf8" : "#0284c7",
             lineWidth: 1.5,
-            title: "SMA50",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
 
-        // 3. Bollinger Bands (20, 2)
+        // 3. Bollinger Bands (20, 2) - Không chèn chữ che nến & đường chỉ báo
         currentFireantBbUpperSeries = createSeries("LineSeries", {
             color: "rgba(129, 140, 248, 0.6)",
             lineWidth: 1,
             lineStyle: 2,
-            title: "BB Upper",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
         currentFireantBbLowerSeries = createSeries("LineSeries", {
             color: "rgba(129, 140, 248, 0.6)",
             lineWidth: 1,
             lineStyle: 2,
-            title: "BB Lower",
+            title: "",
+            lastValueVisible: false,
             priceLineVisible: false
         });
 
@@ -9858,6 +10098,9 @@ function initFireantChart(symbol, interval = "D") {
             ro.observe(renderBox);
         }
 
+        // Tự động căn chỉnh chiều cao vừa trọn màn hình
+        adjustTechnicalChartLayout();
+
         // Nếu đã có cache nến cho mã này đúng resolution, nạp tức thì hiển thị ngay
         if (currentTechnicalData && currentTechnicalData.ticker === cleanSym && currentTechnicalData.resolution === interval && currentTechnicalData.candles_history && currentTechnicalData.candles_history.length > 0) {
             populateFireantChartData(currentTechnicalData.candles_history);
@@ -9867,7 +10110,7 @@ function initFireantChart(symbol, interval = "D") {
         }
 
         // Nạp dữ liệu mới nhất từ Backend API (Ưu tiên SSI FastConnect API, fallback Vietstock/VNDirect/DNSE)
-        const fetchCount = (interval === "W" || interval === "M") ? 200 : (interval === "D" ? 350 : 250);
+        const fetchCount = (interval === "W" || interval === "M" || interval === "D") ? 1500 : 350;
         fetch(`/api/technical/${cleanSym}?resolution=${interval}&count=${fetchCount}`)
             .then(r => r.json())
             .then(data => {
@@ -9881,14 +10124,19 @@ function initFireantChart(symbol, interval = "D") {
                 console.error("Fetch candles error:", err);
             });
 
-        // Crosshair move listener
+        // Crosshair move listener đồng bộ toàn bộ đồ thị nến & 4 sub-panes
         if (typeof chart.subscribeCrosshairMove === "function") {
             chart.subscribeCrosshairMove(param => {
                 try {
-                    if (!param || !param.time || !param.seriesData || !mainSeries) return;
-                    const priceData = param.seriesData.get(mainSeries);
-                    const ma20Val = currentFireantMa20Series ? param.seriesData.get(currentFireantMa20Series) : null;
-                    const ma50Val = currentFireantMa50Series ? param.seriesData.get(currentFireantMa50Series) : null;
+                    if (!param || !param.point || param.point.x < 0) {
+                        currentCrosshairX = null;
+                        if (typeof updateFireantSubpanesLegend === "function") updateFireantSubpanesLegend(null);
+                        if (typeof syncSubPanesWithRange === "function") syncSubPanesWithRange();
+                        return;
+                    }
+                    const priceData = (param.seriesData && mainSeries) ? param.seriesData.get(mainSeries) : null;
+                    const ma20Val = (param.seriesData && currentFireantMa20Series) ? param.seriesData.get(currentFireantMa20Series) : null;
+                    const ma50Val = (param.seriesData && currentFireantMa50Series) ? param.seriesData.get(currentFireantMa50Series) : null;
 
                     if (priceData) {
                         const o = priceData.open !== undefined ? priceData.open : priceData.value;
@@ -9897,9 +10145,28 @@ function initFireantChart(symbol, interval = "D") {
                         const c = priceData.close !== undefined ? priceData.close : priceData.value;
                         updateFireantLegend(o, h, l, c, ma20Val ? ma20Val.value : null, ma50Val ? ma50Val.value : null);
                     }
+
+                    currentCrosshairX = param.point.x;
+                    let hoveredIdx = null;
+                    if (typeof param.logical === "number") {
+                        hoveredIdx = Math.round(param.logical);
+                    } else if (param.time && lastFireantCandles) {
+                        hoveredIdx = lastFireantCandles.findIndex(c => c.time === param.time);
+                    }
+                    if (typeof updateFireantSubpanesLegend === "function") updateFireantSubpanesLegend(hoveredIdx);
+                    if (typeof syncSubPanesWithRange === "function") syncSubPanesWithRange();
                 } catch (e) {}
             });
         }
+
+        // Lắng nghe người dùng chủ động kéo rê / cuộn đồ thị để giữ nguyên vị trí ở đó
+        chart.timeScale().subscribeVisibleLogicalRangeChange(newRange => {
+            if (!newRange || isInternalRangeSetting) return;
+            userManuallyScrolledRange = newRange;
+            if (typeof syncSubPanesWithRange === "function") {
+                syncSubPanesWithRange(newRange);
+            }
+        });
 
         // Kích hoạt canvas vẽ tương tác
         setupDrawingCanvas();
@@ -10018,10 +10285,6 @@ function populateFireantChartData(rawCandles) {
         try { currentFireantCandleSeries.setMarkers(markers); } catch (e) {}
     }
 
-    if (currentFireantChart) {
-        currentFireantChart.timeScale().fitContent();
-    }
-
     // Cập nhật Legend và các Sub-panes (Volume, MCDX, MACD, RSI)
     const last = closes[closes.length - 1];
     const prev = closes.length > 1 ? closes[closes.length - 2] : last;
@@ -10031,8 +10294,23 @@ function populateFireantChartData(rawCandles) {
         updateFireantLegend(last.open, last.high, last.low, last.close, lastMa20, lastMa50, last.close - prev.close, last.volume);
     }
 
-    // Vẽ 4 Sub-panes Canvas
-    renderFireantSubPanes(closes);
+    // Lưu nến để phục vụ tự động co giãn & vẽ lại khi bật/tắt/xóa chỉ báo
+    lastFireantCandles = closes;
+    currentFireantIndicators = calculateFireantIndicators(closes);
+    updateFireantSubpanesLegend(null);
+
+    // Tự động phân bổ chiều cao chuẩn 1 màn hình và vẽ các sub-panes
+    adjustTechnicalChartLayout();
+
+    // Giữ nguyên vị trí nếu người dùng đã chủ động kéo rê, chỉ áp dụng 3M khi chưa kéo
+    if (userManuallyScrolledRange) {
+        try {
+            currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
+            renderFireantSubPanes(closes, userManuallyScrolledRange);
+        } catch(e) {}
+    } else {
+        setChartTimeRange(currentFireantRange || "3M", true, false);
+    }
 }
 
 function updateFireantLegend(open, high, low, close, ma20, ma50, changeDiff, volume) {
@@ -10066,398 +10344,1087 @@ function updateFireantLegend(open, high, low, close, ma20, ma50, changeDiff, vol
     if (lMa50 && ma50 !== null) lMa50.textContent = Number(ma50).toLocaleString("vi-VN");
 }
 
-// -------------------------------------------------------------
-// VẼ 4 SUB-PANES CHUYÊN NGHIỆP: VOLUME, MCDX, MACD, RSI
-// -------------------------------------------------------------
-function renderFireantSubPanes(candles) {
-    if (!candles || candles.length === 0) return;
-
-    // 1. SUB-PANE: KHỐI LƯỢNG (VOLUME & VOLUME MA20)
-    renderVolumeCanvas(candles);
-
-    // 2. SUB-PANE: MCDX - DÒNG TIỀN TẠO LẬP (BANKER ĐỎ, HOT MONEY VÀNG, RETAIL XANH LÁ)
-    renderMcdxCanvas(candles);
-
-    // 3. SUB-PANE: MACD (12, 26, 9)
-    renderMacdCanvas(candles);
-
-    // 4. SUB-PANE: RSI (14)
-    renderRsiCanvas(candles);
+let subPaneSyncRaf = null;
+function syncSubPanesWithRange(range = null) {
+    if (subPaneSyncRaf) cancelAnimationFrame(subPaneSyncRaf);
+    subPaneSyncRaf = requestAnimationFrame(() => {
+        if (lastFireantCandles && lastFireantCandles.length > 0) {
+            renderFireantSubPanes(lastFireantCandles, range);
+        }
+    });
 }
 
-function renderVolumeCanvas(candles) {
+// -------------------------------------------------------------
+// TÍNH TOÁN CÁC CHỈ BÁO KỸ THUẬT CHO TOÀN BỘ CHUỖI NẾN LỊCH SỬ
+// (Không tính trên lát cắt ngắn để bảo đảm tính liên tục của EMA/RSI)
+// -------------------------------------------------------------
+function calculateFireantIndicators(candles) {
+    if (!candles || candles.length === 0) return null;
+    const n = candles.length;
+    const closes = candles.map(c => Number(c.close || 0));
+    const opens = candles.map(c => Number(c.open || 0));
+    const vols = candles.map(c => Number(c.volume || 0));
+
+    // 1. Volume MA20
+    const volMa20 = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+        if (i >= 19) {
+            let sum = 0;
+            for (let j = i - 19; j <= i; j++) sum += vols[j];
+            volMa20[i] = sum / 20;
+        }
+    }
+
+    // 2. RSI 14
+    const rsi14 = new Array(n).fill(null);
+    for (let i = 1; i < n; i++) {
+        if (i >= 14) {
+            let gains = 0, losses = 0;
+            for (let k = i - 13; k <= i; k++) {
+                const diff = closes[k] - closes[k - 1];
+                if (diff >= 0) gains += diff; else losses -= diff;
+            }
+            const rs = losses === 0 ? 100 : gains / losses;
+            rsi14[i] = 100 - (100 / (1 + rs));
+        }
+    }
+
+    // 3. MCDX (Banker Cá mập, Hot money Đầu cơ, Retail Nhỏ lẻ)
+    const mcdx = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+        const rsiVal = rsi14[i] !== null ? rsi14[i] : 50;
+        let banker = Math.min(100, Math.max(0, (rsiVal - 42) * 2.5));
+        if (i >= 19) {
+            let sum20 = 0;
+            for (let j = i - 19; j <= i; j++) sum20 += closes[j];
+            const ma20 = sum20 / 20;
+            const dev = ma20 > 0 ? (closes[i] - ma20) / ma20 : 0;
+            banker = Math.min(100, Math.max(0, banker + dev * 150));
+        }
+        let hotMoney = Math.min(100 - banker, Math.max(10, 45 - Math.abs(rsiVal - 55)));
+        let retail = Math.max(0, 100 - banker - hotMoney);
+        mcdx[i] = {
+            banker: Math.round(banker),
+            hot: Math.round(hotMoney),
+            retail: Math.round(retail)
+        };
+    }
+
+    // 4. MACD (12, 26, 9)
+    function calcEma(period) {
+        const k = 2 / (period + 1);
+        const ema = new Array(n).fill(null);
+        let cur = closes[0];
+        ema[0] = cur;
+        for (let i = 1; i < n; i++) {
+            cur = closes[i] * k + cur * (1 - k);
+            ema[i] = cur;
+        }
+        return ema;
+    }
+    const ema12 = calcEma(12);
+    const ema26 = calcEma(26);
+    const macdLine = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+        macdLine[i] = ema12[i] - ema26[i];
+    }
+    const signalLine = new Array(n).fill(null);
+    const kSig = 2 / 10;
+    let curSig = macdLine[0] || 0;
+    signalLine[0] = curSig;
+    for (let i = 1; i < n; i++) {
+        curSig = macdLine[i] * kSig + curSig * (1 - kSig);
+        signalLine[i] = curSig;
+    }
+    const hist = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+        hist[i] = macdLine[i] - signalLine[i];
+    }
+
+    return {
+        closes,
+        opens,
+        vols,
+        volMa20,
+        rsi14,
+        mcdx,
+        macdLine,
+        signalLine,
+        hist
+    };
+}
+
+// -------------------------------------------------------------
+// HÀM TIỆN ÍCH ĐỒNG BỘ TOẠ ĐỘ PIXEL VÀ KÍCH THƯỚC TRỤC GIÁ
+// -------------------------------------------------------------
+function getFireantPriceScaleWidth() {
+    let pw = 65;
+    try {
+        if (currentFireantChart && typeof currentFireantChart.priceScale === "function") {
+            const ps = currentFireantChart.priceScale('right');
+            if (ps && typeof ps.width === "function") {
+                const w = ps.width();
+                if (w > 20) pw = w;
+            }
+        }
+    } catch (e) {}
+    return pw;
+}
+
+function getFireantBarSpacing(ts) {
+    let spacing = 8;
+    try {
+        if (ts && typeof ts.getVisibleLogicalRange === "function") {
+            const range = ts.getVisibleLogicalRange();
+            if (range && typeof range.from === "number" && typeof range.to === "number") {
+                const mid = Math.round((range.from + range.to) / 2);
+                if (typeof ts.logicalToCoordinate === "function") {
+                    const c1 = ts.logicalToCoordinate(mid);
+                    const c2 = ts.logicalToCoordinate(mid + 1);
+                    if (typeof c1 === "number" && typeof c2 === "number") {
+                        spacing = Math.max(1, Math.abs(c2 - c1));
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+    return spacing;
+}
+
+function getFireantCandleX(ts, candle, index, fallbackUsableW, totalCount) {
+    if (ts) {
+        try {
+            if (typeof ts.logicalToCoordinate === "function") {
+                const x = ts.logicalToCoordinate(index);
+                if (typeof x === "number") return x;
+            }
+            if (typeof ts.timeToCoordinate === "function" && candle && candle.time) {
+                const x = ts.timeToCoordinate(candle.time);
+                if (typeof x === "number") return x;
+            }
+        } catch (e) {}
+    }
+    if (totalCount && totalCount > 0) {
+        return 10 + index * ((fallbackUsableW - 20) / totalCount);
+    }
+    return null;
+}
+
+// Lắng nghe thao tác kéo chuột và cuộn chuột trên các subpanes để kéo toàn bộ đồ thị
+function setupSubpaneInteractions() {
+    ["canvas-sub-volume", "canvas-sub-mcdx", "canvas-sub-macd", "canvas-sub-rsi"].forEach(id => {
+        const c = document.getElementById(id);
+        if (!c || c._dragAttached) return;
+        c._dragAttached = true;
+        let isDragging = false;
+        let startX = 0;
+        let startRange = null;
+
+        c.addEventListener("mousedown", e => {
+            if (e.button !== 0 || !currentFireantChart) return;
+            isDragging = true;
+            startX = e.clientX;
+            const ts = currentFireantChart.timeScale();
+            startRange = ts.getVisibleLogicalRange ? ts.getVisibleLogicalRange() : null;
+            c.style.cursor = "grabbing";
+        });
+
+        window.addEventListener("mousemove", e => {
+            if (!isDragging || !startRange || !currentFireantChart) return;
+            const ts = currentFireantChart.timeScale();
+            const barSpacing = getFireantBarSpacing(ts);
+            const deltaX = e.clientX - startX;
+            const deltaLogical = deltaX / barSpacing;
+            isInternalRangeSetting = true;
+            ts.setVisibleLogicalRange({
+                from: startRange.from - deltaLogical,
+                to: startRange.to - deltaLogical
+            });
+            isInternalRangeSetting = false;
+            userManuallyScrolledRange = ts.getVisibleLogicalRange ? ts.getVisibleLogicalRange() : null;
+            syncSubPanesWithRange();
+        });
+
+        window.addEventListener("mouseup", () => {
+            if (isDragging) {
+                isDragging = false;
+                c.style.cursor = "default";
+            }
+        });
+
+        c.addEventListener("wheel", e => {
+            if (!currentFireantChart) return;
+            e.preventDefault();
+            const ts = currentFireantChart.timeScale();
+            const range = ts.getVisibleLogicalRange ? ts.getVisibleLogicalRange() : null;
+            if (!range) return;
+            const span = range.to - range.from;
+            const zoomFactor = e.deltaY < 0 ? 0.9 : 1.1;
+            const newSpan = Math.max(10, Math.min(1000, span * zoomFactor));
+            const center = (range.from + range.to) / 2;
+            isInternalRangeSetting = true;
+            ts.setVisibleLogicalRange({
+                from: center - newSpan / 2,
+                to: center + newSpan / 2
+            });
+            isInternalRangeSetting = false;
+            userManuallyScrolledRange = ts.getVisibleLogicalRange ? ts.getVisibleLogicalRange() : null;
+            syncSubPanesWithRange();
+        }, { passive: false });
+    });
+}
+
+// Cập nhật thông số tiêu đề (Header / Legend) cho 4 sub-panes theo cây nến đang trỏ
+function updateFireantSubpanesLegend(targetIdx = null) {
+    if (!lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
+    const n = lastFireantCandles.length;
+    const idx = (typeof targetIdx === "number" && targetIdx >= 0 && targetIdx < n) ? targetIdx : (n - 1);
+    const ind = currentFireantIndicators;
+    const c = lastFireantCandles[idx];
+    if (!c) return;
+
+    // 1. Volume
+    const latestEl = document.getElementById("pane-vol-latest");
+    const maEl = document.getElementById("pane-vol-ma");
+    if (latestEl) latestEl.textContent = Number(c.volume || 0).toLocaleString("vi-VN");
+    if (maEl) {
+        const mv = ind.volMa20[idx];
+        maEl.textContent = mv ? `MA20: ${mv >= 1e6 ? (mv / 1e6).toFixed(1) + 'M' : (mv / 1e3).toFixed(0) + 'k'}` : "MA20: —";
+    }
+
+    // 2. MCDX
+    const m = ind.mcdx[idx];
+    if (m) {
+        const bEl = document.getElementById("mcdx-banker-val");
+        const hEl = document.getElementById("mcdx-hot-val");
+        const rEl = document.getElementById("mcdx-retail-val");
+        if (bEl) bEl.textContent = `${m.banker}%`;
+        if (hEl) hEl.textContent = `${m.hot}%`;
+        if (rEl) rEl.textContent = `${m.retail}%`;
+    }
+
+    // 3. MACD
+    const elM = document.getElementById("pane-macd-line");
+    const elS = document.getElementById("pane-macd-signal");
+    const elH = document.getElementById("pane-macd-hist");
+    const lM = ind.macdLine[idx];
+    const lS = ind.signalLine[idx];
+    const lH = ind.hist[idx];
+    if (elM) elM.textContent = (lM !== null && lM !== undefined) ? lM.toFixed(2) : "0.00";
+    if (elS) elS.textContent = (lS !== null && lS !== undefined) ? lS.toFixed(2) : "0.00";
+    if (elH) {
+        elH.textContent = `${(lH !== null && lH >= 0) ? '+' : ''}${(lH !== null && lH !== undefined) ? lH.toFixed(2) : '0.00'}`;
+        elH.className = (lH !== null && lH >= 0) ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+    }
+
+    // 4. RSI
+    const rsiValEl = document.getElementById("pane-rsi-val");
+    const rVal = ind.rsi14[idx];
+    if (rsiValEl) rsiValEl.textContent = (rVal !== null && rVal !== undefined) ? rVal.toFixed(1) : "—";
+}
+
+// -------------------------------------------------------------
+// VẼ 4 SUB-PANES: VOLUME, MCDX, MACD, RSI ĐỒNG BỘ 100% TOẠ ĐỘ VỚI ĐỒ THỊ CHÍNH
+// -------------------------------------------------------------
+function renderFireantSubPanes(candles, range = null) {
+    if (!candles || candles.length === 0) {
+        if (lastFireantCandles && lastFireantCandles.length > 0) {
+            candles = lastFireantCandles;
+        } else if (currentTechnicalData && currentTechnicalData.candles_history && currentTechnicalData.candles_history.length > 0) {
+            candles = currentTechnicalData.candles_history;
+        } else {
+            return;
+        }
+    }
+    lastFireantCandles = candles;
+
+    if (!currentFireantIndicators || currentFireantIndicators.closes.length !== candles.length) {
+        currentFireantIndicators = calculateFireantIndicators(candles);
+    }
+
+    setupSubpaneInteractions();
+
+    if (activeIndicators.vol) renderVolumeCanvas();
+    if (activeIndicators.mcdx) renderMcdxCanvas();
+    if (activeIndicators.macd) renderMacdCanvas();
+    if (activeIndicators.rsi) renderRsiCanvas();
+}
+
+function renderVolumeCanvas() {
     const canvas = document.getElementById("canvas-sub-volume");
-    if (!canvas) return;
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.parentElement.clientWidth || 800;
     const h = canvas.parentElement.clientHeight || 90;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const vols = candles.map(c => c.volume || 0);
-    const maxVol = Math.max(...vols, 1000);
-    const n = candles.length;
-    const barW = Math.max(1.5, (w - 60) / n - 1.5);
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
 
-    // Volume MA20
-    const ma20Vol = [];
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { vols, volMa20 } = currentFireantIndicators;
+
+    // Tìm max volume trong phạm vi nến hiển thị
+    let maxVol = 1000;
     for (let i = 0; i < n; i++) {
-        if (i >= 19) {
-            const sum = vols.slice(i - 19, i + 1).reduce((a, b) => a + b, 0);
-            ma20Vol.push(sum / 20);
-        } else {
-            ma20Vol.push(null);
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x !== null && x >= -barW && x <= usableWidth + barW) {
+            if (vols[i] > maxVol) maxVol = vols[i];
+            if (volMa20[i] && volMa20[i] > maxVol) maxVol = volMa20[i];
         }
     }
 
     const isDark = document.documentElement.classList.contains("dark");
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const upVolColor = isDark ? "rgba(0, 192, 96, 0.8)" : "rgba(21, 128, 61, 0.85)";
     const downVolColor = isDark ? "rgba(255, 59, 87, 0.8)" : "rgba(220, 38, 38, 0.85)";
     const maVolColor = isDark ? "#f59e0b" : "#d97706";
 
-    // Vẽ các cột Volume
+    // Vạch chia trục phải thẳng hàng với trục giá đồ thị chính
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
+
+    // Nhãn trục phải
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#64748b" : "#475569";
+    ctx.textAlign = "left";
+    const maxVolStr = maxVol >= 1e6 ? (maxVol / 1e6).toFixed(1) + 'M' : (maxVol / 1e3).toFixed(0) + 'k';
+    ctx.fillText(maxVolStr, usableWidth + 4, 13);
+    const midVol = maxVol / 2;
+    const midVolStr = midVol >= 1e6 ? (midVol / 1e6).toFixed(1) + 'M' : (midVol / 1e3).toFixed(0) + 'k';
+    ctx.fillText(midVolStr, usableWidth + 4, Math.round(h / 2) + 3);
+
+    // Kẻ đường mờ ngang 50%
+    ctx.beginPath();
+    ctx.moveTo(0, Math.round(h / 2));
+    ctx.lineTo(usableWidth, Math.round(h / 2));
+    ctx.stroke();
+
+    // 1. Vẽ các cột Volume theo đúng toạ độ x của từng cây nến
     for (let i = 0; i < n; i++) {
-        const x = 10 + i * ((w - 60) / n);
-        const vH = (vols[i] / maxVol) * (h - 22);
-        const y = h - vH - 4;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 2 || x > usableWidth + barW * 2) continue;
+        const vH = (vols[i] / maxVol) * (h - 20);
+        const y = h - vH - 2;
         const isUp = candles[i].close >= candles[i].open;
         ctx.fillStyle = isUp ? upVolColor : downVolColor;
-        ctx.fillRect(x, y, barW, vH);
+        ctx.fillRect(Math.round(x - barW / 2), y, barW, vH);
     }
 
-    // Vẽ đường MA20 Volume
+    // 2. Vẽ đường MA20 Volume
     ctx.beginPath();
     ctx.strokeStyle = maVolColor;
     ctx.lineWidth = 1.2;
     let started = false;
     for (let i = 0; i < n; i++) {
-        if (ma20Vol[i] !== null) {
-            const x = 10 + i * ((w - 60) / n) + barW / 2;
-            const y = h - (ma20Vol[i] / maxVol) * (h - 22) - 4;
-            if (!started) { ctx.moveTo(x, y); started = true; }
-            else { ctx.lineTo(x, y); }
+        if (volMa20[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            started = false;
+            continue;
         }
+        const y = h - (volMa20[i] / maxVol) * (h - 20) - 2;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
     }
     ctx.stroke();
 
-    // Cập nhật badge
-    const lastVol = vols[n - 1];
-    const latestEl = document.getElementById("pane-vol-latest");
-    const maEl = document.getElementById("pane-vol-ma");
-    if (latestEl) latestEl.textContent = Number(lastVol).toLocaleString("vi-VN");
-    if (maEl && ma20Vol[n - 1]) {
-        const mv = ma20Vol[n - 1];
-        maEl.textContent = `MA20: ${mv >= 1e6 ? (mv / 1e6).toFixed(1) + 'M' : (mv / 1e3).toFixed(0) + 'k'}`;
+    // 3. Đường Crosshair dọc đồng bộ
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
     }
 }
 
-function renderMcdxCanvas(candles) {
+function renderMcdxCanvas() {
     const canvas = document.getElementById("canvas-sub-mcdx");
-    if (!canvas) return;
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.parentElement.clientWidth || 800;
     const h = canvas.parentElement.clientHeight || 110;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
+
+    const candles = lastFireantCandles;
     const n = candles.length;
-    const barW = Math.max(1.5, (w - 60) / n - 1.5);
+    const { mcdx } = currentFireantIndicators;
 
-    // Tính toán MCDX (Banker Đỏ, Hot Money Vàng, Retail Xanh)
-    // Thuật toán chuẩn hoá: Động lượng RSI + Biến thiên giá so với MA20
-    const mcdxData = [];
-    for (let i = 0; i < n; i++) {
-        let rsiApprox = 50;
-        if (i >= 14) {
-            let gains = 0, losses = 0;
-            for (let k = i - 13; k <= i; k++) {
-                const diff = candles[k].close - candles[k - 1].close;
-                if (diff >= 0) gains += diff; else losses -= diff;
-            }
-            const rs = losses === 0 ? 100 : gains / losses;
-            rsiApprox = 100 - (100 / (1 + rs));
-        }
+    const isDark = document.documentElement.classList.contains("dark");
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+    const bankerColor = isDark ? "#ff3b57" : "#dc2626";
+    const hotColor = isDark ? "#f59e0b" : "#d97706";
+    const retailColor = isDark ? "#00c060" : "#15803d";
 
-        // Tỷ lệ dòng tiền Banker (Nhà tạo lập / Cá mập)
-        let banker = Math.min(100, Math.max(0, (rsiApprox - 42) * 2.5));
-        if (i >= 19) {
-            const sum20 = candles.slice(i - 19, i + 1).reduce((a, b) => a + b.close, 0) / 20;
-            const dev = (candles[i].close - sum20) / sum20;
-            banker = Math.min(100, Math.max(0, banker + dev * 150));
-        }
+    const usableH = h - 26;
+    const y25 = h - 16 - (0.25 * usableH);
+    const y50 = h - 16 - (0.50 * usableH);
 
-        // Hot money (Đầu cơ): tập trung khi giá biến động mạnh quanh mức trung vị
-        let hotMoney = Math.min(100 - banker, Math.max(10, 45 - Math.abs(rsiApprox - 55)));
-        // Retail (Nhỏ lẻ): phần còn lại
-        let retail = Math.max(0, 100 - banker - hotMoney);
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
 
-        mcdxData.push({
-            banker: Math.round(banker),
-            hot: Math.round(hotMoney),
-            retail: Math.round(retail)
-        });
-    }
-
-    // Vẽ đường ngưỡng 25% và 50%
-    const y25 = h - 16 - (0.25 * (h - 26));
-    const y50 = h - 16 - (0.50 * (h - 26));
-
-    const isDarkMcdx = document.documentElement.classList.contains("dark");
-    ctx.strokeStyle = isDarkMcdx ? "rgba(148, 163, 184, 0.25)" : "rgba(100, 116, 139, 0.35)";
+    // Đường ngưỡng 25% và 50%
+    ctx.strokeStyle = isDark ? "rgba(148, 163, 184, 0.25)" : "rgba(100, 116, 139, 0.35)";
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
-    ctx.moveTo(10, y25); ctx.lineTo(w - 50, y25);
-    ctx.moveTo(10, y50); ctx.lineTo(w - 50, y50);
+    ctx.moveTo(0, y25); ctx.lineTo(usableWidth, y25);
+    ctx.moveTo(0, y50); ctx.lineTo(usableWidth, y50);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Nhãn 25% và 50% ở mép phải
+    // Nhãn 25% và 50% ở trục phải
     ctx.font = "9px 'Roboto', 'Inter', sans-serif";
-    ctx.fillStyle = isDarkMcdx ? "#64748b" : "#475569";
-    ctx.fillText("25%", w - 45, y25 + 3);
-    ctx.fillText("50%", w - 45, y50 + 3);
+    ctx.fillStyle = isDark ? "#64748b" : "#475569";
+    ctx.textAlign = "left";
+    ctx.fillText("50%", usableWidth + 4, y50 + 3);
+    ctx.fillText("25%", usableWidth + 4, y25 + 3);
 
-    const bankerColor = isDarkMcdx ? "#ff3b57" : "#dc2626";
-    const hotColor = isDarkMcdx ? "#f59e0b" : "#d97706";
-    const retailColor = isDarkMcdx ? "#00c060" : "#15803d";
-
-    // Vẽ các cột xếp tầng MCDX
-    const usableH = h - 26;
+    // Vẽ các cột xếp tầng MCDX theo đúng toạ độ x của từng cây nến
     for (let i = 0; i < n; i++) {
-        const x = 10 + i * ((w - 60) / n);
-        const { banker, hot, retail } = mcdxData[i];
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 2 || x > usableWidth + barW * 2) continue;
+        const item = mcdx[i];
+        if (!item) continue;
+        const { banker, hot, retail } = item;
 
         const hBanker = (banker / 100) * usableH;
         const hHot = (hot / 100) * usableH;
         const hRetail = (retail / 100) * usableH;
 
+        const bx = Math.round(x - barW / 2);
+
         // Đáy: Banker (Đỏ)
         const yBanker = h - 16 - hBanker;
         ctx.fillStyle = bankerColor;
-        ctx.fillRect(x, yBanker, barW, hBanker);
+        ctx.fillRect(bx, yBanker, barW, hBanker);
 
         // Giữa: Hot Money (Vàng)
         const yHot = yBanker - hHot;
         ctx.fillStyle = hotColor;
-        ctx.fillRect(x, yHot, barW, hHot);
+        ctx.fillRect(bx, yHot, barW, hHot);
 
         // Đỉnh: Retail (Xanh lá)
         const yRetail = yHot - hRetail;
         ctx.fillStyle = retailColor;
-        ctx.fillRect(x, yRetail, barW, hRetail);
+        ctx.fillRect(bx, yRetail, barW, hRetail);
     }
 
-    // Cập nhật nhãn mới nhất trên header
-    const lastMcdx = mcdxData[n - 1];
-    if (lastMcdx) {
-        const bEl = document.getElementById("mcdx-banker-val");
-        const hEl = document.getElementById("mcdx-hot-val");
-        const rEl = document.getElementById("mcdx-retail-val");
-        if (bEl) bEl.textContent = `${lastMcdx.banker}%`;
-        if (hEl) hEl.textContent = `${lastMcdx.hot}%`;
-        if (rEl) rEl.textContent = `${lastMcdx.retail}%`;
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
     }
 }
 
-function renderMacdCanvas(candles) {
+function renderMacdCanvas() {
     const canvas = document.getElementById("canvas-sub-macd");
-    if (!canvas) return;
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.parentElement.clientWidth || 800;
     const h = canvas.parentElement.clientHeight || 90;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const closes = candles.map(c => c.close);
-    const n = closes.length;
-    if (n < 26) return;
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
 
-    // EMA helper
-    function calcEma(period) {
-        const k = 2 / (period + 1);
-        const ema = [closes[0]];
-        for (let i = 1; i < n; i++) {
-            ema.push(closes[i] * k + ema[i - 1] * (1 - k));
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { macdLine, signalLine, hist } = currentFireantIndicators;
+
+    // Tìm max absolute value trong các nến hiển thị
+    let maxAbs = 0.5;
+    for (let i = 0; i < n; i++) {
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x !== null && x >= -barW && x <= usableWidth + barW) {
+            if (macdLine[i] !== null && Math.abs(macdLine[i]) > maxAbs) maxAbs = Math.abs(macdLine[i]);
+            if (signalLine[i] !== null && Math.abs(signalLine[i]) > maxAbs) maxAbs = Math.abs(signalLine[i]);
+            if (hist[i] !== null && Math.abs(hist[i]) > maxAbs) maxAbs = Math.abs(hist[i]);
         }
-        return ema;
     }
 
-    const ema12 = calcEma(12);
-    const ema26 = calcEma(26);
-    const macdLine = [];
-    for (let i = 0; i < n; i++) macdLine.push(ema12[i] - ema26[i]);
+    const isDark = document.documentElement.classList.contains("dark");
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+    const macdBullColor = isDark ? "rgba(0, 192, 96, 0.75)" : "rgba(21, 128, 61, 0.8)";
+    const macdBearColor = isDark ? "rgba(255, 59, 87, 0.75)" : "rgba(220, 38, 38, 0.8)";
+    const macdLineColor = isDark ? "#38bdf8" : "#0284c7";
+    const macdSignalColor = isDark ? "#f59e0b" : "#d97706";
 
-    // Signal EMA 9
-    const kSig = 2 / 10;
-    const signalLine = [macdLine[0]];
-    for (let i = 1; i < n; i++) signalLine.push(macdLine[i] * kSig + signalLine[i - 1] * (1 - kSig));
-
-    const hist = [];
-    for (let i = 0; i < n; i++) hist.push(macdLine[i] - signalLine[i]);
-
-    const maxAbs = Math.max(...macdLine.map(Math.abs), ...hist.map(Math.abs), 1);
     const midY = h / 2;
-    const barW = Math.max(1.5, (w - 60) / n - 1.5);
 
-    const isDarkMacd = document.documentElement.classList.contains("dark");
-    // Đường 0 trung tâm
-    ctx.strokeStyle = isDarkMacd ? "rgba(148, 163, 184, 0.2)" : "rgba(100, 116, 139, 0.35)";
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(10, midY); ctx.lineTo(w - 50, midY);
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
     ctx.stroke();
 
-    const macdBullColor = isDarkMacd ? "rgba(0, 192, 96, 0.75)" : "rgba(21, 128, 61, 0.8)";
-    const macdBearColor = isDarkMacd ? "rgba(255, 59, 87, 0.75)" : "rgba(220, 38, 38, 0.8)";
-    const macdLineColor = isDarkMacd ? "#38bdf8" : "#0284c7";
-    const macdSignalColor = isDarkMacd ? "#f59e0b" : "#d97706";
+    // Đường 0 trung tâm
+    ctx.strokeStyle = isDark ? "rgba(148, 163, 184, 0.25)" : "rgba(100, 116, 139, 0.35)";
+    ctx.beginPath();
+    ctx.moveTo(0, midY); ctx.lineTo(usableWidth, midY);
+    ctx.stroke();
 
-    // Vẽ Histogram
+    // Nhãn 0 và max ở trục phải
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#64748b" : "#475569";
+    ctx.textAlign = "left";
+    ctx.fillText(`+${maxAbs.toFixed(1)}`, usableWidth + 4, 13);
+    ctx.fillText("0.0", usableWidth + 4, midY + 3);
+    ctx.fillText(`-${maxAbs.toFixed(1)}`, usableWidth + 4, h - 5);
+
+    // 1. Vẽ Histogram
     for (let i = 0; i < n; i++) {
-        const x = 10 + i * ((w - 60) / n);
-        const hVal = (hist[i] / maxAbs) * (midY - 6);
+        if (hist[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 2 || x > usableWidth + barW * 2) continue;
+        const hVal = (hist[i] / maxAbs) * (midY - 8);
         ctx.fillStyle = hist[i] >= 0 ? macdBullColor : macdBearColor;
+        const bx = Math.round(x - barW / 2);
         if (hist[i] >= 0) {
-            ctx.fillRect(x, midY - hVal, barW, hVal);
+            ctx.fillRect(bx, midY - hVal, barW, hVal);
         } else {
-            ctx.fillRect(x, midY, barW, Math.abs(hVal));
+            ctx.fillRect(bx, midY, barW, Math.abs(hVal));
         }
     }
 
-    // Vẽ MACD Line
+    // 2. Vẽ MACD Line
     ctx.beginPath();
     ctx.strokeStyle = macdLineColor;
     ctx.lineWidth = 1.3;
+    let startedM = false;
     for (let i = 0; i < n; i++) {
-        const x = 10 + i * ((w - 60) / n) + barW / 2;
-        const y = midY - (macdLine[i] / maxAbs) * (midY - 6);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (macdLine[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            startedM = false;
+            continue;
+        }
+        const y = midY - (macdLine[i] / maxAbs) * (midY - 8);
+        if (!startedM) { ctx.moveTo(x, y); startedM = true; }
+        else { ctx.lineTo(x, y); }
     }
     ctx.stroke();
 
-    // Vẽ Signal Line
+    // 3. Vẽ Signal Line
     ctx.beginPath();
     ctx.strokeStyle = macdSignalColor;
     ctx.lineWidth = 1.2;
+    let startedS = false;
     for (let i = 0; i < n; i++) {
-        const x = 10 + i * ((w - 60) / n) + barW / 2;
-        const y = midY - (signalLine[i] / maxAbs) * (midY - 6);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (signalLine[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            startedS = false;
+            continue;
+        }
+        const y = midY - (signalLine[i] / maxAbs) * (midY - 8);
+        if (!startedS) { ctx.moveTo(x, y); startedS = true; }
+        else { ctx.lineTo(x, y); }
     }
     ctx.stroke();
 
-    // Update labels
-    const lastM = macdLine[n - 1];
-    const lastS = signalLine[n - 1];
-    const lastH = hist[n - 1];
-    const elM = document.getElementById("pane-macd-line");
-    const elS = document.getElementById("pane-macd-signal");
-    const elH = document.getElementById("pane-macd-hist");
-    if (elM) elM.textContent = lastM ? lastM.toFixed(2) : "0.00";
-    if (elS) elS.textContent = lastS ? lastS.toFixed(2) : "0.00";
-    if (elH) {
-        elH.textContent = `${lastH >= 0 ? '+' : ''}${lastH ? lastH.toFixed(2) : '0.00'}`;
-        elH.className = lastH >= 0 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
     }
 }
 
-function renderRsiCanvas(candles) {
+function renderRsiCanvas() {
     const canvas = document.getElementById("canvas-sub-rsi");
-    if (!canvas) return;
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.parentElement.clientWidth || 800;
     const h = canvas.parentElement.clientHeight || 85;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const closes = candles.map(c => c.close);
-    const n = closes.length;
-    if (n < 15) return;
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
 
-    // Tính RSI 14
-    const rsi = [50];
-    let gains = 0, losses = 0;
-    for (let i = 1; i <= 14; i++) {
-        const diff = closes[i] - closes[i - 1];
-        if (diff >= 0) gains += diff; else losses -= diff;
-    }
-    let avgGain = gains / 14;
-    let avgLoss = losses / 14;
-    rsi.push(100 - (100 / (1 + (avgLoss === 0 ? 100 : avgGain / avgLoss))));
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { rsi14 } = currentFireantIndicators;
 
-    for (let i = 15; i < n; i++) {
-        const diff = closes[i] - closes[i - 1];
-        avgGain = (avgGain * 13 + (diff > 0 ? diff : 0)) / 14;
-        avgLoss = (avgLoss * 13 + (diff < 0 ? -diff : 0)) / 14;
-        const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-        rsi.push(100 - (100 / (1 + rs)));
-    }
-
+    const isDark = document.documentElement.classList.contains("dark");
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const y70 = h - (70 / 100) * (h - 18) - 9;
     const y30 = h - (30 / 100) * (h - 18) - 9;
-    const isDarkRsi = document.documentElement.classList.contains("dark");
+
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
 
     // Tô nền vùng 30 - 70
-    ctx.fillStyle = isDarkRsi ? "rgba(168, 85, 247, 0.12)" : "rgba(147, 51, 234, 0.08)";
-    ctx.fillRect(10, y70, w - 60, y30 - y70);
+    ctx.fillStyle = isDark ? "rgba(168, 85, 247, 0.12)" : "rgba(147, 51, 234, 0.08)";
+    ctx.fillRect(0, y70, usableWidth, y30 - y70);
 
     // Kẻ đường 70 và 30
-    ctx.strokeStyle = isDarkRsi ? "rgba(168, 85, 247, 0.35)" : "rgba(147, 51, 234, 0.4)";
+    ctx.strokeStyle = isDark ? "rgba(168, 85, 247, 0.35)" : "rgba(147, 51, 234, 0.4)";
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
-    ctx.moveTo(10, y70); ctx.lineTo(w - 50, y70);
-    ctx.moveTo(10, y30); ctx.lineTo(w - 50, y30);
+    ctx.moveTo(0, y70); ctx.lineTo(usableWidth, y70);
+    ctx.moveTo(0, y30); ctx.lineTo(usableWidth, y30);
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Nhãn 70 và 30 ở trục phải
     ctx.font = "9px 'Roboto', 'Inter', sans-serif";
-    ctx.fillStyle = isDarkRsi ? "#a855f7" : "#7e22ce";
-    ctx.fillText("70", w - 45, y70 + 3);
-    ctx.fillText("30", w - 45, y30 + 3);
+    ctx.fillStyle = isDark ? "#a855f7" : "#7e22ce";
+    ctx.textAlign = "left";
+    ctx.fillText("70", usableWidth + 4, y70 + 3);
+    ctx.fillText("30", usableWidth + 4, y30 + 3);
 
     // Vẽ đường RSI
     ctx.beginPath();
-    ctx.strokeStyle = isDarkRsi ? "#c084fc" : "#9333ea";
+    ctx.strokeStyle = isDark ? "#c084fc" : "#9333ea";
     ctx.lineWidth = 1.5;
-    for (let i = 0; i < rsi.length; i++) {
-        const x = 10 + i * ((w - 60) / rsi.length);
-        const y = h - (rsi[i] / 100) * (h - 18) - 9;
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    let started = false;
+    for (let i = 0; i < n; i++) {
+        if (rsi14[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            started = false;
+            continue;
+        }
+        const y = h - (rsi14[i] / 100) * (h - 18) - 9;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
     }
     ctx.stroke();
 
-    const lastRsi = rsi[rsi.length - 1];
-    const rsiValEl = document.getElementById("pane-rsi-val");
-    if (rsiValEl && lastRsi) rsiValEl.textContent = lastRsi.toFixed(1);
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+
+function adjustTechnicalChartLayout() {
+    const techTab = document.getElementById("tab-technical");
+    if (!techTab || techTab.classList.contains("hidden")) return;
+
+    const stackContainer = document.getElementById("tech-chart-stack-container");
+    if (!stackContainer) return;
+
+    // Đảm bảo thứ tự hiển thị của các sub-panes theo thiết lập người dùng
+    applyIndicatorOrder();
+
+    const vh = window.innerHeight || 800;
+    const isFullscreen = !!document.fullscreenElement;
+
+    // 1. Tính toán tổng chiều cao tối ưu để TOÀN BỘ BIỂU ĐỒ & CHỈ BÁO VỪA TRỌN 1 MÀN HÌNH
+    // Không bị cuộn trang trên mọi thiết bị (Laptop 768p, Full HD 1080p, 2K/4K)
+    let totalChartHeight;
+    if (isFullscreen) {
+        totalChartHeight = Math.max(520, vh - 110);
+    } else {
+        // Trừ header trang + tabs + margin + thanh toolbar terminal + legend + bottom range bar (~240px)
+        totalChartHeight = Math.max(420, Math.min(700, vh - 240));
+    }
+
+    const paneMap = {
+        vol: "pane-volume",
+        mcdx: "pane-mcdx",
+        macd: "pane-macd",
+        rsi: "pane-rsi"
+    };
+
+    // -------------------------------------------------------------
+    // XỬ LÝ CHẾ ĐỘ PHÓNG TO 1 CHỈ BÁO HOẶC NẾN CHÍNH (MAXIMIZE PANE)
+    // -------------------------------------------------------------
+    if (maximizedPaneKey) {
+        const paneMain = document.getElementById("pane-main-chart");
+        const candlesToRender = (lastFireantCandles && lastFireantCandles.length > 0)
+            ? lastFireantCandles
+            : (currentTechnicalData && currentTechnicalData.candles_history ? currentTechnicalData.candles_history : []);
+
+        if (maximizedPaneKey === "main") {
+            if (paneMain) {
+                paneMain.style.display = "block";
+                paneMain.style.height = `${totalChartHeight}px`;
+            }
+            ['vol', 'mcdx', 'macd', 'rsi'].forEach(k => {
+                const el = document.getElementById(paneMap[k]);
+                if (el) el.style.display = "none";
+            });
+            const renderBox = document.getElementById("tech-tv-render-box");
+            if (currentFireantChart && renderBox) {
+                currentFireantChart.applyOptions({
+                    width: renderBox.clientWidth || 800,
+                    height: totalChartHeight
+                });
+                try {
+                    if (userManuallyScrolledRange) {
+                        currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
+                    } else {
+                        setChartTimeRange(currentFireantRange || "3M", false, false);
+                    }
+                } catch(e) {}
+            }
+            const canvas = document.getElementById("tech-drawing-canvas");
+            if (canvas && canvas.parentElement) {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = canvas.parentElement.clientWidth * dpr;
+                canvas.height = totalChartHeight * dpr;
+                if (typeof redrawAllDrawings === "function") redrawAllDrawings();
+            }
+            return;
+        } else {
+            // Phóng to 1 sub-pane cụ thể (vol, mcdx, macd, rsi)
+            if (paneMain) paneMain.style.display = "none";
+
+            ['vol', 'mcdx', 'macd', 'rsi'].forEach(k => {
+                const el = document.getElementById(paneMap[k]);
+                if (!el) return;
+                if (k === maximizedPaneKey) {
+                    el.style.display = "block";
+                    el.style.height = `${totalChartHeight}px`;
+                    const resizer = el.querySelector(".pane-resizer");
+                    if (resizer) resizer.style.display = "none";
+                } else {
+                    el.style.display = "none";
+                }
+            });
+
+            if (candlesToRender && candlesToRender.length > 0) {
+                if (maximizedPaneKey === "vol") renderVolumeCanvas(candlesToRender);
+                else if (maximizedPaneKey === "mcdx") renderMcdxCanvas(candlesToRender);
+                else if (maximizedPaneKey === "macd") renderMacdCanvas(candlesToRender);
+                else if (maximizedPaneKey === "rsi") renderRsiCanvas(candlesToRender);
+            }
+            return;
+        }
+    }
+
+    // -------------------------------------------------------------
+    // CHẾ ĐỘ BÌNH THƯỜNG: ĐA CHỈ BÁO CO GIÃN TỰ ĐỘNG
+    // -------------------------------------------------------------
+    const paneMain = document.getElementById("pane-main-chart");
+    if (paneMain) paneMain.style.display = "block";
+    document.querySelectorAll(".pane-resizer").forEach(r => r.style.display = "");
+
+    // 2. Lấy danh sách sub-panes đang hoạt động
+    const activeSubPanes = [];
+    if (activeIndicators.vol) activeSubPanes.push("vol");
+    if (activeIndicators.mcdx) activeSubPanes.push("mcdx");
+    if (activeIndicators.macd) activeSubPanes.push("macd");
+    if (activeIndicators.rsi) activeSubPanes.push("rsi");
+
+    const numActive = activeSubPanes.length;
+    let mainHeight;
+    const paneHeights = {};
+
+    if (numActive === 0) {
+        // Khi tắt hết chỉ báo phụ: nến chính chiếm 100% không gian
+        mainHeight = totalChartHeight;
+    } else {
+        // Tỷ lệ sub-panes co giãn theo số lượng chỉ báo (35% - 46%)
+        const subRatio = Math.min(0.46, 0.11 * numActive + 0.05);
+        let subTotalH = Math.round(totalChartHeight * subRatio);
+
+        // Giới hạn chiều cao mỗi ô: tối thiểu 50px, tối đa 88px
+        subTotalH = Math.max(numActive * 52, Math.min(numActive * 88, subTotalH));
+
+        // MCDX ưu tiên thêm một chút chiều cao (+8px) để 3 dải màu cột Banker, Hot money, Retail rõ nét
+        const mcdxBonus = activeIndicators.mcdx ? Math.min(10, Math.max(4, Math.floor(subTotalH * 0.06))) : 0;
+        const baseH = Math.floor((subTotalH - mcdxBonus) / numActive);
+
+        activeSubPanes.forEach(key => {
+            // Ưu tiên chiều cao tùy chỉnh do người dùng kéo thả
+            if (customPaneHeights[key] && customPaneHeights[key] >= 35) {
+                paneHeights[key] = Math.round(customPaneHeights[key]);
+            } else if (key === "mcdx") {
+                paneHeights[key] = baseH + mcdxBonus;
+            } else {
+                paneHeights[key] = baseH;
+            }
+        });
+
+        // Đảm bảo tổng chiều cao các sub-panes không lấn át nến chính (nến chính tối thiểu 160px)
+        let actualSubSum = Object.values(paneHeights).reduce((a, b) => a + b, 0);
+        if (totalChartHeight - actualSubSum < 160) {
+            const maxAllowedSub = Math.max(100, totalChartHeight - 160);
+            const scaleFactor = maxAllowedSub / actualSubSum;
+            activeSubPanes.forEach(key => {
+                paneHeights[key] = Math.max(35, Math.floor(paneHeights[key] * scaleFactor));
+            });
+            actualSubSum = Object.values(paneHeights).reduce((a, b) => a + b, 0);
+        }
+        mainHeight = Math.max(160, totalChartHeight - actualSubSum);
+    }
+
+    // 3. Cập nhật chiều cao vùng nến chính (pane-main-chart)
+    if (paneMain) {
+        paneMain.style.height = `${mainHeight}px`;
+    }
+
+    const renderBox = document.getElementById("tech-tv-render-box");
+    if (currentFireantChart && renderBox) {
+        const renderW = renderBox.clientWidth || 800;
+        currentFireantChart.applyOptions({
+            width: renderW,
+            height: mainHeight
+        });
+        try {
+            if (userManuallyScrolledRange) {
+                currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
+            } else {
+                setChartTimeRange(currentFireantRange || "3M", false, false);
+            }
+        } catch(e) {}
+    }
+
+    // Cập nhật drawing canvas overlay
+    const canvas = document.getElementById("tech-drawing-canvas");
+    if (canvas && canvas.parentElement) {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.parentElement.clientWidth * dpr;
+        canvas.height = mainHeight * dpr;
+        if (typeof redrawAllDrawings === "function") {
+            redrawAllDrawings();
+        }
+    }
+
+    // 4. Áp dụng chiều cao cho từng sub-pane
+    ['vol', 'mcdx', 'macd', 'rsi'].forEach(key => {
+        const el = document.getElementById(paneMap[key]);
+        if (!el) return;
+        if (activeIndicators[key]) {
+            el.style.display = "block";
+            el.style.height = `${paneHeights[key]}px`;
+        } else {
+            el.style.display = "none";
+        }
+    });
+
+    // 5. Vẽ lại tất cả Sub-panes theo kích thước mới
+    const candlesToRender = (lastFireantCandles && lastFireantCandles.length > 0)
+        ? lastFireantCandles
+        : (currentTechnicalData && currentTechnicalData.candles_history ? currentTechnicalData.candles_history : []);
+
+    if (candlesToRender && candlesToRender.length > 0 && typeof renderFireantSubPanes === "function") {
+        renderFireantSubPanes(candlesToRender);
+    }
 }
 
 function resizeFireantChartLayout() {
-    const renderBox = document.getElementById("tech-tv-render-box");
-    if (currentFireantChart && renderBox) {
-        currentFireantChart.applyOptions({
-            width: renderBox.clientWidth || 800,
-            height: renderBox.clientHeight || 380
-        });
+    adjustTechnicalChartLayout();
+}
+
+// -------------------------------------------------------------
+// BỘ ĐIỀU CHỈNH ĐỘ CAO CHỈ BÁO BẰNG KÉO THẢ (DRAG RESIZER / SPLITTER)
+// -------------------------------------------------------------
+let isDraggingPaneResizer = false;
+let activeResizingPaneKey = null;
+let resizeStartY = 0;
+let resizeStartPaneH = 0;
+let resizeStartMainH = 0;
+let resizeRafId = null;
+
+function onResizerMouseDown(e) {
+    const resizer = e.target.closest(".pane-resizer");
+    if (!resizer) return;
+    const key = resizer.getAttribute("data-pane");
+    if (!key) return;
+
+    e.preventDefault();
+    isDraggingPaneResizer = true;
+    activeResizingPaneKey = key;
+    resizeStartY = e.clientY;
+
+    const paneMap = { vol: "pane-volume", mcdx: "pane-mcdx", macd: "pane-macd", rsi: "pane-rsi" };
+    const paneEl = document.getElementById(paneMap[key]);
+    const paneMain = document.getElementById("pane-main-chart");
+    if (paneEl) resizeStartPaneH = paneEl.getBoundingClientRect().height;
+    if (paneMain) resizeStartMainH = paneMain.getBoundingClientRect().height;
+
+    document.body.style.cursor = "row-resize";
+    const container = document.getElementById("tech-chart-stack-container");
+    if (container) container.classList.add("is-resizing");
+}
+
+function onResizerMouseMove(e) {
+    if (!isDraggingPaneResizer || !activeResizingPaneKey) return;
+    e.preventDefault();
+    const dy = e.clientY - resizeStartY;
+
+    // Resizer ở mép trên của sub-pane:
+    // Kéo lên (dy < 0) => sub-pane tăng chiều cao, main chart giảm chiều cao
+    // Kéo xuống (dy > 0) => sub-pane giảm chiều cao, main chart tăng chiều cao
+    let newPaneH = Math.round(resizeStartPaneH - dy);
+    newPaneH = Math.max(35, Math.min(320, newPaneH));
+
+    const delta = resizeStartPaneH - newPaneH;
+    let newMainH = Math.round(resizeStartMainH + delta);
+    if (newMainH < 150) {
+        newMainH = 150;
+        newPaneH = Math.max(35, Math.round(resizeStartPaneH + (resizeStartMainH - 150)));
     }
-    const canvas = document.getElementById("tech-drawing-canvas");
-    if (canvas) {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.parentElement.clientWidth * dpr;
-        canvas.height = canvas.parentElement.clientHeight * dpr;
-        redrawAllDrawings();
+
+    if (resizeRafId) cancelAnimationFrame(resizeRafId);
+    resizeRafId = requestAnimationFrame(() => {
+        const paneMap = { vol: "pane-volume", mcdx: "pane-mcdx", macd: "pane-macd", rsi: "pane-rsi" };
+        const paneEl = document.getElementById(paneMap[activeResizingPaneKey]);
+        const paneMain = document.getElementById("pane-main-chart");
+        if (paneEl) paneEl.style.height = `${newPaneH}px`;
+        if (paneMain) paneMain.style.height = `${newMainH}px`;
+
+        customPaneHeights[activeResizingPaneKey] = newPaneH;
+
+        const renderBox = document.getElementById("tech-tv-render-box");
+        if (currentFireantChart && renderBox) {
+            currentFireantChart.applyOptions({
+                width: renderBox.clientWidth || 800,
+                height: newMainH
+            });
+        }
+
+        const candles = (lastFireantCandles && lastFireantCandles.length > 0)
+            ? lastFireantCandles
+            : (currentTechnicalData && currentTechnicalData.candles_history ? currentTechnicalData.candles_history : []);
+        if (candles && candles.length > 0) {
+            if (activeResizingPaneKey === "vol") renderVolumeCanvas(candles);
+            else if (activeResizingPaneKey === "mcdx") renderMcdxCanvas(candles);
+            else if (activeResizingPaneKey === "macd") renderMacdCanvas(candles);
+            else if (activeResizingPaneKey === "rsi") renderRsiCanvas(candles);
+        }
+    });
+}
+
+function onResizerMouseUp() {
+    if (!isDraggingPaneResizer) return;
+    isDraggingPaneResizer = false;
+    activeResizingPaneKey = null;
+    document.body.style.cursor = "";
+    const container = document.getElementById("tech-chart-stack-container");
+    if (container) container.classList.remove("is-resizing");
+
+    try {
+        localStorage.setItem("fireant_custom_pane_heights", JSON.stringify(customPaneHeights));
+    } catch(e) {}
+
+    adjustTechnicalChartLayout();
+}
+
+function onResizerTouchStart(e) {
+    if (!e.touches || e.touches.length === 0) return;
+    const resizer = e.target.closest(".pane-resizer");
+    if (!resizer) return;
+    onResizerMouseDown({
+        target: e.target,
+        clientY: e.touches[0].clientY,
+        preventDefault: () => e.preventDefault()
+    });
+}
+
+function onResizerTouchMove(e) {
+    if (!isDraggingPaneResizer || !e.touches || e.touches.length === 0) return;
+    onResizerMouseMove({
+        clientY: e.touches[0].clientY,
+        preventDefault: () => e.preventDefault()
+    });
+}
+
+function onResizerDblClick(e) {
+    const resizer = e.target.closest(".pane-resizer");
+    if (!resizer) return;
+    const key = resizer.getAttribute("data-pane");
+    if (key && customPaneHeights[key]) {
+        delete customPaneHeights[key];
+        try {
+            localStorage.setItem("fireant_custom_pane_heights", JSON.stringify(customPaneHeights));
+        } catch(e) {}
+        adjustTechnicalChartLayout();
+        const names = { vol: "Khối lượng", mcdx: "MCDX", macd: "MACD", rsi: "RSI" };
+        showToast(`Đã khôi phục độ cao tự động cho chỉ báo ${names[key] || key}`);
     }
 }
+
+// Đăng ký sự kiện kéo thả thay đổi độ cao các chỉ báo
+document.addEventListener("mousedown", onResizerMouseDown);
+window.addEventListener("mousemove", onResizerMouseMove);
+window.addEventListener("mouseup", onResizerMouseUp);
+document.addEventListener("touchstart", onResizerTouchStart, { passive: false });
+window.addEventListener("touchmove", onResizerTouchMove, { passive: false });
+window.addEventListener("touchend", onResizerMouseUp);
+document.addEventListener("dblclick", onResizerDblClick);
 
 // -------------------------------------------------------------
 // HỆ THỐNG VẼ OVERLAY TƯƠNG TÁC (DRAWING CANVAS OVERLAY)
@@ -10870,47 +11837,70 @@ function drawSingleItem(ctx, item, w, h, isSelected = false) {
 // -------------------------------------------------------------
 // CHỨC NĂNG BOTTOM BAR, SNAPSHOT, FULLSCREEN
 // -------------------------------------------------------------
-function setChartTimeRange(range) {
+function setChartTimeRange(range, updateBtn = true, showMsg = true) {
+    if (!range) range = "3M";
+    currentFireantRange = range;
+    if (updateBtn) userManuallyScrolledRange = null;
     if (!currentFireantChart) return;
-    const now = Math.floor(Date.now() / 1000);
-    const ranges = {
-        "1D": 86400,
-        "5D": 86400 * 5,
-        "1M": 86400 * 30,
-        "3M": 86400 * 90,
-        "6M": 86400 * 180,
-        "1Y": 86400 * 365,
-        "5Y": 86400 * 1825,
-        "ALL": 86400 * 3650
-    };
-    const span = ranges[range] || (86400 * 180);
+    const candles = (lastFireantCandles && lastFireantCandles.length > 0)
+        ? lastFireantCandles
+        : (currentTechnicalData && currentTechnicalData.candles_history ? currentTechnicalData.candles_history : []);
+    const n = candles ? candles.length : 0;
+
+    isInternalRangeSetting = true;
     try {
-        if (range === "ALL") {
+        if (range === "ALL" || !n) {
             currentFireantChart.timeScale().fitContent();
+            renderFireantSubPanes(candles);
         } else {
-            const fromTs = now - span;
-            // Áp dụng fitContent hoặc zoom
-            currentFireantChart.timeScale().fitContent();
+            let fromIdx = 0;
+            if (range === "1D") fromIdx = Math.max(0, n - 2);
+            else if (range === "5D") fromIdx = Math.max(0, n - 6);
+            else if (range === "1M") fromIdx = Math.max(0, n - 23);
+            else if (range === "3M") fromIdx = Math.max(0, n - 67);
+            else if (range === "6M") fromIdx = Math.max(0, n - 131);
+            else if (range === "1Y") fromIdx = Math.max(0, n - 251);
+            else if (range === "5Y") fromIdx = Math.max(0, n - 1251);
+            else fromIdx = Math.max(0, n - 67);
+
+            currentFireantChart.timeScale().setVisibleLogicalRange({
+                from: fromIdx,
+                to: n - 1
+            });
+            renderFireantSubPanes(candles, { from: fromIdx, to: n - 1 });
         }
-    } catch (e) {}
+    } catch (e) {
+        try { currentFireantChart.timeScale().fitContent(); } catch (err) {}
+    } finally {
+        setTimeout(() => { isInternalRangeSetting = false; }, 80);
+    }
 
     // Highlight nút active
     const bar = document.getElementById("tech-range-bar");
-    if (bar) {
+    if (bar && updateBtn) {
         bar.querySelectorAll("button").forEach(btn => {
             btn.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white text-[11px]";
         });
-        if (event && event.target) {
-            event.target.className = "px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold text-[11px]";
-        }
+        const rangeBtnMap = {
+            "1D": "1n", "5D": "5n", "1M": "1t", "3M": "3t",
+            "6M": "6t", "1Y": "1y", "5Y": "5y", "ALL": "Tất cả"
+        };
+        const targetText = rangeBtnMap[range] || range;
+        bar.querySelectorAll("button").forEach(btn => {
+            if (btn.textContent.trim() === targetText) {
+                btn.className = "px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold text-[11px]";
+            }
+        });
     }
-    showToast(`Đã chọn khung xem ${range}`);
+    if (showMsg) {
+        showToast(`Đã chọn khung xem ${range}`);
+    }
 }
 
 function resetChartScale() {
     if (currentFireantChart) {
-        currentFireantChart.timeScale().fitContent();
-        showToast("Đã tự động căn chỉnh khung giá & thời gian");
+        setChartTimeRange(currentFireantRange || "3M", true, true);
+        showToast("Đã tự động căn chỉnh khung giá & thời gian (3 tháng)");
     }
 }
 
@@ -10961,7 +11951,8 @@ async function refreshTechnicalData() {
     const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
     showToast(`Đang đồng bộ nến kỹ thuật & dữ liệu SSI FastConnect cho ${ticker}...`);
     try {
-        const res = await fetch(`/api/technical/${ticker}?resolution=${currentTechnicalInterval}&count=150`);
+        const fetchCount = (currentTechnicalInterval === "D" || currentTechnicalInterval === "W" || currentTechnicalInterval === "M") ? 1500 : 350;
+        const res = await fetch(`/api/technical/${ticker}?resolution=${currentTechnicalInterval}&count=${fetchCount}`);
         if (res.ok) {
             const data = await res.json();
             renderTechnicalSection(data);
@@ -11623,8 +12614,8 @@ async function performSearch() {
 
         window._lastDiscoveredReports = { ticker: ticker, results: data.results };
 
-        // Đếm báo cáo mới (chưa trong ma trận) và đã có
-        let newCount = 0, existingCount = 0;
+        // Đếm báo cáo mới (chưa trong ma trận & chưa học), đã có trong ma trận, và đã học
+        let newCount = 0, existingCount = 0, learnedCount = 0;
         data.results.forEach(item => {
             const rawInst = item.institution || "CTCK";
             let alreadyAdded = false;
@@ -11637,7 +12628,13 @@ async function performSearch() {
                     );
                 }
             } catch (e) {}
-            alreadyAdded ? existingCount++ : newCount++;
+            if (alreadyAdded) {
+                existingCount++;
+            } else if (item.already_learned) {
+                learnedCount++;
+            } else {
+                newCount++;
+            }
         });
 
         // Đọc trạng thái auto-extract từ localStorage
@@ -11650,7 +12647,8 @@ async function performSearch() {
                 <div class="text-xs text-slate-300 font-medium">
                     Tìm thấy <span class="text-cyan-400 font-bold">${data.results.length}</span> báo cáo cho mã <span class="text-cyan-300 font-bold">${ticker}</span>
                     ${newCount > 0 ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded font-mono">${newCount} mới</span>` : ''}
-                    ${existingCount > 0 ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded font-mono">${existingCount} đã có</span>` : ''}
+                    ${learnedCount > 0 ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-800 rounded font-mono" title="Đã học trong kho tri thức AI">${learnedCount} đã học</span>` : ''}
+                    ${existingCount > 0 ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded font-mono">${existingCount} đã trong ma trận</span>` : ''}
                 </div>
                 <button id="btn-extract-all-reports" onclick="extractAllDiscoveredReports('${encodeURIComponent(ticker)}')" class="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all">
                     <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
@@ -11669,7 +12667,7 @@ async function performSearch() {
                         ${autoExtractEnabled ? '⚡ Tự động bóc tách: BẬT' : 'Tự động bóc tách sau khi quét'}
                     </span>
                 </label>
-                <span class="text-[10px] text-slate-600 italic">— bóc tách ngay khi tìm thấy báo cáo mới</span>
+                <span class="text-[10px] text-slate-600 italic">— tự động bỏ qua báo cáo đã học, tránh nạp trùng</span>
             </div>
         </div>
         <div id="extract-all-progress-box" class="hidden mb-3 p-2.5 bg-slate-950 rounded-lg border border-cyan-800/80 text-xs text-cyan-300 font-mono shadow-inner"></div>
@@ -11683,6 +12681,7 @@ async function performSearch() {
             const encodedTitle = encodeURIComponent(rawTitle);
             const encodedTicker = encodeURIComponent(ticker);
             const btnId = `btn-extract-${idx}`;
+            const isLearned = Boolean(item.already_learned);
 
             // Safe check if already in current matrix
             let alreadyAdded = false;
@@ -11705,6 +12704,7 @@ async function performSearch() {
                         <span class="text-[10px] text-slate-400 font-mono">(${item.date || ""})</span>
                         <span class="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">${item.source || "eDocs"}</span>
                         <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">${item.type || "Research"}</span>
+                        ${isLearned ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-800 font-mono flex items-center gap-0.5"><i data-lucide="brain" class="w-2.5 h-2.5"></i>AI Đã Học</span>` : ''}
                     </div>
                     <div class="text-[11px] text-slate-300 font-sans line-clamp-1">${item.title || ""}</div>
                     <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
@@ -11721,6 +12721,11 @@ async function performSearch() {
                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
                             <span>Đã Trong Ma Trận</span>
                         </button>
+                    ` : isLearned ? `
+                        <button disabled title="Báo cáo này đã được AI học và lưu trữ trong kho tri thức, không cần nạp trùng" class="px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold flex items-center gap-1 cursor-default">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            <span>✓ Đã Học</span>
+                        </button>
                     ` : `
                         <button id="${btnId}" onclick="addDiscoveredReport('${encodedInst}', '${encodedTicker}', '${encodedUrl}', '${encodedTitle}', '${btnId}')" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
                             <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -11734,7 +12739,7 @@ async function performSearch() {
         if (box) box.innerHTML = html;
         if (window.lucide) lucide.createIcons();
 
-        // === AUTO-EXTRACT: Nếu toggle bật VÀ có báo cáo mới → tự động bóc tách ===
+        // === AUTO-EXTRACT: Nếu toggle bật VÀ có báo cáo mới (chưa học & chưa trong ma trận) → tự động bóc tách ===
         if (autoExtractEnabled && newCount > 0) {
             showToast(`⚡ Tự động bóc tách ${newCount} báo cáo mới cho ${ticker}...`);
             setTimeout(() => extractAllDiscoveredReports(encodeURIComponent(ticker)), 600);
@@ -11800,7 +12805,7 @@ async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encod
 
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -11811,6 +12816,17 @@ async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encod
         }
 
         const data = await resp.json();
+        if (data.already_learned) {
+            if (btn) {
+                btn.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i><span>✓ Đã Học</span>`;
+                btn.className = "px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
+                btn.disabled = true;
+                if (window.lucide) lucide.createIcons();
+            }
+            showToast(`Báo cáo từ ${institution} đã được AI học trước đó (tránh trùng lặp)!`);
+            return;
+        }
+
         const extracted = data.extracted_report;
         if (title && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
             extracted.key_catalysts = [title];
@@ -11871,7 +12887,7 @@ async function extractAllDiscoveredReports(encodedTicker) {
         const btnId = `btn-extract-${idx}`;
         const itemBtn = document.getElementById(btnId);
 
-        // Bỏ qua nếu đã có trong ma trận
+        // Bỏ qua nếu đã có trong ma trận HOẶC đã được AI học trước đó
         let alreadyAdded = false;
         try {
             if (currentReport && Array.isArray(currentReport.matrix_table)) {
@@ -11885,8 +12901,9 @@ async function extractAllDiscoveredReports(encodedTicker) {
             alreadyAdded = false;
         }
 
-        if (alreadyAdded) {
-            if (progressBox) progressBox.innerHTML = `[${idx+1}/${total}] <strong>${rawInst}</strong>: Đã có trong ma trận, bỏ qua...`;
+        const isLearned = Boolean(item.already_learned);
+        if (alreadyAdded || isLearned) {
+            if (progressBox) progressBox.innerHTML = `[${idx+1}/${total}] <strong>${rawInst}</strong>: ${alreadyAdded ? 'Đã có trong ma trận' : 'Đã được AI học trước đó'}, bỏ qua...`;
             continue;
         }
 
@@ -11915,6 +12932,14 @@ async function extractAllDiscoveredReports(encodedTicker) {
 
             if (resp.ok) {
                 const resData = await resp.json();
+                if (resData.already_learned) {
+                    if (itemBtn) {
+                        itemBtn.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i><span>✓ Đã Học</span>`;
+                        itemBtn.className = "px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
+                        if (window.lucide) lucide.createIcons();
+                    }
+                    continue;
+                }
                 const extracted = resData.extracted_report;
                 if (rawTitle && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
                     extracted.key_catalysts = [rawTitle];
@@ -12013,7 +13038,7 @@ async function crawlDirectUrl() {
         });
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -12131,7 +13156,7 @@ async function uploadPdfReport() {
         });
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -12244,7 +13269,7 @@ async function analyzeRawText() {
         });
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -12363,13 +13388,14 @@ function renderAiTemplatesList(templates) {
                         <span class="text-[10px] text-slate-400">(${escapeHtml(tpl.sector || "Đa ngành")})</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
-                        <span class="text-amber-300">⚡ ${catRulesCount} quy tắc Catalysts</span>
+                        <span class="text-amber-300 font-semibold">⚡ ${catRulesCount}/15 quy tắc Catalysts</span>
                         <span class="text-slate-500">•</span>
-                        <span class="text-cyan-300">🎯 ${thesisCount} Luận điểm</span>
+                        <span class="text-cyan-300 font-semibold">🎯 ${thesisCount} Luận điểm</span>
                         <span class="text-slate-500">•</span>
-                        <span class="text-rose-300">⚠️ ${riskCount} Rủi ro</span>
+                        <span class="text-rose-300 font-semibold">⚠️ ${riskCount}/10 Rủi ro</span>
                         <span class="text-slate-500">•</span>
-                        <span class="text-slate-400 truncate max-w-[220px]" title="${escapeHtml(tpl.keywords ? tpl.keywords.join(', ') : '')}">Từ khóa: ${escapeHtml(kwList)}...</span>
+                        <span class="text-slate-400 truncate max-w-[200px]" title="${escapeHtml(tpl.keywords ? tpl.keywords.join(', ') : '')}">Từ khóa: ${escapeHtml(kwList)}...</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-emerald-400/90 font-mono" title="Quy tắc định hướng nhận diện • Trần bóc tách AI: Tối đa 15 Catalysts / 10 Rủi ro">Trần bóc tách: 15/10</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
@@ -12666,7 +13692,7 @@ async function analyzeTemplateImage() {
 
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -12785,7 +13811,7 @@ async function saveCustomTemplate() {
 
         if (resp.status === 403) {
             logoutAdmin();
-            showToast("Quyền Quản trị viên (Admin: 325396) không hợp lệ. Vui lòng đăng nhập lại!", true);
+            showToast("Quyền Quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!", true);
             openAdminAuthModal();
             return;
         }
@@ -14796,8 +15822,21 @@ function exportPeersExcel() {
                 p.debt_to_equity !== undefined && p.debt_to_equity !== null ? Number(p.debt_to_equity) : "-"
             ];
             kpiCols.forEach(col => {
-                const val = p[col.field];
-                row.push(val !== undefined && val !== null ? val : "-");
+                if (col.field === "dividend_yield_pct") {
+                    const cash = p["dividend_cash_amount"];
+                    const y = p["dividend_yield_pct"];
+                    if (cash && cash > 0) {
+                        row.push(`${cash.toLocaleString('vi-VN')} đ${y ? ' (' + Number(y).toFixed(1) + '%)' : ''}`);
+                    } else {
+                        row.push("0 đ (KCT)");
+                    }
+                } else if (col.field === "stock_bonus_pct") {
+                    const disp = p["stock_bonus_display"];
+                    row.push(disp || (p[col.field] ? `${p[col.field]}%` : "0%"));
+                } else {
+                    const val = p[col.field];
+                    row.push(val !== undefined && val !== null ? val : "-");
+                }
             });
             sheet1Data.push(row);
         });
@@ -15009,8 +16048,17 @@ async function exportPeersPdf() {
 
             let kpiTds = "";
             kpiCols.forEach(col => {
-                const val = p[col.field];
-                const formatted = typeof formatSectorKpiValue === 'function' ? formatSectorKpiValue(val, col.unit) : (val !== undefined && val !== null ? val : "-");
+                let formatted;
+                if (col.field === "dividend_yield_pct") {
+                    const cash = p["dividend_cash_amount"];
+                    const y = p["dividend_yield_pct"];
+                    formatted = (cash && cash > 0) ? `${cash.toLocaleString('vi-VN')} đ${y ? ' (' + Number(y).toFixed(1) + '%)' : ''}` : "0 đ (KCT)";
+                } else if (col.field === "stock_bonus_pct") {
+                    formatted = p["stock_bonus_display"] || (p[col.field] ? `${p[col.field]}%` : "0%");
+                } else {
+                    const val = p[col.field];
+                    formatted = typeof formatSectorKpiValue === 'function' ? formatSectorKpiValue(val, col.unit) : (val !== undefined && val !== null ? val : "-");
+                }
                 kpiTds += `<td style="padding: 6px 8px; text-align: right; ${borderStyle} font-size: 11px; white-space: nowrap;">${formatted}</td>`;
             });
 
@@ -15329,7 +16377,12 @@ function syncStickyHeaderHeight() {
     }
 }
 
-window.addEventListener("resize", syncStickyHeaderHeight);
+window.addEventListener("resize", () => {
+    syncStickyHeaderHeight();
+    if (typeof adjustTechnicalChartLayout === "function") {
+        adjustTechnicalChartLayout();
+    }
+});
 window.addEventListener("load", syncStickyHeaderHeight);
 document.addEventListener("DOMContentLoaded", syncStickyHeaderHeight);
 

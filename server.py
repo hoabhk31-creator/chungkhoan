@@ -19,6 +19,16 @@ import asyncio
 import unicodedata
 import urllib.parse
 import sys
+import typing
+try:
+    from typing import Protocol
+except ImportError:
+    try:
+        import typing_extensions
+        typing.Protocol = typing_extensions.Protocol
+    except Exception:
+        pass
+
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -62,7 +72,9 @@ from engine import (
     FullMatrixReport,
     PRESET_DATASETS,
     calculate_consensus,
-    extract_financial_data_from_text
+    extract_financial_data_from_text,
+    is_report_expired,
+    parse_report_date
 )
 from crawler import (
     crawl_url_content,
@@ -433,17 +445,24 @@ def normalize_full_matrix_dict(raw: Any) -> Dict[str, Any]:
 
     clean_matrix = []
     for it in d.get("matrix_table", []):
+        r_dict = None
         if hasattr(it, "model_dump"):
-            clean_matrix.append(it.model_dump())
+            r_dict = it.model_dump()
         elif hasattr(it, "dict") and callable(it.dict):
-            clean_matrix.append(it.dict())
+            r_dict = it.dict()
         elif isinstance(it, dict):
-            clean_matrix.append(dict(it))
+            r_dict = dict(it)
         else:
             try:
-                clean_matrix.append(dict(it))
+                r_dict = dict(it)
             except Exception:
                 pass
+        if r_dict:
+            r_date = r_dict.get("report_date")
+            # Ẩn hoàn toàn các báo cáo đã quá 1.5 năm (> 548 ngày)
+            if is_report_expired(r_date, max_days=548):
+                continue
+            clean_matrix.append(r_dict)
     d["matrix_table"] = clean_matrix
     return d
 
@@ -656,7 +675,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         final_sect_name = cached_sector
         if clean_ticker in PRESET_DATASETS:
             report = PRESET_DATASETS[clean_ticker]
-            base_reports = list(report.matrix_table) if report.matrix_table else []
+            base_reports = [r for r in report.matrix_table if not is_report_expired(r.report_date, max_days=548)] if report.matrix_table else []
             base_causality = report.causality_analysis or []
             base_disensus = report.disensus_table or []
             final_comp_name = report.company_name
@@ -685,7 +704,8 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         profile = prof_res if isinstance(prof_res, dict) else {}
         live_info = live_res if isinstance(live_res, dict) else None
         market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
-        synced_reports = rep_res if isinstance(rep_res, list) else base_reports
+        raw_synced = rep_res if isinstance(rep_res, list) else base_reports
+        synced_reports = [r for r in raw_synced if not is_report_expired(r.report_date, max_days=548)]
 
         comp_name = profile.get("name") or final_comp_name
         sect_name = profile.get("sector") or final_sect_name
@@ -981,6 +1001,14 @@ async def get_financial_overview(ticker: str):
         sector=profile.get("sector") or default_sector,
         corporate_capital=capital_info
     )
+
+    # Làm giàu dữ liệu cổ tức thực tế cho peers_data trong bundle tài chính
+    if data and isinstance(data.get("peers_data"), dict):
+        try:
+            data["peers_data"] = await enrich_peers_with_realized_dividends(data["peers_data"])
+        except Exception:
+            pass
+
     _FIN_OVERVIEW_CACHE[clean_ticker] = data
     _FIN_OVERVIEW_CACHE_TS[clean_ticker] = now_ts
 
@@ -1132,43 +1160,27 @@ async def get_valuation_bundle_endpoint(ticker: str):
     return res
 
 
-@app.get("/api/peers/{ticker}")
-async def get_peers_comparison(ticker: str):
+async def enrich_peers_with_realized_dividends(peers: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Module 5: Truy xuất danh sách đối thủ cùng ngành & Radar Chart (Lazy Loading).
+    Cập nhật cổ tức thực tế từ lịch sử sự kiện quyền (HOSE/HNX) cho danh sách đối thủ trong ngành.
+    Nguyên tắc: KHÔNG suy diễn — nếu có dữ liệu xác nhận trong 12 tháng qua thì dùng thực tế (kể cả 0.0).
     """
-    clean_ticker = ticker.upper().strip()
-    now_ts = time.time()
-    if clean_ticker in _PEERS_CACHE and (now_ts - _PEERS_CACHE_TS.get(clean_ticker, 0)) < _TTL_PEERS:
-        return _PEERS_CACHE[clean_ticker]
-
-    if clean_ticker in _FIN_OVERVIEW_CACHE and (now_ts - _FIN_OVERVIEW_CACHE_TS.get(clean_ticker, 0)) < _TTL_FIN_OVERVIEW:
-        peers = _FIN_OVERVIEW_CACHE[clean_ticker].get("peers_data", {})
-        if peers:
-            _PEERS_CACHE[clean_ticker] = peers
-            _PEERS_CACHE_TS[clean_ticker] = now_ts
-            return peers
-
-    data = await get_financial_overview(clean_ticker)
-    peers = data.get("peers_data", {})
-
-    # === ENRICH: Cập nhật cổ tức thực tế từ lịch sử sự kiện quyền (SONG SONG) ===
-    # Thay thế dividend_yield_pct hardcode bằng dữ liệu từ corporate_actions (HOSE/HNX).
-    # Nguyên tắc: KHÔNG suy diễn — nếu không có dữ liệu đã xác nhận → hiển thị "estimate".
+    if not isinstance(peers, dict):
+        return peers
     try:
-        from corporate_actions import calculate_realized_dividend_yield, calculate_stock_dividend_ratio
+        from corporate_actions import get_detailed_corporate_actions_dividend_summary
         from crawler import fetch_reconciled_live_price
+        from financial_data import VIETNAM_STOCK_DIRECTORY
 
         peer_list = peers.get("peers", []) if isinstance(peers, dict) else []
         if peer_list:
-            # Lấy giá tất cả peer song song với timeout tổng 4s
             peer_tickers = [p.get("ticker", "") for p in peer_list]
 
             async def _safe_price(tk: str):
                 if not tk:
                     return None
                 try:
-                    return await asyncio.wait_for(fetch_reconciled_live_price(tk), timeout=1.5)
+                    return await asyncio.wait_for(fetch_reconciled_live_price(tk), timeout=3.0)
                 except Exception:
                     return None
 
@@ -1181,61 +1193,111 @@ async def get_peers_comparison(ticker: str):
                 try:
                     peer_price = float(price_info.get("latest_close", 0)) if price_info else 0
                     if peer_price <= 0:
-                        # Fallback: ước tính từ market_cap / shares
-                        shares_m = float(peer.get("shares_outstanding_mil", 1000) or 1000)
+                        dir_info = VIETNAM_STOCK_DIRECTORY.get(peer_tk, {})
+                        shares_m = float(peer.get("shares_outstanding_mil") or dir_info.get("shares") or 0)
                         mcap = float(peer.get("market_cap_bil", 0) or 0)
-                        peer_price = (mcap * 1e9) / (shares_m * 1e6) if shares_m > 0 and mcap > 0 else 0
+                        if shares_m > 0 and mcap > 0:
+                            peer_price = (mcap * 1e9) / (shares_m * 1e6)
+                        else:
+                            peer_price = float(peer.get("price") or 25000.0)
 
-                    # 1. Cổ tức tiền mặt thực tế
-                    realized_yield = calculate_realized_dividend_yield(peer_tk, peer_price)
-                    if realized_yield is not None:
-                        peer["dividend_yield_pct"] = realized_yield
-                        peer["dividend_yield_source"] = "corporate_actions"
-                    else:
-                        peer["dividend_yield_source"] = "estimate"
-
-                    # 2. Cổ phiếu thưởng / cổ tức bằng CP (%)
-                    stock_ratio = calculate_stock_dividend_ratio(peer_tk)
-                    if stock_ratio is not None:
-                        peer["stock_bonus_pct"] = stock_ratio
-                        peer["stock_bonus_source"] = "corporate_actions"
-                    else:
-                        peer["stock_bonus_source"] = "estimate"
+                    # Trích xuất tổng hợp chi tiết cổ tức tiền mặt (VND/CP), CP thưởng & cổ tức CP (%)
+                    div_summary = get_detailed_corporate_actions_dividend_summary(peer_tk, peer_price)
+                    peer["dividend_cash_amount"] = div_summary["cash_amount"]
+                    peer["dividend_yield_pct"] = div_summary["yield_pct"]
+                    peer["dividend_par_pct"] = div_summary["par_pct"]
+                    peer["dividend_cash_display"] = div_summary["cash_display"]
+                    peer["stock_bonus_pct"] = div_summary["bonus_pct"]
+                    peer["stock_dividend_pct"] = div_summary["stock_div_pct"]
+                    peer["total_stock_pct"] = div_summary["total_stock_pct"]
+                    peer["stock_bonus_display"] = div_summary["stock_display"]
+                    peer["dividend_yield_source"] = div_summary["source"]
+                    peer["stock_bonus_source"] = div_summary["source"]
+                    # Aliases cho KPI ngành ngân hàng & chứng khoán
+                    if "nim_ratio" in peer:
+                        peer["nim_percent"] = peer["nim_ratio"]
+                    if "casa_ratio" in peer:
+                        peer["casa_percent"] = peer["casa_ratio"]
+                    if "npl_ratio" in peer:
+                        peer["npl_percent"] = peer["npl_ratio"]
+                    if "margin_balance_bil" in peer:
+                        peer["margin_loan_bil"] = peer["margin_balance_bil"]
+                    if "land_bank_ha" in peer:
+                        peer["backlog_bil"] = peer["land_bank_ha"]
                 except Exception:
                     peer["dividend_yield_source"] = "estimate"
                     peer["stock_bonus_source"] = "estimate"
 
-            # === Inject cột "CP Thưởng (%)" vào sector_kpi_columns nếu chưa có ===
-            kpi_cols = peers.get("sector_kpi_columns", []) if isinstance(peers, dict) else []
+            # === Chuẩn hóa cột "Cổ tức TM" và "Thưởng / Cổ tức CP" trong sector_kpi_columns ===
+            kpi_cols = peers.get("sector_kpi_columns", [])
+            for c in kpi_cols:
+                f_name = c.get("field")
+                if f_name == "nim_ratio":
+                    c["field"] = "nim_percent"
+                elif f_name == "casa_ratio":
+                    c["field"] = "casa_percent"
+                elif f_name == "npl_ratio":
+                    c["field"] = "npl_percent"
+                elif f_name == "margin_balance_bil":
+                    c["field"] = "margin_loan_bil"
+                elif f_name == "land_bank_ha":
+                    c["field"] = "backlog_bil"
             has_dividend_col = any(c.get("field") == "dividend_yield_pct" for c in kpi_cols)
             has_stock_bonus_col = any(c.get("field") == "stock_bonus_pct" for c in kpi_cols)
 
             if has_dividend_col and not has_stock_bonus_col:
-                # Chèn cột "CP Thưởng (%)" ngay sau cột "Cổ tức TM (%)"
                 div_idx = next(i for i, c in enumerate(kpi_cols) if c.get("field") == "dividend_yield_pct")
+                kpi_cols[div_idx]["label"] = "Cổ tức TM"
+                kpi_cols[div_idx]["unit"] = "đ/CP"
+                kpi_cols[div_idx]["color"] = "emerald"
                 kpi_cols.insert(div_idx + 1, {
                     "field": "stock_bonus_pct",
-                    "label": "CP Thưởng (%)",
+                    "label": "Thưởng / Cổ tức CP",
                     "unit": "%",
                     "color": "amber"
                 })
             elif not has_dividend_col and not has_stock_bonus_col:
-                # Sector không có cột cổ tức → thêm cả 2 vào cuối
                 kpi_cols.append({
                     "field": "dividend_yield_pct",
-                    "label": "Cổ tức TM (%)",
-                    "unit": "%",
+                    "label": "Cổ tức TM",
+                    "unit": "đ/CP",
                     "color": "emerald"
                 })
                 kpi_cols.append({
                     "field": "stock_bonus_pct",
-                    "label": "CP Thưởng (%)",
+                    "label": "Thưởng / Cổ tức CP",
                     "unit": "%",
                     "color": "amber"
                 })
+            else:
+                for c in kpi_cols:
+                    if c.get("field") == "dividend_yield_pct":
+                        c["label"] = "Cổ tức TM"
+                        c["unit"] = "đ/CP"
+                        c["color"] = "emerald"
+                    elif c.get("field") == "stock_bonus_pct":
+                        c["label"] = "Thưởng / Cổ tức CP"
+                        c["unit"] = "%"
+                        c["color"] = "amber"
     except Exception:
-        pass  # Nếu enrich lỗi → giữ nguyên data từ sector_peers_matrix
+        pass
+    return peers
 
+
+@app.get("/api/peers/{ticker}")
+async def get_peers_comparison(ticker: str):
+    """
+    Truy xuất ma trận so sánh các doanh nghiệp cùng ngành (Peers Comparison Matrix).
+    Đã được làm giàu với dữ liệu cổ tức tiền mặt & cổ phiếu thưởng thực tế (không suy diễn).
+    """
+    clean_ticker = ticker.upper().strip()
+    now_ts = time.time()
+    if clean_ticker in _PEERS_CACHE and (now_ts - _PEERS_CACHE_TS.get(clean_ticker, 0)) < _TTL_PEERS:
+        return _PEERS_CACHE[clean_ticker]
+
+    data = await get_financial_overview(clean_ticker)
+    peers = data.get("peers_data", {})
+    peers = await enrich_peers_with_realized_dividends(peers)
 
     _PEERS_CACHE[clean_ticker] = peers
     _PEERS_CACHE_TS[clean_ticker] = now_ts
@@ -1752,14 +1814,18 @@ async def get_ssi_market_overview():
 
 
 @app.get("/api/technical/{ticker}")
-async def get_technical_signals(ticker: str, resolution: str = "D", count: int = 350):
+async def get_technical_signals(ticker: str, resolution: str = "D", count: int = 1500):
     """
     Truy xuất dữ liệu nến kỹ thuật thực tế và tính toán đầy đủ các chỉ báo kỹ thuật:
     MA20, MA50, MA200, EMA20, RSI(14), MACD(12,26,9), Bollinger Bands, Pivot Points (S1-S3, R1-R3).
     Dữ liệu nến được đồng bộ hóa từ SSI FastConnect và Vietstock/VNDirect/DNSE Multi-timeframe Feed.
+    Hỗ trợ nạp đầy đủ lịch sử từ 5 - 8 năm phục vụ phân tích đa khung thời gian (1D, 1W, 1M, 1Y, 5Y, ALL).
     """
     clean_ticker = ticker.upper().strip()
-    cache_key = f"{clean_ticker}_{resolution}_{count}"
+    norm_res = str(resolution).upper().strip()
+    if norm_res in ["D", "W", "M"] and count < 1000:
+        count = 1500
+    cache_key = f"{clean_ticker}_{norm_res}_{count}"
     now_ts = time.time()
     if cache_key in _TECH_SIGNALS_CACHE and (now_ts - _TECH_SIGNALS_CACHE_TS.get(cache_key, 0)) < 30.0:
         return _TECH_SIGNALS_CACHE[cache_key]
@@ -1776,7 +1842,7 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
 
     # Lấy chuỗi nến thực tế từ SSI FastConnect / VNDirect / Vietstock / DNSE
     try:
-        candles = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count), timeout=4.0)
+        candles = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count), timeout=6.0)
     except Exception:
         candles = []
     
@@ -1817,7 +1883,7 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         "signal_color": tech["signal_color"],
         "recommendation_score": 8 if "MUA" in tech["overall_signal"] else (5 if "TRUNG" in tech["overall_signal"] else 3),
         "trend_summary": tech["trend_summary"],
-        "candles_history": tech["candles_history"],
+        "candles_history": candles if candles else tech.get("candles_history", []),
         "ceiling_price": depth["ceiling_price"],
         "floor_price": depth["floor_price"],
         "reference_price": depth["ref_price"],
@@ -1845,16 +1911,45 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
 async def search_reports(ticker: str, sector: Optional[str] = ""):
     if not ticker:
         raise HTTPException(status_code=400, detail="Mã cổ phiếu không được để trống")
+    clean_tk = ticker.strip().upper()
     try:
-        results = await search_institutional_reports(ticker.strip().upper(), sector or "")
+        results = await search_institutional_reports(clean_tk, sector or "")
+        # Đánh dấu cờ already_learned để chống nạp trùng lặp từ đầu
+        try:
+            from ai_learning_engine import is_report_already_learned
+            for item in results:
+                raw_url = item.get("url", "")
+                raw_inst = item.get("institution", "")
+                item["already_learned"] = is_report_already_learned(
+                    ticker=clean_tk,
+                    url=raw_url,
+                    institution=raw_inst
+                )
+        except Exception as dedup_err:
+            print(f"[Search Dedup] Lỗi kiểm tra đã học: {dedup_err}")
     except Exception as e:
         print(f"Error searching institutional reports for {ticker}: {e}")
         results = []
     return {
-        "ticker": ticker.upper(),
+        "ticker": clean_tk,
         "total_found": len(results),
         "results": results
     }
+
+
+@app.get("/api/ai-learning/analyst-styles")
+async def get_all_analyst_styles():
+    """
+    Trả về danh sách phong cách phân tích và ngữ điệu mà AI đã học từ các CTCK.
+    """
+    from ai_learning_engine import _ANALYST_STYLE_FILE
+    if os.path.exists(_ANALYST_STYLE_FILE):
+        try:
+            with open(_ANALYST_STYLE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
 
 
 @app.post("/api/auth/admin-verify")
@@ -2007,48 +2102,73 @@ async def api_crawl_url(
         )
         extracted_report.source_url = req.url
 
-        # Tự động lưu trữ các Catalysts và Rủi ro mà AI bóc tách được vào kho tri thức
-        raw_text = data.get("text", "")
-        try:
-            save_learned_ticker_catalysts(
-                ticker=clean_ticker,
-                catalysts=extracted_report.key_catalysts,
-                risks=extracted_report.key_risks,
-                source=institution,
-                title=f"Báo cáo phân tích {clean_ticker}"
-            )
+        # Báo cáo đã ra cách đây hơn 1 năm không đưa vào chương trình AI học
+        rep_date = getattr(extracted_report, "report_date", None) or getattr(req, "report_date", None)
+        is_too_old_for_ai = is_report_expired(rep_date, max_days=365) if rep_date else False
 
-            # === HỌC NGỮ ĐIỆU PHÂN TÍCH của CTCK ===
+        if not is_too_old_for_ai:
+            raw_text = data.get("text", "")
             try:
-                learn_analyst_writing_style(
-                    institution=institution,
-                    raw_text=raw_text,
-                    extracted_catalysts=extracted_report.key_catalysts or [],
-                    extracted_risks=extracted_report.key_risks or []
-                )
-            except Exception as style_err:
-                print(f"[Crawl URL] Lỗi học ngữ điệu {institution}: {style_err}")
-
-            # === ĐÁNH DẤU FINGERPRINT đã học ===
-            try:
-                mark_report_as_learned(
+                save_learned_ticker_catalysts(
                     ticker=clean_ticker,
-                    url=req.url,
-                    raw_text=raw_text,
-                    institution=institution,
-                    title=getattr(extracted_report, "report_title", "") or ""
+                    catalysts=extracted_report.key_catalysts,
+                    risks=extracted_report.key_risks,
+                    source=institution,
+                    title=f"Báo cáo phân tích {clean_ticker}",
+                    report_date=rep_date
                 )
-            except Exception as fp_err:
-                print(f"[Crawl URL] Lỗi đánh dấu fingerprint: {fp_err}")
 
-            # Làm mới cache
-            from crawler import _SYNCED_MATRIX_REPORTS_CACHE
-            keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
-            for k in keys_to_del:
-                _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
-            _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
-        except Exception as store_err:
-            print(f"[Crawl URL] Lỗi lưu catalysts: {store_err}")
+                # Ghi nhận sự kiện tự học vào scheduler & cộng dồn tích lũy trọn đời
+                try:
+                    ai_scheduler.record_learned_event(
+                        ticker=clean_ticker,
+                        title=f"Báo cáo {clean_ticker} từ {institution}",
+                        institution=institution,
+                        catalysts_count=len(extracted_report.key_catalysts or []),
+                        risks_count=len(extracted_report.key_risks or []),
+                        theses_count=len(getattr(extracted_report, "investment_theses", []) or []),
+                        confidence=getattr(extracted_report, "confidence_score", 0.92) or 0.92,
+                        source=f"Crawl URL / {institution}",
+                        template_name="Bóc Tách Độc Bản Doanh Nghiệp",
+                        preview_catalysts=extracted_report.key_catalysts or [],
+                        report_date=rep_date
+                    )
+                except Exception as sch_err:
+                    print(f"[Crawl URL] Lỗi ghi nhận scheduler event: {sch_err}")
+
+                # === HỌC NGỮ ĐIỆU PHÂN TÍCH của CTCK ===
+                try:
+                    learn_analyst_writing_style(
+                        institution=institution,
+                        raw_text=raw_text,
+                        extracted_catalysts=extracted_report.key_catalysts or [],
+                        extracted_risks=extracted_report.key_risks or []
+                    )
+                except Exception as style_err:
+                    print(f"[Crawl URL] Lỗi học ngữ điệu {institution}: {style_err}")
+
+                # === ĐÁNH DẤU FINGERPRINT đã học ===
+                try:
+                    mark_report_as_learned(
+                        ticker=clean_ticker,
+                        url=req.url,
+                        raw_text=raw_text,
+                        institution=institution,
+                        title=getattr(extracted_report, "report_title", "") or ""
+                    )
+                except Exception as fp_err:
+                    print(f"[Crawl URL] Lỗi đánh dấu fingerprint: {fp_err}")
+
+                # Làm mới cache
+                from crawler import _SYNCED_MATRIX_REPORTS_CACHE
+                keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
+                for k in keys_to_del:
+                    _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
+                _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
+            except Exception as store_err:
+                print(f"[Crawl URL] Lỗi lưu catalysts: {store_err}")
+        else:
+            print(f"[Crawl URL] Báo cáo đã ra cách đây hơn 1 năm ({rep_date}) - Bỏ qua đưa vào chương trình AI học.")
 
         return {
             "source_info": data,
@@ -2099,22 +2219,49 @@ async def api_upload_pdf(
         )
         extracted_report.source_url = f"File: {file.filename} ({parsed['total_pages']} trang)"
 
-        # Tự động lưu trữ Catalysts vào kho AI
-        try:
-            save_learned_ticker_catalysts(
-                ticker=clean_ticker,
-                catalysts=extracted_report.key_catalysts,
-                risks=extracted_report.key_risks,
-                source=institution or "Bóc tách PDF",
-                title=f"File: {file.filename}"
-            )
-            from crawler import _SYNCED_MATRIX_REPORTS_CACHE
-            keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
-            for k in keys_to_del:
-                _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
-            _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
-        except Exception as store_err:
-            print(f"[Upload PDF] Lỗi lưu catalysts: {store_err}")
+        # Báo cáo đã ra cách đây hơn 1 năm không đưa vào chương trình AI học
+        rep_date = getattr(extracted_report, "report_date", None)
+        is_too_old_for_ai = is_report_expired(rep_date, max_days=365) if rep_date else False
+
+        if not is_too_old_for_ai:
+            # Tự động lưu trữ Catalysts vào kho AI
+            try:
+                save_learned_ticker_catalysts(
+                    ticker=clean_ticker,
+                    catalysts=extracted_report.key_catalysts,
+                    risks=extracted_report.key_risks,
+                    source=institution or "Bóc tách PDF",
+                    title=f"File: {file.filename}",
+                    report_date=rep_date
+                )
+
+                # Ghi nhận sự kiện tự học vào scheduler & cộng dồn tích lũy trọn đời
+                try:
+                    ai_scheduler.record_learned_event(
+                        ticker=clean_ticker,
+                        title=f"File PDF: {file.filename} ({clean_ticker})",
+                        institution=institution or "Tài liệu PDF",
+                        catalysts_count=len(extracted_report.key_catalysts or []),
+                        risks_count=len(extracted_report.key_risks or []),
+                        theses_count=len(getattr(extracted_report, "investment_theses", []) or []),
+                        confidence=getattr(extracted_report, "confidence_score", 0.92) or 0.92,
+                        source="Tải file PDF",
+                        template_name="Bóc Tách Độc Bản Doanh Nghiệp",
+                        preview_catalysts=extracted_report.key_catalysts or [],
+                        report_date=rep_date
+                    )
+                except Exception as sch_err:
+                    print(f"[Upload PDF] Lỗi ghi nhận scheduler event: {sch_err}")
+
+                from crawler import _SYNCED_MATRIX_REPORTS_CACHE
+                keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
+                for k in keys_to_del:
+                    _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
+                _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
+            except Exception as store_err:
+                print(f"[Upload PDF] Lỗi lưu catalysts: {store_err}")
+        else:
+            print(f"[Upload PDF] Báo cáo đã ra cách đây hơn 1 năm ({rep_date}) - Bỏ qua đưa vào chương trình AI học.")
 
         return {
             "file_info": {
@@ -2161,22 +2308,49 @@ async def api_analyze_raw(
         current_market_price=market_p
     )
 
-    # Tự động lưu trữ Catalysts vào kho AI
-    try:
-        save_learned_ticker_catalysts(
-            ticker=clean_ticker,
-            catalysts=report.key_catalysts,
-            risks=report.key_risks,
-            source=req.institution or "Phân tích Text thô",
-            title=f"Nhập văn bản thô {clean_ticker}"
-        )
-        from crawler import _SYNCED_MATRIX_REPORTS_CACHE
-        keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
-        for k in keys_to_del:
-            _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
-        _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
-    except Exception as store_err:
-        print(f"[Analyze Raw] Lỗi lưu catalysts: {store_err}")
+    # Báo cáo đã ra cách đây hơn 1 năm không đưa vào chương trình AI học
+    rep_date = getattr(report, "report_date", None)
+    is_too_old_for_ai = is_report_expired(rep_date, max_days=365) if rep_date else False
+
+    if not is_too_old_for_ai:
+        # Tự động lưu trữ Catalysts vào kho AI
+        try:
+            save_learned_ticker_catalysts(
+                ticker=clean_ticker,
+                catalysts=report.key_catalysts,
+                risks=report.key_risks,
+                source=req.institution or "Phân tích Text thô",
+                title=f"Nhập văn bản thô {clean_ticker}",
+                report_date=rep_date
+            )
+
+            # Ghi nhận sự kiện tự học vào scheduler & cộng dồn tích lũy trọn đời
+            try:
+                ai_scheduler.record_learned_event(
+                    ticker=clean_ticker,
+                    title=f"Văn bản bóc tách {clean_ticker}",
+                    institution=req.institution or "Phân tích Text thô",
+                    catalysts_count=len(report.key_catalysts or []),
+                    risks_count=len(report.key_risks or []),
+                    theses_count=len(getattr(report, "investment_theses", []) or []),
+                    confidence=getattr(report, "confidence_score", 0.90) or 0.90,
+                    source="Nhập văn bản thô",
+                    template_name="Bóc Tách Độc Bản Doanh Nghiệp",
+                    preview_catalysts=report.key_catalysts or [],
+                    report_date=rep_date
+                )
+            except Exception as sch_err:
+                print(f"[Analyze Raw] Lỗi ghi nhận scheduler event: {sch_err}")
+
+            from crawler import _SYNCED_MATRIX_REPORTS_CACHE
+            keys_to_del = [k for k in _SYNCED_MATRIX_REPORTS_CACHE.keys() if k.startswith(f"{clean_ticker}_")]
+            for k in keys_to_del:
+                _SYNCED_MATRIX_REPORTS_CACHE.pop(k, None)
+            _SYNCHRONIZED_PRESETS_CACHE.pop(clean_ticker, None)
+        except Exception as store_err:
+            print(f"[Analyze Raw] Lỗi lưu catalysts: {store_err}")
+    else:
+        print(f"[Analyze Raw] Báo cáo đã ra cách đây hơn 1 năm ({rep_date}) - Bỏ qua đưa vào chương trình AI học.")
 
     return report
 

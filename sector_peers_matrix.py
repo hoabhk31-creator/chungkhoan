@@ -2744,7 +2744,7 @@ UNIVERSAL_SECTOR_PEERS_CONFIG = {
                 "gross_margin": 28.5,
                 "inventory_turnover": 7.2,
                 "sgna_to_revenue": 21.0,
-                "dividend_yield_pct": 2.5
+                "dividend_yield_pct": 0.0
             },
             {
                 "ticker": "SAB",
