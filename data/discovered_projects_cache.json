@@ -78,8 +78,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790181961.4385924,
-    "scan_time_str": "23:46:01 23/09/2026"
+    "timestamp": 1790785443.2925956,
+    "scan_time_str": "23:24:03 30/09/2026"
   },
   "HAG": {
     "ticker": "HAG",
@@ -490,8 +490,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790643316.1739516,
-    "scan_time_str": "07:55:16 29/09/2026"
+    "timestamp": 1790924328.9060328,
+    "scan_time_str": "13:58:48 02/10/2026"
   },
   "HDG": {
     "ticker": "HDG",
@@ -760,8 +760,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790590121.089429,
-    "scan_time_str": "17:08:41 28/09/2026"
+    "timestamp": 1790907024.001908,
+    "scan_time_str": "09:10:24 02/10/2026"
   },
   "MSR": {
     "ticker": "MSR",
@@ -958,8 +958,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790556039.3888218,
-    "scan_time_str": "07:40:39 28/09/2026"
+    "timestamp": 1790749379.0132086,
+    "scan_time_str": "13:22:59 30/09/2026"
   },
   "GEL": {
     "ticker": "GEL",
@@ -1068,48 +1068,60 @@
   "TRC": {
     "ticker": "TRC",
     "company_name": "Cao su Tây Ninh",
-    "official_website": "UBCKNN (Cần tra cứu hồ sơ)",
-    "website_projects_url": "",
-    "total_projects": 2,
-    "total_investment_bil": 1609.0,
+    "official_website": "taniruco.com",
+    "website_projects_url": "http://taniruco.com/du-an",
+    "total_projects": 3,
+    "total_investment_bil": 516.0,
     "projects": [
       {
-        "name": "Tổ hợp Cơ sở Hạ tầng & Tài sản Cố định Hoạt động Cốt lõi (TRC)",
-        "scale": "Nguyên giá và giá trị còn lại của tài sản cố định hữu hình phục vụ SXKD đạt 1,418.2 tỷ VNĐ",
-        "investment_bil": 1418.0,
-        "progress_pct": 95,
-        "commercial_date": "Đang vận hành khai thác",
-        "impact": "Nền tảng tài sản cố định cốt lõi tạo ra doanh thu và dòng tiền hoạt động kinh doanh bền vững.",
-        "legal_status": "100% tài sản sở hữu hợp pháp & nghiệm thu an toàn",
-        "occupancy_rate": 90,
-        "phase_tag": "Đang vận hành",
-        "source": "Báo cáo Tài chính Soát xét / BCTN"
+        "name": "khu công nghiệp cao su Việt Nam",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TRC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Bảng 1: Công ty con và công ty liên kết của TRC Tên doanh nghiệp Vốn góp (tỷ đồng) tỷ lệ sở hữu Ngành nghề kinh doanh Công ty con Công ty Tây Ninh - Siêm Riệp Phát triển Cao su 70 100% Trồng, phát triển và khai thác chế biến mủ cao su tại Campuchia Công ty liên kết CTCP Chế biến – Xuất nhập khẩu gỗ Tây Ninh 25,4 49% Chế biến, xuất khẩu gỗ nội thất, đồ gia dụng Đầu tư vào đơn vị khác CTCP Cao su Việt Lào 77,5 10% Trồng phát triển, khai thác và chế biến mủ cao su CTCP Thương mại dịch vụ và du lịch cao su 8,6 2,34% Xuất nhập khẩu các loại cao su, kinh doanh dịch vụ lữ hành CTCP Phát triển đô thị và khu công nghiệp cao su Việt Nam (VRG) 17,6 6,82% Đầu tư xây dựng hạ tầng và kinh doanh khu công nghiệp CTCP Cao su Dầu Tiếng Lào Cai 36,9 15,61% Trồng phát triển, khai thác và chế biến mủ cao su Nguồn: Báo cáo tài chính TRC II.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       },
       {
-        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (TRC)",
-        "scale": "Giá trị công trình dở dang lũy kế 152.6 tỷ đồng trên BCTC kiểm toán",
-        "investment_bil": 191.0,
+        "name": "Dự án hiện vẫn đang trong",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TRC",
+        "investment_bil": 516.0,
         "progress_pct": 80,
-        "commercial_date": "Hoàn thiện 2025 - 2026",
-        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
-        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Dự án hiện vẫn đang trong giai đoạn kiến thiết nhưng sẽ giúp TRC tăng gấp đôi quy mô khi đi vào hoạt động kể từ năm 2019. Chúng tôi dự phóng doanh thu và lợi nhuận của TRC trong năm 2017 lần lượt là 516 tỷ đồng (+47,3% YoY) và 156 tỷ đồng (+115,9% YoY) với giá cao su trung bình năm 2017 giả định ở mức 2.500$/tấn.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
         "occupancy_rate": 85,
-        "phase_tag": "Đang thi công xây dựng",
-        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án vườn cây cao su tại Campuchia đi vào khai thác năm",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TRC",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Diện tích khai thác sẽ giữ ở mức ổn định 4.500-5.000 ha trong năm 2017 và 2018 trước khi dự án vườn cây cao su tại Campuchia đi vào khai thác năm 2019.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
       }
     ],
-    "newly_discovered_count": 1,
+    "newly_discovered_count": 3,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
-      "Website chính thức: ",
+      "Website chính thức: taniruco.com",
       "Báo cáo Thường niên (Annual Report)",
       "Báo cáo Tài chính Bán niên Soát xét",
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790224345.1689484,
-    "scan_time_str": "11:32:25 24/09/2026"
+    "timestamp": 1790662976.3432202,
+    "scan_time_str": "13:22:56 29/09/2026"
   },
   "QNS": {
     "ticker": "QNS",
@@ -1801,8 +1813,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790556179.8644102,
-    "scan_time_str": "07:42:59 28/09/2026"
+    "timestamp": 1790916686.2494037,
+    "scan_time_str": "11:51:26 02/10/2026"
   },
   "NTL": {
     "ticker": "NTL",
@@ -2755,8 +2767,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790643340.135759,
-    "scan_time_str": "07:55:40 29/09/2026"
+    "timestamp": 1790783398.4816449,
+    "scan_time_str": "22:49:58 30/09/2026"
   },
   "HHV": {
     "ticker": "HHV",
@@ -3037,8 +3049,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790556147.798336,
-    "scan_time_str": "07:42:27 28/09/2026"
+    "timestamp": 1790648147.1333866,
+    "scan_time_str": "09:15:47 29/09/2026"
   },
   "LDG": {
     "ticker": "LDG",
@@ -3853,8 +3865,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790336470.1952858,
-    "scan_time_str": "18:41:10 25/09/2026"
+    "timestamp": 1790663306.276971,
+    "scan_time_str": "13:28:26 29/09/2026"
   },
   "SSI": {
     "ticker": "SSI",
@@ -4647,10 +4659,83 @@
     "company_name": "Tập đoàn Gelex",
     "official_website": "gelex.vn",
     "website_projects_url": "https://gelex.vn/du-an",
-    "total_projects": 0,
-    "total_investment_bil": 0,
-    "projects": [],
-    "newly_discovered_count": 0,
+    "total_projects": 6,
+    "total_investment_bil": 12474.0,
+    "projects": [
+      {
+        "name": "dự án B ĐS nhà ở đồng Nai",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của GEX",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Việc nâng định giá của chúng tôi chủ yếu do (1) định giá mảng thiết bị điện tăng 18% (dự báo LNST sau lợi ích C ĐTS của GEE tăng 13% và P/E mục tiêu cao hơn), (2) bổ sung dự án B ĐS nhà ở đồng Nai/sân bay Gia Bình, và (3) tác động tích cực từ việc chuyển mốc định giá về giữa năm 2027.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Khu công nghiệp cao hơn 11",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của GEX",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Những yếu tố này lấn át (3) tổng LNST sau lợi ích C ĐTS của GEE tăng 20% (nhờ LNST sau lợi ích C ĐTS cốt lõi 2025F cao hơn 10% so với kỳ vọng và doanh thu 2026– 30F cao hơn), và (4) tổng LNST sau lợi ích C ĐTS của VGC tăng 9% (lợi nhuận gộp liên quan đến KCN cao hơn 11%).",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Yếu tố hỗ trợ: Bổ sung thêm quỹ đất thông qua các dự án BT.",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của GEX",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Yếu tố hỗ trợ: Bổ sung thêm quỹ đất thông qua các dự án BT.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án điện tư nhân và m ức tăng thị phần của GEX ở cả mi",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của GEX",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Mức điều chỉnh này chủ yếu được thúc đẩy bởi mức tăng 17% của chúng tôi đối với giả định giá đồng giai đoạn 2026–30, dựa trên dự báo đồng thuận của Bloomberg và mức sản lượng cao hơn kỳ vọng trong quý 1/2026 (được hỗ trợ bởi các dự án điện tư nhân và m ức tăng thị phần của GEX ở cả miền Nam và mi ền Bắc - trang 4).",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án Hải Phòng trong quý 4",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của GEX",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Ban lãnh đạo đặt kế hoạch mở bán dự án Hải Phòng trong quý 4/2026–quý 1/2027 và chúng tôi giả định công ty sẽ bắt đầu bàn giao sản phẩm thấp tầng từ quý 4/2027.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "Hạng mục Chi phí XDCB Dở dang Trọng điểm (GEX)",
+        "scale": "Giá trị công trình dở dang lũy kế 9,979.4 tỷ đồng trên BCTC kiểm toán",
+        "investment_bil": 12474.0,
+        "progress_pct": 80,
+        "commercial_date": "Hoàn thiện 2025 - 2026",
+        "impact": "Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
+        "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang thi công xây dựng",
+        "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
+      }
+    ],
+    "newly_discovered_count": 6,
     "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
     "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
     "scan_sources": [
@@ -4660,8 +4745,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790309610.894521,
-    "scan_time_str": "11:13:30 25/09/2026"
+    "timestamp": 1790913012.4569073,
+    "scan_time_str": "10:50:12 02/10/2026"
   },
   "ANV": {
     "ticker": "ANV",
@@ -5229,8 +5314,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790327500.623294,
-    "scan_time_str": "16:11:40 25/09/2026"
+    "timestamp": 1790751832.8639016,
+    "scan_time_str": "14:03:52 30/09/2026"
   },
   "DGW": {
     "ticker": "DGW",
@@ -5531,8 +5616,8 @@
       "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
       "Công bố Thông tin Sở GDCK (HOSE/HNX)"
     ],
-    "timestamp": 1790556158.1088576,
-    "scan_time_str": "07:42:38 28/09/2026"
+    "timestamp": 1790924353.6721082,
+    "scan_time_str": "13:59:13 02/10/2026"
   },
   "REE": {
     "ticker": "REE",
@@ -5823,5 +5908,211 @@
     ],
     "timestamp": 1790588380.2662835,
     "scan_time_str": "16:39:40 28/09/2026"
+  },
+  "VPB": {
+    "ticker": "VPB",
+    "company_name": "VPBank",
+    "official_website": "vpbank.com.vn",
+    "website_projects_url": "https://vpbank.com.vn",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: vpbank.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790749511.078392,
+    "scan_time_str": "13:25:11 30/09/2026"
+  },
+  "DPR": {
+    "ticker": "DPR",
+    "company_name": "Cao su Đồng Phú",
+    "official_website": "doruco.com.vn",
+    "website_projects_url": "http://doruco.com.vn/du-an",
+    "total_projects": 2,
+    "total_investment_bil": 1088.0,
+    "projects": [
+      {
+        "name": "dự án KCN Bắc đồng Phú",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của DPR",
+        "investment_bil": 1080.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Chúng tôi ước tính dự án KCN Bắc đồng Phú (Giai đoạn 2) sẽ mang lại khoảng 1.080 tỷ đồng LNTT cho DPR.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án dự kiến mang lại khoảng 7",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của DPR",
+        "investment_bil": 8.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Theo đó, dự án dự kiến mang lại khoảng 7,8 tỷ đồng doanh thu và 3,14 tỷ đồng LNTT trong năm 2026.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 2,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: doruco.com.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790663045.611858,
+    "scan_time_str": "13:24:05 29/09/2026"
+  },
+  "TCH": {
+    "ticker": "TCH",
+    "company_name": "ĐT DV Tài chính Hoàng Huy",
+    "official_website": "hoanghuy.vn",
+    "website_projects_url": "https://hoanghuy.vn/du-an",
+    "total_projects": 8,
+    "total_investment_bil": 36949.0,
+    "projects": [
+      {
+        "name": "Đại dự án Khu đô thị Hoàng Huy New City (Đỗ Mười - Thủy Nguyên, Hải Phòng)",
+        "scale": "Quy mô 65 ha trung tâm hành chính mới Thủy Nguyên, biệt thự, liền kề và shophouse",
+        "investment_bil": 14500,
+        "progress_pct": 75,
+        "commercial_date": "Mở bán & Bàn giao 2025 - 2027",
+        "impact": "Hưởng lợi trực tiếp khi Thủy Nguyên chính thức lên Thành phố, biên lợi nhuận gộp BĐS trên 40%.",
+        "legal_status": "Đã hoàn thành 100% giải phóng mặt bằng, phê duyệt 1/500 và cấp phép xây dựng",
+        "occupancy_rate": 78,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Website chính thức (hoanghuy.vn) & BCTN"
+      },
+      {
+        "name": "Đại dự án Hoàng Huy Green River (Hoa Động, Thủy Nguyên, Hải Phòng)",
+        "scale": "Quy mô 62 ha ven sông Cấm, quần thể đô thị sinh thái xanh cao cấp",
+        "investment_bil": 12800,
+        "progress_pct": 65,
+        "commercial_date": "Mở bán 2025 - Bàn giao 2027",
+        "impact": "Dự án gối đầu trọng điểm bảo đảm doanh thu hàng nghìn tỷ đồng trong 3 năm tới.",
+        "legal_status": "Đã hoàn tất phê duyệt quy hoạch chi tiết 1/500 và đánh giá tác động môi trường ĐTM",
+        "occupancy_rate": 70,
+        "phase_tag": "Đang thi công hạ tầng",
+        "source": "Website chính thức (hoanghuy.vn) & BCTN"
+      },
+      {
+        "name": "Tổ hợp Căn hộ Cao cấp Hoàng Huy Commerce (Lê Chân, Hải Phòng)",
+        "scale": "Quy mô 4 tòa tháp 35 tầng với 2,496 căn hộ cao cấp và TTTM",
+        "investment_bil": 5000,
+        "progress_pct": 95,
+        "commercial_date": "Đang bàn giao căn hộ",
+        "impact": "Ghi nhận doanh thu bán hàng kỷ lục, giải phóng lượng lớn tiền trả trước của người mua.",
+        "legal_status": "Đã nghiệm thu PCCC, bàn giao cư dân vào sinh sống và cấp sổ hồng",
+        "occupancy_rate": 92,
+        "phase_tag": "Đang bàn giao",
+        "source": "Website chính thức (hoanghuy.vn) & BCTN"
+      },
+      {
+        "name": "Khu đô thị Hoàng Huy Grand Tower (Sở Dầu, Hồng Bàng, Hải Phòng)",
+        "scale": "Tổ hợp 37 tầng gồm 821 căn hộ cao cấp và shophouse khối đế",
+        "investment_bil": 1850,
+        "progress_pct": 98,
+        "commercial_date": "Đang khai thác",
+        "impact": "Tạo dòng tiền ổn định và khẳng định thương hiệu căn hộ số 1 tại Hải Phòng.",
+        "legal_status": "Sổ hồng đã cấp cho cư dân, pháp lý hoàn chỉnh 100%",
+        "occupancy_rate": 96,
+        "phase_tag": "Đang khai thác",
+        "source": "Website chính thức (hoanghuy.vn) & BCTN"
+      },
+      {
+        "name": "Kinh doanh Xe đầu kéo Mỹ Navistar & Logistics Cảng Hải Phòng",
+        "scale": "Độc quyền phân phối xe đầu kéo International tiêu chuẩn khí thải mới tại Việt Nam",
+        "investment_bil": 800,
+        "progress_pct": 90,
+        "commercial_date": "Đang kinh doanh",
+        "impact": "Hưởng lợi từ sản lượng hàng hóa thông qua cảng biển Hải Phòng tăng trưởng mạnh.",
+        "legal_status": "Độc quyền đại lý cấp 1 toàn quốc cùng Navistar Hoa Kỳ",
+        "occupancy_rate": 90,
+        "phase_tag": "Đang vận hành",
+        "source": "Website chính thức (hoanghuy.vn) & BCTN"
+      },
+      {
+        "name": "dự án khác",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TCH",
+        "investment_bil": 1999.0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Tồn kho tăng chủ yếu do quỹ đất m ới: B ĐS dở dang tăng 1.999 tỷ đồng; riêng “dự án khác” tăng 1.334 tỷ đồng, gần tương đương giá trúng đấu giá I14 là 1.322 tỷ đồng.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án hiện hữu",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TCH",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Nhiều khả năng phần lớn mức tăng là tiền đất I14, không phải toàn bộ là tiến độ xây dựng dự án hiện hữu.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      },
+      {
+        "name": "dự án cũ đã ghi nhậ n hế t còn dự án mớ i chư a bàn giao",
+        "scale": "Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của TCH",
+        "investment_bil": 0,
+        "progress_pct": 80,
+        "commercial_date": "Giai đoạn 2025 - 2027",
+        "impact": "Nă m tài chính 2025 (kế t thúc 31/03/2026) là vùng trũ ng lợi nhuận (doanh thu 1.912 tỷ , lợi nhuận cổ đ ông mẹ 318 tỷ ) do dự án cũ đã ghi nhậ n hế t còn dự án mớ i chư a bàn giao quy mô lớn. Đ iể m mấ u chố t: ng ườ i mua trả tiề n trước tăng vọ t lên hơ n 6.100 tỷ (từ 203 tỷ ), tạ o nề n cho lợi nhuận chuy ển hóa từ FY2026.",
+        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
+        "occupancy_rate": 85,
+        "phase_tag": "Đang mở bán & thi công",
+        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+      }
+    ],
+    "newly_discovered_count": 3,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: hoanghuy.vn",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790749458.4057236,
+    "scan_time_str": "13:24:18 30/09/2026"
+  },
+  "VNMVPB": {
+    "ticker": "VNMVPB",
+    "company_name": "CTCP VNMVPB",
+    "official_website": "UBCKNN (Cần tra cứu hồ sơ)",
+    "website_projects_url": "",
+    "total_projects": 0,
+    "total_investment_bil": 0,
+    "projects": [],
+    "newly_discovered_count": 0,
+    "ssc_portal_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch",
+    "ssc_portal_name": "Hệ thống Công bố Thông tin Doanh nghiệp Niêm yết - UBCKNN (congbothongtin.ssc.gov.vn)",
+    "scan_sources": [
+      "Website chính thức: ",
+      "Báo cáo Thường niên (Annual Report)",
+      "Báo cáo Tài chính Bán niên Soát xét",
+      "Cổng Công bố Thông tin Doanh nghiệp Niêm yết UBCKNN (https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch)",
+      "Công bố Thông tin Sở GDCK (HOSE/HNX)"
+    ],
+    "timestamp": 1790749504.726399,
+    "scan_time_str": "13:25:04 30/09/2026"
   }
 }

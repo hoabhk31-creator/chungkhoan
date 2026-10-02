@@ -382,5 +382,37 @@
     ],
     "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
     "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "TRC": {
+    "name": "TRC: CTCP Cao su Tây Ninh",
+    "domain": "taniruco.com",
+    "official_url": "http://taniruco.com/",
+    "projects_url": "http://taniruco.com/du-an",
+    "ir_url": "http://taniruco.com/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DPR": {
+    "name": "DPR: CTCP Cao su Đồng Phú",
+    "domain": "doruco.com.vn",
+    "official_url": "http://www.doruco.com.vn",
+    "projects_url": "http://doruco.com.vn/du-an",
+    "ir_url": "http://doruco.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
   }
 }
