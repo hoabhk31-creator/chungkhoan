@@ -21,5 +21,32 @@
       "xuất nhập khẩu theo quốc gia": 1
     },
     "last_updated": "02/10/2026 08:16"
+  },
+  "bsc": {
+    "institution": "BSC",
+    "reports_learned": 1,
+    "buy_signal_phrases": {
+      "mua": 2
+    },
+    "risk_signal_phrases": {},
+    "valuation_patterns": {},
+    "catalyst_phrase_freq": {
+      "chúng tôi kỳ vọng lợi nhuận": 1,
+      "đây là khoản thu nhập một": 1,
+      "quan điểm của bsc lợi nhuận": 1,
+      "lũy kế 1h/2026, dtt và lnst-c": 1,
+      "lnst-c đts 2027 báo cáo giảm": 1,
+      ",000 mua 511.4 30,078 3.2 8.2%": 1,
+      "lợi nhuận cốt lõi dự kiến": 1,
+      "chuỗi dự án lô b -": 1,
+      "biên lợi nhuận được bảo vệ": 1,
+      "vị thế nhà cung cấp trạm": 1,
+      "siêu dự án singapore (fid dự": 1,
+      "đầu tư năng lực tạo bước": 1,
+      "cổng trục goliath và nhà xưởng": 1,
+      "kế hoạch tăng vốn (20% trong": 1,
+      "tiến độ fid: việc chậm phê": 1
+    },
+    "last_updated": "04/10/2026 22:27"
   }
 }

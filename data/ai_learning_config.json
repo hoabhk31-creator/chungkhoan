@@ -1,17 +1,11 @@
 {
   "enabled": true,
-  "interval_hours": 6,
-  "watchlist": [
-    "HPG",
-    "SSI",
-    "FPT",
-    "MWG",
-    "TCH"
-  ],
-  "last_run": "02/10/2026 10:40",
-  "next_run": "02/10/2026 16:40",
+  "interval_hours": 1,
+  "watchlist": [],
+  "last_run": "05/10/2026 07:48",
+  "next_run": "05/10/2026 08:48",
   "auto_ingest_matrix": true,
   "status": "LEARNED",
-  "lifetime_reports_learned": 172,
-  "lifetime_catalysts_accumulated": 1171
+  "lifetime_reports_learned": 349,
+  "lifetime_catalysts_accumulated": 2647
 }

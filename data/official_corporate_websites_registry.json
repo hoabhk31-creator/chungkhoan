@@ -414,5 +414,197 @@
     ],
     "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
     "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "HDB": {
+    "name": "HDB: Ngân hàng TMCP Phát triển Thành phố Hồ Chí Minh",
+    "domain": "hdbank.com.vn",
+    "official_url": "https://hdbank.com.vn/",
+    "projects_url": "https://hdbank.com.vn/du-an",
+    "ir_url": "https://hdbank.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "ORS": {
+    "name": "ORS: CTCP Chứng khoán Tiên Phong",
+    "domain": "tpbs.com.vn",
+    "official_url": "https://tpbs.com.vn",
+    "projects_url": "https://tpbs.com.vn/du-an",
+    "ir_url": "https://tpbs.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "TIN": {
+    "name": "TIN: Công Ty Tài chính tổng hợp cổ phần Tín Việt",
+    "domain": "vietcredit.com.vn",
+    "official_url": "https://www.vietcredit.com.vn/",
+    "projects_url": "https://vietcredit.com.vn/du-an",
+    "ir_url": "https://vietcredit.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "HHS": {
+    "name": "HHS: CTCP Đầu tư Dịch vụ Hoàng Huy",
+    "domain": "hoanghuyhhs.vn",
+    "official_url": "http://www.hoanghuyhhs.vn",
+    "projects_url": "http://hoanghuyhhs.vn/du-an",
+    "ir_url": "http://hoanghuyhhs.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "D2D": {
+    "name": "D2D: CTCP Phát triển Đô thị Công nghiệp số 2",
+    "domain": "d2d.com.vn",
+    "official_url": "https://www.d2d.com.vn/",
+    "projects_url": "https://d2d.com.vn/du-an",
+    "ir_url": "https://d2d.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "PVP": {
+    "name": "PVP: CTCP Vận tải Dầu khí Thái Bình Dương",
+    "domain": "pacificshipping.vn",
+    "official_url": "https://pacificshipping.vn/",
+    "projects_url": "https://pacificshipping.vn/du-an",
+    "ir_url": "https://pacificshipping.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "PAN": {
+    "name": "PAN: CTCP Tập đoàn PAN",
+    "domain": "thepangroup.vn",
+    "official_url": "https://thepangroup.vn/",
+    "projects_url": "https://thepangroup.vn/du-an",
+    "ir_url": "https://thepangroup.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "DBC": {
+    "name": "DBC: CTCP Tập đoàn Dabaco Việt Nam",
+    "domain": "dabaco.com.vn",
+    "official_url": "http://www.dabaco.com.vn/",
+    "projects_url": "http://dabaco.com.vn/du-an",
+    "ir_url": "http://dabaco.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "SHB": {
+    "name": "SHB: Ngân hàng TMCP Sài Gòn",
+    "domain": "shb.com.vn",
+    "official_url": "https://www.shb.com.vn",
+    "projects_url": "https://shb.com.vn/du-an",
+    "ir_url": "https://shb.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "NAB": {
+    "name": "NAB: Ngân hàng TMCP Nam Á",
+    "domain": "namabank.com.vn",
+    "official_url": "https://namabank.com.vn/",
+    "projects_url": "https://namabank.com.vn/du-an",
+    "ir_url": "https://namabank.com.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "NT2": {
+    "name": "NT2: CTCP Điện lực Dầu khí Nhơn Trạch 2",
+    "domain": "pvpnt2.vn",
+    "official_url": "https://www.pvpnt2.vn",
+    "projects_url": "https://pvpnt2.vn/du-an",
+    "ir_url": "https://pvpnt2.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
+  },
+  "VVS": {
+    "name": "VVS: CTCP Đầu tư phát triển máy Việt Nam",
+    "domain": "vimid.vn",
+    "official_url": "https://vimid.vn/",
+    "projects_url": "https://vimid.vn/du-an",
+    "ir_url": "https://vimid.vn/quan-he-co-dong",
+    "keywords": [
+      "Dự án",
+      "Công trình",
+      "Nhà máy",
+      "Cảng",
+      "Đầu tư"
+    ],
+    "source": "Hồ sơ Công bố Thông tin Doanh nghiệp Niêm yết (UBCKNN & Vietstock Profile)",
+    "ssc_profile_url": "https://congbothongtin.ssc.gov.vn/faces/CompanyProfilesSearch"
   }
 }

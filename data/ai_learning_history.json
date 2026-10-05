@@ -1,5 +1,3006 @@
 [
   {
+    "id": "log-250c95e2",
+    "ticker": "OCB",
+    "title": "OCB: Khuyến nghị TÍCH LŨY với giá mục tiêu 11,300 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 0,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": []
+  },
+  {
+    "id": "log-0e84f44d",
+    "ticker": "MSB",
+    "title": "MSB: Khuyến nghị GIẢM TỶ TRỌNG với giá mục tiêu 13,200 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 1,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Dự phóng LNTT năm 2026F đạt hơn 7.700 tỷ đồng (+10% YoY, giảm 13% so với dự phóng cũ) với LNTT Q3/26F ước đạt 1.800 tỷ đồng, Lũy kế 9T2026 hoàn thành 68% dự phóng cả năm."
+    ]
+  },
+  {
+    "id": "log-524b6763",
+    "ticker": "VPB",
+    "title": "VPB: Khuyến nghị KHẢ QUAN với giá mục tiêu 30,500 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Ngân hàng có kế hoạch phát hành riêng lẻ hơn 624 triệu cổ phiếu cho nhà đầu tư nước ngoài trong Q4/2026 để nâng cao hệ số CAR.",
+      "Dự phóng tăng trưởng lợi nhuận ròng năm 2026F đạt 30,0% YoY, LNTT đạt 39.567 tỷ đồng (+29,2% YoY) với dư nợ tín dụng tăng 35,0%."
+    ]
+  },
+  {
+    "id": "log-ff70c145",
+    "ticker": "SAB",
+    "title": "SAB: Khuyến nghị MUA với giá mục tiêu 54,300 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến duy trì cổ tức tiền mặt cao ở mức 5.000 đồng/cổ phiếu mỗi năm (lợi suất cổ tức 11,5%) trong giai đoạn 2026-2031.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-7b4c0cc8",
+    "ticker": "VPB",
+    "title": "VPB: Khuyến nghị KHẢ QUAN với giá mục tiêu 26,500 đồng/cổ phiếu",
+    "institution": "SSI",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSI",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, VPB đạt 18.900 tỷ đồng lợi nhuận trước thuế, hoàn thành 49% dự báo của SSI và 45% kế hoạch của ngân hàng.",
+      "Nền tảng vốn chủ sở hữu vững chắc thuộc Top 2 hệ thống sau khi hoàn tất thương vụ bán vốn chiến lược cho SMBC Nhật Bản."
+    ]
+  },
+  {
+    "id": "log-733f861c",
+    "ticker": "VHC",
+    "title": "VHC: Khuyến nghị MUA với giá mục tiêu 65,000 đồng/cổ phiếu",
+    "institution": "NHSV",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Thủy sản & Nông nghiệp xuất khẩu (VHC, ANV, BAF, DBC)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / NHSV",
+    "extracted_catalysts_preview": [
+      "Trong 6 tháng đầu năm 2026, VHC ghi nhận doanh thu Q2/2026 đạt 3.394 tỷ đồng (tăng 6% YoY) và LNST đạt 475 tỷ đồng, qua đó hoàn thành 46% mục tiêu doanh thu và 46% mục tiêu lợi nhuận cả năm.",
+      "VHC đã hoàn tất mua 15 triệu cổ phiếu quỹ (6,7% lượng cổ phiếu lưu hành) và nâng mức cổ tức tiền mặt lên 3.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-3ae679ca",
+    "ticker": "KDH",
+    "title": "KDH: Khuyến nghị MUA với giá mục tiêu 18,400 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "KDH: Khuyến nghị MUA với giá mục tiêu 18,400 đồng/cổ phiếu v Công ty chứng khoán BSC duy trì khuyến nghị MUA đối với mã cổ phiếu KDH của CTCP Đầu tư và Kinh doanh Nhà Khang Điền nhưng điều chỉnh giảm 54,1% giá mục tiêu xuống 18.400 đồng, tương ứng upside 21,5%.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-77122a85",
+    "ticker": "VNM",
+    "title": "VNM: Báo cáo cập nhật KQKD 02/10/2026",
+    "institution": "TCBS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 11,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Sau 6 tháng, VNM đã hoàn thành 52,7% kế hoạch doanh thu và 57,4% kế hoạch lợi nhuận.",
+      "Báo cáo ghi nhận Q2/2026 VNM đạt doanh thu 18,8 nghìn tỷ đồng (tăng 12,7% YoY) và LNST đạt 3.167 tỷ đồng (tăng 28% YoY)."
+    ]
+  },
+  {
+    "id": "log-7c109d40",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026",
+    "institution": "VCBS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026 Công ty chứng khoán VCBS đưa ra khuyến nghị MUA theo phân tích kỹ thuật đối với mã cổ phiếu MWG của CTCP Đầu tư Thế giới Di động với giá mục tiêu 79.000 đồng, tương ứng tỷ suất sinh lời kỳ vọng 8,8%.",
+      "VCBS khuyến nghị giải ngân quanh vùng giá 72.200 - 73.000 đồng và cắt lỗ tại 69.000 đồng."
+    ]
+  },
+  {
+    "id": "log-ef6f229f",
+    "ticker": "HAX",
+    "title": "HAX: Khuyến nghị TÍCH LŨY với giá mục tiêu 9,500 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng trưởng đến từ sự phục hồi của dòng xe Mercedes-Benz và việc hợp nhất VFG (phân phối Vin Fast) từ nửa cuối năm 2026.",
+      "Cổ tức tiền mặt dự kiến trong 12 tháng tới là 0 đồng."
+    ]
+  },
+  {
+    "id": "log-26fa35e8",
+    "ticker": "PLX",
+    "title": "PLX: Khuyến nghị MUA với giá mục tiêu 45,600 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "kế hoạch chi trả cổ tức tiền mặt dự kiến đạt 1.200 đồng/cổ phiếu cho năm 2026F.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-8c7059da",
+    "ticker": "TNG",
+    "title": "TNG: Khuyến nghị MUA với giá mục tiêu 31,200 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "TNG: Khuyến nghị MUA với giá mục tiêu 31,200 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA đối với mã cổ phiếu TNG của CTCP Đầu tư và Thương mại TNG với giá mục tiêu 31.200 đồng, cùng cổ tức tiền mặt 2.000 đồng/cổ phiếu, tương ứng tổng tỷ suất sinh lời 99%.",
+      "Động lực tăng trưởng chính đến từ việc mở rộng thị phần tại Châu Âu và nhận thêm đơn hàng từ Haddad tại Canada."
+    ]
+  },
+  {
+    "id": "log-137b6b88",
+    "ticker": "VGI",
+    "title": "VGI: Khuyến nghị MUA với giá mục tiêu 101,000 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "VGI: Khuyến nghị MUA với giá mục tiêu 101,000 đồng/cổ phiếu Công ty chứng khoán VDSC chuyển khuyến nghị từ TÍCH LŨY sang MUA đối với mã cổ phiếu VGI của Tổng Công ty CP Đầu tư quốc tế Viettel, đồng thời nâng 2% giá mục tiêu lên 101.000 đồng, tương ứng upside 25% dựa trên phương pháp DCF 5 năm.",
+      "cả năm 2026F, doanh thu thuần dự kiến hoàn thành 50% kế hoạch cả năm, LNST công ty mẹ được điều chỉnh tăng 5,6%."
+    ]
+  },
+  {
+    "id": "log-e6be84da",
+    "ticker": "GEG",
+    "title": "GEG: Khuyến nghị  MUA với giá mục tiêu 20,800 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Tiện ích Năng lượng, Điện & Nước (REE, PC1, POW, GEG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "cả năm 2026F, tổng sản lượng điện dự phóng tăng 4,5% YoY nhờ các nhà máy điện mặt trời Đức Huệ 2 và điện gió VPL 2 đi vào vận hành.",
+      "Doanh thu 2026F ước đạt 2.850 tỷ đồng (giảm 5% YoY) và LNST cổ đông công ty mẹ đạt 391 tỷ đồng (giảm 44% YoY do không còn doanh thu hồi tố)."
+    ]
+  },
+  {
+    "id": "log-a7791ac3",
+    "ticker": "NKG",
+    "title": "NKG: Khuyến nghị  MUA với giá mục tiêu 14,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "05/10/2026 07:48",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 14,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp không có kế hoạch chi trả cổ tức tiền mặt.",
+      "Tiến độ giải ngân Capex và vận hành các phân kỳ lò cao (Dung Quất 2, nâng công suất HRC lên 14+ triệu tấn/năm)"
+    ]
+  },
+  {
+    "id": "log-4427d1e4",
+    "ticker": "PVS",
+    "title": "Báo cáo PVS từ BSC",
+    "institution": "BSC",
+    "learned_at": "04/10/2026 22:27",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.92,
+    "status": "SUCCESS",
+    "source": "Crawl URL / BSC",
+    "extracted_catalysts_preview": [
+      "Chúng tôi kỳ vọng lợi nhuận từ LDLK sẽ cải thiện từ cuối Q3/2026 nhờ đóng góp từ FSO Lạc Đà Vàng (dự kiến vận hành từ T9/2026) và các dự án FPSO/FSO thuộc chuỗi Lô B - Ô Môn từ năm 2027.",
+      "Đây là khoản thu nhập một lần, không phản ánh hiệu quả vận hành cốt lõi của PVS."
+    ]
+  },
+  {
+    "id": "log-10533d5b",
+    "ticker": "OCB",
+    "title": "OCB: Khuyến nghị TÍCH LŨY với giá mục tiêu 11,300 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 0,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": []
+  },
+  {
+    "id": "log-8f9d798e",
+    "ticker": "MSB",
+    "title": "MSB: Khuyến nghị GIẢM TỶ TRỌNG với giá mục tiêu 13,200 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 1,
+    "theses_extracted": 0,
+    "confidence": 0.86,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Dự phóng LNTT năm 2026F đạt hơn 7.700 tỷ đồng (+10% YoY, giảm 13% so với dự phóng cũ) với LNTT Q3/26F ước đạt 1.800 tỷ đồng, Lũy kế 9T2026 hoàn thành 68% dự phóng cả năm."
+    ]
+  },
+  {
+    "id": "log-e6b38512",
+    "ticker": "VPB",
+    "title": "VPB: Khuyến nghị KHẢ QUAN với giá mục tiêu 30,500 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Ngân hàng có kế hoạch phát hành riêng lẻ hơn 624 triệu cổ phiếu cho nhà đầu tư nước ngoài trong Q4/2026 để nâng cao hệ số CAR.",
+      "Dự phóng tăng trưởng lợi nhuận ròng năm 2026F đạt 30,0% YoY, LNTT đạt 39.567 tỷ đồng (+29,2% YoY) với dư nợ tín dụng tăng 35,0%."
+    ]
+  },
+  {
+    "id": "log-7e0f6c91",
+    "ticker": "SAB",
+    "title": "SAB: Khuyến nghị MUA với giá mục tiêu 54,300 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến duy trì cổ tức tiền mặt cao ở mức 5.000 đồng/cổ phiếu mỗi năm (lợi suất cổ tức 11,5%) trong giai đoạn 2026-2031.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-78d8e3a7",
+    "ticker": "VPB",
+    "title": "VPB: Khuyến nghị KHẢ QUAN với giá mục tiêu 26,500 đồng/cổ phiếu",
+    "institution": "SSI",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSI",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, VPB đạt 18.900 tỷ đồng lợi nhuận trước thuế, hoàn thành 49% dự báo của SSI và 45% kế hoạch của ngân hàng.",
+      "Nền tảng vốn chủ sở hữu vững chắc thuộc Top 2 hệ thống sau khi hoàn tất thương vụ bán vốn chiến lược cho SMBC Nhật Bản."
+    ]
+  },
+  {
+    "id": "log-7da1fca6",
+    "ticker": "VHC",
+    "title": "VHC: Khuyến nghị MUA với giá mục tiêu 65,000 đồng/cổ phiếu",
+    "institution": "NHSV",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Thủy sản & Nông nghiệp xuất khẩu (VHC, ANV, BAF, DBC)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / NHSV",
+    "extracted_catalysts_preview": [
+      "Trong 6 tháng đầu năm 2026, VHC ghi nhận doanh thu Q2/2026 đạt 3.394 tỷ đồng (tăng 6% YoY) và LNST đạt 475 tỷ đồng, qua đó hoàn thành 46% mục tiêu doanh thu và 46% mục tiêu lợi nhuận cả năm.",
+      "VHC đã hoàn tất mua 15 triệu cổ phiếu quỹ (6,7% lượng cổ phiếu lưu hành) và nâng mức cổ tức tiền mặt lên 3.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-995d73a1",
+    "ticker": "KDH",
+    "title": "KDH: Khuyến nghị MUA với giá mục tiêu 18,400 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "KDH: Khuyến nghị MUA với giá mục tiêu 18,400 đồng/cổ phiếu v Công ty chứng khoán BSC duy trì khuyến nghị MUA đối với mã cổ phiếu KDH của CTCP Đầu tư và Kinh doanh Nhà Khang Điền nhưng điều chỉnh giảm 54,1% giá mục tiêu xuống 18.400 đồng, tương ứng upside 21,5%.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-60e6d256",
+    "ticker": "VNM",
+    "title": "VNM: Báo cáo cập nhật KQKD 02/10/2026",
+    "institution": "TCBS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 11,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Sau 6 tháng, VNM đã hoàn thành 52,7% kế hoạch doanh thu và 57,4% kế hoạch lợi nhuận.",
+      "Báo cáo ghi nhận Q2/2026 VNM đạt doanh thu 18,8 nghìn tỷ đồng (tăng 12,7% YoY) và LNST đạt 3.167 tỷ đồng (tăng 28% YoY)."
+    ]
+  },
+  {
+    "id": "log-54e29683",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026",
+    "institution": "VCBS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026 Công ty chứng khoán VCBS đưa ra khuyến nghị MUA theo phân tích kỹ thuật đối với mã cổ phiếu MWG của CTCP Đầu tư Thế giới Di động với giá mục tiêu 79.000 đồng, tương ứng tỷ suất sinh lời kỳ vọng 8,8%.",
+      "VCBS khuyến nghị giải ngân quanh vùng giá 72.200 - 73.000 đồng và cắt lỗ tại 69.000 đồng."
+    ]
+  },
+  {
+    "id": "log-d3a665af",
+    "ticker": "HAX",
+    "title": "HAX: Khuyến nghị TÍCH LŨY với giá mục tiêu 9,500 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng trưởng đến từ sự phục hồi của dòng xe Mercedes-Benz và việc hợp nhất VFG (phân phối Vin Fast) từ nửa cuối năm 2026.",
+      "Cổ tức tiền mặt dự kiến trong 12 tháng tới là 0 đồng."
+    ]
+  },
+  {
+    "id": "log-6452d875",
+    "ticker": "PLX",
+    "title": "PLX: Khuyến nghị MUA với giá mục tiêu 45,600 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "kế hoạch chi trả cổ tức tiền mặt dự kiến đạt 1.200 đồng/cổ phiếu cho năm 2026F.",
+      "Tiến độ giải ngân Capex, chạy thử hoặc vận hành thương mại nhà máy/dự án phân kỳ mới"
+    ]
+  },
+  {
+    "id": "log-fd7f5ef4",
+    "ticker": "TNG",
+    "title": "TNG: Khuyến nghị MUA với giá mục tiêu 31,200 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "TNG: Khuyến nghị MUA với giá mục tiêu 31,200 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA đối với mã cổ phiếu TNG của CTCP Đầu tư và Thương mại TNG với giá mục tiêu 31.200 đồng, cùng cổ tức tiền mặt 2.000 đồng/cổ phiếu, tương ứng tổng tỷ suất sinh lời 99%.",
+      "Động lực tăng trưởng chính đến từ việc mở rộng thị phần tại Châu Âu và nhận thêm đơn hàng từ Haddad tại Canada."
+    ]
+  },
+  {
+    "id": "log-9af057fe",
+    "ticker": "VGI",
+    "title": "VGI: Khuyến nghị MUA với giá mục tiêu 101,000 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Mẫu Độc Bản Doanh Nghiệp (Thoát ly khuôn mẫu)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "VGI: Khuyến nghị MUA với giá mục tiêu 101,000 đồng/cổ phiếu Công ty chứng khoán VDSC chuyển khuyến nghị từ TÍCH LŨY sang MUA đối với mã cổ phiếu VGI của Tổng Công ty CP Đầu tư quốc tế Viettel, đồng thời nâng 2% giá mục tiêu lên 101.000 đồng, tương ứng upside 25% dựa trên phương pháp DCF 5 năm.",
+      "cả năm 2026F, doanh thu thuần dự kiến hoàn thành 50% kế hoạch cả năm, LNST công ty mẹ được điều chỉnh tăng 5,6%."
+    ]
+  },
+  {
+    "id": "log-aec4da73",
+    "ticker": "GEG",
+    "title": "GEG: Khuyến nghị  MUA với giá mục tiêu 20,800 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Tiện ích Năng lượng, Điện & Nước (REE, PC1, POW, GEG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "cả năm 2026F, tổng sản lượng điện dự phóng tăng 4,5% YoY nhờ các nhà máy điện mặt trời Đức Huệ 2 và điện gió VPL 2 đi vào vận hành.",
+      "Doanh thu 2026F ước đạt 2.850 tỷ đồng (giảm 5% YoY) và LNST cổ đông công ty mẹ đạt 391 tỷ đồng (giảm 44% YoY do không còn doanh thu hồi tố)."
+    ]
+  },
+  {
+    "id": "log-75c1c272",
+    "ticker": "NKG",
+    "title": "NKG: Khuyến nghị  MUA với giá mục tiêu 14,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 22:21",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 14,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp không có kế hoạch chi trả cổ tức tiền mặt.",
+      "Tiến độ giải ngân Capex và vận hành các phân kỳ lò cao (Dung Quất 2, nâng công suất HRC lên 14+ triệu tấn/năm)"
+    ]
+  },
+  {
+    "id": "log-21fede58",
+    "ticker": "PVS",
+    "title": "PVS: Khuyến nghị MUA với giá mục tiêu 45,000 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "04/10/2026 22:20",
+    "template_name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Kết quả này được hỗ trợ lớn từ khoản thu nhập bất thường một lần trị giá 460 tỷ đồng từ quyết toán hợp đồng dự án Formosa.",
+      "Backlog các dự án EPCI dầu khí và năng lượng tái tạo ngoài khơi đạt trên 5 tỷ USD, bảo đảm công việc dồi dào trong 5 năm tới."
+    ]
+  },
+  {
+    "id": "log-46274111",
+    "ticker": "PVS",
+    "title": "PVS: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "04/10/2026 22:20",
+    "template_name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Ngoài ra, PVS kế hoạch thực hiện tăng vốn điều lệ thêm 20% thông qua trả cổ tức bằng cổ phiếu.",
+      "Backlog các dự án EPCI dầu khí và năng lượng tái tạo ngoài khơi đạt trên 5 tỷ USD, bảo đảm công việc dồi dào trong 5 năm tới."
+    ]
+  },
+  {
+    "id": "log-5f9a50dd",
+    "ticker": "PVS",
+    "title": "PVS: Khuyến nghị OUTPERFORM với giá mục tiêu 51,300 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "04/10/2026 22:20",
+    "template_name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Trong năm 2026, BVSC dự phóng doanh thu đạt 37.013 tỷ đồng (+13% YoY) và LNST-C ĐTS đạt 2.257 tỷ đồng (+22% YoY) nhờ khối lượng xây lắp lớn đang triển khai tại các dự án trọng điểm như Lô B - Ô Môn và Lạc Đà Vàng, kết hợp với thu nhập bất thường hơn 600 tỷ đồng do hoàn nhập dự phòng dự án Sao Vàng Đại Nguyệt hết hạn bảo hành.",
+      "Backlog các dự án EPCI dầu khí và năng lượng tái tạo ngoài khơi đạt trên 5 tỷ USD, bảo đảm công việc dồi dào trong 5 năm tới."
+    ]
+  },
+  {
+    "id": "log-9230d4f6",
+    "ticker": "PVS",
+    "title": "PVS: Khuyến nghị MUA với giá mục tiêu 41,759 đồng/cổ phiếu",
+    "institution": "VCBS",
+    "learned_at": "04/10/2026 22:20",
+    "template_name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "PVS: Khuyến nghị MUA với giá mục tiêu 41,759 đồng/cổ phiếu Công ty chứng khoán VCBS duy trì khuyến nghị MUA mã cổ phiếu PVS với giá mục tiêu 41.759 đồng (đã điều chỉnh sau khi chia cổ tức 20%), upside +21%.",
+      "Backlog các dự án EPCI dầu khí và năng lượng tái tạo ngoài khơi đạt trên 5 tỷ USD, bảo đảm công việc dồi dào trong 5 năm tới."
+    ]
+  },
+  {
+    "id": "log-4895ae13",
+    "ticker": "PVS",
+    "title": "PVS: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VFS",
+    "learned_at": "04/10/2026 22:20",
+    "template_name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VFS",
+    "extracted_catalysts_preview": [
+      "EPS bình quân giai đoạn 2026-2027 ước đạt 3.974 đồng/cổ phiếu với P/E hợp lý 10,0x.",
+      "PVS duy trì nền tảng tài chính vững mạnh với lượng tiền mặt và đầu tư ngắn hạn đạt 11.500 tỷ đồng, đồng thời có kế hoạch tăng vốn điều lệ lên trên 10.000 tỷ đồng để tài trợ chuỗi dự án Lô B - Ô Môn."
+    ]
+  },
+  {
+    "id": "log-70726b93",
+    "ticker": "TCH",
+    "title": "Báo cáo phân tích vi mô & Dự án trọng điểm TCH",
+    "institution": "IERM Corporate Intelligence",
+    "learned_at": "04/10/2026 17:17",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / IERM Corporate Intelligence",
+    "extracted_catalysts_preview": [
+      "Báo cáo phân tích vi mô & Dự án trọng điểm TCH Báo cáo phân tích định lượng vi mô cổ phiếu TCH.",
+      "Các dự án trọng điểm nổi bật: Đại dự án Khu đô thị Hoàng Huy New City (Đỗ Mười - Thủy Nguyên, Hải Phòng) (Vốn 14500 tỷ, tiến độ 75%), Đại dự án Hoàng Huy Green River (Hoa Động, Thủy Nguyên, Hải Phòng) (Vốn 12800 tỷ, tiến độ 65%)."
+    ]
+  },
+  {
+    "id": "log-1797d6fb",
+    "ticker": "MWG",
+    "title": "Báo cáo phân tích vi mô & Dự án trọng điểm MWG",
+    "institution": "IERM Corporate Intelligence",
+    "learned_at": "04/10/2026 17:17",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 12,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / IERM Corporate Intelligence",
+    "extracted_catalysts_preview": [
+      "Báo cáo phân tích vi mô & Dự án trọng điểm MWG Báo cáo phân tích định lượng vi mô cổ phiếu MWG.",
+      "Các dự án trọng điểm nổi bật: Tối ưu hóa & Mở rộng Chuỗi Bách Hóa Xanh (BHX) (Vốn 3500 tỷ, tiến độ 85%), Chuỗi Bán lẻ Điện máy Era Blue (Indonesia) (Vốn 1200 tỷ, tiến độ 75%)."
+    ]
+  },
+  {
+    "id": "log-e41267b5",
+    "ticker": "FPT",
+    "title": "Báo cáo phân tích vi mô & Dự án trọng điểm FPT",
+    "institution": "IERM Corporate Intelligence",
+    "learned_at": "04/10/2026 17:17",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / IERM Corporate Intelligence",
+    "extracted_catalysts_preview": [
+      "Báo cáo phân tích vi mô & Dự án trọng điểm FPT Báo cáo phân tích định lượng vi mô cổ phiếu FPT.",
+      "Các dự án trọng điểm nổi bật: Trung tâm AI Factory & GPU Cloud liên minh cùng NVIDIA (Vốn 4800 tỷ, tiến độ 85%), Học viện & Trung tâm Bán dẫn FPT Semiconductor (Vốn 1500 tỷ, tiến độ 75%)."
+    ]
+  },
+  {
+    "id": "log-cd0f63a5",
+    "ticker": "SSI",
+    "title": "Báo cáo phân tích vi mô & Dự án trọng điểm SSI",
+    "institution": "IERM Corporate Intelligence",
+    "learned_at": "04/10/2026 17:17",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / IERM Corporate Intelligence",
+    "extracted_catalysts_preview": [
+      "Báo cáo phân tích vi mô & Dự án trọng điểm SSI Báo cáo phân tích định lượng vi mô cổ phiếu SSI.",
+      "Các dự án trọng điểm nổi bật: Nâng cấp Hệ thống Giao dịch & Core Trading thế hệ mới (KRX & Cloud AI) (Vốn 1200 tỷ, tiến độ 95%), Mở rộng Dư nợ Cho vay Ký quỹ (Margin) từ nguồn vốn phát hành thêm (Vốn 5300 tỷ, tiến độ 85%)."
+    ]
+  },
+  {
+    "id": "log-d99f5af7",
+    "ticker": "HPG",
+    "title": "Báo cáo phân tích vi mô & Dự án trọng điểm HPG",
+    "institution": "IERM Corporate Intelligence",
+    "learned_at": "04/10/2026 17:17",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / IERM Corporate Intelligence",
+    "extracted_catalysts_preview": [
+      "Báo cáo phân tích vi mô & Dự án trọng điểm HPG Báo cáo phân tích định lượng vi mô cổ phiếu HPG.",
+      "Các dự án trọng điểm nổi bật: Khu liên hợp Gang thép Dung Quất 2 (Quảng Ngãi) (Vốn 85000 tỷ, tiến độ 85%), Khu liên hợp Gang thép Dung Quất 1 (Quảng Ngãi) (Vốn 60000 tỷ, tiến độ 100%)."
+    ]
+  },
+  {
+    "id": "log-4e829ca4",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-e1ae7d24",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-66d44aaf",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-184a901b",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-13e047dd",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-337b3cac",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-c3c82a69",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-942ba577",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-cc8fed36",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-20106ff9",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
+    "id": "log-097b7030",
+    "ticker": "HPG",
+    "title": "Văn bản bóc tách HPG",
+    "institution": "SSI Research",
+    "learned_at": "04/10/2026 10:25",
+    "template_name": "Bóc Tách Độc Bản Doanh Nghiệp",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.9,
+    "status": "SUCCESS",
+    "source": "Nhập văn bản thô",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-3625d17c",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 21,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 2,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng ở mức cao đảm bảo tăng trưởng cho giai đoạn tới khi doanh nghiệp tập trung bàn giao các dự án lớn như HH Green River và HH New City II.",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-47c4e896",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 17,700 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "TCH: Khuyến nghị tăng tỷ trọng với giá mục tiêu 17,700 đồng/cổ phiếu Chứng khoán SHS khuyến nghị tăng tỷ trọng đối với cổ phiếu TCH của CTCP Đầu tư dịch vụ Tài chính Hoàng Huy với giá mục tiêu đạt 17.700 đồng/cp (giảm 11,1% so với báo cáo trước, mang lại mức upside kỳ vọng 51,3% so với thị giá 11.700 đồng ngày 07/08/2026).",
+      "SHS dự phóng doanh thu mảng B ĐS của TCH giai đoạn năm tài chính 2026-2028 lần lượt đạt 4.920 tỷ, 7.288 tỷ và 7.509 tỷ đồng;."
+    ]
+  },
+  {
+    "id": "log-2e2d2385",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận."
+    ]
+  },
+  {
+    "id": "log-a0f2a53a",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Kết quả FY2025 ghi nhận doanh thu 1.912 tỷ đồng (-64,8% YoY) và LNST cổ đông mẹ 318 tỷ đồng (-67,5% YoY).",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026."
+    ]
+  },
+  {
+    "id": "log-ba07e454",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-d2fec099",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Chuỗi TGD Đ & ĐMX đạt doanh thu 32.738 tỷ đồng, BHX đạt 15.190 tỷ đồng với biên LN ròng kỷ lục 3,4%.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-c4d6bd27",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-f2e8a938",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm."
+    ]
+  },
+  {
+    "id": "log-7b2cb6aa",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-c2ae4825",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026 Công ty chứng khoán VCBS đưa ra khuyến nghị MUA theo phân tích kỹ thuật đối với mã cổ phiếu MWG của CTCP Đầu tư Thế giới Di động với giá mục tiêu 79.000 đồng, tương ứng tỷ suất sinh lời kỳ vọng 8,8%.",
+      "VCBS khuyến nghị giải ngân quanh vùng giá 72.200 - 73.000 đồng và cắt lỗ tại 69.000 đồng."
+    ]
+  },
+  {
+    "id": "log-c9ba83ff",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng."
+    ]
+  },
+  {
+    "id": "log-9da39469",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-3b910877",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, FPT đạt doanh thu 26.269 tỷ đồng (+12,6% YoY), LNTT 5.714 tỷ đồng (+18,1% YoY) và LNST cổ đông công ty mẹ 5.054 tỷ đồng (+14,1% YoY), hoàn thành gần 50% kế hoạch năm.",
+      "Lũy kế 7T2026, doanh thu đạt 30.784 tỷ đồng (+13,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-e04b383b",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-a4873f48",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-678054c8",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-8b8711f6",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-82553e1a",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-1637eef3",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-eef0dc4b",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-67ca776b",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-c0f3ea16",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-e65d49e1",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-146321a6",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-39f4661b",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 23:16",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
+    "id": "log-d7f44162",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 21,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 15:30",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 2,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng ở mức cao đảm bảo tăng trưởng cho giai đoạn tới khi doanh nghiệp tập trung bàn giao các dự án lớn như HH Green River và HH New City II.",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-e6b36886",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 17,700 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "03/10/2026 15:30",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "TCH: Khuyến nghị tăng tỷ trọng với giá mục tiêu 17,700 đồng/cổ phiếu Chứng khoán SHS khuyến nghị tăng tỷ trọng đối với cổ phiếu TCH của CTCP Đầu tư dịch vụ Tài chính Hoàng Huy với giá mục tiêu đạt 17.700 đồng/cp (giảm 11,1% so với báo cáo trước, mang lại mức upside kỳ vọng 51,3% so với thị giá 11.700 đồng ngày 07/08/2026).",
+      "SHS dự phóng doanh thu mảng B ĐS của TCH giai đoạn năm tài chính 2026-2028 lần lượt đạt 4.920 tỷ, 7.288 tỷ và 7.509 tỷ đồng;."
+    ]
+  },
+  {
+    "id": "log-ec0c13d8",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 15:30",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận."
+    ]
+  },
+  {
+    "id": "log-58ad54fd",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 15:30",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Kết quả FY2025 ghi nhận doanh thu 1.912 tỷ đồng (-64,8% YoY) và LNST cổ đông mẹ 318 tỷ đồng (-67,5% YoY).",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026."
+    ]
+  },
+  {
+    "id": "log-ad2cf6a1",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 15:30",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-a9fbc530",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Chuỗi TGD Đ & ĐMX đạt doanh thu 32.738 tỷ đồng, BHX đạt 15.190 tỷ đồng với biên LN ròng kỷ lục 3,4%.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-9e2b5b93",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-0ad7b194",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm."
+    ]
+  },
+  {
+    "id": "log-e8ce79e3",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-7fd07afe",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "MWG: Báo cáo Phân tích Kỹ thuật 01/10/2026 Công ty chứng khoán VCBS đưa ra khuyến nghị MUA theo phân tích kỹ thuật đối với mã cổ phiếu MWG của CTCP Đầu tư Thế giới Di động với giá mục tiêu 79.000 đồng, tương ứng tỷ suất sinh lời kỳ vọng 8,8%.",
+      "VCBS khuyến nghị giải ngân quanh vùng giá 72.200 - 73.000 đồng và cắt lỗ tại 69.000 đồng."
+    ]
+  },
+  {
+    "id": "log-8d71d3a7",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng."
+    ]
+  },
+  {
+    "id": "log-4a558dba",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-aa993a7c",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, FPT đạt doanh thu 26.269 tỷ đồng (+12,6% YoY), LNTT 5.714 tỷ đồng (+18,1% YoY) và LNST cổ đông công ty mẹ 5.054 tỷ đồng (+14,1% YoY), hoàn thành gần 50% kế hoạch năm.",
+      "Lũy kế 7T2026, doanh thu đạt 30.784 tỷ đồng (+13,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-7d82ad98",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-2d0a7180",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-48f35400",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-5879e0b4",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-d2a2b234",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-e9519828",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-a5b19bb1",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-22f56905",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-27d16dc2",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-34be7fda",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-485cdc9e",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-0586d8b2",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 15:29",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
+    "id": "log-a33253b4",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 21,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 2,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng ở mức cao đảm bảo tăng trưởng cho giai đoạn tới khi doanh nghiệp tập trung bàn giao các dự án lớn như HH Green River và HH New City II.",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-3e4fa1b5",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 17,700 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "TCH: Khuyến nghị tăng tỷ trọng với giá mục tiêu 17,700 đồng/cổ phiếu Chứng khoán SHS khuyến nghị tăng tỷ trọng đối với cổ phiếu TCH của CTCP Đầu tư dịch vụ Tài chính Hoàng Huy với giá mục tiêu đạt 17.700 đồng/cp (giảm 11,1% so với báo cáo trước, mang lại mức upside kỳ vọng 51,3% so với thị giá 11.700 đồng ngày 07/08/2026).",
+      "SHS dự phóng doanh thu mảng B ĐS của TCH giai đoạn năm tài chính 2026-2028 lần lượt đạt 4.920 tỷ, 7.288 tỷ và 7.509 tỷ đồng;."
+    ]
+  },
+  {
+    "id": "log-4219aa6f",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận."
+    ]
+  },
+  {
+    "id": "log-23641b31",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Kết quả FY2025 ghi nhận doanh thu 1.912 tỷ đồng (-64,8% YoY) và LNST cổ đông mẹ 318 tỷ đồng (-67,5% YoY).",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026."
+    ]
+  },
+  {
+    "id": "log-580eeff8",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-b59d11a8",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị OUTPERFORM với giá mục tiêu 106,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, MWG đạt doanh thu 95.213 tỷ đồng (+29% YoY) và LNST-C ĐTS đạt 6.017 tỷ đồng (+88% YoY), hoàn thành 51% kế hoạch doanh thu và 66% kế hoạch lợi nhuận cả năm.",
+      "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-133f68f2",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Chuỗi TGD Đ & ĐMX đạt doanh thu 32.738 tỷ đồng, BHX đạt 15.190 tỷ đồng với biên LN ròng kỷ lục 3,4%.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-42dfc919",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "03/10/2026 09:28",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-e7eb2c36",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm."
+    ]
+  },
+  {
+    "id": "log-3d92e15b",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-7b92ebc2",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng."
+    ]
+  },
+  {
+    "id": "log-a1c3c8d7",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-4e9d0dfc",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, FPT đạt doanh thu 26.269 tỷ đồng (+12,6% YoY), LNTT 5.714 tỷ đồng (+18,1% YoY) và LNST cổ đông công ty mẹ 5.054 tỷ đồng (+14,1% YoY), hoàn thành gần 50% kế hoạch năm.",
+      "Lũy kế 7T2026, doanh thu đạt 30.784 tỷ đồng (+13,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-b56a5555",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-d614bf45",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-f3c4da00",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-7cc13e24",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-9adb119e",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-1beffe21",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-e6c8736c",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "03/10/2026 09:27",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-5c4e5cf9",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "03/10/2026 09:26",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-e2015495",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "03/10/2026 09:26",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-360b4e11",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "03/10/2026 09:26",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-27144511",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "03/10/2026 09:26",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-250944d1",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "03/10/2026 09:26",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
+    "id": "log-77493a90",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 21,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 2,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng ở mức cao đảm bảo tăng trưởng cho giai đoạn tới khi doanh nghiệp tập trung bàn giao các dự án lớn như HH Green River và HH New City II.",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-48ea58c4",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 17,700 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "TCH: Khuyến nghị tăng tỷ trọng với giá mục tiêu 17,700 đồng/cổ phiếu Chứng khoán SHS khuyến nghị tăng tỷ trọng đối với cổ phiếu TCH của CTCP Đầu tư dịch vụ Tài chính Hoàng Huy với giá mục tiêu đạt 17.700 đồng/cp (giảm 11,1% so với báo cáo trước, mang lại mức upside kỳ vọng 51,3% so với thị giá 11.700 đồng ngày 07/08/2026).",
+      "SHS dự phóng doanh thu mảng B ĐS của TCH giai đoạn năm tài chính 2026-2028 lần lượt đạt 4.920 tỷ, 7.288 tỷ và 7.509 tỷ đồng;."
+    ]
+  },
+  {
+    "id": "log-b936a906",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận."
+    ]
+  },
+  {
+    "id": "log-818a10d5",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Kết quả FY2025 ghi nhận doanh thu 1.912 tỷ đồng (-64,8% YoY) và LNST cổ đông mẹ 318 tỷ đồng (-67,5% YoY).",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026."
+    ]
+  },
+  {
+    "id": "log-b302e269",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-80f08dca",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị OUTPERFORM với giá mục tiêu 106,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, MWG đạt doanh thu 95.213 tỷ đồng (+29% YoY) và LNST-C ĐTS đạt 6.017 tỷ đồng (+88% YoY), hoàn thành 51% kế hoạch doanh thu và 66% kế hoạch lợi nhuận cả năm.",
+      "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-5173c07b",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Chuỗi TGD Đ & ĐMX đạt doanh thu 32.738 tỷ đồng, BHX đạt 15.190 tỷ đồng với biên LN ròng kỷ lục 3,4%.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-494d1a0b",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-ecba30c0",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm."
+    ]
+  },
+  {
+    "id": "log-64ccded5",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-d53c05eb",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng."
+    ]
+  },
+  {
+    "id": "log-b154bd71",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-94c69e6b",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, FPT đạt doanh thu 26.269 tỷ đồng (+12,6% YoY), LNTT 5.714 tỷ đồng (+18,1% YoY) và LNST cổ đông công ty mẹ 5.054 tỷ đồng (+14,1% YoY), hoàn thành gần 50% kế hoạch năm.",
+      "Lũy kế 7T2026, doanh thu đạt 30.784 tỷ đồng (+13,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-252404e7",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-fdf65ed4",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-4f2cadbb",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-22626486",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-279b2b7d",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-f97cf95f",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-cf0a36bc",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-07f35d3d",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-1849407e",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-b20e5f4d",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-818f5ff6",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-4759b5d1",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 22:57",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
+    "id": "log-c2620ee0",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 21,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 2,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Doanh số bán hàng ở mức cao đảm bảo tăng trưởng cho giai đoạn tới khi doanh nghiệp tập trung bàn giao các dự án lớn như HH Green River và HH New City II.",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-be0a2b49",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị TĂNG TỶ TRỌNG với giá mục tiêu 17,700 đồng/cổ phiếu",
+    "institution": "SHS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SHS",
+    "extracted_catalysts_preview": [
+      "TCH: Khuyến nghị tăng tỷ trọng với giá mục tiêu 17,700 đồng/cổ phiếu Chứng khoán SHS khuyến nghị tăng tỷ trọng đối với cổ phiếu TCH của CTCP Đầu tư dịch vụ Tài chính Hoàng Huy với giá mục tiêu đạt 17.700 đồng/cp (giảm 11,1% so với báo cáo trước, mang lại mức upside kỳ vọng 51,3% so với thị giá 11.700 đồng ngày 07/08/2026).",
+      "SHS dự phóng doanh thu mảng B ĐS của TCH giai đoạn năm tài chính 2026-2028 lần lượt đạt 4.920 tỷ, 7.288 tỷ và 7.509 tỷ đồng;."
+    ]
+  },
+  {
+    "id": "log-c7dfcfb1",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Backlog người mua trả trước tăng vọt lên 6.116 tỷ đồng, chủ yếu gối đầu cho hai dự án Green River và New City II.",
+      "TCH: Báo cáo cập nhật KQKD Q2/2026 TCBS Research cập nhật KQKD Q2/2026 của Tài chính Hoàng Huy (TCH) và nhận định doanh nghiệp đã vượt qua đáy chu kỳ lợi nhuận."
+    ]
+  },
+  {
+    "id": "log-4140e6f6",
+    "ticker": "TCH",
+    "title": "TCH: Báo cáo cập nhật 10/09/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Kết quả FY2025 ghi nhận doanh thu 1.912 tỷ đồng (-64,8% YoY) và LNST cổ đông mẹ 318 tỷ đồng (-67,5% YoY).",
+      "Công ty không trả cổ tức tiền mặt mà phát hành cổ phiếu thưởng tỷ lệ 10% trong tháng 9/2026."
+    ]
+  },
+  {
+    "id": "log-fa5e57f2",
+    "ticker": "TCH",
+    "title": "TCH: Khuyến nghị MUA với giá mục tiêu 19,700 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cổ tức tiền mặt kỳ vọng đạt 500 đồng/cp (tỷ suất 2%).",
+      "Tiến độ bàn giao căn hộ và shophouse tại cụm dự án trọng điểm Hoàng Huy Commerce và Hoàng Huy Grand Tower ghi nhận dòng tiền doanh số bán hàng đột biến."
+    ]
+  },
+  {
+    "id": "log-c15beddd",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị OUTPERFORM với giá mục tiêu 106,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, MWG đạt doanh thu 95.213 tỷ đồng (+29% YoY) và LNST-C ĐTS đạt 6.017 tỷ đồng (+88% YoY), hoàn thành 51% kế hoạch doanh thu và 66% kế hoạch lợi nhuận cả năm.",
+      "Cổ tức cổ phần đạt 1.000 đồng/cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-02c51a40",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA với giá mục tiêu 110,400 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Chuỗi TGD Đ & ĐMX đạt doanh thu 32.738 tỷ đồng, BHX đạt 15.190 tỷ đồng với biên LN ròng kỷ lục 3,4%.",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-48d37a73",
+    "ticker": "MWG",
+    "title": "MWG: Báo cáo Phân tích Kỹ thuật 14/09/2026",
+    "institution": "FPTS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / FPTS",
+    "extracted_catalysts_preview": [
+      "Chỉ báo RSI mở rộng đà giảm củng cố khả năng thiết lập nhịp giảm thứ cấp mới về kiểm định đáy tháng 7/2026.",
+      "Nhà đầu tư được khuyến nghị mở vị thế Bán xung quanh mốc 69.800 - 71.200 đồng, giá dừng lỗ đặt tại 73.500 đồng."
+    ]
+  },
+  {
+    "id": "log-d8c700bc",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị MUA MẠNH với giá mục tiêu 102,500 đồng/cổ phiếu",
+    "institution": "BSC",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 10,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BSC",
+    "extracted_catalysts_preview": [
+      "Chuỗi ĐMX tiếp tục đóng góp dòng tiền ổn định, trong khi Bách Hóa Xanh (BHX) mở rộng hiệu quả mô hình cửa hàng nhỏ.",
+      "BSC kỳ vọng LNST năm 2026F của MWG tăng trưởng +50% YoY nhờ biên lợi nhuận hoạt động cải thiện 0,2 điểm phần trăm."
+    ]
+  },
+  {
+    "id": "log-bc936ee1",
+    "ticker": "MWG",
+    "title": "MWG: Khuyến nghị KHẢ QUAN với giá mục tiêu 125,700 đồng/cổ phiếu",
+    "institution": "VNDS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Bán lẻ & Chuỗi phân phối (MWG, FRT, PNJ)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VNDS",
+    "extracted_catalysts_preview": [
+      "Động lực tăng giá gồm nhu cầu ICT/CE tích cực mùa tựu trường, mở bán i Phone 18, và chuỗi Bách Hóa Xanh (BHX) mở rộng hiệu quả ra miền Bắc (dự phóng doanh thu BHX đạt 62 nghìn tỷ đồng, LNST 1,9 nghìn tỷ đồng năm 2026).",
+      "Chuỗi Bách Hóa Xanh (BHX) vượt qua điểm hòa vốn, bước vào giai đoạn sinh lời bùng nổ và mở rộng ra thị trường Miền Trung và Miền Bắc."
+    ]
+  },
+  {
+    "id": "log-b2d0e9f4",
+    "ticker": "FPT",
+    "title": "FPT: Báo cáo Phân tích Kỹ thuật 04/09/2026",
+    "institution": "VCBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 15,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU.",
+      "Doanh thu dịch vụ CNTT nước ngoài duy trì tốc độ tăng trưởng kép trên 25%/năm, đạt mốc doanh thu tỷ USD ấn tượng."
+    ]
+  },
+  {
+    "id": "log-9ac8e05f",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị OUTPERFORM với giá mục tiêu 87,700 đồng/cổ phiếu",
+    "institution": "BVS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / BVS",
+    "extracted_catalysts_preview": [
+      "Cổ tức bằng tiền mặt dự kiến ở mức 2.000 đồng/cổ phần.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-eddc7ac4",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 92,400 đồng/cổ phiếu",
+    "institution": "SSV",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / SSV",
+    "extracted_catalysts_preview": [
+      "Trong 6T2026, FPT đạt doanh thu 26.269 tỷ đồng (+12,6% YoY), LNTT 5.714 tỷ đồng (+18,1% YoY) và LNST cổ đông công ty mẹ 5.054 tỷ đồng (+14,1% YoY), hoàn thành gần 50% kế hoạch năm.",
+      "Lũy kế 7T2026, doanh thu đạt 30.784 tỷ đồng (+13,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-c00162cd",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 86,000 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 5,
+    "theses_extracted": 1,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cổ phiếu FPT dự phóng giao dịch ở mức P/E 16,3x và P/B 4,0x trong năm 2026F với EPS đạt 5.799 đồng và ROE ở mức 24,2%. tỷ suất cổ tức dự phóng đạt 1,8%.",
+      "Làn sóng đầu tư Trí tuệ Nhân tạo (GenAI) và Chip bán dẫn toàn cầu mang lại lượng đơn đặt hàng ký mới kỷ lục từ Nhật Bản, Mỹ và EU."
+    ]
+  },
+  {
+    "id": "log-89b8b9e1",
+    "ticker": "FPT",
+    "title": "FPT: Khuyến nghị MUA với giá mục tiêu 72,000 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Công nghệ thông tin & Viễn thông (FPT, CMG)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đề xuất vùng giải ngân tại 64.500 đồng và ngưỡng cắt lỗ tại 60.000 đồng.",
+      "Trên khung đồ thị tuần, cổ phiếu FPT tạo cấu trúc tăng điểm hồi phục sau khi chạm vùng đáy và được kỳ vọng tiếp tục bứt phá sau đợt chi trả cổ tức bằng cổ phiếu."
+    ]
+  },
+  {
+    "id": "log-139612e6",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "TCBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / TCBS",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6 tháng đầu năm, SSI đạt doanh thu hoạt động 6.497 tỷ đồng (hoàn thành 41,5% kế hoạch năm) và LNTT đạt 3.122 tỷ đồng (hoàn thành 53,5% kế hoạch năm).",
+      "Trong quý 2 năm 2026, doanh thu hoạt động và lợi nhuận sau thuế của SSI đạt lần lượt 3.319 tỷ đồng (+11% YoY) và 1.232 tỷ đồng (+27% YoY), chủ yếu nhờ mảng cho vay margin tăng trưởng mạnh."
+    ]
+  },
+  {
+    "id": "log-4a178285",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "Beta",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Beta",
+    "extracted_catalysts_preview": [
+      "Lũy kế 6T2026, SSI hoàn thành 53,5% kế hoạch lợi nhuận trước thuế năm.",
+      "Trong Q2/2026, SSI đạt doanh thu hoạt động 3.318 tỷ đồng (+10,9% YoY) và lợi nhuận trước thuế 1.529 tỷ đồng (+27,6% YoY) nhờ động lực chính từ mảng cho vay margin đạt doanh thu 1.091 tỷ đồng (+31,6% YoY)."
+    ]
+  },
+  {
+    "id": "log-53506b05",
+    "ticker": "SSI",
+    "title": "SSI: Khuyến nghị MUA với giá mục tiêu 22,500 đồng/cổ phiếu",
+    "institution": "EVS.,JSC",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / EVS.,JSC",
+    "extracted_catalysts_preview": [
+      "EVS đánh giá SSI sẽ là một trong những doanh nghiệp hưởng lợi lớn nhất từ triển vọng nâng hạng thị trường lên mới nổi của FTSE Russell (dự kiến vào kỳ đánh giá tháng 9/2026) nhờ sở hữu tệp khách hàng tổ chức nước ngoài lớn.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-544114dc",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo cập nhật KQKD Q2/2026",
+    "institution": "VPX",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.91,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VPX",
+    "extracted_catalysts_preview": [
+      "Hoạt động đầu tư FVTPL mang lại 973 tỷ đồng lợi nhuận gộp, đóng góp 40% lợi nhuận gộp hoạt động Q2/2026.",
+      "Trong quý 1, SSI đã hoàn thành đợt chào bán cho cổ đông hiện hữu huy động thêm hơn 6,2 nghìn tỷ đồng, nâng vốn chủ sở hữu lên 40.724 tỷ đồng."
+    ]
+  },
+  {
+    "id": "log-4601a7c9",
+    "ticker": "SSI",
+    "title": "SSI: Báo cáo Phân tích Kỹ thuật 15/09/2026",
+    "institution": "VCBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Chứng khoán & Dịch vụ tài chính (SSI, HCM, VND, VCI)",
+    "catalysts_extracted": 6,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VCBS",
+    "extracted_catalysts_preview": [
+      "VCBS khuyến nghị giải ngân quanh khu vực 20,4–20,6 đồng với giá mục tiêu 21.800 đồng và mức cắt lỗ tại 19,7 đồng.",
+      "Hệ thống công nghệ KRX và nền tảng số hóa vận hành chính thức thúc đẩy thanh khoản thị trường tăng vọt lên 25,000 - 35,000 tỷ đ/phiên."
+    ]
+  },
+  {
+    "id": "log-ab1347d6",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,150 đồng/cổ phiếu",
+    "institution": "KBSV",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KBSV",
+    "extracted_catalysts_preview": [
+      "cả năm 2026, KBSV dự phóng doanh thu đạt 224.984 tỷ đồng, tăng trưởng 44% so với năm 2025, và lợi nhuận sau thuế của cổ đông công ty mẹ bứt phá đạt 27.153 tỷ đồng, tăng trưởng 75%.",
+      "Định giá P/E dự phóng năm 2026 ở mức 6,8x. tỷ suất cổ tức tiền mặt dự kiến đạt 5%."
+    ]
+  },
+  {
+    "id": "log-fd907e73",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 32,700 đồng/cổ phiếu",
+    "institution": "Vietcap",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / Vietcap",
+    "extracted_catalysts_preview": [
+      "lợi nhuận sau thuế cổ đông công ty mẹ cốt lõi dự phóng tăng trưởng lần lượt 37% và 35% trong năm 2026 và 2027.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-f3f8773a",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị Khả quan với giá mục tiêu 32,000 đồng/cổ phiếu",
+    "institution": "MBS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 8,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / MBS",
+    "extracted_catalysts_preview": [
+      "Doanh nghiệp dự kiến chi trả cổ tức bằng tiền 7.675 tỷ đồng năm 2026.",
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép."
+    ]
+  },
+  {
+    "id": "log-3df06c3a",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị KHẢ QUAN với giá mục tiêu 31,437 đồng/cổ phiếu",
+    "institution": "KAFI",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 7,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / KAFI",
+    "extracted_catalysts_preview": [
+      "Dung Quất 2 đi vào hoạt động gia tăng 70% công suất thép cuộn cán nóng HRC, giúp HPG tự chủ 100% nguyên liệu cho tôn mạ và ống thép.",
+      "Giải ngân đầu tư công hạ tầng giao thông (Cao tốc Bắc - Nam, Sân bay Long Thành, Đường sắt tốc độ cao) cùng Luật Đất đai mới tạo lực cầu tiêu thụ thép khổng lồ."
+    ]
+  },
+  {
+    "id": "log-529096d1",
+    "ticker": "HPG",
+    "title": "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu",
+    "institution": "VDS",
+    "learned_at": "02/10/2026 16:41",
+    "template_name": "Thép & Vật liệu xây dựng (HPG, NKG, HSG)",
+    "catalysts_extracted": 9,
+    "theses_extracted": 0,
+    "confidence": 0.94,
+    "status": "SUCCESS",
+    "source": "Vietstock eDocs / VDS",
+    "extracted_catalysts_preview": [
+      "Cho cả năm 2026, VDSC dự phóng doanh thu HPG đạt 197.000 tỷ đồng (+26% YoY) và điều chỉnh LNST-C ĐM lên 25.900 tỷ đồng (+68% YoY) nhờ quy mô Dung Quất 2 chạy 90% công suất sản xuất HRC.",
+      "HPG: Khuyến nghị MUA với giá mục tiêu 31,100 đồng/cổ phiếu Công ty chứng khoán VDSC duy trì khuyến nghị MUA mã cổ phiếu HPG với giá mục tiêu 31.100 đồng, tổng mức sinh lời kỳ vọng +51% (bao gồm cổ tức tiền mặt 500 đồng/cp)."
+    ]
+  },
+  {
     "id": "log-6cc99126",
     "ticker": "HPG",
     "title": "File PDF: report.pdf (HPG)",
