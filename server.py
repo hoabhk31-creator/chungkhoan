@@ -2544,32 +2544,69 @@ async def get_fansi_screener(
     if not refresh and cache_key in _FANSI_SCREENER_CACHE and (now_ts - _FANSI_SCREENER_CACHE_TS.get(cache_key, 0)) < 40.0:
         return _FANSI_SCREENER_CACHE[cache_key]
 
-    from company_database import COMPANY_DATABASE
-    candidates = []
-    for sym, comp in COMPANY_DATABASE.items():
-        c_ex = (comp.get("exchange") or "HOSE").upper().strip()
-        if clean_ex == "VN30" and sym not in VN30_TICKERS:
-            continue
-        elif clean_ex not in ["ALL", "VN30"] and c_ex != clean_ex:
-            continue
-        # Lọc sơ bộ cổ phiếu giá dưới min_price (loại bỏ penny siêu nhỏ)
-        c_price = float(comp.get("market_price") or comp.get("price") or 0.0)
-        if min_price > 0 and c_price > 0 and c_price < min_price:
-            continue
-        # Lọc sơ bộ theo thanh khoản để tối ưu hóa thời gian quét
-        avg_3m = (comp.get("avg_volume_3m_k") or 0) * 1000
-        if avg_3m < min_vol * 0.35:
-            continue
-        candidates.append((sym, comp))
-
-    # Nạp trước bảng giá SSI toàn thị trường để bảo đảm nến realtime luôn có sẵn
+    # 1. Nạp trước bảng giá SSI toàn thị trường (1.525 mã HOSE, HNX, UPCOM) để bảo đảm không bỏ sót bất kỳ mã nào
     try:
         from crawler import _SSI_EXCHANGE_CACHE, fetch_ssi_live_stock_quote
         await fetch_ssi_live_stock_quote("VN30")
     except Exception:
         pass
 
-    from_ts = int(now_ts) - 86400 * 100
+    from company_database import COMPANY_DATABASE
+    candidates = []
+    seen_symbols = set()
+
+    # Quét toàn bộ cổ phiếu từ bảng giá SSI kết hợp CSDL doanh nghiệp
+    pool_items = []
+    try:
+        from crawler import _SSI_EXCHANGE_CACHE
+        if _SSI_EXCHANGE_CACHE:
+            for s in _SSI_EXCHANGE_CACHE.values():
+                sym = (s.get("stockSymbol") or "").upper().strip()
+                if not sym or len(sym) != 3 or not sym.isalpha():
+                    continue
+                stype = str(s.get("stockType") or "s").lower()
+                if stype not in ["s", "stock"]:
+                    continue
+                pool_items.append((sym, s))
+    except Exception:
+        pass
+
+    # Nếu cache SSI chưa sẵn sàng, fallback vào COMPANY_DATABASE
+    if not pool_items:
+        for sym, comp in COMPANY_DATABASE.items():
+            pool_items.append((sym, {"stockSymbol": sym, "exchange": comp.get("exchange", "HOSE"), "matchedPrice": comp.get("price", 0)}))
+
+    for sym, s_info in pool_items:
+        if sym in seen_symbols:
+            continue
+        seen_symbols.add(sym)
+
+        comp = COMPANY_DATABASE.get(sym, {})
+        raw_ex = (comp.get("exchange") or s_info.get("exchange") or "HOSE").upper().strip()
+        c_ex = "HOSE" if "HOSE" in raw_ex else ("HNX" if "HNX" in raw_ex else ("UPCOM" if "UP" in raw_ex else raw_ex))
+
+        if clean_ex == "VN30" and sym not in VN30_TICKERS:
+            continue
+        elif clean_ex not in ["ALL", "VN30"] and c_ex != clean_ex:
+            continue
+
+        # Lọc sơ bộ cổ phiếu giá dưới min_price (loại bỏ penny siêu nhỏ)
+        m_p = float(s_info.get("matchedPrice") or 0.0)
+        r_p = float(s_info.get("refPrice") or 0.0)
+        c_p = m_p if m_p > 0 else (r_p if r_p > 0 else float(comp.get("price") or comp.get("market_price") or 0.0))
+        if min_price > 0 and c_p > 0 and c_p < min_price:
+            continue
+
+        # Lọc sơ bộ theo thanh khoản (hôm nay có giao dịch hoặc TB 3 tháng đạt ngưỡng)
+        today_vol = float(s_info.get("nmTotalTradedQty") or 0.0)
+        avg_3m = float(comp.get("avg_volume_3m_k") or 0.0) * 1000
+        if today_vol < min_vol * 0.2 and avg_3m < min_vol * 0.2:
+            continue
+
+        name = comp.get("name") or s_info.get("companyNameVi") or sym
+        candidates.append((sym, {"name": name, "exchange": c_ex, "price": c_p}))
+
+    from_ts = int(now_ts) - 86400 * 300
     to_ts = int(now_ts)
     sem = asyncio.Semaphore(30)
 
@@ -2586,6 +2623,13 @@ async def get_fansi_screener(
                     l_arr = d.get("l", [])
                     v_arr = d.get("v", [])
                     t_arr = d.get("t", [])
+
+                    # CHUẨN HÓA ĐƠN VỊ TÍNH (Entrade dùng nghìn đồng, chuyển sang VNĐ đồng bộ với SSI Live)
+                    mult = 1000.0 if (c_arr and c_arr[-1] < 1000.0) else 1.0
+                    c_arr = [x * mult for x in c_arr]
+                    o_arr = [x * mult for x in o_arr]
+                    h_arr = [x * mult for x in h_arr]
+                    l_arr = [x * mult for x in l_arr]
 
                     # GHÉP NẾN REALTIME PHIÊN HÔM NAY:
                     # Nếu hôm nay là ngày giao dịch trong tuần (Thứ 2 - Thứ 6) và nến 1D chưa chốt
