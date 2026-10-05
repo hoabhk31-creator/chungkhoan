@@ -14549,6 +14549,447 @@ function filterFansiScreener() {
     loadFansiScreener(false);
 }
 
+// =============================================================
+// XUẤT DỮ LIỆU BỘ LỌC TÍN HIỆU KỸ THUẬT SANG EXCEL (.xlsx) & PDF
+// =============================================================
+function getFansiCurrentFilteredList() {
+    let buys = [];
+    let sells = [];
+    const minPriceEl = document.getElementById("fansi-filter-min-price");
+    const currentMinPrice = minPriceEl ? (parseFloat(minPriceEl.value) || 0) : 5000;
+
+    if (fansiScreenerData) {
+        let rawBuys = fansiScreenerData.buy_signals || [];
+        let rawSells = fansiScreenerData.sell_signals || [];
+        if (currentMinPrice > 0) {
+            rawBuys = rawBuys.filter(item => (Number(item.price) || 0) >= currentMinPrice);
+            rawSells = rawSells.filter(item => (Number(item.price) || 0) >= currentMinPrice);
+        }
+        if (typeof applyFansiSort === 'function' && typeof fansiSortState !== 'undefined') {
+            buys = applyFansiSort(rawBuys, fansiSortState.buy);
+            sells = applyFansiSort(rawSells, fansiSortState.sell);
+        } else {
+            buys = rawBuys;
+            sells = rawSells;
+        }
+    }
+    return { buys, sells };
+}
+
+function exportFansiScreenerExcel() {
+    if (typeof XLSX === 'undefined') {
+        showToast("⚠️ Thư viện xuất Excel (SheetJS) chưa sẵn sàng! Vui lòng làm mới trang.");
+        return;
+    }
+    const { buys, sells } = getFansiCurrentFilteredList();
+    if (buys.length === 0 && sells.length === 0) {
+        showToast("⚠️ Hiện không có mã cổ phiếu nào trong danh mục lọc để xuất!");
+        return;
+    }
+
+    const stratNameMap = {
+        fansi: "FANSI T+ ROBOT",
+        robot1: "ROBOT 1 (THE BEAST)",
+        robot2: "ROBOT 2 (ROCKET JET)",
+        div_macd: "PHÂN KỲ DƯƠNG MACD",
+        div_rsi: "PHÂN KỲ DƯƠNG RSI"
+    };
+    const stratKey = typeof currentFansiRobotStrategy !== 'undefined' ? currentFansiRobotStrategy : "fansi";
+    const stratName = stratNameMap[stratKey] || stratKey.toUpperCase();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const nowFmt = new Date().toLocaleString('vi-VN');
+
+    const exchangeEl = document.getElementById("fansi-filter-exchange");
+    const timingEl = document.getElementById("fansi-filter-timing");
+    const volumeEl = document.getElementById("fansi-filter-volume");
+    const exName = exchangeEl ? exchangeEl.options[exchangeEl.selectedIndex]?.text : "Tất cả sàn";
+    const timingName = timingEl ? timingEl.options[timingEl.selectedIndex]?.text : "Mới nhất (T+0 đến T+3)";
+    const volName = volumeEl ? volumeEl.options[volumeEl.selectedIndex]?.text : "> 100.000 CP/phiên";
+
+    const wb = XLSX.utils.book_new();
+
+    // 1. Sheet TÍN HIỆU MUA
+    if (buys.length > 0) {
+        const buyHeaders = [
+            "STT", "Mã CP", "Sàn", "Tên Doanh Nghiệp", "Thị Giá (đ)", 
+            "Biến Động Ngày (%)", "Giá Báo Mua (đ)", "Hiệu Suất T+ (%)", 
+            "Phiên T+", "Ngày Tín Hiệu", "Sức Mạnh RS", 
+            "Khối Lượng Khớp Hôm Nay (CP)", "KL Khớp TB 10 Phiên (CP)"
+        ];
+        const buyRows = buys.map((b, idx) => [
+            idx + 1,
+            b.symbol || "",
+            b.exchange || "HOSE",
+            b.name || "",
+            Number(b.price) || 0,
+            Number(b.pct_change) || 0,
+            Number(b.signal_price) || 0,
+            Number(b.profit_pct) || 0,
+            b.status_text || `T+${b.bars_since || 0}`,
+            b.signal_date || "",
+            Number(b.rs_rating) || 50,
+            Number(b.today_vol) || 0,
+            Number(b.ma10_vol) || 0
+        ]);
+        const wsBuy = XLSX.utils.aoa_to_sheet([buyHeaders, ...buyRows]);
+        wsBuy['!cols'] = [
+            { wch: 6 },  // STT
+            { wch: 10 }, // Mã
+            { wch: 8 },  // Sàn
+            { wch: 28 }, // Tên DN
+            { wch: 14 }, // Thị giá
+            { wch: 18 }, // % Ngày
+            { wch: 16 }, // Giá Mua
+            { wch: 16 }, // Hiệu suất
+            { wch: 16 }, // Phiên
+            { wch: 18 }, // Ngày tín hiệu
+            { wch: 15 }, // RS
+            { wch: 25 }, // KL Hôm nay
+            { wch: 25 }  // KL MA10
+        ];
+        XLSX.utils.book_append_sheet(wb, wsBuy, "TIN_HIEU_MUA");
+    }
+
+    // 2. Sheet TÍN HIỆU BÁN
+    if (sells.length > 0) {
+        const sellHeaders = [
+            "STT", "Mã CP", "Sàn", "Tên Doanh Nghiệp", "Thị Giá (đ)", 
+            "Biến Động Ngày (%)", "Giá Báo Bán (đ)", "Biến Động T+ (%)", 
+            "Phiên T+", "Ngày Tín Hiệu", "Sức Mạnh RS", 
+            "Khối Lượng Khớp Hôm Nay (CP)", "KL Khớp TB 10 Phiên (CP)"
+        ];
+        const sellRows = sells.map((s, idx) => [
+            idx + 1,
+            s.symbol || "",
+            s.exchange || "HOSE",
+            s.name || "",
+            Number(s.price) || 0,
+            Number(s.pct_change) || 0,
+            Number(s.signal_price) || 0,
+            Number(s.profit_pct) || 0,
+            s.status_text || `T+${s.bars_since || 0}`,
+            s.signal_date || "",
+            Number(s.rs_rating) || 50,
+            Number(s.today_vol) || 0,
+            Number(s.ma10_vol) || 0
+        ]);
+        const wsSell = XLSX.utils.aoa_to_sheet([sellHeaders, ...sellRows]);
+        wsSell['!cols'] = [
+            { wch: 6 }, { wch: 10 }, { wch: 8 }, { wch: 28 }, 
+            { wch: 14 }, { wch: 18 }, { wch: 16 }, { wch: 16 }, 
+            { wch: 16 }, { wch: 18 }, { wch: 15 }, { wch: 25 }, { wch: 25 }
+        ];
+        XLSX.utils.book_append_sheet(wb, wsSell, "TIN_HIEU_BAN");
+    }
+
+    // 3. Sheet TỔNG HỢP & TIÊU CHÍ LỌC
+    const summaryRows = [
+        ["HỆ THỐNG ĐỊNH LƯỢNG & PHÂN TÍCH KỸ THUẬT IERM PLATFORM"],
+        ["BÁO CÁO DANH MỤC LỌC TÍN HIỆU TOÀN THỊ TRƯỜNG"],
+        [""],
+        ["Chiến lược Robot:", stratName],
+        ["Thời gian trích xuất:", nowFmt],
+        ["Sàn giao dịch:", exName],
+        ["Khung thời gian:", timingName],
+        ["Thanh khoản tối thiểu:", volName],
+        ["Tổng số mã thỏa mãn:", buys.length + sells.length],
+        ["Số mã tín hiệu MUA:", buys.length],
+        ["Số mã tín hiệu BÁN:", sells.length],
+        ["Số mã nổ mới hôm nay (T+0):", buys.filter(b => b.bars_since === 0).length + sells.filter(s => s.bars_since === 0).length],
+        ["Nguồn dữ liệu:", "SSI FastConnect & Vietstock Realtime Market Feed"],
+        ["Ghi chú:", "Tín hiệu định lượng tự động phục vụ nghiên cứu đầu tư, không phải khuyến nghị đầu tư."]
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+    wsSummary['!cols'] = [{ wch: 28 }, { wch: 45 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, "TONG_HOP_TIEU_CHI");
+
+    const fileName = `Tin_Hieu_Ky_Thuat_${stratKey.toUpperCase()}_${todayStr}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    showToast(`✅ Đã xuất thành công file Excel: ${fileName}`);
+}
+
+async function exportFansiScreenerPdf() {
+    const { buys, sells } = getFansiCurrentFilteredList();
+    if (buys.length === 0 && sells.length === 0) {
+        showToast("⚠️ Hiện không có mã cổ phiếu nào trong danh mục lọc để xuất!");
+        return;
+    }
+
+    showToast("⏳ Đang khởi tạo file PDF Báo cáo danh mục lọc...");
+
+    const stratNameMap = {
+        fansi: "FANSI T+ ROBOT",
+        robot1: "ROBOT 1 (THE BEAST)",
+        robot2: "ROBOT 2 (ROCKET JET)",
+        div_macd: "PHÂN KỲ DƯƠNG MACD",
+        div_rsi: "PHÂN KỲ DƯƠNG RSI"
+    };
+    const stratKey = typeof currentFansiRobotStrategy !== 'undefined' ? currentFansiRobotStrategy : "fansi";
+    const stratName = stratNameMap[stratKey] || stratKey.toUpperCase();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const formattedDate = new Date().toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const filename = `Tin_Hieu_Ky_Thuat_${stratKey.toUpperCase()}_${todayStr}.pdf`;
+
+    const exchangeEl = document.getElementById("fansi-filter-exchange");
+    const timingEl = document.getElementById("fansi-filter-timing");
+    const volumeEl = document.getElementById("fansi-filter-volume");
+    const exName = exchangeEl ? exchangeEl.options[exchangeEl.selectedIndex]?.text : "Tất cả sàn";
+    const timingName = timingEl ? timingEl.options[timingEl.selectedIndex]?.text : "Mới nhất (T+0 đến T+3)";
+    const volName = volumeEl ? volumeEl.options[volumeEl.selectedIndex]?.text : "> 100.000 CP/phiên";
+
+    const todayCount = buys.filter(b => b.bars_since === 0).length + sells.filter(s => s.bars_since === 0).length;
+
+    // Render HTML các hàng MUA
+    let buyRowsHtml = "";
+    buys.forEach((b, idx) => {
+        const pFmt = Number(b.price || 0).toLocaleString('vi-VN');
+        const sigFmt = Number(b.signal_price || 0).toLocaleString('vi-VN');
+        const chg = Number(b.pct_change || 0);
+        const chgSign = chg >= 0 ? "+" : "";
+        const chgColor = chg > 0 ? "#059669" : (chg < 0 ? "#dc2626" : "#475569");
+        const profit = Number(b.profit_pct || 0);
+        const profitSign = profit >= 0 ? "+" : "";
+        const profitColor = profit >= 0 ? "#059669" : "#dc2626";
+        const volFmt = (b.today_vol || 0) >= 1000000 
+            ? ((b.today_vol || 0) / 1000000).toFixed(2) + "M" 
+            : ((b.today_vol || 0) / 1000).toFixed(0) + "K";
+        const isT0 = b.bars_since === 0;
+        const rowBg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+
+        buyRowsHtml += `
+            <tr style="background: ${rowBg}; border-bottom: 1px solid #e2e8f0; font-size: 10px;">
+                <td style="padding: 5px 6px; text-align: center; color: #64748b;">${idx + 1}</td>
+                <td style="padding: 5px 6px; font-weight: bold; color: #047857;">
+                    ${b.symbol} <span style="font-size: 8px; font-weight: normal; color: #64748b;">(${b.exchange || 'HOSE'})</span>
+                </td>
+                <td style="padding: 5px 6px; color: #334155; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${b.name || ''}</td>
+                <td style="padding: 5px 6px; text-align: right; font-weight: 600; color: #0f172a;">${pFmt}</td>
+                <td style="padding: 5px 6px; text-align: right; font-weight: 600; color: ${chgColor};">${chgSign}${chg.toFixed(2)}%</td>
+                <td style="padding: 5px 6px; text-align: right; color: #334155;">${sigFmt}</td>
+                <td style="padding: 5px 6px; text-align: right; font-weight: bold; color: ${profitColor};">${profitSign}${profit.toFixed(2)}%</td>
+                <td style="padding: 5px 6px; text-align: center;">
+                    <span style="display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: bold; background: ${isT0 ? '#d1fae5' : '#f1f5f9'}; color: ${isT0 ? '#065f46' : '#475569'}; border: 1px solid ${isT0 ? '#a7f3d0' : '#cbd5e1'};">
+                        ${isT0 ? '⚡ T+0' : `T+${b.bars_since || 0}`}
+                    </span>
+                </td>
+                <td style="padding: 5px 6px; text-align: center; color: #64748b; font-size: 9px;">${b.signal_date || ''}</td>
+                <td style="padding: 5px 6px; text-align: center; font-weight: bold; color: ${b.rs_rating >= 80 ? '#7e22ce' : '#0369a1'};">${b.rs_rating || 50}</td>
+                <td style="padding: 5px 6px; text-align: right; color: #334155;">${volFmt}</td>
+            </tr>
+        `;
+    });
+
+    // Render HTML các hàng BÁN (nếu có)
+    let sellRowsHtml = "";
+    if (sells.length > 0) {
+        sells.forEach((s, idx) => {
+            const pFmt = Number(s.price || 0).toLocaleString('vi-VN');
+            const sigFmt = Number(s.signal_price || 0).toLocaleString('vi-VN');
+            const chg = Number(s.pct_change || 0);
+            const chgSign = chg >= 0 ? "+" : "";
+            const chgColor = chg > 0 ? "#059669" : (chg < 0 ? "#dc2626" : "#475569");
+            const profit = Number(s.profit_pct || 0);
+            const profitSign = profit >= 0 ? "+" : "";
+            const volFmt = (s.today_vol || 0) >= 1000000 
+                ? ((s.today_vol || 0) / 1000000).toFixed(2) + "M" 
+                : ((s.today_vol || 0) / 1000).toFixed(0) + "K";
+            const isT0 = s.bars_since === 0;
+            const rowBg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+
+            sellRowsHtml += `
+                <tr style="background: ${rowBg}; border-bottom: 1px solid #e2e8f0; font-size: 10px;">
+                    <td style="padding: 5px 6px; text-align: center; color: #64748b;">${idx + 1}</td>
+                    <td style="padding: 5px 6px; font-weight: bold; color: #be123c;">
+                        ${s.symbol} <span style="font-size: 8px; font-weight: normal; color: #64748b;">(${s.exchange || 'HOSE'})</span>
+                    </td>
+                    <td style="padding: 5px 6px; color: #334155; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${s.name || ''}</td>
+                    <td style="padding: 5px 6px; text-align: right; font-weight: 600; color: #0f172a;">${pFmt}</td>
+                    <td style="padding: 5px 6px; text-align: right; font-weight: 600; color: ${chgColor};">${chgSign}${chg.toFixed(2)}%</td>
+                    <td style="padding: 5px 6px; text-align: right; color: #334155;">${sigFmt}</td>
+                    <td style="padding: 5px 6px; text-align: right; font-weight: bold; color: #be123c;">${profitSign}${profit.toFixed(2)}%</td>
+                    <td style="padding: 5px 6px; text-align: center;">
+                        <span style="display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: bold; background: ${isT0 ? '#ffe4e6' : '#f1f5f9'}; color: ${isT0 ? '#9f1239' : '#475569'}; border: 1px solid ${isT0 ? '#fecdd3' : '#cbd5e1'};">
+                            ${isT0 ? '⚡ T+0' : `T+${s.bars_since || 0}`}
+                        </span>
+                    </td>
+                    <td style="padding: 5px 6px; text-align: center; color: #64748b; font-size: 9px;">${s.signal_date || ''}</td>
+                    <td style="padding: 5px 6px; text-align: center; font-weight: bold; color: #0369a1;">${s.rs_rating || 50}</td>
+                    <td style="padding: 5px 6px; text-align: right; color: #334155;">${volFmt}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Tạo container trực tiếp để html2pdf render chuẩn A4 ngang không bị lệch tọa độ
+    const container = document.createElement("div");
+    container.id = "fansi-screener-pdf-export-container";
+    container.style.width = "1060px";
+    container.style.minWidth = "1060px";
+    container.style.maxWidth = "1060px";
+    container.style.padding = "18px 22px";
+    container.style.background = "#ffffff";
+    container.style.color = "#0f172a";
+    container.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    container.style.boxSizing = "border-box";
+    container.style.margin = "0";
+
+    container.innerHTML = `
+        <!-- HEADER BÁO CÁO -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0284c7; padding-bottom: 10px; margin-bottom: 12px;">
+            <div>
+                <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 0.5px; text-transform: uppercase;">
+                    IERM PLATFORM | INSTITUTIONAL EQUITY RESEARCH MATRIX
+                </div>
+                <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 2px;">
+                    BÁO CÁO TÍN HIỆU KỸ THUẬT & DANH MỤC LỌC THỊ TRƯỜNG
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                    Chiến lược: <strong style="color: #047857; font-size: 12px;">${stratName}</strong> | 
+                    Phạm vi: <strong>${exName}</strong> | 
+                    Khung phiên: <strong>${timingName}</strong> | 
+                    Thanh khoản: <strong>${volName}</strong>
+                </div>
+            </div>
+            <div style="text-align: right; font-size: 10px; color: #64748b; line-height: 1.5;">
+                <div>Thời gian quét: <strong>${formattedDate}</strong></div>
+                <div style="color: #059669; font-weight: bold; margin-top: 2px;">● Dữ liệu Realtime trong phiên</div>
+            </div>
+        </div>
+
+        <!-- KPI SUMMARY CARDS -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; text-align: center;">
+                <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase;">Tổng mã thỏa mãn</div>
+                <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 2px;">${buys.length + sells.length} mã</div>
+            </div>
+            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px 12px; text-align: center;">
+                <div style="font-size: 9px; color: #047857; font-weight: 600; text-transform: uppercase;">Tín hiệu MUA (BUY)</div>
+                <div style="font-size: 16px; font-weight: 800; color: #047857; margin-top: 2px;">${buys.length} mã</div>
+            </div>
+            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 8px 12px; text-align: center;">
+                <div style="font-size: 9px; color: #be123c; font-weight: 600; text-transform: uppercase;">Tín hiệu BÁN (SELL)</div>
+                <div style="font-size: 16px; font-weight: 800; color: #be123c; margin-top: 2px;">${sells.length} mã</div>
+            </div>
+            <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 12px; text-align: center;">
+                <div style="font-size: 9px; color: #15803d; font-weight: 600; text-transform: uppercase;">Nổ mới hôm nay (T+0)</div>
+                <div style="font-size: 16px; font-weight: 800; color: #15803d; margin-top: 2px;">${todayCount} mã</div>
+            </div>
+        </div>
+
+        <!-- BẢNG TÍN HIỆU MUA -->
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: bold; color: #047857; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <span>🟢 DANH MỤC CỔ PHIẾU CÓ TÍN HIỆU MUA (${buys.length} MÃ)</span>
+                <span style="font-size: 9px; font-weight: normal; color: #64748b;">Đơn vị: VNĐ / Tỷ lệ (%) / CP</span>
+            </div>
+            ${buys.length > 0 ? `
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 10px;">
+                    <thead>
+                        <tr style="background: #ecfdf5;">
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: center; width: 35px;">STT</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: left; width: 80px;">Mã CP</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: left;">Tên Doanh Nghiệp</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: right; width: 75px;">Thị Giá</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: right; width: 65px;">% Ngày</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: right; width: 80px;">Giá Báo Mua</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: right; width: 75px;">Hiệu Suất</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: center; width: 60px;">Phiên T+</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: center; width: 80px;">Ngày Tín Hiệu</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: center; width: 45px;">RS</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #059669; color: #065f46; font-size: 10px; text-align: right; width: 95px;">KL Khớp Hôm Nay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${buyRowsHtml}
+                    </tbody>
+                </table>
+            ` : '<div style="padding: 10px; text-align: center; color: #94a3b8; font-style: italic; border: 1px dashed #cbd5e1; border-radius: 4px;">Không có mã MUA nào thỏa mãn tiêu chí.</div>'}
+        </div>
+
+        <!-- BẢNG TÍN HIỆU BÁN (NẾU CÓ) -->
+        ${sells.length > 0 ? `
+            <div style="margin-bottom: 14px;">
+                <div style="font-size: 12px; font-weight: bold; color: #be123c; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🔴 DANH MỤC CỔ PHIẾU CÓ TÍN HIỆU BÁN (${sells.length} MÃ)</span>
+                    <span style="font-size: 9px; font-weight: normal; color: #64748b;">Đơn vị: VNĐ / Tỷ lệ (%) / CP</span>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 10px;">
+                    <thead>
+                        <tr style="background: #fff1f2;">
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: center; width: 35px;">STT</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: left; width: 80px;">Mã CP</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: left;">Tên Doanh Nghiệp</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: right; width: 75px;">Thị Giá</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: right; width: 65px;">% Ngày</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: right; width: 80px;">Giá Báo Bán</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: right; width: 75px;">Biến Động T+</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: center; width: 60px;">Phiên T+</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: center; width: 80px;">Ngày Tín Hiệu</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: center; width: 45px;">RS</th>
+                            <th style="padding: 5px 6px; border-bottom: 2px solid #e11d48; color: #9f1239; font-size: 10px; text-align: right; width: 95px;">KL Khớp Hôm Nay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sellRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+        ` : ''}
+
+        <!-- FOOTER -->
+        <div style="margin-top: 14px; padding-top: 6px; border-top: 1px solid #cbd5e1; display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8;">
+            <span>Hệ thống Nghiên cứu & Định lượng Đầu tư IERM • Báo cáo tự động hóa</span>
+            <span>Báo cáo lưu hành nội bộ</span>
+        </div>
+    `;
+
+    document.body.appendChild(container);
+
+    try {
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin: [8, 8, 8, 8],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            await html2pdf().set(opt).from(container).save();
+            showToast(`✅ Đã xuất thành công file PDF: ${filename}`);
+        } else {
+            const printWin = window.open('', '_blank', 'width=1120,height=750');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>${filename}</title>
+                    <style>
+                        @page { size: A4 landscape; margin: 8mm; }
+                        body { margin: 0; padding: 10px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; }
+                        table { page-break-inside: auto; }
+                        tr { page-break-inside: avoid; page-break-after: auto; }
+                    </style>
+                </head>
+                <body>
+                    ${container.innerHTML}
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            showToast(`✅ Đã mở trang in PDF: ${filename}`);
+        }
+    } catch (err) {
+        console.error("PDF export error:", err);
+        showToast(`❌ Lỗi xuất PDF: ${err.message}`);
+    } finally {
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
+        }
+    }
+}
+
 function loadStockToTechnicalChart(symbol) {
     if (!symbol) return;
     const clean = symbol.trim().toUpperCase();

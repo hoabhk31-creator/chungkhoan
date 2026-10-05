@@ -2328,8 +2328,18 @@
                             </span>
                         </h3>
                     </div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">
-                        <span id="fansi-last-updated" class="italic">Đang tải dữ liệu...</span>
+                    <div class="flex items-center gap-2 text-xs flex-wrap">
+                        <!-- Nút Xuất Excel -->
+                        <button type="button" onclick="exportFansiScreenerExcel()" id="btn-export-fansi-excel" class="px-2.5 py-1 rounded text-xs font-mono font-bold bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-700/80 hover:border-emerald-500 shadow flex items-center gap-1.5 transition-all cursor-pointer" title="Xuất toàn bộ danh sách tín hiệu lọc được ra file Excel (.xlsx)">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                            <span>Excel</span>
+                        </button>
+                        <!-- Nút Xuất PDF -->
+                        <button type="button" onclick="exportFansiScreenerPdf()" id="btn-export-fansi-pdf" class="px-2.5 py-1 rounded text-xs font-mono font-bold bg-rose-950/80 hover:bg-rose-900 text-rose-400 border border-rose-700/80 hover:border-rose-500 shadow flex items-center gap-1.5 transition-all cursor-pointer" title="Xuất Báo cáo danh mục lọc tín hiệu ra file PDF chuyên nghiệp">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                            <span>PDF</span>
+                        </button>
+                        <span id="fansi-last-updated" class="italic text-slate-500 dark:text-slate-400 ml-1">Đang tải dữ liệu...</span>
                     </div>
                 </div>
 
