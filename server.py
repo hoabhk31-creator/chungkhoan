@@ -1888,7 +1888,11 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         count = 1500
     cache_key = f"{clean_ticker}_{norm_res}_{count}"
     now_ts = time.time()
-    cache_ttl = 300.0 if norm_res in ["D", "W", "M"] else 30.0
+    # Trong phiên giao dịch (Thứ 2 - Thứ 6 từ 09:00 - 15:00), cache TTL ngắn (15s) để nến realtime cập nhật liên tục
+    from datetime import timezone, timedelta
+    vn_now = datetime.now(timezone(timedelta(hours=7)))
+    is_trading_hours = (vn_now.weekday() < 5 and 9 <= vn_now.hour < 15)
+    cache_ttl = (15.0 if is_trading_hours else 120.0) if norm_res in ["D", "W", "M"] else 15.0
     if cache_key in _TECH_SIGNALS_CACHE and (now_ts - _TECH_SIGNALS_CACHE_TS.get(cache_key, 0)) < cache_ttl:
         cached_item = _TECH_SIGNALS_CACHE[cache_key]
         if cached_item and cached_item.get("candles_history") and len(cached_item["candles_history"]) > 0:
@@ -2558,6 +2562,13 @@ async def get_fansi_screener(
             continue
         candidates.append((sym, comp))
 
+    # Nạp trước bảng giá SSI toàn thị trường để bảo đảm nến realtime luôn có sẵn
+    try:
+        from crawler import _SSI_EXCHANGE_CACHE, fetch_ssi_live_stock_quote
+        await fetch_ssi_live_stock_quote("VN30")
+    except Exception:
+        pass
+
     from_ts = int(now_ts) - 86400 * 100
     to_ts = int(now_ts)
     sem = asyncio.Semaphore(30)
@@ -2575,6 +2586,49 @@ async def get_fansi_screener(
                     l_arr = d.get("l", [])
                     v_arr = d.get("v", [])
                     t_arr = d.get("t", [])
+
+                    # GHÉP NẾN REALTIME PHIÊN HÔM NAY:
+                    # Nếu hôm nay là ngày giao dịch trong tuần (Thứ 2 - Thứ 6) và nến 1D chưa chốt
+                    if c_arr and t_arr:
+                        try:
+                            from datetime import timezone, timedelta
+                            vn_tz = timezone(timedelta(hours=7))
+                            now_vn = datetime.now(vn_tz)
+                            if now_vn.weekday() < 5:
+                                from crawler import _SSI_EXCHANGE_CACHE
+                                ssi_data = _SSI_EXCHANGE_CACHE.get(sym.upper())
+                                if ssi_data:
+                                    m_p = float(ssi_data.get("matchedPrice") or 0.0)
+                                    r_p = float(ssi_data.get("refPrice") or 0.0)
+                                    o_p = float(ssi_data.get("openPrice") or 0.0)
+                                    h_p = float(ssi_data.get("highest") or 0.0)
+                                    l_p = float(ssi_data.get("lowest") or 0.0)
+                                    vol = float(ssi_data.get("nmTotalTradedQty") or 0.0)
+
+                                    live_c = m_p if m_p > 0 else (o_p if o_p > 0 else r_p)
+                                    if live_c > 0:
+                                        live_o = o_p if o_p > 0 else live_c
+                                        live_h = h_p if h_p > 0 else max(live_c, live_o)
+                                        live_l = l_p if l_p > 0 else min(live_c, live_o)
+                                        today_date = now_vn.date()
+                                        last_bar_date = datetime.fromtimestamp(t_arr[-1], tz=vn_tz).date()
+                                        today_ts = int(datetime(now_vn.year, now_vn.month, now_vn.day, 9, 0, 0, tzinfo=vn_tz).timestamp())
+
+                                        if last_bar_date == today_date:
+                                            c_arr[-1] = live_c
+                                            if live_o > 0: o_arr[-1] = live_o
+                                            h_arr[-1] = max(h_arr[-1], live_h)
+                                            l_arr[-1] = min(l_arr[-1], live_l) if l_arr[-1] > 0 else live_l
+                                            if vol > 0: v_arr[-1] = max(v_arr[-1], vol)
+                                        else:
+                                            c_arr.append(live_c)
+                                            o_arr.append(live_o)
+                                            h_arr.append(live_h)
+                                            l_arr.append(live_l)
+                                            v_arr.append(vol)
+                                            t_arr.append(today_ts)
+                        except Exception:
+                            pass
 
                     if clean_strat == "robot1":
                         res = _calculate_robot1_core(c_arr, v_arr, t_arr, min_vol, min_price)

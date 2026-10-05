@@ -433,7 +433,13 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         "Accept": "*/*"
     }
 
-    candles = []
+    # Bảo đảm cache SSI luôn sẵn sàng cho mã này để đồng bộ nến trong phiên
+    try:
+        from crawler import _SSI_EXCHANGE_CACHE, fetch_ssi_live_stock_quote
+        if clean not in _SSI_EXCHANGE_CACHE:
+            await fetch_ssi_live_stock_quote(clean)
+    except Exception:
+        pass
 
     def parse_udf_response(data: Dict[str, Any]) -> List[Dict[str, Any]]:
         result = []
@@ -470,6 +476,60 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
                 "close": c_val,
                 "volume": v_val
             })
+
+        # ĐỒNG BỘ NẾN REALTIME TRONG PHIÊN:
+        # Nếu đang là nến ngày (D) và là ngày giao dịch trong tuần (Thứ 2 - Thứ 6)
+        if query_res == "D" and result:
+            try:
+                from datetime import timezone, timedelta
+                vn_tz = timezone(timedelta(hours=7))
+                now_vn = datetime.now(vn_tz)
+                if now_vn.weekday() < 5:
+                    today_str = now_vn.strftime("%d/%m/%Y")
+                    today_iso = now_vn.strftime("%Y-%m-%d")
+                    from crawler import _SSI_EXCHANGE_CACHE
+                    ssi_data = _SSI_EXCHANGE_CACHE.get(clean)
+                    if ssi_data:
+                        m_p = float(ssi_data.get("matchedPrice") or 0.0)
+                        r_p = float(ssi_data.get("refPrice") or 0.0)
+                        o_p = float(ssi_data.get("openPrice") or 0.0)
+                        h_p = float(ssi_data.get("highest") or 0.0)
+                        l_p = float(ssi_data.get("lowest") or 0.0)
+                        vol = float(ssi_data.get("nmTotalTradedQty") or 0.0)
+
+                        live_c = m_p if m_p > 0 else (o_p if o_p > 0 else r_p)
+                        if live_c > 0:
+                            live_o = o_p if o_p > 0 else live_c
+                            live_h = h_p if h_p > 0 else max(live_c, live_o)
+                            live_l = l_p if l_p > 0 else min(live_c, live_o)
+                            today_ts = int(datetime(now_vn.year, now_vn.month, now_vn.day, 9, 0, 0, tzinfo=vn_tz).timestamp())
+
+                            last_bar = result[-1]
+                            last_date = last_bar.get("date", "")
+                            last_iso = str(last_bar.get("time_str", ""))[:10]
+
+                            if last_date == today_str or last_iso == today_iso:
+                                # Đã có nến hôm nay -> Cập nhật giá và khối lượng thời gian thực
+                                last_bar["close"] = live_c
+                                if live_o > 0: last_bar["open"] = live_o
+                                last_bar["high"] = max(last_bar.get("high", live_h), live_h)
+                                last_bar["low"] = min(last_bar.get("low", live_l), live_l) if last_bar.get("low", 0) > 0 else live_l
+                                if vol > 0: last_bar["volume"] = max(last_bar.get("volume", 0), vol)
+                            else:
+                                # Chưa có nến hôm nay -> Append cây nến Realtime của phiên hôm nay
+                                result.append({
+                                    "time": today_ts,
+                                    "time_str": today_iso,
+                                    "date": today_str,
+                                    "open": live_o,
+                                    "high": live_h,
+                                    "low": live_l,
+                                    "close": live_c,
+                                    "volume": vol
+                                })
+            except Exception:
+                pass
+
         if is_period_agg:
             return aggregate_daily_to_period(result, req_res)[-count:]
         return result
