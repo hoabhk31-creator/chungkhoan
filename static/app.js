@@ -14820,18 +14820,27 @@ async function exportFansiScreenerPdf() {
         });
     }
 
-    // Tạo container trực tiếp để html2pdf render chuẩn A4 ngang không bị lệch tọa độ
+    // Bọc trong wrapper ẩn cố định vị trí để html2pdf chụp sắc nét 100% không bị trắng trang và không lệch tọa độ
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.width = "100%";
+    wrapper.style.height = "0";
+    wrapper.style.overflow = "hidden";
+    wrapper.style.zIndex = "-9999";
+    wrapper.style.pointerEvents = "none";
+
     const container = document.createElement("div");
     container.id = "fansi-screener-pdf-export-container";
     container.style.width = "1060px";
-    container.style.minWidth = "1060px";
     container.style.maxWidth = "1060px";
-    container.style.padding = "18px 22px";
+    container.style.padding = "16px 20px";
     container.style.background = "#ffffff";
     container.style.color = "#0f172a";
     container.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     container.style.boxSizing = "border-box";
-    container.style.margin = "0";
+    container.style.margin = "0 auto";
 
     container.innerHTML = `
         <!-- HEADER BÁO CÁO -->
@@ -14943,15 +14952,16 @@ async function exportFansiScreenerPdf() {
         </div>
     `;
 
-    document.body.appendChild(container);
+    wrapper.appendChild(container);
+    document.body.appendChild(wrapper);
 
     try {
         if (typeof html2pdf !== 'undefined') {
             const opt = {
-                margin: [8, 8, 8, 8],
+                margin: [6, 6, 6, 6],
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
             await html2pdf().set(opt).from(container).save();
@@ -14984,8 +14994,8 @@ async function exportFansiScreenerPdf() {
         console.error("PDF export error:", err);
         showToast(`❌ Lỗi xuất PDF: ${err.message}`);
     } finally {
-        if (container && container.parentNode) {
-            container.parentNode.removeChild(container);
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
         }
     }
 }
