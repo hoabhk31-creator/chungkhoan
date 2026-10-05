@@ -19063,13 +19063,82 @@ let screenerCandleSeries = null;
 let screenerVolSeries = null;
 let lastLoadedScreenerTicker = null;
 let lastScreenerCandleHash = null;
+let screenerMarketStatusInterval = null;
+
+function updateScreenerMarketStatus() {
+    const el = document.getElementById("screener-market-status");
+    const dateEl = document.getElementById("screener-data-date");
+    
+    // Giờ chuẩn thị trường chứng khoán Việt Nam (GMT+7)
+    const now = new Date();
+    const vnTimeStr = now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+    const vnDate = new Date(vnTimeStr);
+    
+    if (dateEl) {
+        const y = vnDate.getFullYear();
+        const m = String(vnDate.getMonth() + 1).padStart(2, '0');
+        const d = String(vnDate.getDate()).padStart(2, '0');
+        dateEl.textContent = `${y}-${m}-${d}`;
+    }
+
+    if (!el) return;
+
+    const day = vnDate.getDay(); // 0: CN, 6: T7
+    const h = vnDate.getHours();
+    const min = vnDate.getMinutes();
+    const totalMin = h * 60 + min;
+
+    let text = "Đã đóng phiên";
+    let badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+    let isLive = false;
+
+    if (day === 0 || day === 6) {
+        text = "Nghỉ cuối tuần";
+        badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950/80 text-rose-400 border border-rose-800/60";
+    } else {
+        if (totalMin < 9 * 60) {
+            text = "Chờ mở phiên";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/80 text-amber-400 border border-amber-800/60";
+        } else if (totalMin >= 9 * 60 && totalMin < 9 * 60 + 15) {
+            text = "Phiên ATO (09:00 - 09:15)";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-700 animate-pulse";
+            isLive = true;
+        } else if (totalMin >= 9 * 60 + 15 && totalMin < 11 * 60 + 30) {
+            text = "Đang trong phiên";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/90 text-emerald-400 border border-emerald-600/80 animate-pulse";
+            isLive = true;
+        } else if (totalMin >= 11 * 60 + 30 && totalMin < 13 * 60) {
+            text = "Nghỉ trưa (11:30 - 13:00)";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/80 text-amber-400 border border-amber-800/60";
+        } else if (totalMin >= 13 * 60 && totalMin < 14 * 60 + 30) {
+            text = "Đang trong phiên";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/90 text-emerald-400 border border-emerald-600/80 animate-pulse";
+            isLive = true;
+        } else if (totalMin >= 14 * 60 + 30 && totalMin < 14 * 60 + 45) {
+            text = "Phiên ATC (14:30 - 14:45)";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-700 animate-pulse";
+            isLive = true;
+        } else if (totalMin >= 14 * 60 + 45 && totalMin < 15 * 60) {
+            text = "Thỏa thuận / PLO";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60";
+        } else {
+            text = "Đã đóng phiên";
+            badgeClass = "px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+        }
+    }
+
+    el.className = badgeClass;
+    el.innerHTML = isLive 
+        ? `<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-ping"></span>${text}`
+        : text;
+}
 
 function initScreenerTab() {
     screenerInitialized = true;
-    const d = new Date();
-    const dateStr = d.toISOString().split("T")[0];
-    const dateEl = document.getElementById("screener-data-date");
-    if (dateEl) dateEl.textContent = dateStr;
+    updateScreenerMarketStatus();
+    if (!screenerMarketStatusInterval) {
+        screenerMarketStatusInterval = setInterval(updateScreenerMarketStatus, 15000);
+    }
 
     // Khôi phục tùy chọn Auto Quét từ localStorage nếu có
     try {
@@ -20723,17 +20792,18 @@ async function loadScreenerChartData(ticker, isSilent = false) {
             initScreenerTvChartInstance();
         }
 
-        // Tối ưu hóa 1: Kiểm tra bộ nhớ đệm nến riêng của Bộ lọc (cho phép chuyển qua lại 0.00s tức thì)
+        // Tối ưu hóa 1: Kiểm tra bộ nhớ đệm nến riêng của Bộ lọc (cho phép chuyển qua lại tức thì nhưng làm mới nhanh trong phiên)
         let data = null;
+        const screenerCandleTtl = (isSilent || screenerAutoScanEnabled) ? 10000 : 20000;
         if (window._SCREENER_CANDLES_CACHE && window._SCREENER_CANDLES_CACHE[cleanSym]) {
             const entry = window._SCREENER_CANDLES_CACHE[cleanSym];
-            if (Date.now() - entry.ts < 180000 && entry.data && entry.data.candles_history && entry.data.candles_history.length > 0) {
+            if (Date.now() - entry.ts < screenerCandleTtl && entry.data && entry.data.candles_history && entry.data.candles_history.length > 0) {
                 data = entry.data;
             }
         }
 
-        // Tối ưu hóa 2: Kiểm tra bộ nhớ đệm chung Client Cache
-        if (!data && window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[cleanSym] && window._CLIENT_TICKER_CACHE[cleanSym].tech && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history.length > 20) {
+        // Tối ưu hóa 2: Kiểm tra bộ nhớ đệm chung Client Cache (chỉ khi không yêu cầu realtime mới)
+        if (!data && !isSilent && !screenerAutoScanEnabled && window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[cleanSym] && window._CLIENT_TICKER_CACHE[cleanSym].tech && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history.length > 20) {
             data = window._CLIENT_TICKER_CACHE[cleanSym].tech;
         }
 
