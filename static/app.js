@@ -18,6 +18,10 @@ let currentBreakdownMode = "asset"; // "asset" (Cơ cấu Tài sản) hoặc "re
 let currentPeriodSortOrder = "desc"; // "desc": Mới nhất ở cột đầu tiên bên trái (Mới → Cũ) [MẶC ĐỊNH], "asc": Cũ nhất bên trái (Cũ → Mới)
 
 function getActiveTicker() {
+    const techTab = document.getElementById("tab-technical");
+    if (techTab && !techTab.classList.contains("hidden") && typeof currentTechnicalTicker === "string" && currentTechnicalTicker.trim()) {
+        return currentTechnicalTicker.trim().toUpperCase();
+    }
     return (window.currentActiveTicker || window.currentSymbol || document.getElementById("central-ticker-input")?.value || (currentReport?.ticker || "HPG")).trim().toUpperCase();
 }
 
@@ -250,7 +254,9 @@ let currentOverviewChartType = "candlestick"; // 'candlestick', 'line', 'area'
 let isOverviewMaVisible = true;
 let isOverviewBbVisible = false;
 let isOverviewVolVisible = true;
+let isSyncingOverviewRange = false;
 let currentOverviewCandles = [];
+let currentOverviewDedupedCloses = [];
 let chartOverviewMiniPrice = null;
 let chartOverviewMiniDonut = null;
 let chartOverviewKqkd = null;
@@ -373,6 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try { if (window.lucide) lucide.createIcons(); } catch(e) { console.warn("lucide error:", e); }
     try { loadMarketTickerTape(); } catch(e) { console.warn("loadMarketTickerTape error:", e); }
     try { loadBenchmarkRecommendations(); } catch(e) { console.warn("loadBenchmarkRecommendations error:", e); }
+    try { syncIndicatorCheckboxesUI(); } catch(e) {}
     
     // Tự động đồng bộ giá và chỉ số thị trường mỗi 3 giây (3000ms) cho toàn bộ trang webapp
     setInterval(() => {
@@ -395,11 +402,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
 
     // Load default benchmark preset HPG
-    try { selectTicker("HPG"); } catch(e) { console.warn("selectTicker default error:", e); }
+    try {
+        selectTicker("HPG").then(() => {
+            const input = document.getElementById("central-ticker-input");
+            if (input) input.value = ""; // Mặc định để trống để hiển thị chữ chìm mờ "Mã chứng khoán"
+        });
+    } catch(e) { console.warn("selectTicker default error:", e); }
     try { setupPdfDropzone(); } catch(e) { console.warn("setupPdfDropzone error:", e); }
     try { initDragToScroll("peer-table-container"); } catch(e) {}
     try { initDragToScroll("matrix-table-container"); } catch(e) {}
     try { initDragToScroll("industry-reports-container"); } catch(e) {}
+    
+    // Mặc định luôn luôn vào trang đầu tiên là tab Bộ lọc cổ phiếu khi mở / đăng nhập webapp
+    let targetTab = "tab-screener";
+    if (window.location.hash) {
+        const hashTab = window.location.hash.replace("#", "");
+        if (document.getElementById(hashTab)) targetTab = hashTab;
+    }
+    try { switchTab(targetTab); } catch(e) {}
 });
 
 // -------------------------------------------------------------
@@ -531,6 +551,13 @@ function toggleTheme() {
             renderFireantSubPanes(currentTechnicalData.candles_history);
         }
     }
+    if (typeof initScreenerTvChartInstance === "function") {
+        initScreenerTvChartInstance();
+        const scTicker = screenerCurrentTicker || (document.getElementById("screener-symbol-input") && document.getElementById("screener-symbol-input").value) || "HPG";
+        if (typeof loadScreenerChartData === "function" && scTicker) {
+            loadScreenerChartData(scTicker, true);
+        }
+    }
 }
 
 function updateThemeIcons(isDark) {
@@ -572,9 +599,14 @@ if (document.readyState === "loading") {
 }
 
 // -------------------------------------------------------------
-// TAB NAVIGATION (6 MASTER TABS)
+// TAB NAVIGATION (7 MASTER TABS)
 // -------------------------------------------------------------
 function switchTab(tabId) {
+    if (!tabId || !document.getElementById(tabId)) return;
+    try {
+        localStorage.setItem("ierm_active_tab", tabId);
+    } catch(e) {}
+
     document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.add("hidden"));
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.classList.remove("active", "border-cyan-500", "text-cyan-400");
@@ -596,12 +628,29 @@ function switchTab(tabId) {
 
 
     // Trigger chart resize if newly shown
+    if (tabId === "tab-screener") {
+        setTimeout(() => {
+            if (!screenerInitialized) {
+                initScreenerTab();
+            } else {
+                if (typeof resizeScreenerCharts === "function") {
+                    resizeScreenerCharts();
+                }
+            }
+        }, 60);
+    }
+    if (tabId === "tab-matrix") {
+        setTimeout(() => {
+            syncCausalityColumnsHeight();
+            const rightScrollEl = document.getElementById("causality-right-scroll-content");
+            if (rightScrollEl) enableDragScroll(rightScrollEl);
+        }, 60);
+    }
     if (tabId === "tab-overview") {
         if (chartOverviewTv) {
             const box = document.getElementById("overview-tv-chart-box");
             if (box && box.clientWidth > 0 && box.clientHeight > 0) {
                 chartOverviewTv.resize(box.clientWidth, box.clientHeight);
-                chartOverviewTv.timeScale().fitContent();
             }
         }
         if (chartOverviewVolTv) {
@@ -609,6 +658,9 @@ function switchTab(tabId) {
             if (volBox && volBox.clientWidth > 0 && volBox.clientHeight > 0) {
                 chartOverviewVolTv.resize(volBox.clientWidth, volBox.clientHeight);
             }
+        }
+        if (typeof applyOverviewTimeframeRange === "function") {
+            applyOverviewTimeframeRange(currentOverviewTimeframe);
         }
         if (chartOverviewMiniPrice) chartOverviewMiniPrice.resize();
         if (chartOverviewMiniDonut) chartOverviewMiniDonut.resize();
@@ -649,6 +701,8 @@ function switchTab(tabId) {
                     renderPeersSection(p);
                 }
             }).catch(e => console.warn("Fetch peers error:", e));
+        } else if (currentFinancialBundle && currentFinancialBundle.peers_data) {
+            renderPeersSection(currentFinancialBundle.peers_data);
         }
         if (chartPeerRadar) chartPeerRadar.resize();
     }
@@ -685,11 +739,14 @@ function switchTab(tabId) {
 
 // Sub-navigation inside IERM Tab 6
 function switchIermView(subpaneId) {
+    const isInsideCausality = (subpaneId === "ierm-causality" || subpaneId === "ierm-disensus" || subpaneId === "ierm-strategy");
+    const containerId = isInsideCausality ? "ierm-causality" : subpaneId;
+
     document.querySelectorAll(".ierm-subpane").forEach(p => p.classList.add("hidden"));
-    const target = document.getElementById(subpaneId);
+    const target = document.getElementById(containerId);
     if (target) target.classList.remove("hidden");
 
-    const buttons = ["btn-ierm-grid", "btn-ierm-causality", "btn-ierm-disensus", "btn-ierm-strategy"];
+    const buttons = ["btn-ierm-grid", "btn-ierm-causality"];
     buttons.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
@@ -698,16 +755,107 @@ function switchIermView(subpaneId) {
         }
     });
 
-    const activeBtn = document.getElementById(`btn-${subpaneId}`);
+    const activeBtn = document.getElementById(`btn-${containerId}`);
     if (activeBtn) {
         activeBtn.classList.add("bg-cyan-600", "text-white");
         activeBtn.classList.remove("bg-slate-800", "text-slate-300");
     }
-    if (subpaneId === "ierm-causality" && currentReport) {
-        try { renderCausality(currentReport); } catch (e) { console.warn("switchIermView renderCausality error:", e); }
+
+    const activeT = typeof getActiveTicker === "function" ? getActiveTicker() : null;
+    const rep = currentReport || (window._CLIENT_TICKER_CACHE && activeT && window._CLIENT_TICKER_CACHE[activeT]?.preset);
+    if (isInsideCausality && rep) {
+        try { renderCausality(rep); } catch (e) { console.warn("switchIermView renderCausality error:", e); }
+        try { renderDisensus(rep); } catch (e) { console.warn("switchIermView renderDisensus error:", e); }
+        try { renderStrategy(rep); } catch (e) { console.warn("switchIermView renderStrategy error:", e); }
     }
+
     if (window.lucide) lucide.createIcons();
+
+    if (isInsideCausality) {
+        setTimeout(() => {
+            syncCausalityColumnsHeight();
+            const rightScrollEl = document.getElementById("causality-right-scroll-content");
+            if (rightScrollEl) enableDragScroll(rightScrollEl);
+        }, 50);
+    }
 }
+
+// Synchronize causality column heights (Khung 2 matches Khung 1 height exactly)
+function syncCausalityColumnsHeight() {
+    const leftCol = document.getElementById("causality-col-left");
+    const rightCol = document.getElementById("causality-col-right");
+    if (!leftCol || !rightCol) return;
+
+    if (window.innerWidth >= 768) {
+        rightCol.style.height = "auto";
+        rightCol.style.maxHeight = "none";
+        const leftH = leftCol.clientHeight || leftCol.offsetHeight;
+        if (leftH > 150) {
+            rightCol.style.height = `${leftH}px`;
+            rightCol.style.maxHeight = `${leftH}px`;
+        }
+    } else {
+        rightCol.style.height = "auto";
+        rightCol.style.maxHeight = "none";
+    }
+}
+
+// Enable mouse drag-to-scroll on scrollable elements
+function enableDragScroll(element) {
+    if (!element || element._dragScrollActive) return;
+    element._dragScrollActive = true;
+
+    let isDown = false;
+    let startY = 0;
+    let scrollTop = 0;
+    let hasMoved = false;
+
+    element.style.cursor = "grab";
+
+    element.addEventListener("mousedown", (e) => {
+        if (e.target.closest("button, a, input, select, textarea, th")) return;
+        if (e.button !== 0) return;
+
+        isDown = true;
+        hasMoved = false;
+        startY = e.clientY;
+        scrollTop = element.scrollTop;
+        element.style.cursor = "grabbing";
+    });
+
+    const onMouseUp = () => {
+        if (!isDown) return;
+        isDown = false;
+        element.style.cursor = "grab";
+        document.body.style.userSelect = "";
+    };
+
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseleave", onMouseUp);
+
+    element.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        const deltaY = e.clientY - startY;
+        if (Math.abs(deltaY) > 3) {
+            hasMoved = true;
+            document.body.style.userSelect = "none";
+        }
+        element.scrollTop = scrollTop - (deltaY * 1.2);
+    });
+
+    element.addEventListener("click", (e) => {
+        if (hasMoved) {
+            e.stopPropagation();
+            hasMoved = false;
+        }
+    }, true);
+}
+
+// Global listener for window resize to keep column heights locked
+window.addEventListener("resize", () => {
+    syncCausalityColumnsHeight();
+});
+
 
 // -------------------------------------------------------------
 // LIVE MARKET TAPE & BENCHMARK RECOMMENDATIONS (MARKS 2 & 3)
@@ -879,7 +1027,11 @@ function renderTechnicalDataSection(cleanTicker, techData) {
     if (!techData) return;
     currentTechnicalTicker = cleanTicker;
     try { renderTechnicalSection(techData); } catch(e) { console.error("renderTechnicalSection err", e); }
-    try { initFireantChart(cleanTicker, currentTechnicalInterval); } catch(e) { console.error("initFireantChart err", e); }
+    if (typeof currentTechnicalChartMode !== "undefined" && currentTechnicalChartMode === "tvpro") {
+        try { renderTradingViewProWidget(cleanTicker); } catch(e) {}
+    } else {
+        try { initFireantChart(cleanTicker, currentTechnicalInterval); } catch(e) { console.error("initFireantChart err", e); }
+    }
 }
 
 function renderPresetReportData(cleanTicker, reportData, chip) {
@@ -1023,6 +1175,15 @@ function resetUiToSkeletonLoading(cleanTicker) {
     if (expUpsideEl) expUpsideEl.innerHTML = `<span class="text-xs text-amber-400 font-mono animate-pulse">Đang tổng hợp báo cáo...</span>`;
     const priceToFairEl = document.getElementById("stat-price-to-fair");
     if (priceToFairEl) priceToFairEl.textContent = "—";
+    const curVsFairEl = document.getElementById("stat-current-vs-fair");
+    if (curVsFairEl) curVsFairEl.textContent = `Đang cập nhật theo ${cleanTicker}...`;
+    const pBar = document.getElementById("stat-progress-bar");
+    if (pBar) pBar.style.width = "0%";
+    const upsideBadge = document.getElementById("stat-upside-badge");
+    if (upsideBadge) {
+        upsideBadge.textContent = "ĐANG TỔNG HỢP";
+        upsideBadge.className = "text-[9px] px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-700 font-mono font-bold animate-pulse";
+    }
     const targetRangeEl = document.getElementById("stat-target-range");
     if (targetRangeEl) targetRangeEl.textContent = `Đang cập nhật theo ${cleanTicker}...`;
     const buyZoneEl = document.getElementById("stat-buy-zone");
@@ -1384,6 +1545,17 @@ async function selectTicker(ticker) {
     // Cập nhật ngay lập tức ô tìm kiếm trung tâm
     const input = document.getElementById("central-ticker-input");
     if (input) input.value = cleanTicker;
+
+    // Đồng bộ tức thì Biểu đồ Kỹ thuật trong Tab Bộ lọc Cổ phiếu (Cột 3)
+    try {
+        if (typeof selectScreenerTicker === "function") {
+            selectScreenerTicker(cleanTicker, false);
+        } else if (typeof loadScreenerChartData === "function") {
+            loadScreenerChartData(cleanTicker);
+        }
+    } catch (e) {
+        console.warn("sync screener chart error:", e);
+    }
 
     // Dynamically ensure chip exists in Quick Chips Bar
     let chip = document.getElementById(`chip-${cleanTicker}`);
@@ -1907,21 +2079,27 @@ function renderHero(report) {
         return;
     }
     const cs = report.consensus_summary || {};
-    document.getElementById("display-ticker").textContent = report.ticker;
-    document.getElementById("display-company").textContent = report.company_name;
-    document.getElementById("display-sector").textContent = report.sector;
-    document.getElementById("display-market-price").textContent = `${cs.current_market_price.toLocaleString("vi-VN")} VND`;
+    const curMktPrice = Number(cs.current_market_price || report.current_price || 0);
+
+    const dispTick = document.getElementById("display-ticker");
+    if (dispTick) dispTick.textContent = report.ticker || "";
+    const dispComp = document.getElementById("display-company");
+    if (dispComp) dispComp.textContent = report.company_name || "";
+    const dispSect = document.getElementById("display-sector");
+    if (dispSect) dispSect.textContent = report.sector || "";
+    const dispMktPrice = document.getElementById("display-market-price");
+    if (dispMktPrice) dispMktPrice.textContent = `${curMktPrice.toLocaleString("vi-VN")} VND`;
 
     // Đồng bộ Mã CK & Tên DN trên Header Bảng Ma Trận Ngang (Khoanh đỏ)
     const matrixTickerEl = document.getElementById("matrix-header-ticker");
-    if (matrixTickerEl) matrixTickerEl.textContent = report.ticker;
+    if (matrixTickerEl) matrixTickerEl.textContent = report.ticker || "";
     const matrixCompEl = document.getElementById("matrix-header-company");
     if (matrixCompEl) {
-        matrixCompEl.textContent = report.company_name;
-        matrixCompEl.title = report.company_name;
+        matrixCompEl.textContent = report.company_name || "";
+        matrixCompEl.title = report.company_name || "";
     }
     const matrixSectEl = document.getElementById("matrix-header-sector");
-    if (matrixSectEl) matrixSectEl.textContent = report.sector;
+    if (matrixSectEl) matrixSectEl.textContent = report.sector || "";
     
     // Live price source badge: Chỉ hiển thị Live và ngày tháng theo yêu cầu người dùng
     const dateLabel = cs.price_date_str || new Date().toLocaleDateString('vi-VN');
@@ -1933,6 +2111,7 @@ function renderHero(report) {
     const displayDateEl = document.getElementById("display-date");
     if (displayDateEl) displayDateEl.textContent = report.analysis_date || `Tháng 09/2026`;
     const activeCount = (report.matrix_table || []).filter(r => !isReportOlderThanDays(r.report_date, 548)).length;
+    const repCountEl = document.getElementById("display-report-count");
     if (repCountEl) repCountEl.textContent = `${activeCount} Báo cáo`;
 
 function getConsensusRecommendationText(upside, hasValidValuation) {
@@ -2160,7 +2339,10 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
         }
     }
 
-    document.getElementById("stat-spread").textContent = hasValidValuation && cs.target_price_spread_percent > 0 ? `${cs.target_price_spread_percent.toFixed(1)}%` : "—";
+    const spreadEl = document.getElementById("stat-spread");
+    if (spreadEl) {
+        spreadEl.textContent = hasValidValuation && cs.target_price_spread_percent > 0 ? `${cs.target_price_spread_percent.toFixed(1)}%` : "—";
+    }
 
     // 3. KỲ VỌNG THỊ GIÁ VS ĐỊNH GIÁ TRUNG BÌNH CTCK (Ô GÓC PHẢI)
     const ratio = cs.market_to_fair_value_ratio || (cs.mean_target_price > 0 ? (cs.current_market_price / cs.mean_target_price) * 100 : 100);
@@ -2432,11 +2614,20 @@ function renderMatrixTable(report) {
                     <span class="text-[10px] text-slate-500 line-through block font-normal">Gốc: ${r.target_price.toLocaleString("vi-VN")} đ</span>
                 </div>`;
             }
-            if (r.upside_percent !== null && r.upside_percent !== undefined && (r.adjusted_target_price || r.target_price) > 0) {
-                if (r.upside_percent < 0) {
-                    upsideDisplay = `<div class="text-[11px] font-semibold text-rose-400">Vượt +${Math.abs(r.upside_percent).toFixed(1)}%</div>`;
+            const curP = Number(cs.current_market_price || report.current_price || 0);
+            const effTp = (r.is_price_adjusted && r.adjusted_target_price) ? r.adjusted_target_price : r.target_price;
+            let displayUpside = r.upside_percent;
+            if (curP > 0 && effTp > 0) {
+                const calculatedUpside = Math.round(((effTp - curP) / curP) * 1000) / 10;
+                if (displayUpside === null || displayUpside === undefined || Math.abs(displayUpside - calculatedUpside) > 5) {
+                    displayUpside = calculatedUpside;
+                }
+            }
+            if (displayUpside !== null && displayUpside !== undefined && effTp > 0) {
+                if (displayUpside < 0) {
+                    upsideDisplay = `<div class="text-[11px] font-semibold text-rose-400">Vượt +${Math.abs(displayUpside).toFixed(1)}%</div>`;
                 } else {
-                    upsideDisplay = `<div class="text-[11px] font-semibold text-emerald-400">+${r.upside_percent.toFixed(1)}%</div>`;
+                    upsideDisplay = `<div class="text-[11px] font-semibold text-emerald-400">+${displayUpside.toFixed(1)}%</div>`;
                 }
                 if (r.is_price_adjusted && r.unadjusted_upside_percent !== null && r.unadjusted_upside_percent !== undefined) {
                     upsideDisplay += `<div class="text-[9px] text-slate-500 font-mono mt-0.5">(Gốc: ${r.unadjusted_upside_percent > 0 ? '+' : ''}${r.unadjusted_upside_percent.toFixed(1)}%)</div>`;
@@ -2505,17 +2696,23 @@ function renderMatrixTable(report) {
             </div>
             <span class="text-[10px] text-slate-500">Kỳ vọng kết quả kinh doanh</span>
         </td>`;
+    const formatForecastTag = (txt) => {
+        if (!txt || txt === '—' || txt === 'N/A') return '—';
+        return txt.replace(/\(([A-ZĐa-z0-9_\s]+)\)/g, '<span class="inline-block px-1 py-0.2 rounded text-[9px] font-bold bg-amber-950/80 text-amber-300 border border-amber-800/80 ml-1">($1)</span>');
+    };
     reports.forEach(r => {
         const revDisplay = (r.revenue_forecast && r.revenue_forecast !== 'N/A' && r.revenue_forecast !== '—') ? r.revenue_forecast : '—';
         const npatDisplay = (r.npat_forecast && r.npat_forecast !== 'N/A' && r.npat_forecast !== '—') ? r.npat_forecast : '—';
+        const revHtml = formatForecastTag(revDisplay);
+        const npatHtml = formatForecastTag(npatDisplay);
         tbodyHtml += `<td class="p-3 font-mono text-xs border-b border-slate-800/80 min-w-[175px]">
             <div class="text-slate-300 font-semibold mb-1">
                 <span class="text-slate-500 text-[10px] block">DOANH THU:</span>
-                ${revDisplay}
+                ${revHtml}
             </div>
             <div class="text-emerald-400 font-semibold">
                 <span class="text-slate-500 text-[10px] block">LNST:</span>
-                ${npatDisplay}
+                ${npatHtml}
             </div>
         </td>`;
     });
@@ -3229,7 +3426,7 @@ function renderCausality(report, bundleOverride = null) {
     // Lắp ráp toàn bộ 2 khung
     container.innerHTML = `
         <!-- KHUNG 1: HIỆU QUẢ KINH DOANH & BÁO CÁO KQKD QUÝ GẦN NHẤT -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 flex flex-col justify-between">
+        <div id="causality-col-left" class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 flex flex-col justify-between">
             <div class="space-y-4">
                 <!-- Header Khung 1 -->
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
@@ -3343,19 +3540,20 @@ function renderCausality(report, bundleOverride = null) {
         </div>
 
         <!-- KHUNG 2: ĐỘNG LỰC TĂNG TRƯỞNG TƯƠNG LAI VÀ RỦI RO (TỔNG HỢP TỪ BẢNG MA TRẬN 1) -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 flex flex-col justify-between">
-            <div class="space-y-4">
-                <!-- Header Khung 2 -->
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-                    <h3 class="font-mono font-bold text-sm text-emerald-400 flex items-center gap-2">
-                        <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
-                        <span>2. Động lực tăng trưởng tương lai và rủi ro <strong class="text-emerald-300 font-mono">(${cleanT})</strong></span>
-                    </h3>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
-                        Đồng thuận ${cleanT} từ Bảng Ma trận 1
-                    </span>
-                </div>
+        <div id="causality-col-right" class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col overflow-hidden">
+            <!-- Header Khung 2 (Cố định ở trên) -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2 shrink-0">
+                <h3 class="font-mono font-bold text-sm text-emerald-400 flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+                    <span>2. Động lực tăng trưởng tương lai và rủi ro <strong class="text-emerald-300 font-mono">(${cleanT})</strong></span>
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+                    Đồng thuận ${cleanT} từ Bảng Ma trận 1
+                </span>
+            </div>
 
+            <!-- Vùng nội dung cuộn: Bằng chiều cao với khung 1, hỗ trợ con lăn chuột, thanh trượt & giữ chuột kéo -->
+            <div id="causality-right-scroll-content" class="flex-1 overflow-y-auto space-y-4 pt-3 pr-2 custom-scrollbar-vertical-cyan">
                 <!-- PHẦN A: TỔNG HỢP CATALYSTS TRIỂN VỌNG & ĐỘNG LỰC TĂNG TRƯỞNG TƯƠNG LAI -->
                 <div class="space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-mono text-cyan-300 font-bold">
@@ -3417,6 +3615,12 @@ function renderCausality(report, bundleOverride = null) {
     if (window.lucide && window.lucide.createIcons) {
         window.lucide.createIcons();
     }
+
+    setTimeout(() => {
+        syncCausalityColumnsHeight();
+        const rightScrollEl = document.getElementById("causality-right-scroll-content");
+        if (rightScrollEl) enableDragScroll(rightScrollEl);
+    }, 40);
 }
 
 function renderDisensus(report) {
@@ -4002,20 +4206,21 @@ function renderOverviewHeaderAndStats(data) {
         }
     }
 
-    // Timeframe percent badges
-    if (data.timeframe_percents) {
-        const tfMap = data.timeframe_percents;
-        ['1D', '5D', '1M', '6M', 'YTD', '1Y', '5Y', 'ALL'].forEach(tf => {
-            const pctEl = document.getElementById(`tf-pct-${tf}`);
-            if (pctEl && tfMap[tf] !== undefined) {
-                const val = Number(tfMap[tf]);
-                const sign = val > 0 ? '+' : '';
-                pctEl.textContent = `${sign}${val.toFixed(2)}%`;
-                pctEl.className = val >= 0 
-                    ? `block text-[10px] ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mt-0.5 font-bold`
-                    : `block text-[10px] ${isDark ? 'text-rose-400' : 'text-rose-600'} mt-0.5 font-bold`;
-            }
-        });
+    // Timeframe percent badges: Cập nhật trực tiếp từ nến kỹ thuật thực tế & giá realtime
+    if (currentOverviewCandles && currentOverviewCandles.length > 1) {
+        updateTimeframeReturnBadges(currentOverviewCandles);
+    } else if (data.change_pct !== undefined && data.change_pct !== null) {
+        const el1D = document.getElementById("tf-pct-1D");
+        if (el1D) {
+            const chgVal = Number(data.change_pct);
+            const sign = chgVal > 0 ? "+" : "";
+            el1D.textContent = `${sign}${chgVal.toFixed(2)}%`;
+            el1D.className = chgVal > 0
+                ? `block text-[10px] ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mt-0.5 font-bold`
+                : (chgVal < 0
+                    ? `block text-[10px] ${isDark ? 'text-rose-400' : 'text-rose-600'} mt-0.5 font-bold`
+                    : `block text-[10px] ${isDark ? 'text-amber-400' : 'text-amber-500'} mt-0.5 font-bold`);
+        }
     }
 
     // Top Right Market Cap / P/E / P/B / Rev / NP
@@ -4030,6 +4235,40 @@ function renderOverviewHeaderAndStats(data) {
     if (statPb) statPb.textContent = data.pb ? Number(data.pb).toFixed(2) : "N/A";
     if (statRev) statRev.textContent = `${Number(data.revenue_ttm_bil || 0).toLocaleString("vi-VN")} tỷ`;
     if (statNp) statNp.textContent = `${Number(data.net_profit_ttm_bil || 0).toLocaleString("vi-VN")} tỷ`;
+
+    // Đồng bộ số liệu sang biến toàn cục để Tab So sánh đối thủ (tab-industry) luôn khớp 100%
+    window.currentOverviewMultiples = {
+        ticker: (data.ticker || getActiveTicker() || "").toUpperCase(),
+        market_cap_bil: data.market_cap_bil,
+        pe: data.pe,
+        pb: data.pb,
+        revenue_ttm_bil: data.revenue_ttm_bil,
+        net_profit_ttm_bil: data.net_profit_ttm_bil
+    };
+
+    // Nếu window.currentPeersData đã có sẵn, cập nhật ngay dòng doanh nghiệp mục tiêu
+    if (window.currentPeersData && window.currentPeersData.peers) {
+        const curTarget = (window.currentPeersData.target_ticker || getActiveTicker() || "").toUpperCase();
+        const pTarget = window.currentPeersData.peers.find(p => (p.ticker || "").toUpperCase() === curTarget);
+        if (pTarget) {
+            let updated = false;
+            if (data.market_cap_bil && pTarget.market_cap_bil !== Number(data.market_cap_bil)) {
+                pTarget.market_cap_bil = Number(data.market_cap_bil);
+                updated = true;
+            }
+            if (data.pe && pTarget.pe !== Number(data.pe)) {
+                pTarget.pe = Number(data.pe);
+                updated = true;
+            }
+            if (data.pb && pTarget.pb !== Number(data.pb)) {
+                pTarget.pb = Number(data.pb);
+                updated = true;
+            }
+            if (updated) {
+                try { renderPeersSection(window.currentPeersData); } catch (e) {}
+            }
+        }
+    }
 
     // 2-Column Market Stats
     const setVal = (id, val) => {
@@ -4055,9 +4294,37 @@ function renderOverviewHeaderAndStats(data) {
     setVal("stat-ov-ask", Number(data.ask_vol || 0).toLocaleString("vi-VN"));
     setVal("stat-ov-cash-div", data.cash_dividend ? `${Number(data.cash_dividend).toLocaleString("vi-VN")} đ` : "0 đ");
     
+    // Cổ tức CP / Cổ phiếu thưởng
+    const stockDivEl = document.getElementById("stat-ov-stock-div");
+    if (stockDivEl) {
+        const stockDisp = data.stock_dividend_display;
+        const stockPct = Number(data.stock_dividend_pct || 0);
+        const bonusPct = Number(data.bonus_shares_pct || 0);
+        if (stockDisp && stockDisp !== "0%") {
+            stockDivEl.textContent = stockDisp;
+            stockDivEl.className = "text-amber-400 font-bold";
+            stockDivEl.title = `Cổ tức cổ phiếu / thưởng: ${stockDisp} (Đã điều chỉnh giá tham chiếu vào ngày GDKHQ)`;
+        } else if (stockPct > 0 || bonusPct > 0) {
+            let parts = [];
+            if (stockPct > 0) parts.push(`CP ${stockPct}%`);
+            if (bonusPct > 0) parts.push(`Thưởng ${bonusPct}%`);
+            stockDivEl.textContent = parts.join(" + ");
+            stockDivEl.className = "text-amber-400 font-bold";
+            stockDivEl.title = `Cổ tức cổ phiếu / thưởng: ${parts.join(" + ")}`;
+        } else {
+            stockDivEl.textContent = "0%";
+            stockDivEl.className = "text-slate-400 font-normal";
+            stockDivEl.title = "Không có cổ tức cổ phiếu / thưởng trong 12 tháng qua";
+        }
+    }
+
     let divYieldPct = Number(data.dividend_yield || 0);
     if (divYieldPct > 0 && divYieldPct < 1.0) divYieldPct = divYieldPct * 100;
     setVal("stat-ov-div-yield", `${divYieldPct.toFixed(2)}%`);
+    const divYieldEl = document.getElementById("stat-ov-div-yield");
+    if (divYieldEl) {
+        divYieldEl.title = `Tỷ suất cổ tức tiền mặt = ${Number(data.cash_dividend || 0).toLocaleString('vi-VN')} đ / ${curClose.toLocaleString('vi-VN')} đ = ${divYieldPct.toFixed(2)}%. Cổ tức cổ phiếu không tính vào yield tiền mặt.`;
+    }
 
     setVal("stat-ov-beta", data.beta ? Number(data.beta).toFixed(2) : "1.00");
 
@@ -4073,6 +4340,15 @@ function renderOverviewHeaderAndStats(data) {
     // P/B (TTM) grid — đồng nhất với top card stat-ov-pb
     setVal("stat-ov-pbgrid", data.pb ? Number(data.pb).toFixed(2) : "N/A");
     setVal("stat-ov-bvps", data.bvps ? `${Number(data.bvps).toLocaleString("vi-VN")} đ` : "N/A");
+    setVal("stat-ov-roe", data.roe ? `${Number(data.roe).toFixed(1)}%` : "N/A");
+
+    // Đồng bộ % biến động của nến mới nhất lên thanh Legend OHLC
+    if (currentOverviewCandles && currentOverviewCandles.length > 0) {
+        const newest = currentOverviewCandles[currentOverviewCandles.length - 1];
+        const prev = currentOverviewCandles.length > 1 ? currentOverviewCandles[currentOverviewCandles.length - 2].close : newest.open;
+        const rtPct = data.change_pct !== undefined && data.change_pct !== null ? Number(data.change_pct) : null;
+        updateOverviewLegend(newest.open, newest.high, newest.low, newest.close, newest.volume, prev, rtPct);
+    }
 }
 
 // =============================================================
@@ -4259,7 +4535,10 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
                     borderColor: gridColor,
                     timeVisible: resolution !== "D" && resolution !== "W" && resolution !== "M",
                     secondsVisible: false,
-                    visible: false  // ẩn thanh thời gian trên volume chart (hiển thị ở price chart)
+                    visible: false,  // ẩn thanh thời gian trên volume chart (hiển thị ở price chart)
+                    rightOffset: 12,
+                    fixLeftEdge: false,
+                    lockVisibleTimeRangeOnResize: true
                 },
                 handleScroll: {
                     mouseWheel: true,
@@ -4285,16 +4564,22 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
             } catch (ve) { console.warn("createVolumeSeries error:", ve); }
             chartOverviewVolumeSeries = volSeries;
 
-            // Đồng bộ timescale giữa price chart và volume chart
+            // Đồng bộ timescale giữa price chart và volume chart (chống feedback loop)
             chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-                if (range && chartOverviewVolTv) {
-                    try { chartOverviewVolTv.timeScale().setVisibleLogicalRange(range); } catch (e) {}
-                }
+                if (isSyncingOverviewRange || !range || !chartOverviewVolTv) return;
+                isSyncingOverviewRange = true;
+                try {
+                    chartOverviewVolTv.timeScale().setVisibleLogicalRange(range);
+                } catch (e) {}
+                setTimeout(() => { isSyncingOverviewRange = false; }, 30);
             });
             volChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-                if (range && chartOverviewTv) {
-                    try { chartOverviewTv.timeScale().setVisibleLogicalRange(range); } catch (e) {}
-                }
+                if (isSyncingOverviewRange || !range || !chartOverviewTv) return;
+                isSyncingOverviewRange = true;
+                try {
+                    chartOverviewTv.timeScale().setVisibleLogicalRange(range);
+                } catch (e) {}
+                setTimeout(() => { isSyncingOverviewRange = false; }, 30);
             });
 
             // ResizeObserver cho volume chart
@@ -4362,11 +4647,20 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
             ro.observe(renderBox);
         }
 
-        // Crosshair listener for live OHLC legend update
+        // Crosshair listener for live OHLC legend update with real-time percentage
         if (typeof chart.subscribeCrosshairMove === "function") {
             chart.subscribeCrosshairMove(param => {
                 try {
-                    if (!param || !param.time || !param.seriesData || !mainSeries) return;
+                    if (!param || !param.time || !param.seriesData || !mainSeries) {
+                        // Khi chuột rời khỏi biểu đồ, khôi phục lại hiển thị của cây nến mới nhất
+                        if (currentOverviewCandles && currentOverviewCandles.length > 0) {
+                            const newest = currentOverviewCandles[currentOverviewCandles.length - 1];
+                            const prev = currentOverviewCandles.length > 1 ? currentOverviewCandles[currentOverviewCandles.length - 2].close : newest.open;
+                            const rtPct = currentMiniChartData ? Number(currentMiniChartData.change_pct) : null;
+                            updateOverviewLegend(newest.open, newest.high, newest.low, newest.close, newest.volume, prev, rtPct);
+                        }
+                        return;
+                    }
                     const priceData = param.seriesData.get(mainSeries);
                     if (priceData) {
                         const o = priceData.open !== undefined ? priceData.open : priceData.value;
@@ -4375,14 +4669,25 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
                         const c = priceData.close !== undefined ? priceData.close : priceData.value;
                         
                         let vol = 0;
+                        let prevClose = null;
+                        let customPct = null;
                         if (currentOverviewCandles && currentOverviewCandles.length > 0) {
-                            const found = currentOverviewCandles.find(item => {
+                            const foundIdx = currentOverviewCandles.findIndex(item => {
                                 let itemTime = item.time_str ? item.time_str.split(" ")[0] : item.time;
                                 return itemTime === param.time || item.time === param.time;
                             });
-                            if (found && found.volume) vol = found.volume;
+                            if (foundIdx >= 0) {
+                                const found = currentOverviewCandles[foundIdx];
+                                if (found && found.volume) vol = found.volume;
+                                if (foundIdx > 0) {
+                                    prevClose = currentOverviewCandles[foundIdx - 1].close;
+                                }
+                                if (foundIdx === currentOverviewCandles.length - 1 && currentMiniChartData && currentMiniChartData.change_pct !== undefined) {
+                                    customPct = Number(currentMiniChartData.change_pct);
+                                }
+                            }
                         }
-                        updateOverviewLegend(o, h, l, c, vol);
+                        updateOverviewLegend(o, h, l, c, vol, prevClose, customPct);
                     }
                 } catch (e) {}
             });
@@ -4393,12 +4698,13 @@ function initOverviewTvChartInstance(ticker, resolution = "D") {
     }
 }
 
-function updateOverviewLegend(o, h, l, c, vol) {
+function updateOverviewLegend(o, h, l, c, vol, prevClose, customPct) {
     const elO = document.getElementById("ov-leg-open");
     const elH = document.getElementById("ov-leg-high");
     const elL = document.getElementById("ov-leg-low");
     const elC = document.getElementById("ov-leg-close");
     const elVol = document.getElementById("ov-leg-vol");
+    const elPct = document.getElementById("ov-leg-pct");
 
     if (elO && o !== undefined && o !== null) elO.textContent = Number(o).toLocaleString("vi-VN");
     if (elH && h !== undefined && h !== null) elH.textContent = Number(h).toLocaleString("vi-VN");
@@ -4406,7 +4712,7 @@ function updateOverviewLegend(o, h, l, c, vol) {
     if (elC && c !== undefined && c !== null) {
         elC.textContent = Number(c).toLocaleString("vi-VN");
         if (o !== undefined && o !== null) {
-            elC.className = Number(c) >= Number(o) ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
+            elC.className = Number(c) > Number(o) ? "text-emerald-400 font-bold" : (Number(c) < Number(o) ? "text-rose-400 font-bold" : "text-amber-400 font-bold");
         }
     }
     if (elVol && vol !== undefined && vol !== null) {
@@ -4419,11 +4725,38 @@ function updateOverviewLegend(o, h, l, c, vol) {
             elVol.textContent = vNum.toLocaleString("vi-VN");
         }
     }
+
+    // Hiển thị tỷ lệ % biến động theo thời gian thực tại thanh legend
+    if (elPct) {
+        let pctVal = null;
+        if (customPct !== undefined && customPct !== null && !isNaN(customPct)) {
+            pctVal = Number(customPct);
+        } else if (c !== undefined && c !== null && prevClose !== undefined && prevClose !== null && Number(prevClose) > 0) {
+            pctVal = ((Number(c) - Number(prevClose)) / Number(prevClose)) * 100;
+        } else if (c !== undefined && c !== null && o !== undefined && o !== null && Number(o) > 0) {
+            pctVal = ((Number(c) - Number(o)) / Number(o)) * 100;
+        }
+
+        if (pctVal !== null && !isNaN(pctVal)) {
+            const sign = pctVal > 0 ? "+" : "";
+            elPct.textContent = `${sign}${pctVal.toFixed(2)}%`;
+            if (pctVal > 0) {
+                elPct.className = "text-emerald-400 font-bold";
+            } else if (pctVal < 0) {
+                elPct.className = "text-rose-400 font-bold";
+            } else {
+                elPct.className = "text-amber-400 font-bold";
+            }
+        } else {
+            elPct.textContent = "0.00%";
+            elPct.className = "text-amber-400 font-bold";
+        }
+    }
 }
 
 function updateTimeframeReturnBadges(rawCandles) {
     if (!rawCandles || rawCandles.length < 2) return;
-    const sorted = [...rawCandles].sort((a, b) => (a.time || 0) - (b.time || 0));
+    const sorted = [...rawCandles].sort((a, b) => (Number(a.time) || 0) - (Number(b.time) || 0));
     const n = sorted.length;
     const lastClose = Number(sorted[n - 1].close || sorted[n - 1].price || 0);
     if (lastClose <= 0) return;
@@ -4434,58 +4767,79 @@ function updateTimeframeReturnBadges(rawCandles) {
         if (!el) return;
         const sign = pctVal > 0 ? "+" : "";
         el.textContent = `${sign}${pctVal.toFixed(2)}%`;
-        el.className = pctVal >= 0
+        el.className = pctVal > 0
             ? `block text-[10px] ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mt-0.5 font-bold`
-            : `block text-[10px] ${isDark ? 'text-rose-400' : 'text-rose-600'} mt-0.5 font-bold`;
+            : (pctVal < 0
+                ? `block text-[10px] ${isDark ? 'text-rose-400' : 'text-rose-600'} mt-0.5 font-bold`
+                : `block text-[10px] ${isDark ? 'text-amber-400' : 'text-amber-500'} mt-0.5 font-bold`);
     };
 
-    // 1D (hôm nay so với hôm qua)
-    if (n >= 2) {
+    // 1D: Ưu tiên change_pct thời gian thực từ sàn HOSE/HNX
+    if (currentMiniChartData && currentMiniChartData.change_pct !== undefined && currentMiniChartData.change_pct !== null) {
+        setPct("tf-pct-1D", Number(currentMiniChartData.change_pct));
+    } else if (n >= 2) {
         const prevClose = Number(sorted[n - 2].close || sorted[n - 2].price || lastClose);
         if (prevClose > 0) setPct("tf-pct-1D", ((lastClose - prevClose) / prevClose) * 100);
     }
-    // 5D
-    const idx5D = Math.max(0, n - 6);
-    const close5D = Number(sorted[idx5D].close || sorted[idx5D].price || lastClose);
+
+    // Hàm tìm nến gần nhất trước một khoảng thời gian (Calendar Date Lookback)
+    const lastTime = Number(sorted[n - 1].time || 0);
+    const findCandleBeforeDays = (days) => {
+        if (!lastTime) return sorted[Math.max(0, n - Math.round(days * 0.7))];
+        const targetTime = lastTime - (days * 86400);
+        let found = sorted[0];
+        for (let i = 0; i < n; i++) {
+            if ((Number(sorted[i].time) || 0) <= targetTime) {
+                found = sorted[i];
+            } else {
+                break;
+            }
+        }
+        return found;
+    };
+
+    // 5D (~5 ngày)
+    const c5D = findCandleBeforeDays(5);
+    const close5D = Number(c5D.close || c5D.price || lastClose);
     if (close5D > 0) setPct("tf-pct-5D", ((lastClose - close5D) / close5D) * 100);
 
-    // 1M (~22 phiên)
-    const idx1M = Math.max(0, n - 23);
-    const close1M = Number(sorted[idx1M].close || sorted[idx1M].price || lastClose);
+    // 1M (~30 ngày)
+    const c1M = findCandleBeforeDays(30);
+    const close1M = Number(c1M.close || c1M.price || lastClose);
     if (close1M > 0) setPct("tf-pct-1M", ((lastClose - close1M) / close1M) * 100);
 
-    // 3M (~66 phiên)
-    const idx3M = Math.max(0, n - 67);
-    const close3M = Number(sorted[idx3M].close || sorted[idx3M].price || lastClose);
+    // 3M (~90 ngày)
+    const c3M = findCandleBeforeDays(90);
+    const close3M = Number(c3M.close || c3M.price || lastClose);
     if (close3M > 0) setPct("tf-pct-3M", ((lastClose - close3M) / close3M) * 100);
 
-    // 6M (~130 phiên)
-    const idx6M = Math.max(0, n - 131);
-    const close6M = Number(sorted[idx6M].close || sorted[idx6M].price || lastClose);
+    // 6M (~180 ngày)
+    const c6M = findCandleBeforeDays(180);
+    const close6M = Number(c6M.close || c6M.price || lastClose);
     if (close6M > 0) setPct("tf-pct-6M", ((lastClose - close6M) / close6M) * 100);
 
     // YTD (từ đầu năm hiện tại)
     const currentYear = new Date().getFullYear();
-    let ytdIdx = 0;
+    let ytdCandle = sorted[0];
     for (let i = 0; i < n; i++) {
         let tStr = sorted[i].time_str || "";
         let d = sorted[i].time ? new Date(sorted[i].time * 1000) : null;
         if (tStr.startsWith(String(currentYear)) || (d && d.getFullYear() === currentYear)) {
-            ytdIdx = i;
+            ytdCandle = sorted[i];
             break;
         }
     }
-    const closeYtd = Number(sorted[ytdIdx].close || sorted[ytdIdx].price || lastClose);
+    const closeYtd = Number(ytdCandle.close || ytdCandle.price || lastClose);
     if (closeYtd > 0) setPct("tf-pct-YTD", ((lastClose - closeYtd) / closeYtd) * 100);
 
-    // 1Y (~250 phiên)
-    const idx1Y = Math.max(0, n - 251);
-    const close1Y = Number(sorted[idx1Y].close || sorted[idx1Y].price || lastClose);
+    // 1Y (~365 ngày)
+    const c1Y = findCandleBeforeDays(365);
+    const close1Y = Number(c1Y.close || c1Y.price || lastClose);
     if (close1Y > 0) setPct("tf-pct-1Y", ((lastClose - close1Y) / close1Y) * 100);
 
-    // 5Y (~1250 phiên)
-    const idx5Y = Math.max(0, n - 1251);
-    const close5Y = Number(sorted[idx5Y].close || sorted[idx5Y].price || lastClose);
+    // 5Y (~1825 ngày)
+    const c5Y = findCandleBeforeDays(1825);
+    const close5Y = Number(c5Y.close || c5Y.price || lastClose);
     if (close5Y > 0) setPct("tf-pct-5Y", ((lastClose - close5Y) / close5Y) * 100);
 
     // ALL (toàn bộ dữ liệu)
@@ -4584,22 +4938,33 @@ function populateOverviewTvChartData(rawCandles, timeframe = "3M") {
         chartOverviewVolumeSeries.setData(isOverviewVolVisible ? volData : []);
     }
 
-    // 3. Update return percentage badges
+    // 3. Save deduped closes
+    currentOverviewDedupedCloses = closes;
+
+    // 4. Update return percentage badges
     updateTimeframeReturnBadges(rawCandles);
 
-    // 4. Update legend with newest candle
+    // 5. Update legend with newest candle
     const newest = closes[closes.length - 1];
     if (newest) {
-        updateOverviewLegend(newest.open, newest.high, newest.low, newest.close, newest.volume);
+        const prev = closes.length > 1 ? closes[closes.length - 2].close : newest.open;
+        const rtPct = currentMiniChartData ? Number(currentMiniChartData.change_pct) : null;
+        updateOverviewLegend(newest.open, newest.high, newest.low, newest.close, newest.volume, prev, rtPct);
     }
 
-    // 5. Apply Timeframe View Range
+    // 6. Apply Timeframe View Range
     applyOverviewTimeframeRange(timeframe, closes);
 }
 
 function applyOverviewTimeframeRange(tf, closes) {
-    if (!chartOverviewTv || !closes || closes.length === 0) return;
-    const n = closes.length;
+    if (!chartOverviewTv) return;
+    const dataList = (closes && closes.length > 0) 
+        ? closes 
+        : (currentOverviewDedupedCloses && currentOverviewDedupedCloses.length > 0 
+            ? currentOverviewDedupedCloses 
+            : currentOverviewCandles);
+    if (!dataList || dataList.length === 0) return;
+    const n = dataList.length;
 
     let fromIdx = 0;
     if (tf === "1D") fromIdx = Math.max(0, n - 2);
@@ -4610,7 +4975,7 @@ function applyOverviewTimeframeRange(tf, closes) {
     else if (tf === "YTD") {
         const currentYear = new Date().getFullYear();
         for (let i = 0; i < n; i++) {
-            let tStr = String(closes[i].time);
+            let tStr = String(dataList[i].time_str || dataList[i].time || "");
             if (tStr.startsWith(String(currentYear))) {
                 fromIdx = i;
                 break;
@@ -4621,18 +4986,35 @@ function applyOverviewTimeframeRange(tf, closes) {
     else if (tf === "5Y") fromIdx = Math.max(0, n - 1251);
     else if (tf === "ALL") fromIdx = 0;
 
-    try {
-        if (tf === "ALL") {
-            chartOverviewTv.timeScale().fitContent();
-        } else {
-            chartOverviewTv.timeScale().setVisibleLogicalRange({
-                from: fromIdx,
-                to: n - 1
-            });
+    const setChartRange = () => {
+        if (!chartOverviewTv) return;
+        isSyncingOverviewRange = true;
+        try {
+            if (tf === "ALL") {
+                chartOverviewTv.timeScale().fitContent();
+                if (chartOverviewVolTv) {
+                    try { chartOverviewVolTv.timeScale().fitContent(); } catch (e) {}
+                }
+            } else {
+                const targetRange = { from: fromIdx, to: n - 1 + 3 };
+                chartOverviewTv.timeScale().setVisibleLogicalRange(targetRange);
+                if (chartOverviewVolTv) {
+                    try { chartOverviewVolTv.timeScale().setVisibleLogicalRange(targetRange); } catch (e) {}
+                }
+            }
+        } catch (e) {
+            console.warn("applyOverviewTimeframeRange error:", e);
+        } finally {
+            setTimeout(() => {
+                isSyncingOverviewRange = false;
+            }, 60);
         }
-    } catch (e) {
-        chartOverviewTv.timeScale().fitContent();
-    }
+    };
+
+    requestAnimationFrame(() => {
+        setChartRange();
+        setTimeout(setChartRange, 60);
+    });
 }
 
 async function renderOverviewTvChart(ticker, resolution = "D") {
@@ -4675,9 +5057,7 @@ function changeOverviewTimeframe(tf) {
         activeBtn.classList.remove("border-slate-800", "text-slate-400");
     }
 
-    if (currentOverviewCandles && currentOverviewCandles.length > 0) {
-        populateOverviewTvChartData(currentOverviewCandles, tf);
-    }
+    applyOverviewTimeframeRange(tf);
 }
 
 function setOverviewChartType(type) {
@@ -7739,8 +8119,8 @@ function renderBctcCharts(stm) {
 // -------------------------------------------------------------
 const PEER_BASE_COLUMNS = [
     { field: "market_cap_bil", label: "Vốn hóa (tỷ đ)", format: (p) => p.market_cap_bil >= 1000 ? (p.market_cap_bil / 1000).toFixed(1) + 'k tỷ' : Math.round(p.market_cap_bil) + ' tỷ', avgFormat: () => "-" },
-    { field: "pe", label: "P/E", format: (p) => p.pe !== undefined && p.pe !== null ? p.pe + 'x' : '-', avgFormat: (a) => a.pe !== undefined && a.pe !== null ? a.pe + 'x' : '-' },
-    { field: "pb", label: "P/B", format: (p) => p.pb !== undefined && p.pb !== null ? p.pb + 'x' : '-', avgFormat: (a) => a.pb !== undefined && a.pb !== null ? a.pb + 'x' : '-' },
+    { field: "pe", label: "P/E", format: (p) => (p.pe !== undefined && p.pe !== null && !isNaN(p.pe)) ? (Number(p.pe) > 0 ? Number(p.pe).toFixed(2) + 'x' : '-') : (p.pe ? p.pe + 'x' : '-'), avgFormat: (a) => (a.pe !== undefined && a.pe !== null && !isNaN(a.pe)) ? Number(a.pe).toFixed(1) + 'x' : '-' },
+    { field: "pb", label: "P/B", format: (p) => (p.pb !== undefined && p.pb !== null && !isNaN(p.pb)) ? (Number(p.pb) > 0 ? Number(p.pb).toFixed(2) + 'x' : '-') : (p.pb ? p.pb + 'x' : '-'), avgFormat: (a) => (a.pb !== undefined && a.pb !== null && !isNaN(a.pb)) ? Number(a.pb).toFixed(2) + 'x' : '-' },
     { field: "roe", label: "ROE (%)", colorClass: "text-emerald-400", format: (p) => p.roe !== undefined && p.roe !== null ? p.roe + '%' : '-', avgFormat: (a) => a.roe !== undefined && a.roe !== null ? a.roe + '%' : '-' },
     { field: "roa", label: "ROA (%)", colorClass: "text-sky-400", format: (p) => p.roa !== undefined && p.roa !== null ? p.roa + '%' : '-', avgFormat: (a) => a.roa !== undefined && a.roa !== null ? a.roa + '%' : '-' },
     { field: "net_margin", label: "Biên ròng (%)", format: (p) => p.net_margin !== undefined && p.net_margin !== null ? p.net_margin + '%' : '-', avgFormat: (a) => a.net_margin !== undefined && a.net_margin !== null ? a.net_margin + '%' : '-' },
@@ -7947,8 +8327,26 @@ function renderPeersSection(peersData) {
     const tbody = document.getElementById("peer-table-body");
     if (tbody) {
         let rows = "";
+        const activeT = (peersData.target_ticker || getActiveTicker() || "").toUpperCase();
         peersData.peers.forEach(p => {
-            const isTarget = p.ticker === peersData.target_ticker;
+            const isTarget = (p.ticker || "").toUpperCase() === activeT;
+            if (isTarget) {
+                // Đồng bộ hóa tuyệt đối với số liệu P/E, P/B và Vốn hóa của tab Tổng Quan
+                if (window.currentOverviewMultiples && (window.currentOverviewMultiples.ticker || "").toUpperCase() === activeT) {
+                    if (window.currentOverviewMultiples.market_cap_bil) p.market_cap_bil = Number(window.currentOverviewMultiples.market_cap_bil);
+                    if (window.currentOverviewMultiples.pe) p.pe = Number(window.currentOverviewMultiples.pe);
+                    if (window.currentOverviewMultiples.pb) p.pb = Number(window.currentOverviewMultiples.pb);
+                } else if (typeof currentMiniChartData !== 'undefined' && currentMiniChartData && (currentMiniChartData.ticker || getActiveTicker() || "").toUpperCase() === activeT) {
+                    if (currentMiniChartData.market_cap_bil) p.market_cap_bil = Number(currentMiniChartData.market_cap_bil);
+                    if (currentMiniChartData.pe) p.pe = Number(currentMiniChartData.pe);
+                    if (currentMiniChartData.pb) p.pb = Number(currentMiniChartData.pb);
+                } else if (typeof currentFinancialBundle !== 'undefined' && currentFinancialBundle && currentFinancialBundle.valuation) {
+                    const val = currentFinancialBundle.valuation;
+                    if (val.market_cap_bil) p.market_cap_bil = Number(val.market_cap_bil);
+                    if (val.pe_live) p.pe = Number(val.pe_live);
+                    if (val.pb_live) p.pb = Number(val.pb_live);
+                }
+            }
             
             let baseCells = "";
             visibleBaseCols.forEach(col => {
@@ -9303,8 +9701,17 @@ let currentFireantCandleSeries = null;
 let currentFireantMa20Series = null;
 let currentFireantMa50Series = null;
 let currentFireantMa200Series = null;
+let currentFireantEma9Series = null;
+let currentFireantEma21Series = null;
+let currentFireantEma50Series = null;
+let currentFireantEma200Series = null;
 let currentFireantBbUpperSeries = null;
 let currentFireantBbLowerSeries = null;
+let currentFireantIchiTenkanSeries = null;
+let currentFireantIchiKijunSeries = null;
+let currentFireantIchiSpanASeries = null;
+let currentFireantIchiSpanBSeries = null;
+let currentFireantSarSeries = null;
 
 currentTechnicalInterval = "D"; // reuse declared variable from line 28
 let currentFireantRange = "3M";
@@ -9316,16 +9723,435 @@ let currentCandleType = "candlestick";
 let currentDrawingTool = "crosshair";
 let isDrawingsLocked = false;
 let showMaCrossAlerts = false;
+let showFansiSignals = true; // Bật tín hiệu mũi tên Mua/Bán FANSI T+ (AmiBroker AFL)
+let fansiScreenerData = null;
+let isFansiScreenerLoading = false;
 
-// Trạng thái các chỉ báo
+// Trạng thái các chỉ báo kỹ thuật toàn diện chuẩn Vietstock & FireAnt (Lưu localStorage)
 let activeIndicators = {
     ma: true,
+    ema: false,
+    ichi: false,
     bb: false,
+    sar: false,
     vol: true,
     mcdx: true,
     macd: true,
-    rsi: true
+    rsi: true,
+    stoch: false,
+    mfi: false,
+    obv: false,
+    atr: false,
+    fansi: true,
+    macross: false
 };
+try {
+    const savedInd = localStorage.getItem("fireant_active_indicators");
+    if (savedInd) {
+        const parsed = JSON.parse(savedInd);
+        if (typeof parsed === "object" && parsed !== null) {
+            activeIndicators = Object.assign(activeIndicators, parsed);
+        }
+    }
+} catch(e) {}
+
+// Kho dữ liệu chỉ báo kỹ thuật chuẩn hóa Vietstock & FireAnt
+const INDICATORS_REGISTRY = [
+    {
+        id: "ma",
+        name: "Đường trung bình động giản đơn (SMA 20, 50, 200)",
+        shortName: "SMA",
+        category: "trend",
+        type: "overlay",
+        color: "#f59e0b",
+        desc: "Xác định xu hướng ngắn, trung và dài hạn. Hỗ trợ điểm giao cắt Golden / Death Cross.",
+        defaultOn: true
+    },
+    {
+        id: "ema",
+        name: "Đường trung bình hàm mũ (EMA 9, 21, 50, 200)",
+        shortName: "EMA",
+        category: "trend",
+        type: "overlay",
+        color: "#06b6d4",
+        desc: "Phản ứng nhạy bén hơn với biến động giá gần nhất. Rất phổ biến cho lướt sóng T+.",
+        defaultOn: false
+    },
+    {
+        id: "ichi",
+        name: "Mây Ichimoku Kinko Hyo (9, 26, 52)",
+        shortName: "ICHI",
+        category: "trend",
+        type: "overlay",
+        color: "#10b981",
+        desc: "Hệ thống toàn diện xác định vùng hỗ trợ/kháng cự mây Kumo, Tenkan, Kijun và xu hướng.",
+        defaultOn: false
+    },
+    {
+        id: "bb",
+        name: "Dải băng Bollinger Bands (20, 2)",
+        shortName: "BB",
+        category: "volatility",
+        type: "overlay",
+        color: "#818cf8",
+        desc: "Đo lường độ biến động và các vùng co thắt nút cổ chai (Bollinger Squeeze) trước khi bùng nổ.",
+        defaultOn: false
+    },
+    {
+        id: "sar",
+        name: "Điểm dừng và đảo chiều Parabolic SAR (0.02, 0.2)",
+        shortName: "SAR",
+        category: "trend",
+        type: "overlay",
+        color: "#fbbf24",
+        desc: "Xác định điểm đảo chiều xu hướng và mức trailing stoploss tối ưu khi cổ phiếu chạy sóng.",
+        defaultOn: false
+    },
+    {
+        id: "vol",
+        name: "Khối lượng giao dịch & MA20 Vol (Volume)",
+        shortName: "VOL",
+        category: "volume",
+        type: "subpane",
+        paneId: "pane-volume",
+        color: "#38bdf8",
+        desc: "Khối lượng khớp lệnh so với mức trung bình 20 phiên để phát hiện phiên bùng nổ thanh khoản.",
+        defaultOn: true
+    },
+    {
+        id: "mcdx",
+        name: "MCDX - Dòng tiền Tạo lập Cá mập (Multi Color Dragon Extended)",
+        shortName: "MCDX",
+        category: "volume",
+        type: "subpane",
+        paneId: "pane-mcdx",
+        color: "#f43f5e",
+        desc: "Độc quyền phân tách 3 dòng tiền: Banker (Đỏ - Cá mập), Hot Money (Vàng - Đầu cơ), Retail (Xanh - Nhỏ lẻ).",
+        defaultOn: true
+    },
+    {
+        id: "macd",
+        name: "Phân kỳ Hội tụ Trung bình Động (MACD 12, 26, 9)",
+        shortName: "MACD",
+        category: "oscillator",
+        type: "subpane",
+        paneId: "pane-macd",
+        color: "#38bdf8",
+        desc: "Chỉ báo động lượng nhận diện điểm giao cắt đường tín hiệu và phân kỳ đỉnh/đáy đảo chiều.",
+        defaultOn: true
+    },
+    {
+        id: "rsi",
+        name: "Chỉ số Sức mạnh Tương đối (RSI 14)",
+        shortName: "RSI",
+        category: "oscillator",
+        type: "subpane",
+        paneId: "pane-rsi",
+        color: "#c084fc",
+        desc: "Đo lường quán tính giá, xác định vùng Quá Mua (>70) và Quá Bán (<30) cùng phân kỳ.",
+        defaultOn: true
+    },
+    {
+        id: "stoch",
+        name: "Chỉ báo Dao động Ngẫu nhiên (Stochastic %K, %D 14, 3, 3)",
+        shortName: "STOCH",
+        category: "oscillator",
+        type: "subpane",
+        paneId: "pane-stoch",
+        color: "#60a5fa",
+        desc: "So sánh giá đóng cửa với biên độ giá, cho tín hiệu đảo chiều sớm trong các nhịp điều chỉnh ngắn.",
+        defaultOn: false
+    },
+    {
+        id: "mfi",
+        name: "Chỉ số Dòng tiền MFI (Money Flow Index 14)",
+        shortName: "MFI",
+        category: "volume",
+        type: "subpane",
+        paneId: "pane-mfi",
+        color: "#34d399",
+        desc: "Kết hợp giữa giá và khối lượng (RSI có trọng số dòng tiền) để đo áp lực dòng tiền vào/ra.",
+        defaultOn: false
+    },
+    {
+        id: "obv",
+        name: "Khối lượng Cân bằng (On Balance Volume - OBV)",
+        shortName: "OBV",
+        category: "volume",
+        type: "subpane",
+        paneId: "pane-obv",
+        color: "#22d3ee",
+        desc: "Tính toán tích lũy khối lượng theo chiều giá tăng/giảm, phát hiện sự gom hàng âm thầm của tay to.",
+        defaultOn: false
+    },
+    {
+        id: "atr",
+        name: "Độ biến động Thực tế (Average True Range - ATR 14)",
+        shortName: "ATR",
+        category: "volatility",
+        type: "subpane",
+        paneId: "pane-atr",
+        color: "#fb923c",
+        desc: "Đo lường biên độ dao động giá bình quân để đặt mức chốt lời, cắt lỗ và quản trị rủi ro vị thế.",
+        defaultOn: false
+    },
+    {
+        id: "fansi",
+        name: "Hệ thống Tín hiệu Robot T+ FANSI (AmiBroker AFL)",
+        shortName: "FANSI",
+        category: "strategy",
+        type: "markers",
+        color: "#10b981",
+        desc: "Hiển thị mũi tên Mua (Xanh lá) và Bán (Đỏ) tự động từ hệ thống Robot thuật toán FANSI T+.",
+        defaultOn: true
+    },
+    {
+        id: "macross",
+        name: "Cảnh báo Điểm giao cắt Vàng (Golden / Death Cross MA20 & MA50)",
+        shortName: "CROSS",
+        category: "strategy",
+        type: "markers",
+        color: "#fbbf24",
+        desc: "Đánh dấu tự động các điểm giao cắt vàng (MA20 vượt lên MA50) và giao cắt tử thần trên nến.",
+        defaultOn: false
+    }
+];
+
+const PANE_ID_MAP = {
+    vol: "pane-volume",
+    mcdx: "pane-mcdx",
+    macd: "pane-macd",
+    rsi: "pane-rsi",
+    stoch: "pane-stoch",
+    mfi: "pane-mfi",
+    obv: "pane-obv",
+    atr: "pane-atr"
+};
+
+let currentModalIndicatorCategory = "all";
+let currentModalIndicatorSearchQuery = "";
+
+// Biến lưu dữ liệu chỉ báo đã tính toán để render biểu đồ
+let lastCalculatedMa20Data = [];
+let lastCalculatedMa50Data = [];
+let lastCalculatedMa200Data = [];
+let lastCalculatedEma9Data = [];
+let lastCalculatedEma21Data = [];
+let lastCalculatedEma50Data = [];
+let lastCalculatedEma200Data = [];
+let lastCalculatedBbUpperData = [];
+let lastCalculatedBbLowerData = [];
+let lastCalculatedIchiTenkan = [];
+let lastCalculatedIchiKijun = [];
+let lastCalculatedIchiSpanA = [];
+let lastCalculatedIchiSpanB = [];
+let lastCalculatedSarData = [];
+
+function saveActiveIndicators() {
+    try {
+        localStorage.setItem("fireant_active_indicators", JSON.stringify(activeIndicators));
+    } catch(e) {}
+    updateActiveIndicatorsBadge();
+}
+
+function updateActiveIndicatorsBadge() {
+    const activeCount = Object.keys(activeIndicators).filter(k => !!activeIndicators[k]).length;
+    const badge = document.getElementById("badge-active-indicators-count");
+    if (badge) badge.textContent = activeCount;
+    const modalCount = document.getElementById("modal-ind-count-active");
+    if (modalCount) modalCount.textContent = activeCount;
+    const tabActiveCount = document.getElementById("ind-tab-active-count");
+    if (tabActiveCount) tabActiveCount.textContent = activeCount;
+}
+
+function syncIndicatorCheckboxesUI() {
+    updateActiveIndicatorsBadge();
+}
+
+// -------------------------------------------------------------
+// ĐIỀU KHIỂN CỬA SỔ MODAL CHỈ BÁO & CHIẾN LƯỢC KỸ THUẬT
+// -------------------------------------------------------------
+function openIndicatorsModal() {
+    const modal = document.getElementById("modal-indicators-search");
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    currentModalIndicatorSearchQuery = "";
+    const searchInput = document.getElementById("modal-indicator-search-input");
+    if (searchInput) {
+        searchInput.value = "";
+        setTimeout(() => searchInput.focus(), 80);
+    }
+    const clearBtn = document.getElementById("btn-clear-indicator-search");
+    if (clearBtn) clearBtn.classList.add("hidden");
+    filterIndicatorCategory("all", false);
+    renderModalIndicatorsList();
+    updateActiveIndicatorsBadge();
+}
+
+function closeIndicatorsModal() {
+    const modal = document.getElementById("modal-indicators-search");
+    if (!modal) return;
+    modal.classList.add("hidden");
+}
+
+window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        const modal = document.getElementById("modal-indicators-search");
+        if (modal && !modal.classList.contains("hidden")) {
+            closeIndicatorsModal();
+        }
+    }
+});
+
+function handleIndicatorSearch(query) {
+    currentModalIndicatorSearchQuery = (query || "").trim().toLowerCase();
+    const clearBtn = document.getElementById("btn-clear-indicator-search");
+    if (clearBtn) {
+        if (currentModalIndicatorSearchQuery) clearBtn.classList.remove("hidden");
+        else clearBtn.classList.add("hidden");
+    }
+    renderModalIndicatorsList();
+}
+
+function clearIndicatorSearch() {
+    const searchInput = document.getElementById("modal-indicator-search-input");
+    if (searchInput) {
+        searchInput.value = "";
+        searchInput.focus();
+    }
+    handleIndicatorSearch("");
+}
+
+function filterIndicatorCategory(category, shouldRerender = true) {
+    currentModalIndicatorCategory = category;
+    const tabsContainer = document.getElementById("modal-indicator-tabs");
+    if (tabsContainer) {
+        tabsContainer.querySelectorAll("button").forEach(btn => {
+            btn.className = "px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 whitespace-nowrap border border-slate-800 transition-all";
+        });
+        const activeBtn = document.getElementById(`ind-tab-${category}`);
+        if (activeBtn) {
+            activeBtn.className = "px-3 py-1 rounded-lg bg-cyan-700 text-white font-bold whitespace-nowrap shadow-sm transition-all";
+        }
+    }
+    if (shouldRerender) {
+        renderModalIndicatorsList();
+    }
+}
+
+function renderModalIndicatorsList() {
+    const container = document.getElementById("modal-indicators-list");
+    if (!container) return;
+
+    const q = currentModalIndicatorSearchQuery;
+    const cat = currentModalIndicatorCategory;
+
+    const filtered = INDICATORS_REGISTRY.filter(item => {
+        if (cat === "active" && !activeIndicators[item.id]) return false;
+        if (cat !== "all" && cat !== "active" && item.category !== cat) return false;
+        if (q) {
+            const matchName = item.name.toLowerCase().includes(q);
+            const matchShort = item.shortName.toLowerCase().includes(q);
+            const matchDesc = item.desc.toLowerCase().includes(q);
+            const matchId = item.id.toLowerCase().includes(q);
+            if (!matchName && !matchShort && !matchDesc && !matchId) return false;
+        }
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="py-12 text-center text-slate-400 space-y-2 font-mono">
+                <i data-lucide="search-x" class="w-8 h-8 mx-auto text-slate-500 opacity-60"></i>
+                <p class="text-sm">Không tìm thấy chỉ báo phù hợp với từ khóa "${q}"</p>
+                <button onclick="clearIndicatorSearch(); filterIndicatorCategory('all');" class="text-xs text-cyan-400 hover:underline">Xem tất cả 15 chỉ báo</button>
+            </div>
+        `;
+        if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+        return;
+    }
+
+    let html = "";
+    filtered.forEach(ind => {
+        const isOn = !!activeIndicators[ind.id];
+        const catBadge = {
+            trend: '<span class="px-1.5 py-0.2 rounded text-[10px] bg-amber-950/80 text-amber-400 border border-amber-800/60">Xu hướng</span>',
+            oscillator: '<span class="px-1.5 py-0.2 rounded text-[10px] bg-purple-950/80 text-purple-400 border border-purple-800/60">Dao động</span>',
+            volume: '<span class="px-1.5 py-0.2 rounded text-[10px] bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">Dòng tiền</span>',
+            volatility: '<span class="px-1.5 py-0.2 rounded text-[10px] bg-indigo-950/80 text-indigo-400 border border-indigo-800/60">Đo lường</span>',
+            strategy: '<span class="px-1.5 py-0.2 rounded text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">Tín hiệu Robot</span>'
+        }[ind.category] || '';
+
+        html += `
+            <div class="py-2.5 px-3 rounded-xl transition-colors flex items-center justify-between gap-3 ${isOn ? 'bg-cyan-950/20 border border-cyan-900/40' : 'hover:bg-slate-900/80 border border-transparent'}">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-mono font-black text-xs shrink-0 shadow-sm" style="background-color: ${ind.color}22; color: ${ind.color}; border: 1px solid ${ind.color}55;">
+                        ${ind.shortName}
+                    </div>
+                    <div class="space-y-0.5 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-xs sm:text-sm text-slate-100 truncate">${ind.name}</span>
+                            ${catBadge}
+                            ${isOn ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Đang bật</span>' : ''}
+                        </div>
+                        <p class="text-[11px] text-slate-400 line-clamp-2">${ind.desc}</p>
+                    </div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2">
+                    <button onclick="toggleIndicatorFromModal('${ind.id}')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${isOn ? 'bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/80 shadow' : 'bg-cyan-700 hover:bg-cyan-600 text-white shadow-sm'}">
+                        <span>${isOn ? '✕ Tắt' : '+ Bật'}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+}
+
+function toggleIndicatorFromModal(indId) {
+    const currentState = !!activeIndicators[indId];
+    toggleIndicator(indId, !currentState);
+    renderModalIndicatorsList();
+    updateActiveIndicatorsBadge();
+}
+
+function resetIndicatorsToDefault() {
+    activeIndicators = {
+        ma: true,
+        ema: false,
+        ichi: false,
+        bb: false,
+        sar: false,
+        vol: true,
+        mcdx: true,
+        macd: true,
+        rsi: true,
+        stoch: false,
+        mfi: false,
+        obv: false,
+        atr: false,
+        fansi: true,
+        macross: false
+    };
+    saveActiveIndicators();
+    showToast("Đã khôi phục cài đặt chỉ báo kỹ thuật mặc định");
+
+    // Áp dụng ngay lên biểu đồ
+    const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
+    initFireantChart(ticker, currentTechnicalInterval);
+    renderModalIndicatorsList();
+    updateActiveIndicatorsBadge();
+}
+
+// Lắng nghe phím ESC để đóng Modal
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape" || e.keyCode === 27) {
+        closeIndicatorsModal();
+    }
+});
+
 let lastFireantCandles = [];
 let customPaneHeights = {};
 try {
@@ -9333,12 +10159,19 @@ try {
     if (savedHeights) customPaneHeights = JSON.parse(savedHeights);
 } catch(e) {}
 let maximizedPaneKey = null;
-let indicatorOrder = ['vol', 'mcdx', 'macd', 'rsi'];
+let defaultIndicatorOrder = ['vol', 'mcdx', 'macd', 'rsi', 'stoch', 'mfi', 'obv', 'atr'];
+let indicatorOrder = [...defaultIndicatorOrder];
 try {
     const savedOrder = localStorage.getItem("fireant_indicator_order");
     if (savedOrder) {
         const parsed = JSON.parse(savedOrder);
-        if (Array.isArray(parsed) && parsed.length === 4) indicatorOrder = parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            const validSaved = parsed.filter(k => defaultIndicatorOrder.includes(k));
+            defaultIndicatorOrder.forEach(k => {
+                if (!validSaved.includes(k)) validSaved.push(k);
+            });
+            indicatorOrder = validSaved;
+        }
     }
 } catch(e) {}
 
@@ -9478,14 +10311,24 @@ function renderTechnicalChart(data) {
 async function syncTechnicalDataRealtime(ticker) {
     if (isSyncingTechnical) return;
     const clean = (ticker || currentTechnicalTicker || "HPG").toUpperCase();
+    if (currentTechnicalTicker && clean !== currentTechnicalTicker) {
+        return;
+    }
     isSyncingTechnical = true;
     try {
         const fetchCount = (currentTechnicalInterval === "D" || currentTechnicalInterval === "W" || currentTechnicalInterval === "M") ? 1500 : 350;
         const res = await fetch(`/api/technical/${clean}?resolution=${currentTechnicalInterval}&count=${fetchCount}`);
         if (res.ok) {
             const data = await res.json();
+            // Bảo vệ nghiêm ngặt: Nếu người dùng đã chuyển sang mã khác trong lúc fetch, tuyệt đối không đè nến cũ
+            if (clean !== currentTechnicalTicker || (data.ticker && data.ticker.toUpperCase() !== currentTechnicalTicker.toUpperCase())) {
+                return;
+            }
             currentTechnicalData = data;
             renderTechnicalSection(data);
+            if (currentTechnicalChartMode === "tvpro") {
+                updateTvProRobotSignal(clean);
+            }
             if (data.candles_history && data.candles_history.length > 0) {
                 if (currentFireantCandleSeries) {
                     populateFireantChartData(data.candles_history);
@@ -9501,11 +10344,309 @@ async function syncTechnicalDataRealtime(ticker) {
     }
 }
 
+// =============================================================
+// CHẾ ĐỘ BIỂU ĐỒ KÉP: FANSI & MCDX (MẶC ĐỊNH) vs TRADINGVIEW PRO (100+ CHỈ BÁO)
+// =============================================================
+let currentTechnicalChartMode = "fansi"; // "fansi" (mặc định) hoặc "tvpro"
+let currentTvProWidget = null;
+let currentTvProRobotStrategy = "fansi";
+
+function switchTechnicalChartMode(mode) {
+    if (!mode) mode = "fansi";
+    currentTechnicalChartMode = mode;
+
+    const wsFansi = document.getElementById("tech-workspace-container");
+    const wsTvPro = document.getElementById("tech-tvpro-container");
+    const btnFansi = document.getElementById("btn-chart-mode-fansi");
+    const btnTvPro = document.getElementById("btn-chart-mode-tvpro");
+    const fireantTimeframes = document.getElementById("tech-fireant-timeframe-group");
+    const candleTypeDropdown = document.getElementById("btn-candle-type") ? document.getElementById("btn-candle-type").parentElement : null;
+    const indicatorsMenu = document.getElementById("btn-indicators-menu") ? document.getElementById("btn-indicators-menu").parentElement : null;
+    const btnMaCross = document.getElementById("btn-ma-cross");
+    const btnFansiSignals = document.getElementById("btn-fansi-signals");
+
+    const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
+
+    if (mode === "fansi") {
+        if (wsFansi) wsFansi.style.display = "flex";
+        if (wsTvPro) wsTvPro.classList.add("hidden");
+
+        if (btnFansi) {
+            btnFansi.className = "px-2.5 py-1 rounded bg-cyan-700 text-white font-bold flex items-center gap-1.5 transition-all shadow-sm";
+        }
+        if (btnTvPro) {
+            btnTvPro.className = "px-2.5 py-1 rounded text-slate-400 hover:text-white flex items-center gap-1.5 transition-all";
+        }
+
+        // Hiện lại các công cụ FireAnt chuẩn
+        if (fireantTimeframes) fireantTimeframes.style.display = "flex";
+        if (candleTypeDropdown) candleTypeDropdown.style.display = "block";
+        if (indicatorsMenu) indicatorsMenu.style.display = "block";
+        if (btnMaCross) btnMaCross.style.display = "flex";
+        if (btnFansiSignals) btnFansiSignals.style.display = "flex";
+
+        adjustTechnicalChartLayout();
+        showToast("Đã kích hoạt: Biểu đồ FANSI AI & Dòng tiền tạo lập MCDX (Mặc định)");
+    } else {
+        if (wsFansi) wsFansi.style.display = "none";
+        if (wsTvPro) wsTvPro.classList.remove("hidden");
+
+        if (btnTvPro) {
+            btnTvPro.className = "px-2.5 py-1 rounded bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold flex items-center gap-1.5 transition-all shadow-sm";
+        }
+        if (btnFansi) {
+            btnFansi.className = "px-2.5 py-1 rounded text-slate-400 hover:text-white flex items-center gap-1.5 transition-all";
+        }
+
+        // Ẩn các nút nến/chỉ báo cũ của FireAnt vì TradingView Pro có thanh công cụ riêng đầy đủ 100+ chỉ báo
+        if (candleTypeDropdown) candleTypeDropdown.style.display = "none";
+        if (indicatorsMenu) indicatorsMenu.style.display = "none";
+        if (btnMaCross) btnMaCross.style.display = "none";
+        if (btnFansiSignals) btnFansiSignals.style.display = "none";
+
+        renderTradingViewProWidget(ticker);
+        updateTvProRobotSignal(ticker);
+        showToast("Đã kích hoạt: Biểu đồ TradingView Pro (Đầy đủ 100+ chỉ báo, công cụ vẽ & đo lường)");
+    }
+}
+
+function renderTradingViewProWidget(ticker) {
+    const rawSym = (ticker || currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG")).trim().toUpperCase();
+    const widgetBox = document.getElementById("tech-tvpro-widget-box");
+    if (!widgetBox) return;
+
+    let exchange = "HOSE";
+    if (currentTechnicalData && currentTechnicalData.exchange) {
+        exchange = currentTechnicalData.exchange.toUpperCase();
+    } else if (fansiScreenerData && fansiScreenerData.items) {
+        const found = fansiScreenerData.items.find(x => (x.symbol || "").toUpperCase() === rawSym);
+        if (found && found.exchange) exchange = found.exchange.toUpperCase();
+    }
+
+    let tvSymbol = `${exchange}:${rawSym}`;
+    if (rawSym === "VNINDEX" || rawSym === "HNXINDEX" || rawSym === "UPINDEX" || rawSym === "VN30") {
+        tvSymbol = rawSym;
+    }
+
+    // Cập nhật nút Deep-link mở TradingView.com trực tiếp
+    const extBtn = document.getElementById("tvpro-external-chart-btn");
+    const extLbl = document.getElementById("tvpro-btn-ticker-lbl");
+    if (extBtn) {
+        extBtn.href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSymbol)}`;
+    }
+    if (extLbl) {
+        extLbl.textContent = rawSym;
+    }
+
+    const vh = window.innerHeight || 800;
+    const isFullscreen = !!document.fullscreenElement;
+    const totalH = isFullscreen ? Math.max(550, vh - 90) : Math.max(500, Math.min(780, vh - 220));
+    widgetBox.style.height = `${totalH}px`;
+
+    const isDark = document.documentElement.classList.contains("dark") || true;
+
+    if (typeof TradingView !== "undefined") {
+        widgetBox.innerHTML = "";
+        try {
+            currentTvProWidget = new TradingView.widget({
+                "autosize": true,
+                "symbol": tvSymbol,
+                "interval": currentTechnicalInterval === "1" ? "1" : (currentTechnicalInterval === "5" ? "5" : (currentTechnicalInterval === "15" ? "15" : (currentTechnicalInterval === "60" ? "60" : (currentTechnicalInterval === "W" ? "W" : (currentTechnicalInterval === "M" ? "M" : "D"))))),
+                "timezone": "Asia/Ho_Chi_Minh",
+                "theme": isDark ? "dark" : "light",
+                "style": "1",
+                "locale": "vi_VN",
+                "toolbar_bg": isDark ? "#101625" : "#f1f5f9",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+                "container_id": "tech-tvpro-widget-box",
+                "hide_side_toolbar": false,
+                "withdateranges": true,
+                "details": false,
+                "hotlist": false,
+                "calendar": false,
+                "studies": [
+                    "MASimple@tv-basicstudies",
+                    "RSI@tv-basicstudies"
+                ]
+            });
+        } catch(e) {
+            console.error("renderTradingViewProWidget error:", e);
+        }
+    } else {
+        widgetBox.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-2 font-mono text-xs">
+                <span class="animate-spin text-lg">⏳</span>
+                <span>Đang tải thư viện TradingView Pro...</span>
+            </div>
+        `;
+    }
+
+    updateTvProRobotSignal(rawSym);
+}
+
+function updateTvProRobotSignal(ticker, strategyKey = null) {
+    const rawSym = (ticker || currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG")).trim().toUpperCase();
+    const stratKey = strategyKey || currentTvProRobotStrategy || "fansi";
+    currentTvProRobotStrategy = stratKey;
+
+    const lblTicker = document.getElementById("tvpro-ticker-label");
+    const lblEx = document.getElementById("tvpro-exchange-label");
+    if (lblTicker) lblTicker.textContent = rawSym;
+    if (lblEx) {
+        lblEx.textContent = (currentTechnicalData && currentTechnicalData.exchange) ? currentTechnicalData.exchange.toUpperCase() : "HOSE";
+    }
+
+    ['fansi', 'robot1', 'robot2', 'div_macd', 'div_rsi'].forEach(k => {
+        const btn = document.getElementById(`tvpro-strat-${k}`);
+        if (btn) {
+            if (k === stratKey) {
+                btn.className = "px-2.5 py-0.5 rounded font-bold bg-cyan-700 text-white shadow-sm transition-all";
+            } else {
+                btn.className = "px-2.5 py-0.5 rounded text-slate-400 hover:text-white transition-all";
+            }
+        }
+    });
+
+    const STRAT_NAMES = {
+        fansi: "FANSI T+",
+        robot1: "ROBOT 1 (THE BEAST)",
+        robot2: "ROBOT 2 (ROCKET JET)",
+        div_macd: "PHÂN KỲ MACD",
+        div_rsi: "PHÂN KỲ RSI"
+    };
+    const stratName = STRAT_NAMES[stratKey] || stratKey;
+
+    const badge = document.getElementById("tvpro-signal-badge");
+    const textEl = document.getElementById("tvpro-signal-text");
+    const priceVal = document.getElementById("tvpro-signal-price-val");
+    const dateVal = document.getElementById("tvpro-signal-date-val");
+    const drawerTableBody = document.getElementById("tvpro-signal-history-tbody");
+
+    const candles = (lastFireantCandles && lastFireantCandles.length > 0)
+        ? lastFireantCandles
+        : ((currentTechnicalData && currentTechnicalData.candles_history) ? currentTechnicalData.candles_history : []);
+
+    if (!candles || candles.length < 20) {
+        if (badge) {
+            badge.className = "px-3 py-1 rounded-md text-xs font-mono bg-slate-900 text-slate-400 border border-slate-700 flex items-center gap-1.5";
+            if (textEl) textEl.textContent = `Đang đồng bộ nến... (${stratName})`;
+        }
+        return;
+    }
+
+    const afl = calcScreenerAflSignals(candles, stratKey);
+    const n = candles.length;
+    const lastCandle = candles[n - 1];
+
+    if (afl.lastSignal === "BUY") {
+        const isT0 = afl.barsSince === 0;
+        if (badge) {
+            badge.className = "px-3 py-1 rounded-md text-xs font-bold font-mono bg-emerald-950 text-emerald-400 border border-emerald-700/80 shadow-sm flex items-center gap-1.5";
+        }
+        if (textEl) {
+            textEl.innerHTML = isT0 ? `⚡ T+0 MUA (${stratName})` : `MUA (${stratName} T+${afl.barsSince})`;
+        }
+        if (priceVal) {
+            const sigIdx = Math.max(0, n - 1 - afl.barsSince);
+            const p = candles[sigIdx] ? candles[sigIdx].close : lastCandle.close;
+            priceVal.textContent = Number(p).toLocaleString('vi-VN');
+        }
+        if (dateVal) {
+            const sigIdx = Math.max(0, n - 1 - afl.barsSince);
+            const d = candles[sigIdx] ? (candles[sigIdx].time_str || candles[sigIdx].time) : "--";
+            dateVal.textContent = d;
+        }
+    } else if (afl.lastSignal === "SELL") {
+        const isT0 = afl.barsSince === 0;
+        if (badge) {
+            badge.className = "px-3 py-1 rounded-md text-xs font-bold font-mono bg-rose-950 text-rose-400 border border-rose-700/80 shadow-sm flex items-center gap-1.5";
+        }
+        if (textEl) {
+            textEl.innerHTML = isT0 ? `⚡ T+0 BÁN (${stratName})` : `BÁN (${stratName} T+${afl.barsSince})`;
+        }
+        if (priceVal) {
+            const sigIdx = Math.max(0, n - 1 - afl.barsSince);
+            const p = candles[sigIdx] ? candles[sigIdx].close : lastCandle.close;
+            priceVal.textContent = Number(p).toLocaleString('vi-VN');
+        }
+        if (dateVal) {
+            const sigIdx = Math.max(0, n - 1 - afl.barsSince);
+            const d = candles[sigIdx] ? (candles[sigIdx].time_str || candles[sigIdx].time) : "--";
+            dateVal.textContent = d;
+        }
+    } else {
+        if (badge) {
+            badge.className = "px-3 py-1 rounded-md text-xs font-mono bg-slate-900 text-slate-400 border border-slate-700 flex items-center gap-1.5";
+        }
+        if (textEl) {
+            textEl.textContent = `Đang theo dõi (${stratName})`;
+        }
+        if (priceVal) priceVal.textContent = Number(lastCandle.close).toLocaleString('vi-VN');
+        if (dateVal) dateVal.textContent = "Hiện tại";
+    }
+
+    if (drawerTableBody && afl.markers && afl.markers.length > 0) {
+        const recentMarkers = [...afl.markers].reverse().slice(0, 5);
+        drawerTableBody.innerHTML = recentMarkers.map(m => {
+            const isBuy = m.position === "belowBar";
+            const colorClass = isBuy ? "text-emerald-400" : "text-rose-400";
+            const typeText = isBuy ? "MUA" : "BÁN";
+            return `
+                <tr class="border-b border-slate-800/60">
+                    <td class="py-1 px-2 font-mono ${colorClass} font-bold">${typeText}</td>
+                    <td class="py-1 px-2 font-mono text-slate-300">${m.time || '--'}</td>
+                    <td class="py-1 px-2 font-mono text-right text-slate-200">${m.text || stratName}</td>
+                </tr>
+            `;
+        }).join("");
+    }
+}
+
+function changeTvProRobotStrategy(stratKey) {
+    currentTvProRobotStrategy = stratKey;
+    updateTvProRobotSignal(currentTechnicalTicker, stratKey);
+    const names = {
+        fansi: "FANSI T+",
+        robot1: "ROBOT 1 (THE BEAST)",
+        robot2: "ROBOT 2 (ROCKET JET)",
+        div_macd: "PHÂN KỲ MACD",
+        div_rsi: "PHÂN KỲ RSI"
+    };
+    showToast(`Đang theo dõi tín hiệu kỹ thuật: ${names[stratKey] || stratKey}`);
+}
+
+function toggleTvProSignalHistory() {
+    const drawer = document.getElementById("tvpro-signal-history-drawer");
+    if (drawer) {
+        drawer.classList.toggle("hidden");
+    }
+}
+
 function onSwitchToTechnicalTab() {
+    try { syncIndicatorCheckboxesUI(); } catch(e) {}
     const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
     setTimeout(() => {
-        initFireantChart(ticker, currentTechnicalInterval);
+        if (currentTechnicalChartMode === "tvpro") {
+            renderTradingViewProWidget(ticker);
+            updateTvProRobotSignal(ticker);
+            return;
+        }
+        if (!currentFireantChart || currentTechnicalTicker !== ticker) {
+            initFireantChart(ticker, currentTechnicalInterval);
+        } else {
+            adjustTechnicalChartLayout();
+            if (userManuallyScrolledRange && currentFireantChart.timeScale) {
+                try {
+                    currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
+                    if (typeof syncSubPanesWithRange === "function") syncSubPanesWithRange(userManuallyScrolledRange);
+                } catch(e) {}
+            }
+        }
         adjustTechnicalChartLayout();
+        if (!fansiScreenerData) {
+            loadFansiScreener();
+        }
     }, 80);
 }
 
@@ -9513,12 +10654,34 @@ function changeTechnicalSymbol(newSymbol) {
     if (!newSymbol || !newSymbol.trim()) return;
     const clean = newSymbol.trim().toUpperCase();
     currentTechnicalTicker = clean;
+    window.currentActiveTicker = clean;
+    window.currentSymbol = clean;
+    userManuallyScrolledRange = null; // Luôn reset để đồ thị căn lề phải chuẩn xác
     const input = document.getElementById("tech-quick-ticker");
     if (input) input.value = clean;
     
     // Đồng bộ sang thanh tìm kiếm trung tâm
     const centralInput = document.getElementById("central-ticker-input");
     if (centralInput) centralInput.value = clean;
+
+    try {
+        if (typeof selectScreenerTicker === "function") {
+            selectScreenerTicker(clean, false);
+        }
+    } catch (e) {}
+
+    if (currentTechnicalChartMode === "tvpro") {
+        renderTradingViewProWidget(clean);
+        updateTvProRobotSignal(clean);
+        showToast(`Đã chuyển biểu đồ TradingView Pro sang mã ${clean}`);
+        return;
+    }
+
+    // Xóa sạch nến cũ và markers cũ ngay lập tức để tránh hiển thị nhầm nến mã cũ
+    if (currentFireantCandleSeries) {
+        try { currentFireantCandleSeries.setData([]); } catch(e) {}
+        try { currentFireantCandleSeries.setMarkers([]); } catch(e) {}
+    }
 
     showToast(`Đang tải biểu đồ kỹ thuật FireAnt cho mã ${clean}...`);
     initFireantChart(clean, currentTechnicalInterval);
@@ -9568,6 +10731,7 @@ function setCandleType(type) {
 }
 
 function toggleIndicatorsMenu() {
+    syncIndicatorCheckboxesUI();
     const menu = document.getElementById("dropdown-indicators-menu");
     if (menu) menu.classList.toggle("hidden");
 }
@@ -9578,15 +10742,19 @@ function removeIndicatorPane(key) {
         vol: "Khối lượng (Volume)",
         mcdx: "MCDX Dòng tiền Cá mập",
         macd: "Chỉ báo MACD (12, 26, 9)",
-        rsi: "Chỉ báo RSI (14)"
+        rsi: "Chỉ báo RSI (14)",
+        stoch: "Chỉ báo Stochastic Oscillator",
+        mfi: "Chỉ báo Money Flow Index (MFI)",
+        obv: "Chỉ báo On Balance Volume (OBV)",
+        atr: "Chỉ báo Average True Range (ATR)"
     };
-    showToast(`Đã xóa ${names[key] || key}. Thêm lại tại menu [fx Các chỉ báo]`);
+    showToast(`Đã xóa ${names[key] || key}. Thêm lại tại cửa sổ [Chỉ báo]`);
 }
 
 function applyIndicatorOrder() {
     const container = document.getElementById("tech-chart-stack-container");
     if (!container) return;
-    const paneMap = { vol: "pane-volume", mcdx: "pane-mcdx", macd: "pane-macd", rsi: "pane-rsi" };
+    const paneMap = PANE_ID_MAP;
     indicatorOrder.forEach(key => {
         const el = document.getElementById(paneMap[key]);
         if (el && el.parentElement === container) {
@@ -9605,7 +10773,16 @@ function moveIndicatorPane(key, direction) {
 
     const idx = indicatorOrder.indexOf(key);
     if (idx === -1) return;
-    const names = { vol: "Khối lượng", mcdx: "MCDX Dòng tiền", macd: "MACD", rsi: "RSI" };
+    const names = {
+        vol: "Khối lượng",
+        mcdx: "MCDX Dòng tiền",
+        macd: "MACD",
+        rsi: "RSI",
+        stoch: "Stochastic",
+        mfi: "MFI",
+        obv: "OBV",
+        atr: "ATR"
+    };
 
     if (direction === "up") {
         if (idx === 0) {
@@ -9638,10 +10815,14 @@ function toggleMaximizePane(key) {
         vol: "Khối lượng (Volume)",
         mcdx: "MCDX Dòng tiền Cá mập",
         macd: "MACD (12, 26, 9)",
-        rsi: "RSI (14)"
+        rsi: "RSI (14)",
+        stoch: "Stochastic Oscillator",
+        mfi: "Money Flow Index (MFI)",
+        obv: "On Balance Volume (OBV)",
+        atr: "Average True Range (ATR)"
     };
 
-    const keys = ['main', 'vol', 'mcdx', 'macd', 'rsi'];
+    const keys = ['main', 'vol', 'mcdx', 'macd', 'rsi', 'stoch', 'mfi', 'obv', 'atr'];
 
     if (maximizedPaneKey === key) {
         // Thoát chế độ phóng to -> Trở về xem tất cả
@@ -9712,17 +10893,55 @@ function toggleMaximizePane(key) {
 function restoreAllIndicatorsDefault() {
     ['vol', 'mcdx', 'macd', 'rsi', 'ma'].forEach(k => {
         activeIndicators[k] = true;
-        const chk = document.getElementById("chk-ind-" + k);
-        if (chk) chk.checked = true;
     });
-    activeIndicators.bb = false;
-    const chkBb = document.getElementById("chk-ind-bb");
-    if (chkBb) chkBb.checked = false;
+    ['bb', 'ema', 'ichi', 'sar', 'stoch', 'mfi', 'obv', 'atr'].forEach(k => {
+        activeIndicators[k] = false;
+    });
+    saveActiveIndicators();
+    syncIndicatorCheckboxesUI();
 
-    if (currentFireantMa20Series) currentFireantMa20Series.applyOptions({ visible: true });
-    if (currentFireantMa50Series) currentFireantMa50Series.applyOptions({ visible: true });
-    if (currentFireantBbUpperSeries) currentFireantBbUpperSeries.applyOptions({ visible: false });
-    if (currentFireantBbLowerSeries) currentFireantBbLowerSeries.applyOptions({ visible: false });
+    if (currentFireantMa20Series) {
+        currentFireantMa20Series.setData(lastCalculatedMa20Data || []);
+        currentFireantMa20Series.applyOptions({ visible: true });
+    }
+    if (currentFireantMa50Series) {
+        currentFireantMa50Series.setData(lastCalculatedMa50Data || []);
+        currentFireantMa50Series.applyOptions({ visible: true });
+    }
+    if (currentFireantMa200Series) {
+        currentFireantMa200Series.setData([]);
+        currentFireantMa200Series.applyOptions({ visible: false });
+    }
+    if (currentFireantBbUpperSeries) {
+        currentFireantBbUpperSeries.setData([]);
+        currentFireantBbUpperSeries.applyOptions({ visible: false });
+    }
+    if (currentFireantBbLowerSeries) {
+        currentFireantBbLowerSeries.setData([]);
+        currentFireantBbLowerSeries.applyOptions({ visible: false });
+    }
+    if (currentFireantEma9Series) {
+        currentFireantEma9Series.setData([]);
+        currentFireantEma9Series.applyOptions({ visible: false });
+    }
+    if (currentFireantEma21Series) {
+        currentFireantEma21Series.setData([]);
+        currentFireantEma21Series.applyOptions({ visible: false });
+    }
+    if (currentFireantEma50Series) {
+        currentFireantEma50Series.setData([]);
+        currentFireantEma50Series.applyOptions({ visible: false });
+    }
+    if (currentFireantEma200Series) {
+        currentFireantEma200Series.setData([]);
+        currentFireantEma200Series.applyOptions({ visible: false });
+    }
+    if (currentFireantIchiTenkanSeries) currentFireantIchiTenkanSeries.applyOptions({ visible: false });
+    if (currentFireantIchiKijunSeries) currentFireantIchiKijunSeries.applyOptions({ visible: false });
+    if (currentFireantIchiSpanASeries) currentFireantIchiSpanASeries.applyOptions({ visible: false });
+    if (currentFireantIchiSpanBSeries) currentFireantIchiSpanBSeries.applyOptions({ visible: false });
+    if (currentFireantSarSeries) currentFireantSarSeries.applyOptions({ visible: false });
+
     const b20 = document.getElementById("legend-box-ma20");
     const b50 = document.getElementById("legend-box-ma50");
     if (b20) b20.style.display = "inline";
@@ -9731,7 +10950,7 @@ function restoreAllIndicatorsDefault() {
     customPaneHeights = {};
     try { localStorage.removeItem("fireant_custom_pane_heights"); } catch(e) {}
 
-    indicatorOrder = ['vol', 'mcdx', 'macd', 'rsi'];
+    indicatorOrder = ['vol', 'mcdx', 'macd', 'rsi', 'stoch', 'mfi', 'obv', 'atr'];
     try { localStorage.removeItem("fireant_indicator_order"); } catch(e) {}
     applyIndicatorOrder();
 
@@ -9745,28 +10964,110 @@ function restoreAllIndicatorsDefault() {
 
 function toggleIndicator(indicatorKey, isChecked) {
     activeIndicators[indicatorKey] = isChecked;
+    saveActiveIndicators();
 
     if (indicatorKey === "ma") {
-        if (currentFireantMa20Series) currentFireantMa20Series.applyOptions({ visible: isChecked });
-        if (currentFireantMa50Series) currentFireantMa50Series.applyOptions({ visible: isChecked });
+        if (currentFireantMa20Series) {
+            currentFireantMa20Series.setData(isChecked && lastCalculatedMa20Data && lastCalculatedMa20Data.length > 0 ? lastCalculatedMa20Data : []);
+            currentFireantMa20Series.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantMa50Series) {
+            currentFireantMa50Series.setData(isChecked && lastCalculatedMa50Data && lastCalculatedMa50Data.length > 0 ? lastCalculatedMa50Data : []);
+            currentFireantMa50Series.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantMa200Series) {
+            currentFireantMa200Series.setData(isChecked && lastCalculatedMa200Data && lastCalculatedMa200Data.length > 0 ? lastCalculatedMa200Data : []);
+            currentFireantMa200Series.applyOptions({ visible: isChecked });
+        }
         const b20 = document.getElementById("legend-box-ma20");
         const b50 = document.getElementById("legend-box-ma50");
         if (b20) b20.style.display = isChecked ? "inline" : "none";
         if (b50) b50.style.display = isChecked ? "inline" : "none";
+    } else if (indicatorKey === "ema") {
+        if (currentFireantEma9Series) {
+            currentFireantEma9Series.setData(isChecked && lastCalculatedEma9Data && lastCalculatedEma9Data.length > 0 ? lastCalculatedEma9Data : []);
+            currentFireantEma9Series.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantEma21Series) {
+            currentFireantEma21Series.setData(isChecked && lastCalculatedEma21Data && lastCalculatedEma21Data.length > 0 ? lastCalculatedEma21Data : []);
+            currentFireantEma21Series.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantEma50Series) {
+            currentFireantEma50Series.setData(isChecked && lastCalculatedEma50Data && lastCalculatedEma50Data.length > 0 ? lastCalculatedEma50Data : []);
+            currentFireantEma50Series.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantEma200Series) {
+            currentFireantEma200Series.setData(isChecked && lastCalculatedEma200Data && lastCalculatedEma200Data.length > 0 ? lastCalculatedEma200Data : []);
+            currentFireantEma200Series.applyOptions({ visible: isChecked });
+        }
     } else if (indicatorKey === "bb") {
-        if (currentFireantBbUpperSeries) currentFireantBbUpperSeries.applyOptions({ visible: isChecked });
-        if (currentFireantBbLowerSeries) currentFireantBbLowerSeries.applyOptions({ visible: isChecked });
+        if (currentFireantBbUpperSeries) {
+            currentFireantBbUpperSeries.setData(isChecked && lastCalculatedBbUpperData && lastCalculatedBbUpperData.length > 0 ? lastCalculatedBbUpperData : []);
+            currentFireantBbUpperSeries.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantBbLowerSeries) {
+            currentFireantBbLowerSeries.setData(isChecked && lastCalculatedBbLowerData && lastCalculatedBbLowerData.length > 0 ? lastCalculatedBbLowerData : []);
+            currentFireantBbLowerSeries.applyOptions({ visible: isChecked });
+        }
+    } else if (indicatorKey === "ichi") {
+        if (currentFireantIchiTenkanSeries) {
+            currentFireantIchiTenkanSeries.setData(isChecked && lastCalculatedIchiTenkan && lastCalculatedIchiTenkan.length > 0 ? lastCalculatedIchiTenkan : []);
+            currentFireantIchiTenkanSeries.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantIchiKijunSeries) {
+            currentFireantIchiKijunSeries.setData(isChecked && lastCalculatedIchiKijun && lastCalculatedIchiKijun.length > 0 ? lastCalculatedIchiKijun : []);
+            currentFireantIchiKijunSeries.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantIchiSpanASeries) {
+            currentFireantIchiSpanASeries.setData(isChecked && lastCalculatedIchiSpanA && lastCalculatedIchiSpanA.length > 0 ? lastCalculatedIchiSpanA : []);
+            currentFireantIchiSpanASeries.applyOptions({ visible: isChecked });
+        }
+        if (currentFireantIchiSpanBSeries) {
+            currentFireantIchiSpanBSeries.setData(isChecked && lastCalculatedIchiSpanB && lastCalculatedIchiSpanB.length > 0 ? lastCalculatedIchiSpanB : []);
+            currentFireantIchiSpanBSeries.applyOptions({ visible: isChecked });
+        }
+    } else if (indicatorKey === "sar") {
+        if (currentFireantSarSeries) {
+            currentFireantSarSeries.setData(isChecked && lastCalculatedSarData && lastCalculatedSarData.length > 0 ? lastCalculatedSarData : []);
+            currentFireantSarSeries.applyOptions({ visible: isChecked });
+        }
+    } else if (indicatorKey === "fansi") {
+        showFansiSignals = isChecked;
+        const btn = document.getElementById("btn-fansi-signals");
+        if (btn) {
+            btn.className = isChecked
+                ? "px-2.5 py-1 rounded bg-emerald-600 text-white font-bold border border-emerald-400 flex items-center gap-1 text-[11px] transition-all shadow-md"
+                : "px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700/80 flex items-center gap-1 text-[11px] font-semibold transition-all";
+        }
+        if (lastFireantCandles && lastFireantCandles.length > 0) {
+            applyChartMarkers(lastFireantCandles, lastCalculatedMa20Data, lastCalculatedMa50Data);
+        }
+    } else if (indicatorKey === "macross") {
+        showMaCrossAlerts = isChecked;
+        const btn = document.getElementById("btn-ma-cross");
+        if (btn) {
+            btn.className = isChecked
+                ? "px-2 py-1 rounded bg-amber-500 text-black font-bold border border-amber-400 flex items-center gap-1 text-[11px] transition-all shadow-md"
+                : "px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-800/60 flex items-center gap-1 text-[11px] font-semibold transition-all";
+        }
+        if (lastFireantCandles && lastFireantCandles.length > 0) {
+            applyChartMarkers(lastFireantCandles, lastCalculatedMa20Data, lastCalculatedMa50Data);
+        }
     }
 
-    // Đồng bộ checkbox trên dropdown fx
-    const chk = document.getElementById("chk-ind-" + indicatorKey);
-    if (chk && chk.checked !== isChecked) chk.checked = isChecked;
-
+    // Đồng bộ số lượng trên badge & layout subpanes
+    syncIndicatorCheckboxesUI();
     adjustTechnicalChartLayout();
+
+    const indObj = INDICATORS_REGISTRY.find(x => x.id === indicatorKey);
+    const indName = indObj ? indObj.name : indicatorKey.toUpperCase();
+    showToast(isChecked ? `Đã BẬT chỉ báo: ${indName}` : `Đã TẮT chỉ báo: ${indName}`);
 }
 
 function toggleMaCrossAlert() {
     showMaCrossAlerts = !showMaCrossAlerts;
+    activeIndicators.macross = showMaCrossAlerts;
+    saveActiveIndicators();
     const btn = document.getElementById("btn-ma-cross");
     if (btn) {
         if (showMaCrossAlerts) {
@@ -9777,8 +11078,30 @@ function toggleMaCrossAlert() {
             showToast("Đã TẮT tín hiệu giao cắt MA");
         }
     }
-    const ticker = currentTechnicalTicker || (currentReport ? currentReport.ticker : "HPG");
-    initFireantChart(ticker, currentTechnicalInterval);
+    syncIndicatorCheckboxesUI();
+    if (lastFireantCandles && lastFireantCandles.length > 0) {
+        applyChartMarkers(lastFireantCandles, lastCalculatedMa20Data, lastCalculatedMa50Data);
+    }
+}
+
+function toggleFansiSignals() {
+    showFansiSignals = !showFansiSignals;
+    activeIndicators.fansi = showFansiSignals;
+    saveActiveIndicators();
+    const btn = document.getElementById("btn-fansi-signals");
+    if (btn) {
+        if (showFansiSignals) {
+            btn.className = "px-2.5 py-1 rounded bg-emerald-600 text-white font-bold border border-emerald-400 flex items-center gap-1 text-[11px] transition-all shadow-md";
+            showToast("Đã BẬT hiển thị mũi tên Mua/Bán FANSI T+ trên biểu đồ");
+        } else {
+            btn.className = "px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700/80 flex items-center gap-1 text-[11px] font-semibold transition-all";
+            showToast("Đã TẮT mũi tên FANSI T+");
+        }
+    }
+    syncIndicatorCheckboxesUI();
+    if (lastFireantCandles && lastFireantCandles.length > 0) {
+        applyChartMarkers(lastFireantCandles, lastCalculatedMa20Data, lastCalculatedMa50Data);
+    }
 }
 
 // -------------------------------------------------------------
@@ -9914,11 +11237,15 @@ function initFireantChart(symbol, interval = "D") {
     }
 
     try {
+        // Giữ nguyên vị trí zoom nếu người dùng đã tùy chỉnh trước đó
+        isInternalRangeSetting = true;
         renderBox.innerHTML = "";
         if (currentFireantChart) {
             try { currentFireantChart.remove(); } catch (e) {}
             currentFireantChart = null;
         }
+        lastFireantCandles = null;
+        userManuallyScrolledRange = null;
 
         const isDark = document.documentElement.classList.contains("dark");
         const bgColor = isDark ? "#0c1017" : "#ffffff";
@@ -10049,39 +11376,139 @@ function initFireantChart(symbol, interval = "D") {
         }
         currentFireantCandleSeries = mainSeries;
 
-        // 2. Đường trung bình MA (SMA20, SMA50) - Không chèn chữ che nến & đường chỉ báo
+        // 2. Đường trung bình MA (SMA20, SMA50, SMA200)
         currentFireantMa20Series = createSeries("LineSeries", {
             color: isDark ? "#f59e0b" : "#d97706",
             lineWidth: 1.5,
             title: "",
             lastValueVisible: false,
-            priceLineVisible: false
+            priceLineVisible: false,
+            visible: !!activeIndicators.ma
         });
         currentFireantMa50Series = createSeries("LineSeries", {
             color: isDark ? "#38bdf8" : "#0284c7",
             lineWidth: 1.5,
             title: "",
             lastValueVisible: false,
-            priceLineVisible: false
+            priceLineVisible: false,
+            visible: !!activeIndicators.ma
+        });
+        currentFireantMa200Series = createSeries("LineSeries", {
+            color: isDark ? "#a855f7" : "#7e22ce",
+            lineWidth: 1.5,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ma
         });
 
-        // 3. Bollinger Bands (20, 2) - Không chèn chữ che nến & đường chỉ báo
+        // 3. Đường trung bình hàm mũ EMA (EMA9, EMA21, EMA50, EMA200)
+        currentFireantEma9Series = createSeries("LineSeries", {
+            color: isDark ? "#fbbf24" : "#b45309",
+            lineWidth: 1.5,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ema
+        });
+        currentFireantEma21Series = createSeries("LineSeries", {
+            color: isDark ? "#22d3ee" : "#0891b2",
+            lineWidth: 1.5,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ema
+        });
+        currentFireantEma50Series = createSeries("LineSeries", {
+            color: isDark ? "#60a5fa" : "#2563eb",
+            lineWidth: 1.5,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ema
+        });
+        currentFireantEma200Series = createSeries("LineSeries", {
+            color: isDark ? "#f43f5e" : "#e11d48",
+            lineWidth: 1.5,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ema
+        });
+
+        // 4. Bollinger Bands (20, 2)
         currentFireantBbUpperSeries = createSeries("LineSeries", {
-            color: "rgba(129, 140, 248, 0.6)",
+            color: "rgba(129, 140, 248, 0.7)",
             lineWidth: 1,
             lineStyle: 2,
             title: "",
             lastValueVisible: false,
-            priceLineVisible: false
+            priceLineVisible: false,
+            visible: !!activeIndicators.bb
         });
         currentFireantBbLowerSeries = createSeries("LineSeries", {
-            color: "rgba(129, 140, 248, 0.6)",
+            color: "rgba(129, 140, 248, 0.7)",
             lineWidth: 1,
             lineStyle: 2,
             title: "",
             lastValueVisible: false,
-            priceLineVisible: false
+            priceLineVisible: false,
+            visible: !!activeIndicators.bb
         });
+
+        // 5. Mây Ichimoku Kinko Hyo (Tenkan, Kijun, Span A, Span B)
+        currentFireantIchiTenkanSeries = createSeries("LineSeries", {
+            color: "#38bdf8",
+            lineWidth: 1.2,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ichi
+        });
+        currentFireantIchiKijunSeries = createSeries("LineSeries", {
+            color: "#ef4444",
+            lineWidth: 1.2,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ichi
+        });
+        currentFireantIchiSpanASeries = createSeries("LineSeries", {
+            color: "#10b981",
+            lineWidth: 1,
+            lineStyle: 2,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ichi
+        });
+        currentFireantIchiSpanBSeries = createSeries("LineSeries", {
+            color: "#f59e0b",
+            lineWidth: 1,
+            lineStyle: 2,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.ichi
+        });
+
+        // 6. Parabolic SAR
+        currentFireantSarSeries = createSeries("LineSeries", {
+            color: "#fbbf24",
+            lineWidth: 1,
+            lineStyle: 3,
+            title: "",
+            lastValueVisible: false,
+            priceLineVisible: false,
+            visible: !!activeIndicators.sar
+        });
+
+        const b20 = document.getElementById("legend-box-ma20");
+        const b50 = document.getElementById("legend-box-ma50");
+        if (b20) b20.style.display = activeIndicators.ma ? "inline" : "none";
+        if (b50) b50.style.display = activeIndicators.ma ? "inline" : "none";
+
+        syncIndicatorCheckboxesUI();
 
         // Tự động điều chỉnh kích thước biểu đồ vừa vặn container
         if (window.ResizeObserver && !renderBox.dataset.resizeObserved) {
@@ -10105,15 +11532,17 @@ function initFireantChart(symbol, interval = "D") {
         if (currentTechnicalData && currentTechnicalData.ticker === cleanSym && currentTechnicalData.resolution === interval && currentTechnicalData.candles_history && currentTechnicalData.candles_history.length > 0) {
             populateFireantChartData(currentTechnicalData.candles_history);
         } else if (currentFireantCandleSeries) {
-            // Tạm thời xóa nến cũ khi chuyển khung thời gian để hiển thị nến mới tức thì
+            // Tạm thời xóa nến cũ và markers cũ khi chuyển khung thời gian hoặc đổi mã
             try { currentFireantCandleSeries.setData([]); } catch(e) {}
+            try { currentFireantCandleSeries.setMarkers([]); } catch(e) {}
         }
 
-        // Nạp dữ liệu mới nhất từ Backend API (Ưu tiên SSI FastConnect API, fallback Vietstock/VNDirect/DNSE)
+        // Nạp dữ liệu mới nhất từ Backend API (Ưu tiên DNSE Entrade, SSI FastConnect, Vietstock)
         const fetchCount = (interval === "W" || interval === "M" || interval === "D") ? 1500 : 350;
         fetch(`/api/technical/${cleanSym}?resolution=${interval}&count=${fetchCount}`)
             .then(r => r.json())
             .then(data => {
+                if (cleanSym !== currentTechnicalTicker) return;
                 currentTechnicalData = data;
                 renderTechnicalSection(data);
                 if (data.candles_history && data.candles_history.length > 0) {
@@ -10135,8 +11564,8 @@ function initFireantChart(symbol, interval = "D") {
                         return;
                     }
                     const priceData = (param.seriesData && mainSeries) ? param.seriesData.get(mainSeries) : null;
-                    const ma20Val = (param.seriesData && currentFireantMa20Series) ? param.seriesData.get(currentFireantMa20Series) : null;
-                    const ma50Val = (param.seriesData && currentFireantMa50Series) ? param.seriesData.get(currentFireantMa50Series) : null;
+                    const ma20Val = (param.seriesData && currentFireantMa20Series && activeIndicators.ma) ? param.seriesData.get(currentFireantMa20Series) : null;
+                    const ma50Val = (param.seriesData && currentFireantMa50Series && activeIndicators.ma) ? param.seriesData.get(currentFireantMa50Series) : null;
 
                     if (priceData) {
                         const o = priceData.open !== undefined ? priceData.open : priceData.value;
@@ -10161,7 +11590,9 @@ function initFireantChart(symbol, interval = "D") {
 
         // Lắng nghe người dùng chủ động kéo rê / cuộn đồ thị để giữ nguyên vị trí ở đó
         chart.timeScale().subscribeVisibleLogicalRangeChange(newRange => {
-            if (!newRange || isInternalRangeSetting) return;
+            if (!newRange || isInternalRangeSetting || !lastFireantCandles || lastFireantCandles.length < 5) return;
+            const span = (newRange.to || 0) - (newRange.from || 0);
+            if (span < 4) return;
             userManuallyScrolledRange = newRange;
             if (typeof syncSubPanesWithRange === "function") {
                 syncSubPanesWithRange(newRange);
@@ -10176,8 +11607,97 @@ function initFireantChart(symbol, interval = "D") {
     }
 }
 
-function populateFireantChartData(rawCandles) {
+// -------------------------------------------------------------
+// TÍNH TOÁN & CẬP NHẬT MŨI TÊN TÍN HIỆU FANSI T+ (AMIBROKER AFL)
+// Chỉ hiển thị mũi tên (MUA xanh dưới nến, BÁN đỏ trên nến), KHÔNG chữ
+// -------------------------------------------------------------
+function applyChartMarkers(closes, ma20Data = [], ma50Data = []) {
+    if (!currentFireantCandleSeries || typeof currentFireantCandleSeries.setMarkers !== "function") return;
+    if (!closes || closes.length < 26) {
+        try { currentFireantCandleSeries.setMarkers([]); } catch (e) {}
+        return;
+    }
+
+    const markers = [];
+
+    // 1. TÍN HIỆU ROBOT (FANSI, ROBOT 1, ROBOT 2) TỪ AMIBROKER AFL (CHỈ MŨI TÊN, KHÔNG CHỮ)
+    if (showFansiSignals) {
+        const strat = currentFansiRobotStrategy || "fansi";
+        const afl = calcScreenerAflSignals(closes, strat);
+        if (afl && afl.markers && afl.markers.length > 0) {
+            for (const m of afl.markers) {
+                markers.push({
+                    time: m.time,
+                    position: m.position,
+                    color: m.color,
+                    shape: m.shape,
+                    text: "",
+                    size: 1
+                });
+            }
+        }
+    }
+
+    // 2. Giao cắt Golden Cross / Death Cross nếu bật
+    const m20 = (ma20Data && ma20Data.length > 1) ? ma20Data : (lastCalculatedMa20Data || []);
+    const m50 = (ma50Data && ma50Data.length > 1) ? ma50Data : (lastCalculatedMa50Data || []);
+    if (showMaCrossAlerts && m20.length > 1 && m50.length > 1) {
+        const map50 = new Map(m50.map(m => [m.time, m.value]));
+        for (let i = 1; i < m20.length; i++) {
+            const t = m20[i].time;
+            const prevT = m20[i - 1].time;
+            const v20 = m20[i].value;
+            const prevV20 = m20[i - 1].value;
+            const v50 = map50.get(t);
+            const prevV50 = map50.get(prevT);
+            if (v50 !== undefined && prevV50 !== undefined) {
+                if (prevV20 <= prevV50 && v20 > v50) {
+                    markers.push({
+                        time: t,
+                        position: "belowBar",
+                        color: "#10b981",
+                        shape: "arrowUp",
+                        text: "MA Cross"
+                    });
+                } else if (prevV20 >= prevV50 && v20 < v50) {
+                    markers.push({
+                        time: t,
+                        position: "aboveBar",
+                        color: "#f43f5e",
+                        shape: "arrowDown",
+                        text: "MA Cross"
+                    });
+                }
+            }
+        }
+    }
+
+    // Sắp xếp markers theo thời gian tăng dần
+    markers.sort((a, b) => {
+        const ta = typeof a.time === "number" ? a.time : (new Date(a.time).getTime() || 0);
+        const tb = typeof b.time === "number" ? b.time : (new Date(b.time).getTime() || 0);
+        return ta - tb;
+    });
+
+    try {
+        currentFireantCandleSeries.setMarkers(markers);
+    } catch (e) {
+        console.warn("setMarkers error:", e);
+    }
+}
+
+function populateFireantChartData(rawCandles, force = false) {
     if (!currentFireantCandleSeries || !rawCandles || !rawCandles.length) return;
+
+    // Lưu lại vị trí zoom/scroll hiện tại của người dùng khi biểu đồ đã có nến thực tế
+    if (currentFireantChart && currentFireantChart.timeScale && lastFireantCandles && lastFireantCandles.length > 10) {
+        try {
+            const activeRange = currentFireantChart.timeScale().getVisibleLogicalRange();
+            if (activeRange && (activeRange.to - activeRange.from >= 4)) {
+                userManuallyScrolledRange = activeRange;
+            }
+        } catch (e) {}
+    }
 
     const seenTimes = new Set();
     const sorted = [...rawCandles].sort((a, b) => (a.time || 0) - (b.time || 0));
@@ -10218,12 +11738,39 @@ function populateFireantChartData(rawCandles) {
 
     if (!candleData.length) return;
 
+    // Kiểm tra dữ liệu nến có thay đổi so với lần vẽ trước hay không
+    const lastCloseObj = closes[closes.length - 1];
+    const prevLastCloseObj = (lastFireantCandles && lastFireantCandles.length > 0) ? lastFireantCandles[lastFireantCandles.length - 1] : null;
+    const isCandleDataIdentical = (
+        !force &&
+        prevLastCloseObj &&
+        lastFireantCandles &&
+        lastFireantCandles.length === closes.length &&
+        lastCloseObj.time === prevLastCloseObj.time &&
+        lastCloseObj.close === prevLastCloseObj.close &&
+        lastCloseObj.volume === prevLastCloseObj.volume &&
+        lastCloseObj.high === prevLastCloseObj.high &&
+        lastCloseObj.low === prevLastCloseObj.low
+    );
+
+    if (isCandleDataIdentical) {
+        if (closes.length >= 2) {
+            const last = closes[closes.length - 1];
+            const prev = closes[closes.length - 2];
+            const lastMa20 = (activeIndicators.ma && lastCalculatedMa20Data && lastCalculatedMa20Data.length) ? lastCalculatedMa20Data[lastCalculatedMa20Data.length - 1].value : null;
+            const lastMa50 = (activeIndicators.ma && lastCalculatedMa50Data && lastCalculatedMa50Data.length) ? lastCalculatedMa50Data[lastCalculatedMa50Data.length - 1].value : null;
+            updateFireantLegend(last.open, last.high, last.low, last.close, lastMa20, lastMa50, last.close - prev.close, last.volume);
+        }
+        return;
+    }
+
     // 1. Set main series data
     currentFireantCandleSeries.setData(candleData);
 
-    // 2. Tính toán SMA20 & SMA50
+    // 2. Tính toán SMA (20, 50, 200) & Bollinger Bands (20, 2)
     const ma20Data = [];
     const ma50Data = [];
+    const ma200Data = [];
     const bbUpperData = [];
     const bbLowerData = [];
 
@@ -10244,53 +11791,195 @@ function populateFireantChartData(rawCandles) {
             const sum50 = closes.slice(i - 49, i + 1).reduce((acc, x) => acc + x.close, 0);
             ma50Data.push({ time: closes[i].time, value: Math.round(sum50 / 50) });
         }
+        if (i >= 199) {
+            const sum200 = closes.slice(i - 199, i + 1).reduce((acc, x) => acc + x.close, 0);
+            ma200Data.push({ time: closes[i].time, value: Math.round(sum200 / 200) });
+        }
     }
 
-    if (currentFireantMa20Series) currentFireantMa20Series.setData(ma20Data);
-    if (currentFireantMa50Series) currentFireantMa50Series.setData(ma50Data);
-    if (currentFireantBbUpperSeries) currentFireantBbUpperSeries.setData(bbUpperData);
-    if (currentFireantBbLowerSeries) currentFireantBbLowerSeries.setData(bbLowerData);
+    // 3. Tính toán EMA (9, 21, 50, 200)
+    function calcEmaData(period) {
+        const k = 2 / (period + 1);
+        const res = [];
+        if (!closes.length) return res;
+        let cur = closes[0].close;
+        res.push({ time: closes[0].time, value: Math.round(cur) });
+        for (let i = 1; i < closes.length; i++) {
+            cur = closes[i].close * k + cur * (1 - k);
+            res.push({ time: closes[i].time, value: Math.round(cur) });
+        }
+        return res;
+    }
+    const ema9Data = calcEmaData(9);
+    const ema21Data = calcEmaData(21);
+    const ema50Data = calcEmaData(50);
+    const ema200Data = calcEmaData(200);
 
-    // Tín hiệu giao cắt MA20 / MA50 (Golden Cross / Death Cross) nếu bật
-    if (showMaCrossAlerts && currentFireantCandleSeries.setMarkers && ma20Data.length > 1 && ma50Data.length > 1) {
-        const markers = [];
-        const map50 = new Map(ma50Data.map(m => [m.time, m.value]));
-        for (let i = 1; i < ma20Data.length; i++) {
-            const t = ma20Data[i].time;
-            const prevT = ma20Data[i - 1].time;
-            const v20 = ma20Data[i].value;
-            const prevV20 = ma20Data[i - 1].value;
-            const v50 = map50.get(t);
-            const prevV50 = map50.get(prevT);
-            if (v50 && prevV50) {
-                if (prevV20 <= prevV50 && v20 > v50) {
-                    markers.push({
-                        time: t,
-                        position: "belowBar",
-                        color: "#10b981",
-                        shape: "arrowUp",
-                        text: "Golden Cross (MA20 > MA50)"
-                    });
-                } else if (prevV20 >= prevV50 && v20 < v50) {
-                    markers.push({
-                        time: t,
-                        position: "aboveBar",
-                        color: "#f43f5e",
-                        shape: "arrowDown",
-                        text: "Death Cross (MA20 < MA50)"
-                    });
-                }
+    // 4. Tính toán Ichimoku Kinko Hyo (Tenkan 9, Kijun 26, Senkou Span A/B)
+    const ichiTenkanData = [];
+    const ichiKijunData = [];
+    const ichiSpanAData = [];
+    const ichiSpanBData = [];
+    for (let i = 0; i < closes.length; i++) {
+        let t = closes[i].time;
+        if (i >= 8) {
+            let hh9 = -Infinity, ll9 = Infinity;
+            for (let j = i - 8; j <= i; j++) {
+                if (closes[j].high > hh9) hh9 = closes[j].high;
+                if (closes[j].low < ll9) ll9 = closes[j].low;
+            }
+            ichiTenkanData.push({ time: t, value: Math.round((hh9 + ll9) / 2) });
+        }
+        if (i >= 25) {
+            let hh26 = -Infinity, ll26 = Infinity;
+            for (let j = i - 25; j <= i; j++) {
+                if (closes[j].high > hh26) hh26 = closes[j].high;
+                if (closes[j].low < ll26) ll26 = closes[j].low;
+            }
+            const kijunVal = Math.round((hh26 + ll26) / 2);
+            ichiKijunData.push({ time: t, value: kijunVal });
+
+            const lastTenkan = ichiTenkanData[ichiTenkanData.length - 1];
+            if (lastTenkan) {
+                ichiSpanAData.push({ time: t, value: Math.round((lastTenkan.value + kijunVal) / 2) });
             }
         }
-        try { currentFireantCandleSeries.setMarkers(markers); } catch (e) {}
+        if (i >= 51) {
+            let hh52 = -Infinity, ll52 = Infinity;
+            for (let j = i - 51; j <= i; j++) {
+                if (closes[j].high > hh52) hh52 = closes[j].high;
+                if (closes[j].low < ll52) ll52 = closes[j].low;
+            }
+            ichiSpanBData.push({ time: t, value: Math.round((hh52 + ll52) / 2) });
+        }
     }
+
+    // 5. Tính toán Parabolic SAR (0.02, 0.2)
+    const sarData = [];
+    if (closes.length >= 3) {
+        let isLong = closes[1].close >= closes[0].close;
+        let ep = isLong ? closes[1].high : closes[1].low;
+        let af = 0.02;
+        let curSar = isLong ? closes[0].low : closes[0].high;
+        sarData.push({ time: closes[1].time, value: Math.round(curSar) });
+
+        for (let i = 2; i < closes.length; i++) {
+            curSar = curSar + af * (ep - curSar);
+            if (isLong) {
+                if (closes[i - 1].low < curSar) curSar = closes[i - 1].low;
+                if (closes[i - 2].low < curSar) curSar = closes[i - 2].low;
+                if (closes[i].low < curSar) {
+                    isLong = false;
+                    curSar = ep;
+                    ep = closes[i].low;
+                    af = 0.02;
+                } else {
+                    if (closes[i].high > ep) {
+                        ep = closes[i].high;
+                        af = Math.min(0.20, af + 0.02);
+                    }
+                }
+            } else {
+                if (closes[i - 1].high > curSar) curSar = closes[i - 1].high;
+                if (closes[i - 2].high > curSar) curSar = closes[i - 2].high;
+                if (closes[i].high > curSar) {
+                    isLong = true;
+                    curSar = ep;
+                    ep = closes[i].high;
+                    af = 0.02;
+                } else {
+                    if (closes[i].low < ep) {
+                        ep = closes[i].low;
+                        af = Math.min(0.20, af + 0.02);
+                    }
+                }
+            }
+            sarData.push({ time: closes[i].time, value: Math.round(curSar) });
+        }
+    }
+
+    lastCalculatedMa20Data = ma20Data;
+    lastCalculatedMa50Data = ma50Data;
+    lastCalculatedMa200Data = ma200Data;
+    lastCalculatedEma9Data = ema9Data;
+    lastCalculatedEma21Data = ema21Data;
+    lastCalculatedEma50Data = ema50Data;
+    lastCalculatedEma200Data = ema200Data;
+    lastCalculatedBbUpperData = bbUpperData;
+    lastCalculatedBbLowerData = bbLowerData;
+    lastCalculatedIchiTenkan = ichiTenkanData;
+    lastCalculatedIchiKijun = ichiKijunData;
+    lastCalculatedIchiSpanA = ichiSpanAData;
+    lastCalculatedIchiSpanB = ichiSpanBData;
+    lastCalculatedSarData = sarData;
+
+    // Cập nhật dữ liệu cho các series trên biểu đồ chính
+    if (currentFireantMa20Series) {
+        currentFireantMa20Series.setData(activeIndicators.ma ? ma20Data : []);
+        currentFireantMa20Series.applyOptions({ visible: !!activeIndicators.ma });
+    }
+    if (currentFireantMa50Series) {
+        currentFireantMa50Series.setData(activeIndicators.ma ? ma50Data : []);
+        currentFireantMa50Series.applyOptions({ visible: !!activeIndicators.ma });
+    }
+    if (currentFireantMa200Series) {
+        currentFireantMa200Series.setData(activeIndicators.ma ? ma200Data : []);
+        currentFireantMa200Series.applyOptions({ visible: !!activeIndicators.ma });
+    }
+    if (currentFireantEma9Series) {
+        currentFireantEma9Series.setData(activeIndicators.ema ? ema9Data : []);
+        currentFireantEma9Series.applyOptions({ visible: !!activeIndicators.ema });
+    }
+    if (currentFireantEma21Series) {
+        currentFireantEma21Series.setData(activeIndicators.ema ? ema21Data : []);
+        currentFireantEma21Series.applyOptions({ visible: !!activeIndicators.ema });
+    }
+    if (currentFireantEma50Series) {
+        currentFireantEma50Series.setData(activeIndicators.ema ? ema50Data : []);
+        currentFireantEma50Series.applyOptions({ visible: !!activeIndicators.ema });
+    }
+    if (currentFireantEma200Series) {
+        currentFireantEma200Series.setData(activeIndicators.ema ? ema200Data : []);
+        currentFireantEma200Series.applyOptions({ visible: !!activeIndicators.ema });
+    }
+    if (currentFireantBbUpperSeries) {
+        currentFireantBbUpperSeries.setData(activeIndicators.bb ? bbUpperData : []);
+        currentFireantBbUpperSeries.applyOptions({ visible: !!activeIndicators.bb });
+    }
+    if (currentFireantBbLowerSeries) {
+        currentFireantBbLowerSeries.setData(activeIndicators.bb ? bbLowerData : []);
+        currentFireantBbLowerSeries.applyOptions({ visible: !!activeIndicators.bb });
+    }
+    if (currentFireantIchiTenkanSeries) {
+        currentFireantIchiTenkanSeries.setData(activeIndicators.ichi ? ichiTenkanData : []);
+        currentFireantIchiTenkanSeries.applyOptions({ visible: !!activeIndicators.ichi });
+    }
+    if (currentFireantIchiKijunSeries) {
+        currentFireantIchiKijunSeries.setData(activeIndicators.ichi ? ichiKijunData : []);
+        currentFireantIchiKijunSeries.applyOptions({ visible: !!activeIndicators.ichi });
+    }
+    if (currentFireantIchiSpanASeries) {
+        currentFireantIchiSpanASeries.setData(activeIndicators.ichi ? ichiSpanAData : []);
+        currentFireantIchiSpanASeries.applyOptions({ visible: !!activeIndicators.ichi });
+    }
+    if (currentFireantIchiSpanBSeries) {
+        currentFireantIchiSpanBSeries.setData(activeIndicators.ichi ? ichiSpanBData : []);
+        currentFireantIchiSpanBSeries.applyOptions({ visible: !!activeIndicators.ichi });
+    }
+    if (currentFireantSarSeries) {
+        currentFireantSarSeries.setData(activeIndicators.sar ? sarData : []);
+        currentFireantSarSeries.applyOptions({ visible: !!activeIndicators.sar });
+    }
+
+    // Áp dụng mũi tên tín hiệu FANSI T+ (AmiBroker AFL) & MA Cross (nếu bật)
+    applyChartMarkers(closes, ma20Data, ma50Data);
 
     // Cập nhật Legend và các Sub-panes (Volume, MCDX, MACD, RSI)
     const last = closes[closes.length - 1];
     const prev = closes.length > 1 ? closes[closes.length - 2] : last;
     if (last) {
-        const lastMa20 = ma20Data.length ? ma20Data[ma20Data.length - 1].value : null;
-        const lastMa50 = ma50Data.length ? ma50Data[ma50Data.length - 1].value : null;
+        const lastMa20 = (activeIndicators.ma && ma20Data.length) ? ma20Data[ma20Data.length - 1].value : null;
+        const lastMa50 = (activeIndicators.ma && ma50Data.length) ? ma50Data[ma50Data.length - 1].value : null;
         updateFireantLegend(last.open, last.high, last.low, last.close, lastMa20, lastMa50, last.close - prev.close, last.volume);
     }
 
@@ -10302,14 +11991,32 @@ function populateFireantChartData(rawCandles) {
     // Tự động phân bổ chiều cao chuẩn 1 màn hình và vẽ các sub-panes
     adjustTechnicalChartLayout();
 
-    // Giữ nguyên vị trí nếu người dùng đã chủ động kéo rê, chỉ áp dụng 3M khi chưa kéo
+    // Nếu người dùng đã zoom / di chuyển biểu đồ (userManuallyScrolledRange), giữ nguyên vị trí hiển thị đó
     if (userManuallyScrolledRange) {
+        isInternalRangeSetting = true;
         try {
             currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
             renderFireantSubPanes(closes, userManuallyScrolledRange);
-        } catch(e) {}
+        } catch (e) {} finally {
+            setTimeout(() => { isInternalRangeSetting = false; }, 50);
+        }
     } else {
-        setChartTimeRange(currentFireantRange || "3M", true, false);
+        // Chỉ khi người dùng chưa từng zoom/pan (mặc định ban đầu), mới áp dụng range mặc định 3M
+        setChartTimeRange(currentFireantRange || "3M", false, false);
+        setTimeout(() => {
+            try {
+                if (currentFireantChart && closes && closes.length > 0) {
+                    if (userManuallyScrolledRange) return;
+                    const n = closes.length;
+                    const span = (currentFireantRange === "1M") ? 25 : ((currentFireantRange === "6M") ? 130 : ((currentFireantRange === "1Y") ? 250 : 70));
+                    const fromIdx = Math.max(0, n - span);
+                    const toIdx = n + 4; // Khoảng đệm 5 nến so với lề phải
+                    currentFireantChart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
+                    try { currentFireantChart.timeScale().scrollToPosition(4, false); } catch(e) {}
+                    renderFireantSubPanes(closes, { from: fromIdx, to: toIdx });
+                }
+            } catch(e) {}
+        }, 60);
     }
 }
 
@@ -10441,6 +12148,95 @@ function calculateFireantIndicators(candles) {
         hist[i] = macdLine[i] - signalLine[i];
     }
 
+    // 5. Stochastic Oscillator (14, 3, 3)
+    const highs = candles.map(c => Number(c.high || c.close || 0));
+    const lows = candles.map(c => Number(c.low || c.close || 0));
+    const rawFastK = new Array(n).fill(null);
+    const stochK = new Array(n).fill(null);
+    const stochD = new Array(n).fill(null);
+
+    for (let i = 13; i < n; i++) {
+        let highestHigh = -Infinity;
+        let lowestLow = Infinity;
+        for (let j = i - 13; j <= i; j++) {
+            if (highs[j] > highestHigh) highestHigh = highs[j];
+            if (lows[j] < lowestLow) lowestLow = lows[j];
+        }
+        const rng = highestHigh - lowestLow;
+        rawFastK[i] = rng > 0 ? ((closes[i] - lowestLow) / rng) * 100 : 50;
+    }
+
+    for (let i = 15; i < n; i++) {
+        let sumK = 0, countK = 0;
+        for (let j = i - 2; j <= i; j++) {
+            if (rawFastK[j] !== null) { sumK += rawFastK[j]; countK++; }
+        }
+        if (countK === 3) stochK[i] = Math.round((sumK / 3) * 10) / 10;
+    }
+
+    for (let i = 17; i < n; i++) {
+        let sumD = 0, countD = 0;
+        for (let j = i - 2; j <= i; j++) {
+            if (stochK[j] !== null) { sumD += stochK[j]; countD++; }
+        }
+        if (countD === 3) stochD[i] = Math.round((sumD / 3) * 10) / 10;
+    }
+
+    // 6. MFI (Money Flow Index 14)
+    const mfi14 = new Array(n).fill(null);
+    const typPrices = new Array(n).fill(null);
+    for (let i = 0; i < n; i++) {
+        typPrices[i] = (highs[i] + lows[i] + closes[i]) / 3;
+    }
+    for (let i = 14; i < n; i++) {
+        let posFlow = 0;
+        let negFlow = 0;
+        for (let j = i - 13; j <= i; j++) {
+            const rawFlow = typPrices[j] * vols[j];
+            if (typPrices[j] > typPrices[j - 1]) posFlow += rawFlow;
+            else if (typPrices[j] < typPrices[j - 1]) negFlow += rawFlow;
+        }
+        if (negFlow === 0) {
+            mfi14[i] = 100;
+        } else {
+            const mr = posFlow / negFlow;
+            mfi14[i] = Math.round((100 - (100 / (1 + mr))) * 10) / 10;
+        }
+    }
+
+    // 7. OBV (On Balance Volume) & OBV MA20
+    const obv = new Array(n).fill(0);
+    for (let i = 1; i < n; i++) {
+        if (closes[i] > closes[i - 1]) obv[i] = obv[i - 1] + vols[i];
+        else if (closes[i] < closes[i - 1]) obv[i] = obv[i - 1] - vols[i];
+        else obv[i] = obv[i - 1];
+    }
+    const obvMa20 = new Array(n).fill(null);
+    for (let i = 19; i < n; i++) {
+        let s = 0;
+        for (let j = i - 19; j <= i; j++) s += obv[j];
+        obvMa20[i] = Math.round(s / 20);
+    }
+
+    // 8. ATR (Average True Range 14)
+    const atr14 = new Array(n).fill(null);
+    const tr = new Array(n).fill(0);
+    tr[0] = highs[0] - lows[0];
+    for (let i = 1; i < n; i++) {
+        const hl = highs[i] - lows[i];
+        const hc = Math.abs(highs[i] - closes[i - 1]);
+        const lc = Math.abs(lows[i] - closes[i - 1]);
+        tr[i] = Math.max(hl, hc, lc);
+    }
+    let curAtr = 0;
+    for (let i = 0; i < 14 && i < n; i++) curAtr += tr[i];
+    curAtr = curAtr / Math.min(14, n);
+    atr14[Math.min(13, n - 1)] = Math.round(curAtr);
+    for (let i = 14; i < n; i++) {
+        curAtr = (curAtr * 13 + tr[i]) / 14;
+        atr14[i] = Math.round(curAtr);
+    }
+
     return {
         closes,
         opens,
@@ -10450,7 +12246,13 @@ function calculateFireantIndicators(candles) {
         mcdx,
         macdLine,
         signalLine,
-        hist
+        hist,
+        stochK,
+        stochD,
+        mfi14,
+        obv,
+        obvMa20,
+        atr14
     };
 }
 
@@ -10512,7 +12314,7 @@ function getFireantCandleX(ts, candle, index, fallbackUsableW, totalCount) {
 
 // Lắng nghe thao tác kéo chuột và cuộn chuột trên các subpanes để kéo toàn bộ đồ thị
 function setupSubpaneInteractions() {
-    ["canvas-sub-volume", "canvas-sub-mcdx", "canvas-sub-macd", "canvas-sub-rsi"].forEach(id => {
+    ["canvas-sub-volume", "canvas-sub-mcdx", "canvas-sub-macd", "canvas-sub-rsi", "canvas-sub-stoch", "canvas-sub-mfi", "canvas-sub-obv", "canvas-sub-atr"].forEach(id => {
         const c = document.getElementById(id);
         if (!c || c._dragAttached) return;
         c._dragAttached = true;
@@ -10574,7 +12376,7 @@ function setupSubpaneInteractions() {
     });
 }
 
-// Cập nhật thông số tiêu đề (Header / Legend) cho 4 sub-panes theo cây nến đang trỏ
+// Cập nhật thông số tiêu đề (Header / Legend) cho tất cả sub-panes theo cây nến đang trỏ
 function updateFireantSubpanesLegend(targetIdx = null) {
     if (!lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
     const n = lastFireantCandles.length;
@@ -10588,12 +12390,12 @@ function updateFireantSubpanesLegend(targetIdx = null) {
     const maEl = document.getElementById("pane-vol-ma");
     if (latestEl) latestEl.textContent = Number(c.volume || 0).toLocaleString("vi-VN");
     if (maEl) {
-        const mv = ind.volMa20[idx];
+        const mv = ind.volMa20 ? ind.volMa20[idx] : null;
         maEl.textContent = mv ? `MA20: ${mv >= 1e6 ? (mv / 1e6).toFixed(1) + 'M' : (mv / 1e3).toFixed(0) + 'k'}` : "MA20: —";
     }
 
     // 2. MCDX
-    const m = ind.mcdx[idx];
+    const m = ind.mcdx ? ind.mcdx[idx] : null;
     if (m) {
         const bEl = document.getElementById("mcdx-banker-val");
         const hEl = document.getElementById("mcdx-hot-val");
@@ -10607,9 +12409,9 @@ function updateFireantSubpanesLegend(targetIdx = null) {
     const elM = document.getElementById("pane-macd-line");
     const elS = document.getElementById("pane-macd-signal");
     const elH = document.getElementById("pane-macd-hist");
-    const lM = ind.macdLine[idx];
-    const lS = ind.signalLine[idx];
-    const lH = ind.hist[idx];
+    const lM = ind.macdLine ? ind.macdLine[idx] : null;
+    const lS = ind.signalLine ? ind.signalLine[idx] : null;
+    const lH = ind.hist ? ind.hist[idx] : null;
     if (elM) elM.textContent = (lM !== null && lM !== undefined) ? lM.toFixed(2) : "0.00";
     if (elS) elS.textContent = (lS !== null && lS !== undefined) ? lS.toFixed(2) : "0.00";
     if (elH) {
@@ -10619,12 +12421,32 @@ function updateFireantSubpanesLegend(targetIdx = null) {
 
     // 4. RSI
     const rsiValEl = document.getElementById("pane-rsi-val");
-    const rVal = ind.rsi14[idx];
+    const rVal = ind.rsi14 ? ind.rsi14[idx] : null;
     if (rsiValEl) rsiValEl.textContent = (rVal !== null && rVal !== undefined) ? rVal.toFixed(1) : "—";
+
+    // 5. Stochastic
+    const elStochK = document.getElementById("pane-stoch-k");
+    const elStochD = document.getElementById("pane-stoch-d");
+    if (elStochK && ind.stochK) elStochK.textContent = ind.stochK[idx] !== null ? ind.stochK[idx].toFixed(1) : "—";
+    if (elStochD && ind.stochD) elStochD.textContent = ind.stochD[idx] !== null ? ind.stochD[idx].toFixed(1) : "—";
+
+    // 6. MFI
+    const elMfi = document.getElementById("pane-mfi-val");
+    if (elMfi && ind.mfi14) elMfi.textContent = ind.mfi14[idx] !== null ? ind.mfi14[idx].toFixed(1) : "—";
+
+    // 7. OBV
+    const elObv = document.getElementById("pane-obv-val");
+    const elObvMa = document.getElementById("pane-obv-ma");
+    if (elObv && ind.obv) elObv.textContent = Number(ind.obv[idx] || 0).toLocaleString("vi-VN");
+    if (elObvMa && ind.obvMa20) elObvMa.textContent = ind.obvMa20[idx] !== null ? `MA20: ${Number(ind.obvMa20[idx]).toLocaleString("vi-VN")}` : "MA20: —";
+
+    // 8. ATR
+    const elAtr = document.getElementById("pane-atr-val");
+    if (elAtr && ind.atr14) elAtr.textContent = ind.atr14[idx] !== null ? Number(ind.atr14[idx]).toLocaleString("vi-VN") : "—";
 }
 
 // -------------------------------------------------------------
-// VẼ 4 SUB-PANES: VOLUME, MCDX, MACD, RSI ĐỒNG BỘ 100% TOẠ ĐỘ VỚI ĐỒ THỊ CHÍNH
+// VẼ TẤT CẢ SUB-PANES ĐỒNG BỘ 100% TOẠ ĐỘ VỚI ĐỒ THỊ CHÍNH
 // -------------------------------------------------------------
 function renderFireantSubPanes(candles, range = null) {
     if (!candles || candles.length === 0) {
@@ -10648,6 +12470,10 @@ function renderFireantSubPanes(candles, range = null) {
     if (activeIndicators.mcdx) renderMcdxCanvas();
     if (activeIndicators.macd) renderMacdCanvas();
     if (activeIndicators.rsi) renderRsiCanvas();
+    if (activeIndicators.stoch) renderStochCanvas();
+    if (activeIndicators.mfi) renderMfiCanvas();
+    if (activeIndicators.obv) renderObvCanvas();
+    if (activeIndicators.atr) renderAtrCanvas();
 }
 
 function renderVolumeCanvas() {
@@ -10663,6 +12489,9 @@ function renderVolumeCanvas() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#080b13" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
 
     const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
     const priceScaleWidth = getFireantPriceScaleWidth();
@@ -10684,7 +12513,6 @@ function renderVolumeCanvas() {
         }
     }
 
-    const isDark = document.documentElement.classList.contains("dark");
     const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const upVolColor = isDark ? "rgba(0, 192, 96, 0.8)" : "rgba(21, 128, 61, 0.85)";
     const downVolColor = isDark ? "rgba(255, 59, 87, 0.8)" : "rgba(220, 38, 38, 0.85)";
@@ -10769,6 +12597,9 @@ function renderMcdxCanvas() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
 
     const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
     const priceScaleWidth = getFireantPriceScaleWidth();
@@ -10780,7 +12611,6 @@ function renderMcdxCanvas() {
     const n = candles.length;
     const { mcdx } = currentFireantIndicators;
 
-    const isDark = document.documentElement.classList.contains("dark");
     const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const bankerColor = isDark ? "#ff3b57" : "#dc2626";
     const hotColor = isDark ? "#f59e0b" : "#d97706";
@@ -10870,6 +12700,9 @@ function renderMacdCanvas() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
 
     const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
     const priceScaleWidth = getFireantPriceScaleWidth();
@@ -10892,7 +12725,6 @@ function renderMacdCanvas() {
         }
     }
 
-    const isDark = document.documentElement.classList.contains("dark");
     const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const macdBullColor = isDark ? "rgba(0, 192, 96, 0.75)" : "rgba(21, 128, 61, 0.8)";
     const macdBearColor = isDark ? "rgba(255, 59, 87, 0.75)" : "rgba(220, 38, 38, 0.8)";
@@ -11000,6 +12832,9 @@ function renderRsiCanvas() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
 
     const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
     const priceScaleWidth = getFireantPriceScaleWidth();
@@ -11011,7 +12846,6 @@ function renderRsiCanvas() {
     const n = candles.length;
     const { rsi14 } = currentFireantIndicators;
 
-    const isDark = document.documentElement.classList.contains("dark");
     const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
     const y70 = h - (70 / 100) * (h - 18) - 9;
     const y30 = h - (30 / 100) * (h - 18) - 9;
@@ -11076,6 +12910,435 @@ function renderRsiCanvas() {
 }
 
 
+function renderStochCanvas() {
+    const canvas = document.getElementById("canvas-sub-stoch");
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.parentElement.clientWidth || 800;
+    const h = canvas.parentElement.clientHeight || 85;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
+
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { stochK, stochD } = currentFireantIndicators;
+    if (!stochK || !stochD) return;
+
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+    const y80 = h - (80 / 100) * (h - 18) - 9;
+    const y20 = h - (20 / 100) * (h - 18) - 9;
+
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
+
+    // Vùng tô 20 - 80
+    ctx.fillStyle = isDark ? "rgba(56, 189, 248, 0.08)" : "rgba(2, 132, 199, 0.05)";
+    ctx.fillRect(0, y80, usableWidth, y20 - y80);
+
+    // Kẻ đường 80 và 20
+    ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.3)" : "rgba(2, 132, 199, 0.35)";
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0, y80); ctx.lineTo(usableWidth, y80);
+    ctx.moveTo(0, y20); ctx.lineTo(usableWidth, y20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Nhãn 80, 20
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#38bdf8" : "#0284c7";
+    ctx.textAlign = "left";
+    ctx.fillText("80", usableWidth + 4, y80 + 3);
+    ctx.fillText("20", usableWidth + 4, y20 + 3);
+
+    // Đường %K (Xanh dương)
+    ctx.beginPath();
+    ctx.strokeStyle = isDark ? "#38bdf8" : "#0284c7";
+    ctx.lineWidth = 1.4;
+    let startedK = false;
+    for (let i = 0; i < n; i++) {
+        if (stochK[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            startedK = false;
+            continue;
+        }
+        const y = h - (stochK[i] / 100) * (h - 18) - 9;
+        if (!startedK) { ctx.moveTo(x, y); startedK = true; }
+        else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+
+    // Đường %D (Cam/Vàng)
+    ctx.beginPath();
+    ctx.strokeStyle = isDark ? "#f59e0b" : "#d97706";
+    ctx.lineWidth = 1.2;
+    let startedD = false;
+    for (let i = 0; i < n; i++) {
+        if (stochD[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            startedD = false;
+            continue;
+        }
+        const y = h - (stochD[i] / 100) * (h - 18) - 9;
+        if (!startedD) { ctx.moveTo(x, y); startedD = true; }
+        else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+function renderMfiCanvas() {
+    const canvas = document.getElementById("canvas-sub-mfi");
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.parentElement.clientWidth || 800;
+    const h = canvas.parentElement.clientHeight || 85;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
+
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { mfi14 } = currentFireantIndicators;
+    if (!mfi14) return;
+
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+    const y80 = h - (80 / 100) * (h - 18) - 9;
+    const y20 = h - (20 / 100) * (h - 18) - 9;
+
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
+
+    // Vùng tô 20 - 80
+    ctx.fillStyle = isDark ? "rgba(16, 185, 129, 0.08)" : "rgba(5, 150, 105, 0.05)";
+    ctx.fillRect(0, y80, usableWidth, y20 - y80);
+
+    // Kẻ đường 80 và 20
+    ctx.strokeStyle = isDark ? "rgba(16, 185, 129, 0.3)" : "rgba(5, 150, 105, 0.35)";
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0, y80); ctx.lineTo(usableWidth, y80);
+    ctx.moveTo(0, y20); ctx.lineTo(usableWidth, y20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Nhãn 80, 20
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#10b981" : "#059669";
+    ctx.textAlign = "left";
+    ctx.fillText("80", usableWidth + 4, y80 + 3);
+    ctx.fillText("20", usableWidth + 4, y20 + 3);
+
+    // Đường MFI (Xanh ngọc / Emerald)
+    ctx.beginPath();
+    ctx.strokeStyle = isDark ? "#10b981" : "#059669";
+    ctx.lineWidth = 1.4;
+    let started = false;
+    for (let i = 0; i < n; i++) {
+        if (mfi14[i] === null) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            started = false;
+            continue;
+        }
+        const y = h - (mfi14[i] / 100) * (h - 18) - 9;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+function renderObvCanvas() {
+    const canvas = document.getElementById("canvas-sub-obv");
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.parentElement.clientWidth || 800;
+    const h = canvas.parentElement.clientHeight || 85;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
+
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { obv, obvMa20 } = currentFireantIndicators;
+    if (!obv) return;
+
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    for (let i = 0; i < n; i++) {
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x !== null && x >= -barW && x <= usableWidth + barW) {
+            if (obv[i] !== null && obv[i] !== undefined) {
+                if (obv[i] < minVal) minVal = obv[i];
+                if (obv[i] > maxVal) maxVal = obv[i];
+            }
+            if (obvMa20 && obvMa20[i] !== null && obvMa20[i] !== undefined) {
+                if (obvMa20[i] < minVal) minVal = obvMa20[i];
+                if (obvMa20[i] > maxVal) maxVal = obvMa20[i];
+            }
+        }
+    }
+    if (minVal === Infinity || maxVal === -Infinity || minVal === maxVal) {
+        minVal = 0;
+        maxVal = 100000;
+    }
+    const valRange = maxVal - minVal || 1;
+
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
+
+    // Nhãn trục phải
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#64748b" : "#475569";
+    ctx.textAlign = "left";
+    const formatObv = v => {
+        const sign = v < 0 ? '-' : '';
+        const abs = Math.abs(v);
+        if (abs >= 1e6) return `${sign}${(abs / 1e6).toFixed(1)}M`;
+        if (abs >= 1e3) return `${sign}${(abs / 1e3).toFixed(0)}k`;
+        return `${sign}${abs}`;
+    };
+    ctx.fillText(formatObv(maxVal), usableWidth + 4, 13);
+    ctx.fillText(formatObv(minVal), usableWidth + 4, h - 5);
+
+    // Kẻ đường mờ 50%
+    ctx.beginPath();
+    ctx.moveTo(0, Math.round(h / 2));
+    ctx.lineTo(usableWidth, Math.round(h / 2));
+    ctx.stroke();
+
+    // Đường OBV Line
+    ctx.beginPath();
+    ctx.strokeStyle = isDark ? "#38bdf8" : "#0284c7";
+    ctx.lineWidth = 1.4;
+    let startedObv = false;
+    for (let i = 0; i < n; i++) {
+        if (obv[i] === null || obv[i] === undefined) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            startedObv = false;
+            continue;
+        }
+        const y = h - ((obv[i] - minVal) / valRange) * (h - 18) - 9;
+        if (!startedObv) { ctx.moveTo(x, y); startedObv = true; }
+        else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+
+    // Đường OBV MA20 Line
+    if (obvMa20) {
+        ctx.beginPath();
+        ctx.strokeStyle = isDark ? "#f59e0b" : "#d97706";
+        ctx.lineWidth = 1.2;
+        let startedMa = false;
+        for (let i = 0; i < n; i++) {
+            if (obvMa20[i] === null || obvMa20[i] === undefined) continue;
+            const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+            if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+                startedMa = false;
+                continue;
+            }
+            const y = h - ((obvMa20[i] - minVal) / valRange) * (h - 18) - 9;
+            if (!startedMa) { ctx.moveTo(x, y); startedMa = true; }
+            else { ctx.lineTo(x, y); }
+        }
+        ctx.stroke();
+    }
+
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+function renderAtrCanvas() {
+    const canvas = document.getElementById("canvas-sub-atr");
+    if (!canvas || !lastFireantCandles || !lastFireantCandles.length || !currentFireantIndicators) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.parentElement.clientWidth || 800;
+    const h = canvas.parentElement.clientHeight || 85;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.classList.contains("dark");
+    ctx.fillStyle = isDark ? "#070a11" : "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    const ts = currentFireantChart ? currentFireantChart.timeScale() : null;
+    const priceScaleWidth = getFireantPriceScaleWidth();
+    const usableWidth = w - priceScaleWidth;
+    const barSpacing = getFireantBarSpacing(ts);
+    const barW = Math.max(1, Math.min(barSpacing - 1.5, barSpacing * 0.8));
+
+    const candles = lastFireantCandles;
+    const n = candles.length;
+    const { atr14 } = currentFireantIndicators;
+    if (!atr14) return;
+
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    for (let i = 0; i < n; i++) {
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x !== null && x >= -barW && x <= usableWidth + barW) {
+            if (atr14[i] !== null && atr14[i] !== undefined) {
+                if (atr14[i] < minVal) minVal = atr14[i];
+                if (atr14[i] > maxVal) maxVal = atr14[i];
+            }
+        }
+    }
+    if (minVal === Infinity || maxVal === -Infinity || minVal === maxVal) {
+        minVal = 0;
+        maxVal = 1000;
+    }
+    const valRange = maxVal - minVal || 1;
+
+    const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(100, 116, 139, 0.15)";
+
+    // Vạch chia trục phải
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(usableWidth, 0);
+    ctx.lineTo(usableWidth, h);
+    ctx.stroke();
+
+    // Nhãn trục phải
+    ctx.font = "9px 'Roboto', 'Inter', sans-serif";
+    ctx.fillStyle = isDark ? "#64748b" : "#475569";
+    ctx.textAlign = "left";
+    ctx.fillText(Number(maxVal).toLocaleString("vi-VN"), usableWidth + 4, 13);
+    ctx.fillText(Number(minVal).toLocaleString("vi-VN"), usableWidth + 4, h - 5);
+
+    // Kẻ đường mờ 50%
+    ctx.beginPath();
+    ctx.moveTo(0, Math.round(h / 2));
+    ctx.lineTo(usableWidth, Math.round(h / 2));
+    ctx.stroke();
+
+    // Đường ATR (Đỏ hồng / Rose)
+    ctx.beginPath();
+    ctx.strokeStyle = isDark ? "#f43f5e" : "#e11d48";
+    ctx.lineWidth = 1.4;
+    let started = false;
+    for (let i = 0; i < n; i++) {
+        if (atr14[i] === null || atr14[i] === undefined) continue;
+        const x = getFireantCandleX(ts, candles[i], i, usableWidth, n);
+        if (x === null || x < -barW * 4 || x > usableWidth + barW * 4) {
+            started = false;
+            continue;
+        }
+        const y = h - ((atr14[i] - minVal) / valRange) * (h - 18) - 9;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+
+    // Crosshair
+    if (currentCrosshairX !== null && currentCrosshairX >= 0 && currentCrosshairX <= usableWidth) {
+        ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.45)" : "rgba(2, 132, 199, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currentCrosshairX, 0);
+        ctx.lineTo(currentCrosshairX, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
 function adjustTechnicalChartLayout() {
     const techTab = document.getElementById("tab-technical");
     if (!techTab || techTab.classList.contains("hidden")) return;
@@ -11099,12 +13362,8 @@ function adjustTechnicalChartLayout() {
         totalChartHeight = Math.max(420, Math.min(700, vh - 240));
     }
 
-    const paneMap = {
-        vol: "pane-volume",
-        mcdx: "pane-mcdx",
-        macd: "pane-macd",
-        rsi: "pane-rsi"
-    };
+    const paneMap = PANE_ID_MAP;
+    const allSubKeys = ['vol', 'mcdx', 'macd', 'rsi', 'stoch', 'mfi', 'obv', 'atr'];
 
     // -------------------------------------------------------------
     // XỬ LÝ CHẾ ĐỘ PHÓNG TO 1 CHỈ BÁO HOẶC NẾN CHÍNH (MAXIMIZE PANE)
@@ -11120,7 +13379,7 @@ function adjustTechnicalChartLayout() {
                 paneMain.style.display = "block";
                 paneMain.style.height = `${totalChartHeight}px`;
             }
-            ['vol', 'mcdx', 'macd', 'rsi'].forEach(k => {
+            allSubKeys.forEach(k => {
                 const el = document.getElementById(paneMap[k]);
                 if (el) el.style.display = "none";
             });
@@ -11147,10 +13406,10 @@ function adjustTechnicalChartLayout() {
             }
             return;
         } else {
-            // Phóng to 1 sub-pane cụ thể (vol, mcdx, macd, rsi)
+            // Phóng to 1 sub-pane cụ thể (vol, mcdx, macd, rsi, stoch, mfi, obv, atr)
             if (paneMain) paneMain.style.display = "none";
 
-            ['vol', 'mcdx', 'macd', 'rsi'].forEach(k => {
+            allSubKeys.forEach(k => {
                 const el = document.getElementById(paneMap[k]);
                 if (!el) return;
                 if (k === maximizedPaneKey) {
@@ -11168,6 +13427,10 @@ function adjustTechnicalChartLayout() {
                 else if (maximizedPaneKey === "mcdx") renderMcdxCanvas(candlesToRender);
                 else if (maximizedPaneKey === "macd") renderMacdCanvas(candlesToRender);
                 else if (maximizedPaneKey === "rsi") renderRsiCanvas(candlesToRender);
+                else if (maximizedPaneKey === "stoch") renderStochCanvas(candlesToRender);
+                else if (maximizedPaneKey === "mfi") renderMfiCanvas(candlesToRender);
+                else if (maximizedPaneKey === "obv") renderObvCanvas(candlesToRender);
+                else if (maximizedPaneKey === "atr") renderAtrCanvas(candlesToRender);
             }
             return;
         }
@@ -11182,10 +13445,9 @@ function adjustTechnicalChartLayout() {
 
     // 2. Lấy danh sách sub-panes đang hoạt động
     const activeSubPanes = [];
-    if (activeIndicators.vol) activeSubPanes.push("vol");
-    if (activeIndicators.mcdx) activeSubPanes.push("mcdx");
-    if (activeIndicators.macd) activeSubPanes.push("macd");
-    if (activeIndicators.rsi) activeSubPanes.push("rsi");
+    allSubKeys.forEach(k => {
+        if (activeIndicators[k]) activeSubPanes.push(k);
+    });
 
     const numActive = activeSubPanes.length;
     let mainHeight;
@@ -11195,12 +13457,12 @@ function adjustTechnicalChartLayout() {
         // Khi tắt hết chỉ báo phụ: nến chính chiếm 100% không gian
         mainHeight = totalChartHeight;
     } else {
-        // Tỷ lệ sub-panes co giãn theo số lượng chỉ báo (35% - 46%)
-        const subRatio = Math.min(0.46, 0.11 * numActive + 0.05);
+        // Tỷ lệ sub-panes co giãn theo số lượng chỉ báo (35% - 48%)
+        const subRatio = Math.min(0.48, 0.10 * numActive + 0.05);
         let subTotalH = Math.round(totalChartHeight * subRatio);
 
-        // Giới hạn chiều cao mỗi ô: tối thiểu 50px, tối đa 88px
-        subTotalH = Math.max(numActive * 52, Math.min(numActive * 88, subTotalH));
+        // Giới hạn chiều cao mỗi ô: tối thiểu 48px, tối đa 88px
+        subTotalH = Math.max(numActive * 48, Math.min(numActive * 88, subTotalH));
 
         // MCDX ưu tiên thêm một chút chiều cao (+8px) để 3 dải màu cột Banker, Hot money, Retail rõ nét
         const mcdxBonus = activeIndicators.mcdx ? Math.min(10, Math.max(4, Math.floor(subTotalH * 0.06))) : 0;
@@ -11238,32 +13500,41 @@ function adjustTechnicalChartLayout() {
     const renderBox = document.getElementById("tech-tv-render-box");
     if (currentFireantChart && renderBox) {
         const renderW = renderBox.clientWidth || 800;
-        currentFireantChart.applyOptions({
-            width: renderW,
-            height: mainHeight
-        });
-        try {
-            if (userManuallyScrolledRange) {
-                currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
-            } else {
-                setChartTimeRange(currentFireantRange || "3M", false, false);
-            }
-        } catch(e) {}
+        const sizeChanged = (!currentFireantChart._lastW || currentFireantChart._lastW !== renderW || !currentFireantChart._lastH || currentFireantChart._lastH !== mainHeight);
+        if (sizeChanged) {
+            currentFireantChart._lastW = renderW;
+            currentFireantChart._lastH = mainHeight;
+            currentFireantChart.applyOptions({
+                width: renderW,
+                height: mainHeight
+            });
+            try {
+                if (userManuallyScrolledRange && (userManuallyScrolledRange.to - userManuallyScrolledRange.from >= 4)) {
+                    currentFireantChart.timeScale().setVisibleLogicalRange(userManuallyScrolledRange);
+                } else {
+                    setChartTimeRange(currentFireantRange || "3M", false, false);
+                }
+            } catch(e) {}
+        }
     }
 
-    // Cập nhật drawing canvas overlay
+    // Cập nhật drawing canvas overlay (chỉ resize khi kích thước thay đổi để không xóa buffer)
     const canvas = document.getElementById("tech-drawing-canvas");
     if (canvas && canvas.parentElement) {
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.parentElement.clientWidth * dpr;
-        canvas.height = mainHeight * dpr;
-        if (typeof redrawAllDrawings === "function") {
-            redrawAllDrawings();
+        const targetW = canvas.parentElement.clientWidth * dpr;
+        const targetH = mainHeight * dpr;
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+            if (typeof redrawAllDrawings === "function") {
+                redrawAllDrawings();
+            }
         }
     }
 
     // 4. Áp dụng chiều cao cho từng sub-pane
-    ['vol', 'mcdx', 'macd', 'rsi'].forEach(key => {
+    allSubKeys.forEach(key => {
         const el = document.getElementById(paneMap[key]);
         if (!el) return;
         if (activeIndicators[key]) {
@@ -11863,11 +14134,13 @@ function setChartTimeRange(range, updateBtn = true, showMsg = true) {
             else if (range === "5Y") fromIdx = Math.max(0, n - 1251);
             else fromIdx = Math.max(0, n - 67);
 
+            const toIdx = n + 4; // Khoảng đệm 5 nến so với lề phải (right-aligned)
             currentFireantChart.timeScale().setVisibleLogicalRange({
                 from: fromIdx,
-                to: n - 1
+                to: toIdx
             });
-            renderFireantSubPanes(candles, { from: fromIdx, to: n - 1 });
+            try { currentFireantChart.timeScale().scrollToPosition(4, false); } catch(e) {}
+            renderFireantSubPanes(candles, { from: fromIdx, to: toIdx });
         }
     } catch (e) {
         try { currentFireantChart.timeScale().fitContent(); } catch (err) {}
@@ -11967,6 +14240,328 @@ async function refreshTechnicalData() {
         console.error("refreshTechnicalData error:", e);
         showToast(`Lỗi kết nối: ${e.message}`, true);
     }
+}
+
+// -------------------------------------------------------------
+// BỘ LỌC TÍN HIỆU FANSI T+, ROBOT 1, ROBOT 2, PHÂN KỲ MACD, PHÂN KỲ RSI (AMIBROKER AFL)
+// -------------------------------------------------------------
+let currentFansiRobotStrategy = "fansi"; // 'fansi' | 'robot1' | 'robot2' | 'div_macd' | 'div_rsi'
+
+function switchFansiRobotStrategy(strat) {
+    if (!strat) strat = "fansi";
+    currentFansiRobotStrategy = strat;
+
+    const btnFansi = document.getElementById("fansi-strat-tab-fansi");
+    const btnRobot1 = document.getElementById("fansi-strat-tab-robot1");
+    const btnRobot2 = document.getElementById("fansi-strat-tab-robot2");
+    const btnDivMacd = document.getElementById("fansi-strat-tab-div_macd");
+    const btnDivRsi = document.getElementById("fansi-strat-tab-div_rsi");
+
+    [btnFansi, btnRobot1, btnRobot2, btnDivMacd, btnDivRsi].forEach(b => {
+        if (b) {
+            b.className = "fansi-strat-tab px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 cursor-pointer shadow-sm";
+            const dot = b.querySelector("span.rounded-full");
+            if (dot) dot.classList.remove("animate-pulse");
+        }
+    });
+
+    if (strat === "robot1") {
+        if (btnRobot1) {
+            btnRobot1.className = "fansi-strat-tab active px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-500/80 shadow-md cursor-pointer";
+            const dot = btnRobot1.querySelector("span.rounded-full");
+            if (dot) dot.classList.add("animate-pulse");
+        }
+    } else if (strat === "robot2") {
+        if (btnRobot2) {
+            btnRobot2.className = "fansi-strat-tab active px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-500/80 shadow-md cursor-pointer";
+            const dot = btnRobot2.querySelector("span.rounded-full");
+            if (dot) dot.classList.add("animate-pulse");
+        }
+    } else if (strat === "div_macd") {
+        if (btnDivMacd) {
+            btnDivMacd.className = "fansi-strat-tab active px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border border-indigo-500/80 shadow-md cursor-pointer";
+            const dot = btnDivMacd.querySelector("span.rounded-full");
+            if (dot) dot.classList.add("animate-pulse");
+        }
+    } else if (strat === "div_rsi") {
+        if (btnDivRsi) {
+            btnDivRsi.className = "fansi-strat-tab active px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-500/80 shadow-md cursor-pointer";
+            const dot = btnDivRsi.querySelector("span.rounded-full");
+            if (dot) dot.classList.add("animate-pulse");
+        }
+    } else {
+        if (btnFansi) {
+            btnFansi.className = "fansi-strat-tab active px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-400 border border-emerald-500/80 shadow-md cursor-pointer";
+            const dot = btnFansi.querySelector("span.rounded-full");
+            if (dot) dot.classList.add("animate-pulse");
+        }
+    }
+
+    // Cập nhật lại nhãn nút trên chart thanh công cụ kỹ thuật (#btn-fansi-signals) nếu có
+    const chartBtn = document.getElementById("btn-fansi-signals");
+    if (chartBtn) {
+        let stratName = "FANSI T+";
+        let colorCls = "text-emerald-400";
+        if (strat === "robot1") { stratName = "ROBOT 1"; colorCls = "text-amber-400"; }
+        else if (strat === "robot2") { stratName = "ROBOT 2"; colorCls = "text-sky-400"; }
+        else if (strat === "div_macd") { stratName = "PHÂN KỲ MACD"; colorCls = "text-indigo-400"; }
+        else if (strat === "div_rsi") { stratName = "PHÂN KỲ RSI"; colorCls = "text-rose-400"; }
+        chartBtn.innerHTML = `
+            <i data-lucide="zap" class="w-3.5 h-3.5 ${colorCls}"></i>
+            <span>${stratName}</span>
+        `;
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Vẽ lại mũi tên trên biểu đồ kỹ thuật nếu đang hiển thị nến
+    if (lastFireantCandles && lastFireantCandles.length > 0) {
+        applyChartMarkers(lastFireantCandles);
+    }
+
+    // Nạp lại danh sách tín hiệu cho robot được chọn
+    loadFansiScreener(true);
+}
+
+async function loadFansiScreener(forceRefresh = false) {
+    if (isFansiScreenerLoading) return;
+    isFansiScreenerLoading = true;
+
+    const refreshIcon = document.getElementById("fansi-refresh-icon");
+    if (refreshIcon) refreshIcon.classList.add("animate-spin");
+
+    const exchangeEl = document.getElementById("fansi-filter-exchange");
+    const volumeEl = document.getElementById("fansi-filter-volume");
+    const timingEl = document.getElementById("fansi-filter-timing");
+    const minPriceEl = document.getElementById("fansi-filter-min-price");
+
+    const exchange = exchangeEl ? exchangeEl.value : "ALL";
+    const minVol = volumeEl ? volumeEl.value : "100000";
+    const timing = timingEl ? timingEl.value : "recent";
+    const minPrice = minPriceEl ? minPriceEl.value : "5000";
+
+    const buyTbody = document.getElementById("fansi-buy-tbody");
+    const sellTbody = document.getElementById("fansi-sell-tbody");
+
+    if (forceRefresh) {
+        if (buyTbody) buyTbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400"><div class="flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div><span>Đang quét dữ liệu nến toàn sàn Realtime...</span></div></td></tr>`;
+        if (sellTbody) sellTbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400"><div class="flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-rose-400 border-t-transparent rounded-full animate-spin"></div><span>Đang quét dữ liệu nến toàn sàn Realtime...</span></div></td></tr>`;
+    }
+
+    try {
+        const url = `/api/screener/fansi-signals?strategy=${encodeURIComponent(currentFansiRobotStrategy)}&exchange=${encodeURIComponent(exchange)}&min_vol=${encodeURIComponent(minVol)}&timing=${encodeURIComponent(timing)}&min_price=${encodeURIComponent(minPrice)}${forceRefresh ? '&refresh=true' : ''}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        fansiScreenerData = data;
+        renderFansiScreenerUI(data);
+    } catch (err) {
+        console.error("loadFansiScreener error:", err);
+        if (buyTbody) buyTbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-400">Lỗi kết nối bộ lọc: ${err.message}. Vui lòng thử lại.</td></tr>`;
+        if (sellTbody) sellTbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-400">Lỗi kết nối bộ lọc: ${err.message}. Vui lòng thử lại.</td></tr>`;
+    } finally {
+        isFansiScreenerLoading = false;
+        if (refreshIcon) refreshIcon.classList.remove("animate-spin");
+    }
+}
+
+let fansiSortState = {
+    buy: { col: 'bars_since', dir: 'asc' },
+    sell: { col: 'bars_since', dir: 'asc' }
+};
+
+function sortFansiTable(side, col) {
+    if (!fansiScreenerData) return;
+    const current = fansiSortState[side] || { col: 'bars_since', dir: 'asc' };
+    if (current.col === col) {
+        current.dir = current.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        current.col = col;
+        current.dir = (col === 'symbol' || col === 'bars_since') ? 'asc' : 'desc';
+    }
+    fansiSortState[side] = current;
+    renderFansiScreenerUI(fansiScreenerData);
+}
+
+function updateFansiSortHeaderIcons() {
+    const cols = ['symbol', 'price', 'pct_change', 'signal_price', 'profit_pct', 'bars_since', 'ma10_vol'];
+    ['buy', 'sell'].forEach(side => {
+        const state = fansiSortState[side];
+        cols.forEach(c => {
+            const el = document.getElementById(`sort-${side}-${c}`);
+            if (el) {
+                if (state.col === c) {
+                    el.textContent = state.dir === 'asc' ? '▲' : '▼';
+                    el.className = side === 'buy' ? 'text-[10px] text-emerald-400 font-bold ml-1' : 'text-[10px] text-rose-400 font-bold ml-1';
+                } else {
+                    el.textContent = '↕';
+                    el.className = 'text-[10px] text-slate-500 group-hover:text-slate-300 ml-1 transition-colors';
+                }
+            }
+        });
+    });
+}
+
+function renderFansiScreenerUI(data) {
+    if (!data) return;
+
+    // 1. Header & Counter Stats
+    const updatedEl = document.getElementById("fansi-last-updated");
+    if (updatedEl && data.updated_at) updatedEl.textContent = `Vừa cập nhật: ${data.updated_at}`;
+
+    const statTotal = document.getElementById("fansi-stat-total");
+    const statBuys = document.getElementById("fansi-stat-buys");
+    const statSells = document.getElementById("fansi-stat-sells");
+    const statToday = document.getElementById("fansi-stat-today");
+    const buyBadge = document.getElementById("fansi-buy-badge");
+    const sellBadge = document.getElementById("fansi-sell-badge");
+
+    const summary = data.summary || {};
+
+    function applyFansiSort(list, state) {
+        const col = state.col;
+        const dir = state.dir;
+        return [...list].sort((a, b) => {
+            let va = a[col];
+            let vb = b[col];
+            if (col === "symbol") {
+                va = (va || "").toString().toUpperCase();
+                vb = (vb || "").toString().toUpperCase();
+                return dir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+            }
+            va = Number(va != null ? va : 0);
+            vb = Number(vb != null ? vb : 0);
+            return dir === "asc" ? va - vb : vb - va;
+        });
+    }
+
+    const minPriceEl = document.getElementById("fansi-filter-min-price");
+    const currentMinPrice = minPriceEl ? (parseFloat(minPriceEl.value) || 0) : 5000;
+
+    let filteredBuys = data.buy_signals || [];
+    let filteredSells = data.sell_signals || [];
+
+    if (currentMinPrice > 0) {
+        filteredBuys = filteredBuys.filter(item => (Number(item.price) || 0) >= currentMinPrice);
+        filteredSells = filteredSells.filter(item => (Number(item.price) || 0) >= currentMinPrice);
+    }
+
+    const buys = applyFansiSort(filteredBuys, fansiSortState.buy);
+    const sells = applyFansiSort(filteredSells, fansiSortState.sell);
+    updateFansiSortHeaderIcons();
+
+    const todayBuyCount = buys.filter(b => b.bars_since === 0).length;
+    const todaySellCount = sells.filter(s => s.bars_since === 0).length;
+
+    if (statTotal) statTotal.textContent = `${buys.length + sells.length} mã`;
+    if (statBuys) statBuys.textContent = `${buys.length} mã`;
+    if (statSells) statSells.textContent = `${sells.length} mã`;
+    if (statToday) statToday.textContent = `${todayBuyCount + todaySellCount} mã`;
+    if (buyBadge) buyBadge.textContent = `${buys.length} mã`;
+    if (sellBadge) sellBadge.textContent = `${sells.length} mã`;
+
+    // 2. Render Cột TÍN HIỆU MUA
+    const buyTbody = document.getElementById("fansi-buy-tbody");
+    if (buyTbody) {
+        if (buys.length === 0) {
+            buyTbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Không có mã nào có tín hiệu Mua thỏa điều kiện hiện tại.</td></tr>`;
+        } else {
+            buyTbody.innerHTML = buys.map(item => {
+                const isToday = item.bars_since === 0;
+                const chgColor = item.pct_change > 0 ? "text-emerald-400" : (item.pct_change < 0 ? "text-rose-400" : "text-amber-300");
+                const chgSign = item.pct_change > 0 ? "+" : "";
+                const profColor = item.profit_pct >= 0 ? "text-emerald-400" : "text-rose-400";
+                const profSign = item.profit_pct > 0 ? "+" : "";
+
+                const timingBadge = isToday
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">T+0</span>`
+                    : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">T+${item.bars_since}</span>`;
+
+                return `
+                    <tr class="hover:bg-emerald-950/40 cursor-pointer transition-colors group" onclick="loadStockToTechnicalChart('${item.symbol}')" title="Bấm để xem biểu đồ và mũi tên của mã ${item.symbol}">
+                        <td class="p-2.5 pl-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-white group-hover:text-cyan-300 transition-colors">${item.symbol}</span>
+                                <span class="text-[9px] px-1 py-0.2 rounded bg-slate-900 border border-slate-700 text-slate-400">${item.exchange || 'HOSE'}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 truncate max-w-[130px]">${item.name || ''}</div>
+                        </td>
+                        <td class="p-2.5 text-right font-bold text-white">${Number(item.price || 0).toLocaleString("vi-VN")}</td>
+                        <td class="p-2.5 text-right font-bold ${chgColor}">${chgSign}${item.pct_change}%</td>
+                        <td class="p-2.5 text-right text-slate-300">${Number(item.signal_price || item.price || 0).toLocaleString("vi-VN")}</td>
+                        <td class="p-2.5 text-right font-bold ${profColor}">${profSign}${item.profit_pct}%</td>
+                        <td class="p-2.5 text-center">${timingBadge}</td>
+                        <td class="p-2.5 text-right pr-3 font-semibold text-amber-300">${Number(item.ma10_vol || 0).toLocaleString("vi-VN")}</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+    }
+
+    // 3. Render Cột TÍN HIỆU BÁN
+    const sellTbody = document.getElementById("fansi-sell-tbody");
+    if (sellTbody) {
+        if (sells.length === 0) {
+            sellTbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Không có mã nào có tín hiệu Bán thỏa điều kiện hiện tại.</td></tr>`;
+        } else {
+            sellTbody.innerHTML = sells.map(item => {
+                const isToday = item.bars_since === 0;
+                const chgColor = item.pct_change > 0 ? "text-emerald-400" : (item.pct_change < 0 ? "text-rose-400" : "text-amber-300");
+                const chgSign = item.pct_change > 0 ? "+" : "";
+                const profColor = item.profit_pct >= 0 ? "text-rose-400" : "text-emerald-400";
+                const profSign = item.profit_pct > 0 ? "+" : "";
+
+                const timingBadge = isToday
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">T+0</span>`
+                    : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">T+${item.bars_since}</span>`;
+
+                return `
+                    <tr class="hover:bg-rose-950/40 cursor-pointer transition-colors group" onclick="loadStockToTechnicalChart('${item.symbol}')" title="Bấm để xem biểu đồ và mũi tên của mã ${item.symbol}">
+                        <td class="p-2.5 pl-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-white group-hover:text-rose-300 transition-colors">${item.symbol}</span>
+                                <span class="text-[9px] px-1 py-0.2 rounded bg-slate-900 border border-slate-700 text-slate-400">${item.exchange || 'HOSE'}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 truncate max-w-[130px]">${item.name || ''}</div>
+                        </td>
+                        <td class="p-2.5 text-right font-bold text-white">${Number(item.price || 0).toLocaleString("vi-VN")}</td>
+                        <td class="p-2.5 text-right font-bold ${chgColor}">${chgSign}${item.pct_change}%</td>
+                        <td class="p-2.5 text-right text-slate-300">${Number(item.signal_price || item.price || 0).toLocaleString("vi-VN")}</td>
+                        <td class="p-2.5 text-right font-bold ${profColor}">${profSign}${item.profit_pct}%</td>
+                        <td class="p-2.5 text-center">${timingBadge}</td>
+                        <td class="p-2.5 text-right pr-3 font-semibold text-amber-300">${Number(item.ma10_vol || 0).toLocaleString("vi-VN")}</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+function filterFansiScreener() {
+    if (fansiScreenerData) {
+        renderFansiScreenerUI(fansiScreenerData);
+    }
+    loadFansiScreener(false);
+}
+
+function loadStockToTechnicalChart(symbol) {
+    if (!symbol) return;
+    const clean = symbol.trim().toUpperCase();
+    userManuallyScrolledRange = null;
+    changeTechnicalSymbol(clean);
+    
+    // Smooth scroll lên khung biểu đồ kỹ thuật
+    const chartEl = document.getElementById("tech-quick-ticker") || document.getElementById("tech-tv-render-box");
+    if (chartEl) {
+        chartEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    const stratName = currentFansiRobotStrategy === "robot1" ? "ROBOT 1 (THE BEAST)" : (currentFansiRobotStrategy === "robot2" ? "ROBOT 2 (ROCKET JET)" : "FANSI T+");
+    showToast(`Đã chuyển biểu đồ sang ${clean}. Đang hiển thị mũi tên tín hiệu ${stratName}...`);
 }
 
 // -------------------------------------------------------------
@@ -16435,4 +19030,1986 @@ function toggleAutoExtractSetting(enabled) {
         : "Đã tắt tự động bóc tách. Bấm thủ công khi cần."
     );
 }
+
+// ============================================================================
+// BỘ LỌC CỔ PHIẾU (STOCK SCREENER) - KỸ THUẬT & 5 CHIẾN LƯỢC QUỸ ĐẦU TƯ
+// ============================================================================
+let screenerInitialized = false;
+let screenerCurrentMode = "tech"; // 'tech' | 'fund'
+let screenerCurrentStrategy = "fansi"; // 'fansi' | 'value' | 'growth' | 'garp' | 'quality' | 'momentum'
+let screenerCurrentExchange = "ALL"; // 'ALL' | 'HOSE' | 'HNX' | 'UPCOM' | 'VN30'
+let screenerCurrentMinVol = 100000;
+let screenerCurrentMinPrice = 5000;
+let screenerCurrentTiming = "today"; // 'today' (T+0 hôm nay) | 'recent' (T+0 đến T+3)
+let screenerCurrentTicker = "HDB";
+let screenerCurrentMinRs = 80; // Mặc định lọc theo RS >= 80
+let screenerAllTechBuys = [];
+let screenerAllTechSells = [];
+let screenerCachedFundData = [];
+let screenerCachedTechBuys = [];
+let screenerCachedTechSells = [];
+let screenerSortState = { col: "rs_rating", dir: "desc" };
+let screenerUserCustomSort = null; // Trạng thái sort do người dùng click (giữ cố định qua các chu kỳ auto-scan)
+
+// Auto Quét Liên Tục Trong Phiên (chu kỳ 10s)
+let screenerAutoScanEnabled = true;
+let screenerAutoScanTimer = null;
+let screenerAutoScanCountdown = 10;
+
+// Chart references for Column 3
+let chartScreenerTv = null;
+let chartScreenerVolTv = null;
+let screenerCandleSeries = null;
+let screenerVolSeries = null;
+let lastLoadedScreenerTicker = null;
+let lastScreenerCandleHash = null;
+
+function initScreenerTab() {
+    screenerInitialized = true;
+    const d = new Date();
+    const dateStr = d.toISOString().split("T")[0];
+    const dateEl = document.getElementById("screener-data-date");
+    if (dateEl) dateEl.textContent = dateStr;
+
+    // Khôi phục tùy chọn Auto Quét từ localStorage nếu có
+    try {
+        const savedAuto = localStorage.getItem("ierm_screener_auto_scan");
+        if (savedAuto !== null) {
+            screenerAutoScanEnabled = (savedAuto === "true");
+        }
+    } catch(e) {}
+    updateScreenerAutoScanUI();
+    startScreenerAutoScanLoop();
+
+    // Đồng bộ các select tiêu chí lọc
+    const exSelect = document.getElementById("screener-global-exchange");
+    const volSelect = document.getElementById("screener-global-min-vol");
+    const priceSelect = document.getElementById("screener-global-min-price");
+    if (exSelect) exSelect.value = screenerCurrentExchange;
+    if (volSelect) volSelect.value = String(screenerCurrentMinVol);
+    if (priceSelect) priceSelect.value = String(screenerCurrentMinPrice);
+
+    initScreenerTvChartInstance();
+    selectScreenerStrategy(screenerCurrentStrategy, false);
+}
+
+// -------------------------------------------------------------
+// BẬT / TẮT & CHU KỲ AUTO QUÉT LIÊN TỤC THEO THỊ TRƯỜNG TRONG PHIÊN
+// -------------------------------------------------------------
+function toggleScreenerAutoScan() {
+    screenerAutoScanEnabled = !screenerAutoScanEnabled;
+    try {
+        localStorage.setItem("ierm_screener_auto_scan", screenerAutoScanEnabled ? "true" : "false");
+    } catch(e) {}
+    screenerAutoScanCountdown = 10;
+    updateScreenerAutoScanUI();
+    showToast(screenerAutoScanEnabled 
+        ? "⚡ Đã bật: Auto quét liên tục theo thị trường trong phiên!" 
+        : "Đã tạm dừng Auto quét liên tục trong phiên.");
+}
+
+function updateScreenerAutoScanUI() {
+    const btn = document.getElementById("screener-auto-scan-btn");
+    const ping = document.getElementById("screener-auto-scan-ping");
+    const dot = document.getElementById("screener-auto-scan-dot");
+    const text = document.getElementById("screener-auto-scan-text");
+    const cd = document.getElementById("screener-auto-scan-countdown");
+
+    if (screenerAutoScanEnabled) {
+        if (btn) {
+            btn.className = "px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all flex items-center gap-2 border bg-emerald-950/90 text-emerald-400 border-emerald-700/80 hover:bg-emerald-900 shadow-sm cursor-pointer";
+        }
+        if (ping) ping.classList.remove("hidden");
+        if (dot) dot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+        if (text) text.textContent = "⚡ Auto: BẬT";
+        if (cd) {
+            cd.classList.remove("hidden");
+            cd.textContent = `${screenerAutoScanCountdown}s`;
+        }
+    } else {
+        if (btn) {
+            btn.className = "px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all flex items-center gap-2 border bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500 shadow-sm cursor-pointer";
+        }
+        if (ping) ping.classList.add("hidden");
+        if (dot) dot.className = "relative inline-flex rounded-full h-2 w-2 bg-slate-500";
+        if (text) text.textContent = "Auto: TẮT";
+        if (cd) cd.classList.add("hidden");
+    }
+}
+
+function startScreenerAutoScanLoop() {
+    if (screenerAutoScanTimer) clearInterval(screenerAutoScanTimer);
+    screenerAutoScanCountdown = 10;
+
+    screenerAutoScanTimer = setInterval(() => {
+        const screenerTab = document.getElementById("tab-screener");
+        // Chỉ chạy khi tab-screener đang hiển thị và auto scan được bật
+        if (!screenerTab || screenerTab.classList.contains("hidden") || !screenerAutoScanEnabled) {
+            return;
+        }
+
+        screenerAutoScanCountdown--;
+        const cd = document.getElementById("screener-auto-scan-countdown");
+        if (cd) cd.textContent = `${Math.max(0, screenerAutoScanCountdown)}s`;
+
+        if (screenerAutoScanCountdown <= 0) {
+            screenerAutoScanCountdown = 10;
+            // Quét tự động chạy ngầm, không làm giật cuộn chuột hay mất mã đang xem
+            selectScreenerStrategy(screenerCurrentStrategy, true, true);
+        }
+    }, 1000);
+}
+
+// -------------------------------------------------------------
+// XỬ LÝ TIÊU CHÍ LỌC PHÍA TRÊN (SÀN, KL TB 10N, THỊ GIÁ)
+// -------------------------------------------------------------
+function handleScreenerCriteriaChange() {
+    const exSelect = document.getElementById("screener-global-exchange");
+    const volSelect = document.getElementById("screener-global-min-vol");
+    const priceSelect = document.getElementById("screener-global-min-price");
+
+    if (exSelect) screenerCurrentExchange = exSelect.value;
+    if (volSelect) screenerCurrentMinVol = parseInt(volSelect.value, 10) || 0;
+    if (priceSelect) screenerCurrentMinPrice = parseFloat(priceSelect.value) || 0;
+
+    // Đồng bộ nút chọn nhanh sàn ở Cột 2
+    document.querySelectorAll(".screener-ex-btn").forEach(btn => {
+        btn.classList.remove("active", "bg-cyan-900/60", "text-cyan-300", "font-bold");
+        btn.classList.add("text-slate-400");
+    });
+    const activeExBtn = document.getElementById(`ex-btn-${screenerCurrentExchange}`);
+    if (activeExBtn) {
+        activeExBtn.classList.add("active", "bg-cyan-900/60", "text-cyan-300", "font-bold");
+        activeExBtn.classList.remove("text-slate-400");
+    }
+
+    selectScreenerStrategy(screenerCurrentStrategy, true);
+}
+
+// -------------------------------------------------------------
+// -------------------------------------------------------------
+// BỘ LỌC ĐỘC LẬP SỨC MẠNH GIÁ RS (RELATIVE STRENGTH 0 - 100)
+// -------------------------------------------------------------
+let screenerAllRsStocks = [];
+let screenerCachedRsData = [];
+
+function handleScreenerRsSliderChange(val) {
+    const num = parseInt(val, 10);
+    screenerCurrentMinRs = isNaN(num) ? 0 : num;
+
+    const badge = document.getElementById("screener-rs-val-badge");
+    if (badge) {
+        if (screenerCurrentMinRs === 0) {
+            badge.textContent = "Tất cả (≥ 0)";
+            badge.className = "px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 shadow-sm";
+        } else if (screenerCurrentMinRs >= 80) {
+            badge.textContent = `≥ ${screenerCurrentMinRs}`;
+            badge.className = "px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-purple-950 text-purple-300 border border-purple-700/80 shadow-sm";
+        } else {
+            badge.textContent = `≥ ${screenerCurrentMinRs}`;
+            badge.className = "px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 shadow-sm";
+        }
+    }
+
+    if (screenerCurrentStrategy === "rs") {
+        applyRsFilter();
+    } else {
+        // Tự động kích hoạt bộ lọc RS khi người dùng kéo thanh slider
+        selectScreenerStrategy("rs");
+    }
+}
+
+function applyRsFilter() {
+    const minRs = screenerCurrentMinRs || 0;
+    const minVol = screenerCurrentMinVol || 0;
+    const minPrice = screenerCurrentMinPrice || 0;
+
+    let filtered = (screenerAllRsStocks || []).filter(s => {
+        // 1. Tiêu chí bộ lọc RS bên trái: RS >= mốc slider (0 - 100)
+        const rs = s.rs_rating !== undefined ? s.rs_rating : 50;
+        if (rs < minRs) return false;
+
+        // 2. Tiêu chí phía trên: Sàn giao dịch
+        if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+            const ex = (s.exchange || "").toUpperCase();
+            if (screenerCurrentExchange === "VN30") {
+                if (typeof VN30_TICKERS !== "undefined" && Array.isArray(VN30_TICKERS)) {
+                    if (!VN30_TICKERS.includes((s.ticker || s.symbol || "").toUpperCase())) return false;
+                }
+            } else if (ex !== screenerCurrentExchange) {
+                return false;
+            }
+        }
+
+        // 3. Tiêu chí phía trên: Khối lượng tối thiểu (KL TB 10N / 3T)
+        const vol = s.volume !== undefined ? s.volume : (s.today_vol || s.ma10_vol || 0);
+        if (minVol > 0 && vol < minVol) return false;
+
+        // 4. Tiêu chí phía trên: Thị giá tối thiểu
+        const p = s.price || 0;
+        if (minPrice > 0 && p < minPrice) return false;
+
+        return true;
+    });
+
+    screenerCachedRsData = filtered;
+
+    // Giữ nguyên trạng thái sắp xếp của người dùng
+    if (screenerUserCustomSort) {
+        applyScreenerSort(screenerCachedRsData, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+    } else {
+        applyScreenerSort(screenerCachedRsData, "rs_rating", "desc");
+    }
+
+    const countEl = document.getElementById("screener-result-count");
+    if (countEl) countEl.textContent = `(${filtered.length} mã)`;
+
+    const stratTitleEl = document.getElementById("screener-strat-title");
+    if (stratTitleEl) stratTitleEl.textContent = `⚡ SỨC MẠNH GIÁ RS (≥ ${minRs})`;
+
+    renderRsScreenerTable(screenerCachedRsData);
+    updateScreenerSortHeaderIcons(screenerUserCustomSort ? screenerUserCustomSort.col : "rs_rating", screenerUserCustomSort ? screenerUserCustomSort.dir : "desc");
+
+    // Tự động hiển thị mã đầu tiên nếu mã hiện tại không còn trong danh sách
+    const isCurrentStillPresent = filtered.some(it => (it.ticker || "").toUpperCase() === screenerCurrentTicker);
+    if (!isCurrentStillPresent && filtered.length > 0) {
+        selectScreenerTicker(filtered[0].ticker, false);
+    }
+}
+
+function renderRsScreenerTable(items) {
+    const tbody = document.getElementById("screener-rs-tbody");
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500 italic">Không có mã nào đạt chỉ số RS ≥ ${screenerCurrentMinRs} thỏa mãn tiêu chí Sàn, KL TB và Thị giá phía trên.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map(it => {
+        const sym = (it.ticker || "").toUpperCase();
+        const p = it.price || 0;
+        const pFmt = p >= 1000 ? (p / 1000).toFixed(2) : p.toFixed(2);
+        const chg = it.price_change_pct || 0;
+        const chgSign = chg >= 0 ? "+" : "";
+        const chgClass = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-300");
+
+        const vol = it.volume || 0;
+        const volStr = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M" : (vol >= 1000 ? (vol / 1000).toFixed(0) + "K" : vol);
+
+        const rs = it.rs_rating !== undefined ? it.rs_rating : 50;
+        let rsBadgeClass = "bg-slate-800 text-slate-300 border-slate-700";
+        if (rs >= 90) {
+            rsBadgeClass = "bg-purple-950/90 text-purple-300 border-purple-600 font-bold shadow-sm";
+        } else if (rs >= 80) {
+            rsBadgeClass = "bg-blue-950/90 text-blue-300 border-blue-600 font-bold shadow-sm";
+        } else if (rs >= 70) {
+            rsBadgeClass = "bg-cyan-950/80 text-cyan-300 border-cyan-700";
+        } else if (rs < 40) {
+            rsBadgeClass = "bg-rose-950/70 text-rose-300 border-rose-800";
+        }
+
+        const isSelected = (screenerCurrentTicker === sym);
+        const rowBg = isSelected ? "bg-cyan-950/80 border-l-2 border-cyan-400 font-bold" : "hover:bg-slate-800/60";
+
+        return `
+            <tr id="screener-row-${sym}" onclick="selectScreenerTicker('${sym}', true)" class="${rowBg} cursor-pointer transition-all border-b border-slate-800/40 group">
+                <td class="py-2 px-1.5 font-bold text-slate-200 group-hover:text-cyan-300 flex items-center gap-1.5">
+                    <span class="truncate">${sym}</span>
+                    <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 font-normal">${it.exchange || "HOSE"}</span>
+                </td>
+                <td class="py-2 px-1 text-center">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-mono border ${rsBadgeClass}">
+                        RS ${rs}
+                    </span>
+                </td>
+                <td class="py-2 px-1 text-right font-bold text-slate-200">
+                    ${pFmt}
+                </td>
+                <td class="py-2 px-1 text-right font-semibold ${chgClass}">
+                    ${chgSign}${chg.toFixed(2)}%
+                </td>
+                <td class="py-2 px-1 text-right text-slate-400 text-[11px]">
+                    ${volStr}
+                </td>
+                <td class="py-2 px-1 text-center">
+                    <button onclick="event.stopPropagation(); selectScreenerTicker('${sym}', true)" class="w-5 h-5 rounded hover:bg-cyan-800/60 text-slate-400 hover:text-cyan-300 flex items-center justify-center transition-all mx-auto font-bold text-xs" title="Xem biểu đồ và chọn mã ${sym}">
+                        +
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function resizeScreenerCharts() {
+    const priceBox = document.getElementById("screener-tv-chart-box");
+    const volBox = document.getElementById("screener-volume-chart-box");
+    if (chartScreenerTv && priceBox && priceBox.clientWidth > 0 && priceBox.clientHeight > 0) {
+        chartScreenerTv.resize(priceBox.clientWidth, priceBox.clientHeight);
+    }
+    if (chartScreenerVolTv && volBox && volBox.clientWidth > 0 && volBox.clientHeight > 0) {
+        chartScreenerVolTv.resize(volBox.clientWidth, volBox.clientHeight);
+    }
+}
+
+function switchScreenerMode(mode) {
+    screenerCurrentMode = mode;
+    const techBtn = document.getElementById("screener-mode-tech-btn");
+    const fundBtn = document.getElementById("screener-mode-fund-btn");
+    const techList = document.getElementById("screener-tech-playbooks");
+    const fundList = document.getElementById("screener-fund-playbooks");
+    const rsFilter = document.getElementById("screener-tech-rs-filter");
+
+    if (mode === "tech") {
+        if (techBtn) {
+            techBtn.className = "py-2 px-3 rounded-lg font-bold transition-all text-center flex items-center justify-center gap-1.5 bg-gradient-to-r from-red-500/20 to-amber-500/20 text-red-400 border border-red-500/40 shadow-sm";
+        }
+        if (fundBtn) {
+            fundBtn.className = "py-2 px-3 rounded-lg font-bold transition-all text-center flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent";
+        }
+        if (techList) techList.classList.remove("hidden");
+        if (fundList) fundList.classList.add("hidden");
+        if (rsFilter) rsFilter.classList.remove("hidden");
+        selectScreenerStrategy("fansi");
+    } else {
+        if (fundBtn) {
+            fundBtn.className = "py-2 px-3 rounded-lg font-bold transition-all text-center flex items-center justify-center gap-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm";
+        }
+        if (techBtn) {
+            techBtn.className = "py-2 px-3 rounded-lg font-bold transition-all text-center flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent";
+        }
+        if (techList) techList.classList.add("hidden");
+        if (fundList) fundList.classList.remove("hidden");
+        if (rsFilter) rsFilter.classList.add("hidden");
+        selectScreenerStrategy("value");
+    }
+}
+
+function setScreenerExchange(ex) {
+    screenerCurrentExchange = ex;
+    const globalEx = document.getElementById("screener-global-exchange");
+    if (globalEx) globalEx.value = ex;
+
+    document.querySelectorAll(".screener-ex-btn").forEach(btn => {
+        btn.classList.remove("active", "bg-cyan-900/60", "text-cyan-300", "font-bold");
+        btn.classList.add("text-slate-400");
+    });
+    const activeBtn = document.getElementById(`ex-btn-${ex}`);
+    if (activeBtn) {
+        activeBtn.classList.add("active", "bg-cyan-900/60", "text-cyan-300", "font-bold");
+        activeBtn.classList.remove("text-slate-400");
+    }
+
+    if (screenerCurrentStrategy === "rs") {
+        applyRsFilter();
+    } else {
+        selectScreenerStrategy(screenerCurrentStrategy, true);
+    }
+}
+
+function setScreenerTiming(timing) {
+    screenerCurrentTiming = timing;
+    const btnToday = document.getElementById("timing-btn-today");
+    const btnRecent = document.getElementById("timing-btn-recent");
+
+    if (timing === "today") {
+        if (btnToday) {
+            btnToday.className = "screener-timing-btn active px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 shadow-sm";
+        }
+        if (btnRecent) {
+            btnRecent.className = "screener-timing-btn px-2 py-0.5 rounded text-[10px] text-slate-400 hover:text-slate-200 border border-transparent";
+        }
+    } else {
+        if (btnRecent) {
+            btnRecent.className = "screener-timing-btn active px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950/80 text-cyan-400 border border-cyan-800/80 shadow-sm";
+        }
+        if (btnToday) {
+            btnToday.className = "screener-timing-btn px-2 py-0.5 rounded text-[10px] text-slate-400 hover:text-slate-200 border border-transparent";
+        }
+    }
+
+    if (screenerCurrentMode === "tech") {
+        selectScreenerStrategy(screenerCurrentStrategy || "fansi", true);
+    }
+}
+
+async function selectScreenerStrategy(stratKey, forceReload = false, silent = false) {
+    if (!stratKey) stratKey = "fansi";
+    screenerCurrentStrategy = stratKey;
+
+    // Highlight card
+    document.querySelectorAll(".screener-card").forEach(c => {
+        c.classList.remove("active", "border-cyan-500/60", "bg-gradient-to-br", "from-slate-900", "via-slate-900", "to-cyan-950/40");
+        c.classList.add("border-slate-800", "bg-slate-900/60");
+    });
+    const cardEl = document.getElementById(`strat-card-${stratKey}`);
+    if (cardEl) {
+        cardEl.classList.remove("border-slate-800", "bg-slate-900/60");
+        cardEl.classList.add("active", "border-cyan-500/60", "bg-gradient-to-br", "from-slate-900", "via-slate-900", "to-cyan-950/40");
+    }
+
+    const stratTitleEl = document.getElementById("screener-strat-title");
+    const countEl = document.getElementById("screener-result-count");
+    const techContainer = document.getElementById("screener-tech-results-container");
+    const fundContainer = document.getElementById("screener-fund-results-container");
+    const rsContainer = document.getElementById("screener-rs-results-container");
+    const timingBar = document.getElementById("screener-tech-timing-bar");
+
+    const STRAT_TITLES = {
+        fansi: `⚡ FANSI T+ ROBOT (${screenerCurrentTiming === 'today' ? 'T+0' : 'T+0..T+3'})`,
+        robot1: `⚡ ROBOT 1 - THE BEAST (${screenerCurrentTiming === 'today' ? 'T+0' : 'T+0..T+3'})`,
+        robot2: `⚡ ROBOT 2 - ROCKET JET (${screenerCurrentTiming === 'today' ? 'T+0' : 'T+0..T+3'})`,
+        div_macd: `⚡ PHÂN KỲ DƯƠNG MACD (${screenerCurrentTiming === 'today' ? 'T+0' : 'T+0..T+3'})`,
+        div_rsi: `⚡ PHÂN KỲ DƯƠNG RSI (${screenerCurrentTiming === 'today' ? 'T+0' : 'T+0..T+3'})`,
+        rs: `⚡ SỨC MẠNH GIÁ RS (≥ ${screenerCurrentMinRs})`,
+        value: "💎 Giá trị (Value)",
+        growth: "🚀 Tăng trưởng (Growth)",
+        garp: "🎯 GARP (Peter Lynch)",
+        quality: "👑 Chất lượng (Quality & Moat)",
+        momentum: "⚡ Đà tăng trưởng (Momentum)"
+    };
+
+    if (stratTitleEl) stratTitleEl.textContent = STRAT_TITLES[stratKey] || stratKey;
+
+    if (stratKey === "rs") {
+        // Mode RS (Relative Strength Screener)
+        if (techContainer) techContainer.classList.add("hidden");
+        if (fundContainer) fundContainer.classList.add("hidden");
+        if (rsContainer) rsContainer.classList.remove("hidden");
+        if (timingBar) timingBar.classList.add("hidden");
+
+        const rsTbody = document.getElementById("screener-rs-tbody");
+        if (!silent && rsTbody) {
+            rsTbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500 italic"><span class="inline-block animate-spin mr-1">⌛</span>Đang tải danh sách cổ phiếu RS ≥ ${screenerCurrentMinRs}...</td></tr>`;
+        }
+
+        try {
+            if (!screenerAllRsStocks || screenerAllRsStocks.length === 0 || forceReload) {
+                const url = `/api/screener/rs-ranking?exchange=ALL&min_rs=0&min_vol=0&min_price=0${forceReload ? '&refresh=true' : ''}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                screenerAllRsStocks = data.items || [];
+            }
+
+            // Áp dụng bộ lọc kết hợp: RS bên trái + Tiêu chí Sàn, KL TB, Thị giá phía trên
+            applyRsFilter();
+
+            // Tự động hiển thị cổ phiếu ĐẦU TIÊN trong bảng RS
+            if ((!silent || !screenerCurrentTicker) && screenerCachedRsData.length > 0) {
+                selectScreenerTicker(screenerCachedRsData[0].ticker, false);
+            } else if (screenerCurrentTicker) {
+                loadScreenerChartData(screenerCurrentTicker, silent);
+            }
+        } catch (err) {
+            console.error("selectScreenerStrategy rs error:", err);
+            if (rsTbody) rsTbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
+        }
+
+    } else if (stratKey === "fansi" || stratKey === "robot1" || stratKey === "robot2" || stratKey === "div_macd" || stratKey === "div_rsi") {
+        // Mode Technical - FANSI T+, ROBOT 1, ROBOT 2, PHÂN KỲ MACD, PHÂN KỲ RSI
+        currentFansiRobotStrategy = stratKey;
+
+        if (techContainer) techContainer.classList.remove("hidden");
+        if (fundContainer) fundContainer.classList.add("hidden");
+        if (rsContainer) rsContainer.classList.add("hidden");
+        if (timingBar) timingBar.classList.remove("hidden");
+
+        const buyTbody = document.getElementById("screener-tech-buy-tbody");
+        const sellTbody = document.getElementById("screener-tech-sell-tbody");
+        let stratName = "FANSI";
+        if (stratKey === "robot1") stratName = "ROBOT 1";
+        else if (stratKey === "robot2") stratName = "ROBOT 2";
+        else if (stratKey === "div_macd") stratName = "PHÂN KỲ MACD";
+        else if (stratKey === "div_rsi") stratName = "PHÂN KỲ RSI";
+
+        if (!silent) {
+            if (buyTbody) buyTbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 italic"><span class="inline-block animate-spin mr-1">⌛</span>Đang quét tín hiệu MUA (${stratName})...</td></tr>`;
+            if (sellTbody) sellTbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 italic"><span class="inline-block animate-spin mr-1">⌛</span>Đang quét tín hiệu BÁN (${stratName})...</td></tr>`;
+        }
+
+        try {
+            const url = `/api/screener/fansi-signals?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}&timing=${encodeURIComponent(screenerCurrentTiming)}${forceReload ? '&refresh=true' : ''}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            let buys = data.buy_signals || [];
+            let sells = data.sell_signals || [];
+
+            // Nếu timing === 'today', đảm bảo chỉ lấy các mã T+0
+            if (screenerCurrentTiming === "today") {
+                buys = buys.filter(b => b.bars_since === 0);
+                sells = sells.filter(s => s.bars_since === 0);
+            }
+
+            // Đồng bộ nghiêm ngặt với các tiêu chí lọc phía trên (Sàn, KL TB, Thị giá)
+            if (screenerCurrentMinVol > 0) {
+                buys = buys.filter(b => (b.today_vol || b.ma10_vol || b.volume || 0) >= screenerCurrentMinVol);
+                sells = sells.filter(s => (s.today_vol || s.ma10_vol || s.volume || 0) >= screenerCurrentMinVol);
+            }
+            if (screenerCurrentMinPrice > 0) {
+                buys = buys.filter(b => (b.price || b.signal_price || 0) >= screenerCurrentMinPrice);
+                sells = sells.filter(s => (s.price || s.signal_price || 0) >= screenerCurrentMinPrice);
+            }
+            if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+                buys = buys.filter(b => (b.exchange || "").toUpperCase() === screenerCurrentExchange);
+                sells = sells.filter(s => (s.exchange || "").toUpperCase() === screenerCurrentExchange);
+            }
+
+            screenerAllTechBuys = buys;
+            screenerAllTechSells = sells;
+            screenerCachedTechBuys = buys;
+            screenerCachedTechSells = sells;
+
+            // Giữ nguyên trạng thái sắp xếp của người dùng qua các chu kỳ auto-scan
+            if (screenerUserCustomSort) {
+                applyScreenerSort(screenerCachedTechBuys, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+                applyScreenerSort(screenerCachedTechSells, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+            }
+
+            const total = buys.length + sells.length;
+            if (countEl) countEl.textContent = `(${total} mã)`;
+            const buyCountEl = document.getElementById("screener-tech-buy-count");
+            const sellCountEl = document.getElementById("screener-tech-sell-count");
+            if (buyCountEl) buyCountEl.textContent = `${buys.length} mã`;
+            if (sellCountEl) sellCountEl.textContent = `${sells.length} mã`;
+
+            renderTechScreenerTables(screenerCachedTechBuys, screenerCachedTechSells);
+            if (screenerUserCustomSort) {
+                updateScreenerSortHeaderIcons(screenerUserCustomSort.col, screenerUserCustomSort.dir);
+            }
+
+            // Tự động hiển thị cổ phiếu ĐẦU TIÊN trong bộ lọc lên biểu đồ Cột 3 (trừ khi silent update và đã có mã đang xem)
+            let firstSym = null;
+            if (screenerCachedTechBuys.length > 0) {
+                firstSym = screenerCachedTechBuys[0].symbol;
+            } else if (screenerCachedTechSells.length > 0) {
+                firstSym = screenerCachedTechSells[0].symbol;
+            }
+
+            if (!silent || !screenerCurrentTicker) {
+                if (firstSym) {
+                    selectScreenerTicker(firstSym, false);
+                }
+            } else if (screenerCurrentTicker) {
+                // Đang xem một mã cụ thể khi chuyển đổi robot -> nạp lại chart với tín hiệu theo robot mới
+                loadScreenerChartData(screenerCurrentTicker, silent);
+            }
+        } catch (err) {
+            console.error("selectScreenerStrategy technical error:", err);
+            if (buyTbody) buyTbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
+            if (sellTbody) sellTbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
+        }
+
+    } else {
+        // Mode Fundamental
+        if (techContainer) techContainer.classList.add("hidden");
+        if (rsContainer) rsContainer.classList.add("hidden");
+        if (fundContainer) fundContainer.classList.remove("hidden");
+        if (timingBar) timingBar.classList.add("hidden");
+
+        const fundTbody = document.getElementById("screener-fund-tbody");
+        if (!silent && fundTbody) {
+            fundTbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500 italic"><span class="inline-block animate-spin mr-1">⌛</span>Đang lọc cổ phiếu cơ bản...</td></tr>`;
+        }
+
+        try {
+            const url = `/api/screener/fund-strategies?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}${forceReload ? '&refresh=true' : ''}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            let items = data.items || [];
+
+            // Đồng bộ nghiêm ngặt với các tiêu chí lọc phía trên (Sàn, KL TB, Thị giá)
+            if (screenerCurrentMinVol > 0) {
+                items = items.filter(it => (it.volume || 0) >= screenerCurrentMinVol);
+            }
+            if (screenerCurrentMinPrice > 0) {
+                items = items.filter(it => (it.price || 0) >= screenerCurrentMinPrice);
+            }
+            if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+                items = items.filter(it => (it.exchange || "").toUpperCase() === screenerCurrentExchange);
+            }
+
+            screenerCachedFundData = items;
+
+            // Giữ nguyên trạng thái sắp xếp của người dùng qua các chu kỳ auto-scan
+            if (screenerUserCustomSort) {
+                applyScreenerSort(screenerCachedFundData, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+            }
+
+            if (countEl) countEl.textContent = `(${items.length} mã)`;
+            renderFundScreenerTable(screenerCachedFundData);
+            if (screenerUserCustomSort) {
+                updateScreenerSortHeaderIcons(screenerUserCustomSort.col, screenerUserCustomSort.dir);
+            }
+
+            // Tự động hiển thị cổ phiếu ĐẦU TIÊN trong bộ lọc lên biểu đồ Cột 3
+            if ((!silent || !screenerCurrentTicker) && items.length > 0) {
+                selectScreenerTicker(items[0].ticker, false);
+            }
+        } catch (err) {
+            console.error("selectScreenerStrategy fundamental error:", err);
+            if (fundTbody) fundTbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
+        }
+    }
+}
+
+function renderTechScreenerTables(buys, sells) {
+    const buyTbody = document.getElementById("screener-tech-buy-tbody");
+    const sellTbody = document.getElementById("screener-tech-sell-tbody");
+
+    // 1. Render Buy Table
+    if (buyTbody) {
+        if (!buys || buys.length === 0) {
+            buyTbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-slate-500 italic text-[11px]">Không có mã MUA thỏa mãn ${screenerCurrentTiming === 'today' ? '(T+0)' : ''}.</td></tr>`;
+        } else {
+            buyTbody.innerHTML = buys.map(b => {
+                const sym = (b.symbol || "").toUpperCase();
+                const isSelected = sym === screenerCurrentTicker;
+                const price = b.price || 0;
+                const priceFmt = (price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2));
+                const chg = b.pct_change || 0;
+                const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
+                const vol = b.today_vol || b.ma10_vol || 0;
+                const volFmt = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M" : (vol / 1000).toFixed(0) + "K";
+                const rowBg = isSelected ? "bg-cyan-950/80 border-l-2 border-cyan-400 font-bold" : "hover:bg-slate-800/60";
+
+                const rs = b.rs_rating !== undefined ? b.rs_rating : 50;
+                const rsBadgeColor = rs >= 80 ? "bg-purple-950 text-purple-300 border-purple-700/70" :
+                                    (rs >= 60 ? "bg-cyan-950 text-cyan-300 border-cyan-800/60" : "bg-slate-800 text-slate-400 border-slate-700/60");
+
+                return `
+                    <tr id="screener-row-${sym}" onclick="selectScreenerTicker('${sym}', true)" class="${rowBg} cursor-pointer transition-all border-b border-slate-800/40 group">
+                        <td class="py-1.5 px-1 font-bold font-mono text-xs flex items-center gap-1">
+                            <span class="text-emerald-400 group-hover:text-emerald-300 transition-colors">${sym}</span>
+                            <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/60 font-normal">${b.exchange || 'HOSE'}</span>
+                            <span class="text-[9px] px-1 py-0.2 rounded font-mono font-bold border ${rsBadgeColor}">RS ${rs}</span>
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-emerald-400 text-xs">
+                            ${priceFmt}
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-emerald-400 text-xs">
+                            ${chgText}
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono text-[11px] text-slate-300">
+                            ${volFmt}
+                        </td>
+                        <td class="py-1.5 px-1 text-center">
+                            <span class="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold font-mono bg-emerald-950/90 text-emerald-400 border border-emerald-800">
+                                T+${b.bars_since !== undefined ? b.bars_since : 0}
+                            </span>
+                        </td>
+                        <td class="py-1.5 px-1 text-center">
+                            <button onclick="event.stopPropagation(); selectScreenerTicker('${sym}', true)" class="w-5 h-5 rounded hover:bg-emerald-900/60 text-slate-400 hover:text-emerald-300 flex items-center justify-center transition-all mx-auto font-bold text-xs" title="Xem biểu đồ mã ${sym}">
+                                +
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+    }
+
+    // 2. Render Sell Table
+    if (sellTbody) {
+        if (!sells || sells.length === 0) {
+            sellTbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-slate-500 italic text-[11px]">Không có mã BÁN thỏa mãn ${screenerCurrentTiming === 'today' ? '(T+0)' : ''}.</td></tr>`;
+        } else {
+            sellTbody.innerHTML = sells.map(s => {
+                const sym = (s.symbol || "").toUpperCase();
+                const isSelected = sym === screenerCurrentTicker;
+                const price = s.price || 0;
+                const priceFmt = (price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2));
+                const chg = s.pct_change || 0;
+                const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
+                const vol = s.today_vol || s.ma10_vol || 0;
+                const volFmt = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M" : (vol / 1000).toFixed(0) + "K";
+                const rowBg = isSelected ? "bg-cyan-950/80 border-l-2 border-cyan-400 font-bold" : "hover:bg-slate-800/60";
+
+                const rs = s.rs_rating !== undefined ? s.rs_rating : 50;
+                const rsBadgeColor = rs >= 80 ? "bg-purple-950 text-purple-300 border-purple-700/70" :
+                                    (rs >= 60 ? "bg-cyan-950 text-cyan-300 border-cyan-800/60" : "bg-slate-800 text-slate-400 border-slate-700/60");
+
+                return `
+                    <tr id="screener-row-${sym}" onclick="selectScreenerTicker('${sym}', true)" class="${rowBg} cursor-pointer transition-all border-b border-slate-800/40 group">
+                        <td class="py-1.5 px-1 font-bold font-mono text-xs flex items-center gap-1">
+                            <span class="text-rose-400 group-hover:text-rose-300 transition-colors">${sym}</span>
+                            <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/60 font-normal">${s.exchange || 'HOSE'}</span>
+                            <span class="text-[9px] px-1 py-0.2 rounded font-mono font-bold border ${rsBadgeColor}">RS ${rs}</span>
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-rose-400 text-xs">
+                            ${priceFmt}
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-rose-400 text-xs">
+                            ${chgText}
+                        </td>
+                        <td class="py-1.5 px-1 text-right font-mono text-[11px] text-slate-300">
+                            ${volFmt}
+                        </td>
+                        <td class="py-1.5 px-1 text-center">
+                            <span class="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold font-mono bg-rose-950/90 text-rose-400 border border-rose-800">
+                                T+${s.bars_since !== undefined ? s.bars_since : 0}
+                            </span>
+                        </td>
+                        <td class="py-1.5 px-1 text-center">
+                            <button onclick="event.stopPropagation(); selectScreenerTicker('${sym}', true)" class="w-5 h-5 rounded hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 flex items-center justify-center transition-all mx-auto font-bold text-xs" title="Xem biểu đồ mã ${sym}">
+                                +
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+    }
+}
+
+function renderFundScreenerTable(items) {
+    const tbody = document.getElementById("screener-fund-tbody");
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500 italic">Không có mã nào thỏa mãn tiêu chí lọc trên sàn đã chọn.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map(item => {
+        const sym = (item.ticker || "").toUpperCase();
+        const isSelected = sym === screenerCurrentTicker;
+        const price = item.price || 0;
+        const priceFmt = price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2);
+        const chg = item.price_change_pct !== undefined ? item.price_change_pct : (item.pct_change || 0);
+        const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
+        const chgColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-red-400" : "text-amber-400");
+        const priceColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-red-400" : "text-amber-400");
+        const vol = item.volume || 0;
+        const volFmt = vol.toLocaleString("en-US");
+        const rs = item.rs_rating || 50;
+        const rsColor = rs >= 90 ? "bg-purple-950/90 text-purple-300 border-purple-600/70" :
+                        (rs >= 70 ? "bg-emerald-950/80 text-emerald-300 border-emerald-700/60" : "bg-slate-800 text-slate-300 border-slate-700");
+
+        const rowBg = isSelected ? "bg-cyan-950/50 border-l-2 border-cyan-400" : "hover:bg-slate-800/50";
+
+        return `
+            <tr id="screener-row-${sym}" onclick="selectScreenerTicker('${sym}', true)" class="${rowBg} cursor-pointer transition-all border-b border-slate-800/40 group">
+                <td class="py-2 px-1.5 font-bold font-mono text-xs flex items-center gap-1.5">
+                    <span class="text-slate-100 group-hover:text-cyan-400 transition-colors">${sym}</span>
+                    <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/60 font-normal">${item.exchange || 'HOSE'}</span>
+                </td>
+                <td class="py-2 px-1 text-right font-mono font-semibold ${priceColor}">
+                    ${priceFmt}
+                </td>
+                <td class="py-2 px-1 text-right font-mono font-semibold ${chgColor}">
+                    ${chgText}
+                </td>
+                <td class="py-2 px-1 text-right font-mono text-[11px] text-slate-400">
+                    ${volFmt}
+                </td>
+                <td class="py-2 px-1 text-center">
+                    <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold font-mono border ${rsColor}">
+                        ${rs}
+                    </span>
+                </td>
+                <td class="py-2 px-1 text-center">
+                    <button onclick="event.stopPropagation(); selectScreenerTicker('${sym}', true)" class="w-5 h-5 rounded hover:bg-cyan-800/60 text-slate-400 hover:text-cyan-300 flex items-center justify-center transition-all mx-auto font-bold text-xs" title="Xem biểu đồ và chọn mã này">
+                        +
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function applyScreenerSort(list, col, dir) {
+    if (!list || !Array.isArray(list) || list.length === 0 || !col) return list;
+    const isAsc = dir === "asc";
+    return list.sort((a, b) => {
+        let va, vb;
+        if (col === "ticker" || col === "symbol") {
+            va = (a.ticker || a.symbol || "").toUpperCase();
+            vb = (b.ticker || b.symbol || "").toUpperCase();
+            return isAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        } else if (col === "price" || col === "signal_price") {
+            va = Number(a.price || a.signal_price || 0);
+            vb = Number(b.price || b.signal_price || 0);
+        } else if (col === "price_change_pct" || col === "pct_change") {
+            va = Number(a.price_change_pct !== undefined ? a.price_change_pct : (a.pct_change || 0));
+            vb = Number(b.price_change_pct !== undefined ? b.price_change_pct : (b.pct_change || 0));
+        } else if (col === "volume" || col === "vol") {
+            va = Number(a.volume !== undefined ? a.volume : (a.today_vol || a.ma10_vol || 0));
+            vb = Number(b.volume !== undefined ? b.volume : (b.today_vol || b.ma10_vol || 0));
+        } else if (col === "rs_rating" || col === "rs") {
+            va = Number(a.rs_rating !== undefined ? a.rs_rating : 50);
+            vb = Number(b.rs_rating !== undefined ? b.rs_rating : 50);
+        } else if (col === "bars_since") {
+            va = Number(a.bars_since !== undefined ? a.bars_since : 999);
+            vb = Number(b.bars_since !== undefined ? b.bars_since : 999);
+        } else {
+            va = a[col] !== undefined ? a[col] : 0;
+            vb = b[col] !== undefined ? b[col] : 0;
+            if (typeof va === "string") {
+                return isAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            }
+            va = Number(va) || 0;
+            vb = Number(vb) || 0;
+        }
+        return isAsc ? va - vb : vb - va;
+    });
+}
+
+function updateScreenerSortHeaderIcons(activeCol, dir) {
+    const arrow = dir === "asc" ? "▲" : "▼";
+    const headerCols = [
+        { key: "ticker", label: "Mã CP" },
+        { key: "price", label: "Thị giá", altLabel: "Giá" },
+        { key: "price_change_pct", label: "% Ngày", altLabel: "%Chg" },
+        { key: "volume", label: "KL (10N)", altLabel: "KL TB", altLabel2: "KL" },
+        { key: "rs_rating", label: "Điểm RS", altLabel: "RS" },
+        { key: "bars_since", label: "Phiên" }
+    ];
+
+    document.querySelectorAll("#screener-tech-results-container th, #screener-fund-results-container th, #screener-rs-results-container th").forEach(th => {
+        const onclickAttr = th.getAttribute("onclick") || "";
+        for (const c of headerCols) {
+            if (onclickAttr.includes(`'${c.key}'`)) {
+                let base = c.label;
+                const txt = th.textContent || "";
+                if (c.altLabel && txt.includes(c.altLabel)) base = c.altLabel;
+                if (c.altLabel2 && txt.includes(c.altLabel2)) base = c.altLabel2;
+                if (c.key === activeCol) {
+                    th.innerHTML = `${base} <span class="text-cyan-400 font-bold ml-0.5">${arrow}</span>`;
+                } else {
+                    th.innerHTML = `${base} <span class="text-slate-500 text-[9px] ml-0.5">↕</span>`;
+                }
+                break;
+            }
+        }
+    });
+}
+
+function sortScreenerColumn(col) {
+    if (screenerSortState.col === col) {
+        screenerSortState.dir = screenerSortState.dir === "asc" ? "desc" : "asc";
+    } else {
+        screenerSortState.col = col;
+        screenerSortState.dir = (col === "ticker" || col === "symbol" || col === "bars_since") ? "asc" : "desc";
+    }
+
+    screenerUserCustomSort = { col: screenerSortState.col, dir: screenerSortState.dir };
+    applyCurrentScreenerSortAndRender();
+}
+
+function applyCurrentScreenerSortAndRender() {
+    const { col, dir } = screenerSortState;
+    updateScreenerSortHeaderIcons(col, dir);
+
+    const isTech = (screenerCurrentStrategy === "fansi" || screenerCurrentStrategy === "robot1" || screenerCurrentStrategy === "robot2" || screenerCurrentStrategy === "div_macd" || screenerCurrentStrategy === "div_rsi");
+
+    if (isTech) {
+        applyScreenerSort(screenerCachedTechBuys, col, dir);
+        applyScreenerSort(screenerCachedTechSells, col, dir);
+        renderTechScreenerTables(screenerCachedTechBuys, screenerCachedTechSells);
+    } else if (screenerCurrentStrategy === "rs") {
+        applyScreenerSort(screenerCachedRsData, col, dir);
+        renderRsScreenerTable(screenerCachedRsData);
+    } else {
+        applyScreenerSort(screenerCachedFundData, col, dir);
+        renderFundScreenerTable(screenerCachedFundData);
+    }
+}
+
+let isScreenerSyncingRange = false;
+let screenerSyncTickerTimer = null;
+
+async function selectScreenerTicker(ticker, syncGlobal = true) {
+    if (!ticker) return;
+    const cleanSym = ticker.trim().toUpperCase();
+    screenerCurrentTicker = cleanSym;
+
+    // 1. Highlight dòng được chọn trên bảng Mua/Bán/Cơ bản/RS sạch sẽ
+    document.querySelectorAll("#screener-tech-buy-tbody tr, #screener-tech-sell-tbody tr, #screener-fund-tbody tr, #screener-rs-tbody tr").forEach(tr => {
+        tr.classList.remove("bg-cyan-950/80", "border-cyan-400", "bg-cyan-950/60", "bg-emerald-950/60", "border-emerald-400", "bg-rose-950/60", "border-rose-400", "border-l-2", "font-bold");
+    });
+    const targetRow = document.getElementById(`screener-row-${cleanSym}`);
+    if (targetRow) {
+        targetRow.classList.add("bg-cyan-950/80", "border-l-2", "border-cyan-400", "font-bold");
+    }
+
+    // 2. Cập nhật ô nhập mã & nhãn đồng bộ
+    const symInput = document.getElementById("screener-symbol-input");
+    if (symInput) symInput.value = cleanSym;
+    const syncTickerEl = document.getElementById("screener-sync-ticker");
+    if (syncTickerEl) syncTickerEl.textContent = cleanSym;
+
+    // 3. Phản hồi tức thì tên mã trên biểu đồ nến cột 3
+    const compNameEl = document.getElementById("screener-chart-comp-name");
+    if (compNameEl) compNameEl.textContent = cleanSym;
+
+    const isDifferentTicker = (cleanSym !== lastLoadedScreenerTicker);
+    const syncIndicator = document.getElementById("screener-chart-sync-indicator");
+    const priceBox = document.getElementById("screener-tv-chart-box");
+    const volBox = document.getElementById("screener-volume-chart-box");
+    const loadingEl = document.getElementById("screener-chart-loading");
+    const loadingText = document.getElementById("screener-chart-loading-text");
+
+    if (isDifferentTicker) {
+        // Hiển thị ngay trạng thái đang nạp biểu đồ để tránh người xem nhầm lẫn với biểu đồ của mã cũ
+        if (syncIndicator) syncIndicator.classList.remove("hidden");
+        if (priceBox) priceBox.classList.add("opacity-35");
+        if (volBox) volBox.classList.add("opacity-35");
+        if (loadingText) loadingText.textContent = `Đang tải biểu đồ nến ${cleanSym}...`;
+        if (loadingEl) loadingEl.classList.remove("hidden");
+
+        // Tạm thời đặt các thông số nến về trạng thái chờ nạp
+        const oEl = document.getElementById("screener-ohlc-o");
+        const hEl = document.getElementById("screener-ohlc-h");
+        const lEl = document.getElementById("screener-ohlc-l");
+        if (oEl) oEl.textContent = "--";
+        if (hEl) hEl.textContent = "--";
+        if (lEl) lEl.textContent = "--";
+    }
+
+    // 4. Tìm dữ liệu mã vừa click ngay trong bảng hiện tại để cập nhật thông số tức thì (0.00s)
+    let itemData = null;
+    if (screenerCachedRsData && screenerCachedRsData.length > 0) {
+        itemData = screenerCachedRsData.find(it => (it.ticker || it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerAllRsStocks && screenerAllRsStocks.length > 0) {
+        itemData = screenerAllRsStocks.find(it => (it.ticker || it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerCachedTechBuys && screenerCachedTechBuys.length > 0) {
+        itemData = screenerCachedTechBuys.find(it => (it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerCachedTechSells && screenerCachedTechSells.length > 0) {
+        itemData = screenerCachedTechSells.find(it => (it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerAllTechBuys && screenerAllTechBuys.length > 0) {
+        itemData = screenerAllTechBuys.find(it => (it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerAllTechSells && screenerAllTechSells.length > 0) {
+        itemData = screenerAllTechSells.find(it => (it.symbol || "").toUpperCase() === cleanSym);
+    }
+    if (!itemData && screenerCachedFundData && screenerCachedFundData.length > 0) {
+        itemData = screenerCachedFundData.find(it => (it.ticker || "").toUpperCase() === cleanSym);
+    }
+
+    if (itemData) {
+        if (itemData.rs_rating !== undefined && itemData.rs_rating !== null) {
+            const rsEl = document.getElementById("screener-chart-rs");
+            if (rsEl) rsEl.textContent = itemData.rs_rating;
+        }
+
+        const p = itemData.price || itemData.signal_price || 0;
+        const pFmt = p >= 1000 ? (p / 1000).toFixed(2) : p.toFixed(2);
+        const chg = itemData.pct_change || itemData.price_change_pct || 0;
+        const chgSign = chg >= 0 ? "+" : "";
+        const isUp = chg >= 0;
+
+        const liveTag = document.getElementById("screener-chart-live-price-tag");
+        if (liveTag) {
+            liveTag.textContent = `${p.toLocaleString('vi-VN')} (${chgSign}${chg.toFixed(2)}%)`;
+            liveTag.className = `font-mono font-bold text-xs ${isUp ? 'text-emerald-400' : 'text-red-400'}`;
+        }
+
+        const chgEl = document.getElementById("screener-ohlc-chg");
+        if (chgEl) {
+            chgEl.textContent = `${chgSign}${chg.toFixed(2)}%`;
+            chgEl.className = isUp ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold";
+        }
+
+        const cEl = document.getElementById("screener-ohlc-c");
+        if (cEl) cEl.textContent = pFmt;
+
+        const sigTag = document.getElementById("screener-signal-tag");
+        if (sigTag && itemData.signal) {
+            const isBuy = itemData.signal === "BUY";
+            const bars = itemData.bars_since !== undefined ? itemData.bars_since : 0;
+            const isT0 = bars === 0;
+            let robotName = "FANSI";
+            if (screenerCurrentStrategy === "robot1") robotName = "ROBOT 1";
+            else if (screenerCurrentStrategy === "robot2") robotName = "ROBOT 2";
+
+            if (isBuy) {
+                sigTag.className = "px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-950/90 text-emerald-400 border border-emerald-800 shadow-sm flex items-center gap-1";
+                sigTag.innerHTML = `
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 ${isT0 ? 'animate-pulse' : ''}"></span>
+                    <span>${isT0 ? `⚡ T+0 MUA (${robotName})` : `MUA (${robotName} T+${bars})`}</span>
+                `;
+            } else {
+                sigTag.className = "px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-rose-950/90 text-rose-400 border border-rose-800 shadow-sm flex items-center gap-1";
+                sigTag.innerHTML = `
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400 ${isT0 ? 'animate-pulse' : ''}"></span>
+                    <span>${isT0 ? `⚡ T+0 BÁN (${robotName})` : `BÁN (${robotName} T+${bars})`}</span>
+                `;
+            }
+        }
+
+        const vol = itemData.today_vol || itemData.ma10_vol || itemData.volume || 0;
+        if (vol > 0) {
+            const volStr = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M CP" : (vol / 1000).toFixed(0) + "K CP";
+            const legVol = document.getElementById("screener-legend-vol");
+            const volStat = document.getElementById("screener-vol-detail-stat");
+            if (legVol) legVol.textContent = volStr;
+            if (volStat) volStat.textContent = volStr;
+        }
+
+        const exEl = document.getElementById("screener-chart-exchange");
+        if (exEl) exEl.textContent = itemData.exchange || "HOSE";
+    }
+
+    // 5. Tải dữ liệu nến mới
+    loadScreenerChartData(cleanSym);
+
+    // 6. Đồng bộ mã toàn cục (Debounce 150ms chống quá tải mạng khi người dùng click duyệt nhanh)
+    if (syncGlobal && typeof selectTicker === "function") {
+        window.currentActiveTicker = cleanSym;
+        const centralInput = document.getElementById("central-ticker-input");
+        if (centralInput) centralInput.value = cleanSym;
+
+        if (screenerSyncTickerTimer) clearTimeout(screenerSyncTickerTimer);
+        screenerSyncTickerTimer = setTimeout(() => {
+            selectTicker(cleanSym);
+        }, 150);
+    }
+}
+
+let currentScreenerCandlesData = [];
+
+function centerScreenerChart() {
+    if (!chartScreenerTv || !chartScreenerVolTv || !screenerCandleSeries) return;
+    try {
+        isScreenerSyncingRange = true;
+
+        // 1. Cấu hình autoScale và căn lề cho trục giá
+        chartScreenerTv.priceScale('right').applyOptions({
+            autoScale: true,
+            scaleMargins: { top: 0.12, bottom: 0.15 }
+        });
+        chartScreenerVolTv.priceScale('right').applyOptions({
+            autoScale: true,
+            scaleMargins: { top: 0.15, bottom: 0 }
+        });
+
+        // 2. Căn chỉnh trực tiếp 55 phiên gần nhất (không fitContent trung gian để tránh giật hình nhấp nháy)
+        const totalBars = (currentScreenerCandlesData && currentScreenerCandlesData.length) || 0;
+        const defaultBars = 55;
+        if (totalBars > 20) {
+            const fromBar = Math.max(0, totalBars - defaultBars);
+            const toBar = totalBars + 8; // Đệm 8 bars bên phải
+            chartScreenerTv.timeScale().setVisibleLogicalRange({ from: fromBar, to: toBar });
+            chartScreenerVolTv.timeScale().setVisibleLogicalRange({ from: fromBar, to: toBar });
+        } else {
+            chartScreenerTv.timeScale().fitContent();
+            chartScreenerVolTv.timeScale().fitContent();
+        }
+    } catch (e) {
+        console.warn("centerScreenerChart error:", e);
+    } finally {
+        setTimeout(() => { isScreenerSyncingRange = false; }, 50);
+    }
+}
+
+function initScreenerTvChartInstance() {
+    const priceBox = document.getElementById("screener-tv-chart-box");
+    const volBox = document.getElementById("screener-volume-chart-box");
+    if (!priceBox || !volBox) return;
+
+    if (chartScreenerTv) {
+        try { chartScreenerTv.remove(); } catch (e) {}
+        chartScreenerTv = null;
+    }
+    if (chartScreenerVolTv) {
+        try { chartScreenerVolTv.remove(); } catch (e) {}
+        chartScreenerVolTv = null;
+    }
+
+    const boxWidth = priceBox.clientWidth || 450;
+    const priceHeight = priceBox.clientHeight || 270;
+    const volHeight = volBox.clientHeight || 95;
+
+    const isDark = document.documentElement.classList.contains("dark");
+    const bgColor = isDark ? "#020617" : "#ffffff";
+    const textColor = isDark ? "#94a3b8" : "#475569";
+    const gridColor = isDark ? "rgba(30, 41, 59, 0.3)" : "rgba(226, 232, 240, 0.8)";
+    const borderColor = isDark ? "rgba(30, 41, 59, 0.6)" : "rgba(203, 213, 225, 0.8)";
+    const bullColor = isDark ? "#00c060" : "#15803d";
+    const bearColor = isDark ? "#ff3b57" : "#dc2626";
+
+    // 1. Candlestick Price Chart
+    chartScreenerTv = LightweightCharts.createChart(priceBox, {
+        width: boxWidth,
+        height: priceHeight,
+        layout: {
+            background: { color: bgColor },
+            textColor: textColor,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+            fontSize: 10
+        },
+        watermark: {
+            visible: true,
+            fontSize: 34,
+            horzAlign: 'center',
+            vertAlign: 'center',
+            color: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.06)",
+            text: screenerCurrentTicker ? `${screenerCurrentTicker} · 1D` : "IERM",
+        },
+        grid: {
+            vertLines: { color: gridColor },
+            horzLines: { color: gridColor }
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode ? LightweightCharts.CrosshairMode.Normal : 0,
+            vertLine: { color: "#0284c7", width: 1, style: 2 },
+            horzLine: { color: "#0284c7", width: 1, style: 2 }
+        },
+        rightPriceScale: {
+            borderColor: borderColor,
+            scaleMargins: { top: 0.12, bottom: 0.15 },
+            autoScale: true
+        },
+        timeScale: {
+            borderColor: borderColor,
+            rightOffset: 8,
+            fixLeftEdge: false,
+            visible: false // Ẩn timeScale trên price chart, để hiển thị trên volume chart bên dưới
+        }
+    });
+
+    screenerCandleSeries = chartScreenerTv.addCandlestickSeries({
+        upColor: bullColor,
+        downColor: bearColor,
+        borderUpColor: bullColor,
+        borderDownColor: bearColor,
+        wickUpColor: bullColor,
+        wickDownColor: bearColor,
+        autoscaleInfoProvider: (original) => {
+            const res = original();
+            if (res && res.priceRange) {
+                const min = res.priceRange.minValue;
+                const max = res.priceRange.maxValue;
+                const span = max - min;
+                const margin = span > 0 ? span * 0.15 : (max > 0 ? max * 0.1 : 1000);
+                return {
+                    priceRange: {
+                        minValue: Math.max(0, min - margin),
+                        maxValue: max + margin,
+                    },
+                };
+            }
+            return res;
+        }
+    });
+
+    // Double click vào biểu đồ để tự động căn giữa biểu đồ
+    priceBox.addEventListener("dblclick", () => {
+        centerScreenerChart();
+    });
+
+    // 2. Volume Chart (Hàng riêng bên dưới tách khỏi giá)
+    chartScreenerVolTv = LightweightCharts.createChart(volBox, {
+        width: boxWidth,
+        height: volHeight,
+        layout: {
+            background: { color: bgColor },
+            textColor: textColor,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+            fontSize: 10
+        },
+        grid: {
+            vertLines: { color: "transparent" },
+            horzLines: { color: gridColor }
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode ? LightweightCharts.CrosshairMode.Normal : 0,
+            vertLine: { color: "#0284c7", width: 1, style: 2 },
+            horzLine: { visible: false }
+        },
+        rightPriceScale: {
+            borderColor: borderColor,
+            scaleMargins: { top: 0.1, bottom: 0.05 }
+        },
+        timeScale: {
+            borderColor: borderColor,
+            rightOffset: 8,
+            fixLeftEdge: false,
+            visible: true
+        }
+    });
+
+    screenerVolSeries = chartScreenerVolTv.addHistogramSeries({
+        priceFormat: { type: "volume" },
+        scaleMargins: { top: 0.1, bottom: 0 }
+    });
+
+    // Đồng bộ TimeScale giữa Price Chart và Volume Chart (có guard chống đệ quy lặp vô hạn)
+    chartScreenerTv.timeScale().subscribeVisibleLogicalRangeChange(range => {
+        if (!range || isScreenerSyncingRange || !chartScreenerVolTv) return;
+        try {
+            isScreenerSyncingRange = true;
+            chartScreenerVolTv.timeScale().setVisibleLogicalRange(range);
+        } catch (e) {} finally {
+            isScreenerSyncingRange = false;
+        }
+    });
+    chartScreenerVolTv.timeScale().subscribeVisibleLogicalRangeChange(range => {
+        if (!range || isScreenerSyncingRange || !chartScreenerTv) return;
+        try {
+            isScreenerSyncingRange = true;
+            chartScreenerTv.timeScale().setVisibleLogicalRange(range);
+        } catch (e) {} finally {
+            isScreenerSyncingRange = false;
+        }
+    });
+
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+            resizeScreenerCharts();
+        });
+        ro.observe(priceBox);
+        ro.observe(volBox);
+    }
+}
+
+// -------------------------------------------------------------
+// TÍNH TOÁN TÍN HIỆU FANSI T+, ROBOT 1, ROBOT 2 (AMIBROKER AFL)
+// -------------------------------------------------------------
+function calcScreenerAflSignals(candles, strategyKey) {
+    if (!candles || candles.length < 20) {
+        return { markers: [], lastSignal: null, barsSince: 999 };
+    }
+    const n = candles.length;
+    const clVals = candles.map(c => Number(c.close || 0));
+    const opVals = candles.map(c => Number(c.open || 0));
+    const hiVals = candles.map(c => Number(c.high || c.close || 0));
+    const loVals = candles.map(c => Number(c.low || c.close || 0));
+
+    const strat = (strategyKey || screenerCurrentStrategy || "fansi").toLowerCase().trim();
+
+    if (strat === "robot1") {
+        // Thuật toán ROBOT 1 (THE BEAST) - Zero-Lag DEMA Crossover (AmiBroker AFL)
+        // M1 = EMA(((2*EMA(C,29/2))-EMA(C,29)), 2);
+        // M2 = EMA(((2*EMA(C,29/2))-EMA(C,29)), 5);
+        // Buy = Cross(M1, M2); Sell = Cross(M2, M1);
+        // Buy = ExRem(Buy, Sell); Sell = ExRem(Sell, Buy);
+        if (n < 30) return { markers: [], lastSignal: null, barsSince: 999 };
+
+        const kHalf = 2 / (14.5 + 1);
+        const kFull = 2 / (29 + 1);
+        const emaHalf = new Array(n);
+        const emaFull = new Array(n);
+        emaHalf[0] = clVals[0];
+        emaFull[0] = clVals[0];
+        for (let i = 1; i < n; i++) {
+            emaHalf[i] = clVals[i] * kHalf + emaHalf[i - 1] * (1 - kHalf);
+            emaFull[i] = clVals[i] * kFull + emaFull[i - 1] * (1 - kFull);
+        }
+
+        const inner = new Array(n);
+        for (let i = 0; i < n; i++) {
+            inner[i] = 2 * emaHalf[i] - emaFull[i];
+        }
+
+        const k2 = 2 / (2 + 1);
+        const k5 = 2 / (5 + 1);
+        const m1 = new Array(n);
+        const m2 = new Array(n);
+        m1[0] = inner[0];
+        m2[0] = inner[0];
+        for (let i = 1; i < n; i++) {
+            m1[i] = inner[i] * k2 + m1[i - 1] * (1 - k2);
+            m2[i] = inner[i] * k5 + m2[i - 1] * (1 - k5);
+        }
+
+        const rawBuy = new Array(n).fill(false);
+        const rawSell = new Array(n).fill(false);
+        for (let i = 1; i < n; i++) {
+            if (m1[i] > m2[i] && m1[i - 1] <= m2[i - 1] && clVals[i] > clVals[i - 1]) {
+                rawBuy[i] = true;
+            } else if (m2[i] > m1[i] && m2[i - 1] <= m1[i - 1]) {
+                rawSell[i] = true;
+            }
+        }
+
+        // ExRem(Buy, Sell)
+        const fsBuy = new Array(n).fill(false);
+        const fsSell = new Array(n).fill(false);
+        let state = 0;
+        let lastSignal = null;
+        let lastSignalBar = -1;
+
+        for (let i = 0; i < n; i++) {
+            if (rawBuy[i] && state !== 1) {
+                fsBuy[i] = true;
+                state = 1;
+                lastSignal = "BUY";
+                lastSignalBar = i;
+            } else if (rawSell[i] && state !== -1) {
+                fsSell[i] = true;
+                state = -1;
+                lastSignal = "SELL";
+                lastSignalBar = i;
+            }
+        }
+
+        const markers = [];
+        for (let i = 0; i < n; i++) {
+            if (fsBuy[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "belowBar",
+                    color: "#10b981",
+                    shape: "arrowUp",
+                    text: "MUA",
+                    size: 2
+                });
+            } else if (fsSell[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "aboveBar",
+                    color: "#ef4444",
+                    shape: "arrowDown",
+                    text: "BÁN",
+                    size: 2
+                });
+            }
+        }
+
+        const barsSince = lastSignalBar >= 0 ? (n - 1 - lastSignalBar) : 999;
+        return { markers, lastSignal, barsSince };
+
+    } else if (strat === "robot2") {
+        // Thuật toán ROBOT 2 (ROCKET JET) - Breakout 5 phiên đỉnh/đáy (AmiBroker AFL)
+        // Buyperiods = 5; Sellperiods = 5;
+        // Buy = C > Ref(HHV(High, Buyperiods), -1);
+        // Sell = C < Ref(LLV(Low, Sellperiods), -1);
+        // Buy = ExRem(Buy, Sell); Sell = ExRem(Sell, Buy);
+        const p = 5;
+        const rawBuy = new Array(n).fill(false);
+        const rawSell = new Array(n).fill(false);
+
+        for (let i = p + 1; i < n; i++) {
+            let maxH = -Infinity;
+            let minL = Infinity;
+            for (let j = i - p; j < i; j++) {
+                if (hiVals[j] > maxH) maxH = hiVals[j];
+                if (loVals[j] < minL) minL = loVals[j];
+            }
+            if (clVals[i] > maxH && clVals[i] > clVals[i - 1]) {
+                rawBuy[i] = true;
+            } else if (clVals[i] < minL) {
+                rawSell[i] = true;
+            }
+        }
+
+        // ExRem(Buy, Sell)
+        const fsBuy = new Array(n).fill(false);
+        const fsSell = new Array(n).fill(false);
+        let state = 0;
+        let lastSignal = null;
+        let lastSignalBar = -1;
+
+        for (let i = 0; i < n; i++) {
+            if (rawBuy[i] && state !== 1) {
+                fsBuy[i] = true;
+                state = 1;
+                lastSignal = "BUY";
+                lastSignalBar = i;
+            } else if (rawSell[i] && state !== -1) {
+                fsSell[i] = true;
+                state = -1;
+                lastSignal = "SELL";
+                lastSignalBar = i;
+            }
+        }
+
+        const markers = [];
+        for (let i = 0; i < n; i++) {
+            if (fsBuy[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "belowBar",
+                    color: "#10b981",
+                    shape: "arrowUp",
+                    text: "MUA",
+                    size: 2
+                });
+            } else if (fsSell[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "aboveBar",
+                    color: "#ef4444",
+                    shape: "arrowDown",
+                    text: "BÁN",
+                    size: 2
+                });
+            }
+        }
+
+        const barsSince = lastSignalBar >= 0 ? (n - 1 - lastSignalBar) : 999;
+        return { markers, lastSignal, barsSince };
+
+    } else if (strat === "div_macd") {
+        // Thuật toán PHÂN KỲ DƯƠNG MACD (AmiBroker AFL):
+        // Dk1 = MACD() > Ref(MACD(),-1) AND Ref(MACD(),-1) > Ref(MACD(),-2) AND Ref(MACD(),-2) < Ref(MACD(),-3) AND Ref(MACD(),-3) < Ref(MACD(),-4);
+        // Dk2 = LLV(MACD(),7) > LLV(MACD(),50);
+        // DK3 = LLV(L,7) <= LLV(L,50);
+        // Filter = DK1 AND DK2 AND DK3 AND C >= Ref(C,-1);
+        if (n < 50) return { markers: [], lastSignal: null, barsSince: 999 };
+
+        const k12 = 2 / 13;
+        const k26 = 2 / 27;
+        const ema12 = new Array(n);
+        const ema26 = new Array(n);
+        ema12[0] = clVals[0];
+        ema26[0] = clVals[0];
+        for (let i = 1; i < n; i++) {
+            ema12[i] = clVals[i] * k12 + ema12[i - 1] * (1 - k12);
+            ema26[i] = clVals[i] * k26 + ema26[i - 1] * (1 - k26);
+        }
+        const macdLine = new Array(n);
+        for (let i = 0; i < n; i++) macdLine[i] = ema12[i] - ema26[i];
+
+        const rawBuy = new Array(n).fill(false);
+        for (let i = 50; i < n; i++) {
+            const dk1 = (macdLine[i] > macdLine[i - 1] && 
+                         macdLine[i - 1] > macdLine[i - 2] && 
+                         macdLine[i - 2] < macdLine[i - 3] && 
+                         macdLine[i - 3] < macdLine[i - 4]);
+            let minMacd7 = Infinity, minMacd50 = Infinity;
+            let minL7 = Infinity, minL50 = Infinity;
+            for (let j = i - 6; j <= i; j++) {
+                if (macdLine[j] < minMacd7) minMacd7 = macdLine[j];
+                if (loVals[j] < minL7) minL7 = loVals[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (macdLine[j] < minMacd50) minMacd50 = macdLine[j];
+                if (loVals[j] < minL50) minL50 = loVals[j];
+            }
+            const dk2 = (minMacd7 > minMacd50);
+            const dk3 = (minL7 <= minL50);
+            const dkC = (clVals[i] >= clVals[i - 1]);
+
+            if (dk1 && dk2 && dk3 && dkC) {
+                rawBuy[i] = true;
+            }
+        }
+
+        const markers = [];
+        let lastSignal = null;
+        let lastSignalBar = -1;
+        for (let i = 0; i < n; i++) {
+            if (rawBuy[i]) {
+                lastSignal = "BUY";
+                lastSignalBar = i;
+                markers.push({
+                    time: candles[i].time,
+                    position: "belowBar",
+                    color: "#6366f1",
+                    shape: "arrowUp",
+                    text: "MUA (PK MACD)",
+                    size: 2
+                });
+            }
+        }
+        const barsSince = lastSignalBar >= 0 ? (n - 1 - lastSignalBar) : 999;
+        return { markers, lastSignal, barsSince };
+
+    } else if (strat === "div_rsi") {
+        // Thuật toán PHÂN KỲ DƯƠNG RSI (AmiBroker AFL):
+        // DK1 = RSI(14) > Ref(RSI(14),-1) AND Ref(RSI(14),-1) > Ref(RSI(14),-2) AND Ref(RSI(14),-2) < Ref(RSI(14),-3) AND Ref(RSI(14),-3) < Ref(RSI(14),-4);
+        // DK2 = LLV(RSI(14),4) > LLV(RSI(14),50);
+        // DK3 = LLV(L,4) <= LLV(L,50);
+        if (n < 50) return { markers: [], lastSignal: null, barsSince: 999 };
+
+        const p = 14;
+        const rsi = new Array(n).fill(50);
+        let gains = 0, losses = 0;
+        for (let i = 1; i <= p; i++) {
+            const diff = clVals[i] - clVals[i - 1];
+            if (diff > 0) gains += diff; else losses -= diff;
+        }
+        let avgGain = gains / p;
+        let avgLoss = losses / p;
+        rsi[p] = avgLoss === 0 ? 100 : (100 - (100 / (1 + avgGain / avgLoss)));
+
+        for (let i = p + 1; i < n; i++) {
+            const diff = clVals[i] - clVals[i - 1];
+            const g = diff > 0 ? diff : 0;
+            const l = diff < 0 ? -diff : 0;
+            avgGain = (avgGain * (p - 1) + g) / p;
+            avgLoss = (avgLoss * (p - 1) + l) / p;
+            rsi[i] = avgLoss === 0 ? 100 : (100 - (100 / (1 + avgGain / avgLoss)));
+        }
+
+        const rawBuy = new Array(n).fill(false);
+        for (let i = 50; i < n; i++) {
+            const dk1 = (rsi[i] > rsi[i - 1] && 
+                         rsi[i - 1] > rsi[i - 2] && 
+                         rsi[i - 2] < rsi[i - 3] && 
+                         rsi[i - 3] < rsi[i - 4]);
+            let minRsi4 = Infinity, minRsi50 = Infinity;
+            let minL4 = Infinity, minL50 = Infinity;
+            for (let j = i - 3; j <= i; j++) {
+                if (rsi[j] < minRsi4) minRsi4 = rsi[j];
+                if (loVals[j] < minL4) minL4 = loVals[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (rsi[j] < minRsi50) minRsi50 = rsi[j];
+                if (loVals[j] < minL50) minL50 = loVals[j];
+            }
+            const dk2 = (minRsi4 > minRsi50);
+            const dk3 = (minL4 <= minL50);
+
+            if (dk1 && dk2 && dk3) {
+                rawBuy[i] = true;
+            }
+        }
+
+        const markers = [];
+        let lastSignal = null;
+        let lastSignalBar = -1;
+        for (let i = 0; i < n; i++) {
+            if (rawBuy[i]) {
+                lastSignal = "BUY";
+                lastSignalBar = i;
+                markers.push({
+                    time: candles[i].time,
+                    position: "belowBar",
+                    color: "#f43f5e",
+                    shape: "arrowUp",
+                    text: "MUA (PK RSI)",
+                    size: 2
+                });
+            }
+        }
+        const barsSince = lastSignalBar >= 0 ? (n - 1 - lastSignalBar) : 999;
+        return { markers, lastSignal, barsSince };
+
+    } else {
+        // Thuật toán FANSI T+ (MACD 12,26,9 + SMA 20 + Candlestick)
+        if (n < 26) return { markers: [], lastSignal: null, barsSince: 999 };
+
+        const k12 = 2 / 13;
+        const k26 = 2 / 27;
+        const ema12 = new Array(n);
+        const ema26 = new Array(n);
+        ema12[0] = clVals[0];
+        ema26[0] = clVals[0];
+        for (let i = 1; i < n; i++) {
+            ema12[i] = clVals[i] * k12 + ema12[i - 1] * (1 - k12);
+            ema26[i] = clVals[i] * k26 + ema26[i - 1] * (1 - k26);
+        }
+        const macdLine = new Array(n);
+        for (let i = 0; i < n; i++) macdLine[i] = ema12[i] - ema26[i];
+
+        const signalLine = new Array(n);
+        const kSig = 2 / 10;
+        signalLine[0] = macdLine[0];
+        for (let i = 1; i < n; i++) {
+            signalLine[i] = macdLine[i] * kSig + signalLine[i - 1] * (1 - kSig);
+        }
+
+        const sma20 = new Array(n);
+        for (let i = 0; i < n; i++) {
+            if (i >= 19) {
+                let sum = 0;
+                for (let j = i - 19; j <= i; j++) sum += clVals[j];
+                sma20[i] = sum / 20;
+            } else {
+                let sum = 0;
+                for (let j = 0; j <= i; j++) sum += clVals[j];
+                sma20[i] = sum / (i + 1);
+            }
+        }
+
+        const buy1 = new Array(n).fill(false);
+        const sell1 = new Array(n).fill(false);
+        for (let i = 20; i < n; i++) {
+            const dk1 = macdLine[i] > signalLine[i];
+            const dk12 = clVals[i] > sma20[i];
+            const dk13 = clVals[i] > opVals[i];
+            buy1[i] = (dk1 && dk12 && dk13);
+
+            const dk2 = macdLine[i] < signalLine[i];
+            const dk22 = clVals[i] < sma20[i];
+            const dk23 = clVals[i] < opVals[i];
+            sell1[i] = (dk2 && dk22 && dk23);
+        }
+
+        const fsBuy = new Array(n).fill(false);
+        const fsSell = new Array(n).fill(false);
+        let state = 0;
+        let lastSignal = null;
+        let lastSignalBar = -1;
+
+        for (let i = 0; i < n; i++) {
+            if (buy1[i] && state !== 1) {
+                fsBuy[i] = true;
+                state = 1;
+                lastSignal = "BUY";
+                lastSignalBar = i;
+            } else if (sell1[i] && state !== -1) {
+                fsSell[i] = true;
+                state = -1;
+                lastSignal = "SELL";
+                lastSignalBar = i;
+            }
+        }
+
+        const markers = [];
+        for (let i = 0; i < n; i++) {
+            if (fsBuy[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "belowBar",
+                    color: "#10b981",
+                    shape: "arrowUp",
+                    text: "MUA",
+                    size: 2
+                });
+            } else if (fsSell[i]) {
+                markers.push({
+                    time: candles[i].time,
+                    position: "aboveBar",
+                    color: "#ef4444",
+                    shape: "arrowDown",
+                    text: "BÁN",
+                    size: 2
+                });
+            }
+        }
+
+        const barsSince = lastSignalBar >= 0 ? (n - 1 - lastSignalBar) : 999;
+        return { markers, lastSignal, barsSince };
+    }
+}
+
+let screenerChartRequestSeq = 0;
+let screenerChartAbortCtrl = null;
+window._SCREENER_CANDLES_CACHE = window._SCREENER_CANDLES_CACHE || {};
+
+async function loadScreenerChartData(ticker, isSilent = false) {
+    if (!ticker) return;
+    const cleanSym = ticker.trim().toUpperCase();
+
+    const isNewTicker = (cleanSym !== lastLoadedScreenerTicker);
+    const loadingEl = document.getElementById("screener-chart-loading");
+    const loadingText = document.getElementById("screener-chart-loading-text");
+    const syncIndicator = document.getElementById("screener-chart-sync-indicator");
+    const priceBox = document.getElementById("screener-tv-chart-box");
+    const volBox = document.getElementById("screener-volume-chart-box");
+
+    // Khi đổi sang mã mới, làm mờ nhẹ biểu đồ cũ và hiển thị overlay nạp dữ liệu
+    if (isNewTicker && !isSilent) {
+        if (loadingText) loadingText.textContent = `Đang tải biểu đồ nến ${cleanSym}...`;
+        if (loadingEl) loadingEl.classList.remove("hidden");
+        if (syncIndicator) syncIndicator.classList.remove("hidden");
+        if (priceBox) priceBox.classList.add("opacity-35");
+        if (volBox) volBox.classList.add("opacity-35");
+    }
+
+    // Hủy bỏ request nến trước đó đang chạy dở để triệt tiêu hoàn toàn race condition
+    if (screenerChartAbortCtrl) {
+        try { screenerChartAbortCtrl.abort(); } catch (e) {}
+    }
+    screenerChartAbortCtrl = new AbortController();
+    const thisReqSeq = ++screenerChartRequestSeq;
+
+    try {
+        // Tự động khởi tạo chart nếu chưa có
+        if (!chartScreenerTv || !chartScreenerVolTv) {
+            initScreenerTvChartInstance();
+        }
+
+        // Tối ưu hóa 1: Kiểm tra bộ nhớ đệm nến riêng của Bộ lọc (cho phép chuyển qua lại 0.00s tức thì)
+        let data = null;
+        if (window._SCREENER_CANDLES_CACHE && window._SCREENER_CANDLES_CACHE[cleanSym]) {
+            const entry = window._SCREENER_CANDLES_CACHE[cleanSym];
+            if (Date.now() - entry.ts < 180000 && entry.data && entry.data.candles_history && entry.data.candles_history.length > 0) {
+                data = entry.data;
+            }
+        }
+
+        // Tối ưu hóa 2: Kiểm tra bộ nhớ đệm chung Client Cache
+        if (!data && window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[cleanSym] && window._CLIENT_TICKER_CACHE[cleanSym].tech && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history.length > 20) {
+            data = window._CLIENT_TICKER_CACHE[cleanSym].tech;
+        }
+
+        if (!data) {
+            const res = await fetch(`/api/technical/${encodeURIComponent(cleanSym)}?resolution=D&count=1500`, {
+                signal: screenerChartAbortCtrl.signal
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            data = await res.json();
+        }
+
+        // BẢO VỆ CHỐNG LỆCH PHA (RACE CONDITION GUARD):
+        // Nếu người dùng đã chọn sang mã khác hoặc có request mới hơn thì bỏ qua
+        if (thisReqSeq !== screenerChartRequestSeq || cleanSym !== screenerCurrentTicker) {
+            console.warn(`[Screener Chart Guard] Bỏ qua dữ liệu của ${cleanSym} vì hiện tại đang xem ${screenerCurrentTicker}`);
+            return;
+        }
+
+        // Cập nhật tên công ty, sàn, RS rating
+        const compNameEl = document.getElementById("screener-chart-comp-name");
+        if (compNameEl) compNameEl.textContent = `${data.ticker || cleanSym}`;
+        const exEl = document.getElementById("screener-chart-exchange");
+        if (exEl) exEl.textContent = data.exchange || "HOSE";
+
+        // Thử lấy RS rating từ cached data nếu có
+        let rsVal = null;
+        const inRs = (screenerCachedRsData || []).find(it => (it.ticker || it.symbol || "").toUpperCase() === cleanSym) ||
+                     (screenerAllRsStocks || []).find(it => (it.ticker || it.symbol || "").toUpperCase() === cleanSym);
+        const inAllBuy = (screenerAllTechBuys || []).find(it => (it.symbol || "").toUpperCase() === cleanSym);
+        const inAllSell = (screenerAllTechSells || []).find(it => (it.symbol || "").toUpperCase() === cleanSym);
+        const inFund = (screenerCachedFundData || []).find(it => (it.ticker || "").toUpperCase() === cleanSym);
+        if (inRs && inRs.rs_rating !== undefined && inRs.rs_rating !== null) {
+            rsVal = inRs.rs_rating;
+        } else if (inAllBuy && inAllBuy.rs_rating !== undefined && inAllBuy.rs_rating !== null) {
+            rsVal = inAllBuy.rs_rating;
+        } else if (inAllSell && inAllSell.rs_rating !== undefined && inAllSell.rs_rating !== null) {
+            rsVal = inAllSell.rs_rating;
+        } else if (inFund && inFund.rs_rating !== undefined && inFund.rs_rating !== null) {
+            rsVal = inFund.rs_rating;
+        } else if (data && data.rs_rating) {
+            rsVal = data.rs_rating;
+        }
+        if (rsVal !== null) {
+            const rsEl = document.getElementById("screener-chart-rs");
+            if (rsEl) rsEl.textContent = rsVal;
+        }
+
+        const candles = data.candles_history || [];
+
+        // NẾU KHÔNG CÓ NẾN: Xóa ngay nến cũ để không gây nhầm lẫn và hiển thị thông báo
+        if (!candles || candles.length === 0) {
+            if (screenerCandleSeries) screenerCandleSeries.setData([]);
+            if (screenerVolSeries) screenerVolSeries.setData([]);
+            if (loadingText) {
+                loadingText.innerHTML = `<span class="text-amber-500 font-semibold">⚠️ Đang cập nhật dữ liệu nến cho ${cleanSym}</span> <button onclick="loadScreenerChartData('${cleanSym}')" class="ml-2 text-cyan-500 underline font-bold">Thử lại</button>`;
+            }
+            if (loadingEl) loadingEl.classList.remove("hidden");
+            if (syncIndicator) syncIndicator.classList.add("hidden");
+            return;
+        }
+
+        // Lưu vào bộ nhớ đệm
+        window._SCREENER_CANDLES_CACHE[cleanSym] = { data: data, ts: Date.now() };
+
+        if (chartScreenerTv && chartScreenerVolTv && screenerCandleSeries && screenerVolSeries) {
+            candles.sort((a, b) => a.time - b.time);
+
+            const uniqueCandles = [];
+            const seenTime = new Set();
+            for (const c of candles) {
+                if (!seenTime.has(c.time)) {
+                    seenTime.add(c.time);
+                    uniqueCandles.push(c);
+                }
+            }
+
+            const isDark = document.documentElement.classList.contains("dark");
+            const upVolColor = isDark ? "rgba(0, 192, 96, 0.65)" : "rgba(21, 128, 61, 0.75)";
+            const downVolColor = isDark ? "rgba(255, 59, 87, 0.65)" : "rgba(220, 38, 38, 0.75)";
+
+            const candleData = [];
+            const volData = [];
+            for (const c of uniqueCandles) {
+                const cl = Number(c.close || 0);
+                const op = Number(c.open || cl);
+                const hi = Number(c.high || Math.max(cl, op));
+                const lo = Number(c.low || Math.min(cl, op));
+                const tm = Number(c.time);
+                if (tm > 0 && cl > 0) {
+                    candleData.push({ time: tm, open: op, high: hi, low: lo, close: cl });
+                    volData.push({
+                        time: tm,
+                        value: Number(c.volume || 0),
+                        color: cl >= op ? upVolColor : downVolColor
+                    });
+                }
+            }
+
+            currentScreenerCandlesData = candleData;
+
+            const lastC = uniqueCandles[uniqueCandles.length - 1];
+            const candleHash = lastC ? `${uniqueCandles.length}_${lastC.time}_${lastC.close}_${lastC.volume}` : "";
+            const dataChanged = (isNewTicker || candleHash !== lastScreenerCandleHash);
+
+            let existingRange = null;
+            if (!isNewTicker && chartScreenerTv && chartScreenerTv.timeScale) {
+                try { existingRange = chartScreenerTv.timeScale().getVisibleLogicalRange(); } catch(e) {}
+            }
+
+            if (dataChanged) {
+                // 1. Cấu hình Auto-Scale cho trục giá
+                chartScreenerTv.priceScale('right').applyOptions({
+                    autoScale: true,
+                    scaleMargins: { top: 0.12, bottom: 0.15 }
+                });
+                chartScreenerVolTv.priceScale('right').applyOptions({
+                    autoScale: true,
+                    scaleMargins: { top: 0.15, bottom: 0 }
+                });
+
+                // 2. Nạp dữ liệu nến và khối lượng mới
+                screenerCandleSeries.setData(candleData);
+                screenerVolSeries.setData(volData);
+                lastScreenerCandleHash = candleHash;
+                lastLoadedScreenerTicker = cleanSym;
+
+                // 3. Cập nhật Watermark hiển thị rõ ràng mã cổ phiếu trên nền biểu đồ (chống nhầm lẫn)
+                try {
+                    chartScreenerTv.applyOptions({
+                        watermark: {
+                            visible: true,
+                            fontSize: 34,
+                            horzAlign: 'center',
+                            vertAlign: 'center',
+                            color: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.06)",
+                            text: `${cleanSym} · 1D`,
+                        }
+                    });
+                } catch (e) {}
+
+                // 4. Gắn Markers tín hiệu theo robot/bộ lọc tương ứng
+                const afl = calcScreenerAflSignals(uniqueCandles, screenerCurrentStrategy);
+                if (screenerCandleSeries && typeof screenerCandleSeries.setMarkers === "function") {
+                    screenerCandleSeries.setMarkers(afl.markers || []);
+                }
+
+                // 5. CANH CHỈNH BIỂU ĐỒ: Đổi mã mới -> căn giữa 55 nến; Auto-refresh cùng mã -> giữ nguyên dải zoom
+                if (isNewTicker || !existingRange) {
+                    centerScreenerChart();
+                } else {
+                    isScreenerSyncingRange = true;
+                    try {
+                        chartScreenerTv.timeScale().setVisibleLogicalRange(existingRange);
+                        chartScreenerVolTv.timeScale().setVisibleLogicalRange(existingRange);
+                    } catch(e) {} finally {
+                        setTimeout(() => { isScreenerSyncingRange = false; }, 50);
+                    }
+                }
+            } else {
+                lastLoadedScreenerTicker = cleanSym;
+            }
+
+            // Cập nhật nhãn tín hiệu bộ lọc (#screener-signal-tag)
+            const afl = calcScreenerAflSignals(uniqueCandles, screenerCurrentStrategy);
+            let robotName = "FANSI";
+            if (screenerCurrentStrategy === "robot1") robotName = "ROBOT 1";
+            else if (screenerCurrentStrategy === "robot2") robotName = "ROBOT 2";
+            else if (screenerCurrentStrategy === "div_macd") robotName = "PK MACD";
+            else if (screenerCurrentStrategy === "div_rsi") robotName = "PK RSI";
+
+            const sigTag = document.getElementById("screener-signal-tag");
+            if (sigTag) {
+                if (afl.lastSignal === "BUY") {
+                    const isT0 = afl.barsSince === 0;
+                    sigTag.className = "px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-950/90 text-emerald-400 border border-emerald-800 shadow-sm flex items-center gap-1";
+                    sigTag.innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 ${isT0 ? 'animate-pulse' : ''}"></span>
+                        <span>${isT0 ? `⚡ T+0 MUA (${robotName})` : `MUA (${robotName} T+${afl.barsSince})`}</span>
+                    `;
+                } else if (afl.lastSignal === "SELL") {
+                    const isT0 = afl.barsSince === 0;
+                    sigTag.className = "px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-rose-950/90 text-rose-400 border border-rose-800 shadow-sm flex items-center gap-1";
+                    sigTag.innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 ${isT0 ? 'animate-pulse' : ''}"></span>
+                        <span>${isT0 ? `⚡ T+0 BÁN (${robotName})` : `BÁN (${robotName} T+${afl.barsSince})`}</span>
+                    `;
+                } else {
+                    sigTag.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-slate-400 border border-slate-700 flex items-center gap-1";
+                    sigTag.innerHTML = `<span>Đang theo dõi (${robotName})</span>`;
+                }
+            }
+
+            // Đọc thông số nến cuối cùng (OHLC & Live Price)
+            const last = uniqueCandles[uniqueCandles.length - 1];
+            if (last) {
+                const prevClose = uniqueCandles.length > 1 ? uniqueCandles[uniqueCandles.length - 2].close : last.open;
+                const diff = last.close - prevClose;
+                const diffPct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+
+                const oEl = document.getElementById("screener-ohlc-o");
+                const hEl = document.getElementById("screener-ohlc-h");
+                const lEl = document.getElementById("screener-ohlc-l");
+                const cEl = document.getElementById("screener-ohlc-c");
+                const chgEl = document.getElementById("screener-ohlc-chg");
+                const liveTag = document.getElementById("screener-chart-live-price-tag");
+
+                const cFmt = last.close >= 1000 ? (last.close / 1000).toFixed(2) : last.close.toFixed(2);
+                if (oEl) oEl.textContent = last.open >= 1000 ? (last.open / 1000).toFixed(2) : last.open.toFixed(2);
+                if (hEl) hEl.textContent = last.high >= 1000 ? (last.high / 1000).toFixed(2) : last.high.toFixed(2);
+                if (lEl) lEl.textContent = last.low >= 1000 ? (last.low / 1000).toFixed(2) : last.low.toFixed(2);
+                if (cEl) cEl.textContent = cFmt;
+                if (chgEl) {
+                    chgEl.textContent = `${diff >= 0 ? '+' : ''}${(diff / 1000).toFixed(2)} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
+                    chgEl.className = diff >= 0 ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold";
+                }
+                if (liveTag) {
+                    liveTag.textContent = `${last.close.toLocaleString('vi-VN')} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
+                    liveTag.className = `font-mono font-bold text-xs ${diffPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+                }
+
+                // Volume Legend
+                const legVol = document.getElementById("screener-legend-vol");
+                const volStat = document.getElementById("screener-vol-detail-stat");
+                if (last.volume) {
+                    const volStr = last.volume >= 1000000 ? (last.volume / 1000000).toFixed(2) + "M CP" : (last.volume / 1000).toFixed(0) + "K CP";
+                    if (legVol) legVol.textContent = volStr;
+                    if (volStat) volStat.textContent = volStr;
+                }
+            }
+
+            // Phục hồi độ mờ ban đầu cho biểu đồ khi đã vẽ xong nến mới
+            if (priceBox) priceBox.classList.remove("opacity-35");
+            if (volBox) volBox.classList.remove("opacity-35");
+            if (syncIndicator) syncIndicator.classList.add("hidden");
+        }
+    } catch (err) {
+        if (err.name !== "AbortError") {
+            console.error("loadScreenerChartData error:", err);
+            if (loadingText) {
+                loadingText.innerHTML = `<span class="text-rose-400 font-semibold">Lỗi tải dữ liệu ${cleanSym}: ${err.message}</span> <button onclick="loadScreenerChartData('${cleanSym}')" class="ml-2 text-cyan-400 underline font-bold">Thử lại</button>`;
+            }
+        }
+    } finally {
+        if (cleanSym === screenerCurrentTicker && thisReqSeq === screenerChartRequestSeq) {
+            if (loadingEl && (!loadingText || !loadingText.innerHTML.includes("Thử lại"))) {
+                loadingEl.classList.add("hidden");
+            }
+            if (priceBox && (!loadingText || !loadingText.innerHTML.includes("Thử lại"))) {
+                priceBox.classList.remove("opacity-35");
+            }
+            if (volBox && (!loadingText || !loadingText.innerHTML.includes("Thử lại"))) {
+                volBox.classList.remove("opacity-35");
+            }
+            if (syncIndicator) {
+                syncIndicator.classList.add("hidden");
+            }
+        }
+    }
+}
+
+function applyStrategyFromBottomTable(stratKey) {
+    switchScreenerMode("fund");
+    selectScreenerStrategy(stratKey, true);
+    const target = document.getElementById("strat-card-" + stratKey);
+    if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+}
+
+function refreshCurrentScreener() {
+    const icon = document.getElementById("screener-refresh-icon");
+    if (icon) icon.classList.add("animate-spin");
+    selectScreenerStrategy(screenerCurrentStrategy, true).finally(() => {
+        if (icon) icon.classList.remove("animate-spin");
+    });
+}
+
+
 

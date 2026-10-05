@@ -1355,3 +1355,28 @@ html:not(.dark) #master-tabs-nav {
 
 
 
+
+/* =============================================================
+   VERTICAL HIGH-VISIBILITY SCROLLBAR & DRAG-SCROLL (CAUSALITY COL 2)
+   ============================================================= */
+.custom-scrollbar-vertical-cyan::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scrollbar-vertical-cyan::-webkit-scrollbar-track {
+    background: #090d14;
+    border: 1px solid #1f293d;
+    border-radius: 6px;
+}
+.custom-scrollbar-vertical-cyan::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #0284c7, #06b6d4);
+    border-radius: 6px;
+    border: 1px solid #0c1017;
+}
+.custom-scrollbar-vertical-cyan::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #06b6d4, #38bdf8);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+}
+.custom-scrollbar-vertical-cyan {
+    scrollbar-width: thin;
+    scrollbar-color: #06b6d4 #090d14;
+}

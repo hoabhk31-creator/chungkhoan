@@ -90,7 +90,8 @@ from crawler import (
     fetch_industry_reports,
     fetch_company_reports,
     get_ssi_fastconnect_status,
-    get_synchronized_matrix_reports
+    get_synchronized_matrix_reports,
+    _LIVE_PRICE_CACHE
 )
 from financial_data import (
     get_financial_data_bundle,
@@ -215,15 +216,11 @@ async def startup_event():
             except Exception:
                 pass
             try:
-                await asyncio.wait_for(
-                    get_synchronized_matrix_reports(
-                        ticker=tkr, base_reports=[], comp_name="", sector_name="", market_p=25000.0
-                    ),
-                    timeout=10.0
-                )
+                # Pre-warm Báo cáo đồng thuận định giá CTCK để phản hồi tức thì
+                await asyncio.wait_for(get_preset_by_ticker(tkr, refresh=False), timeout=5.0)
             except Exception:
                 pass
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.3)
 
     try:
         asyncio.create_task(_prewarm_top_tickers())
@@ -601,6 +598,10 @@ _PEERS_CACHE_TS: Dict[str, float] = {}
 _TECH_SIGNALS_CACHE: Dict[str, Dict[str, Any]] = {}
 _TECH_SIGNALS_CACHE_TS: Dict[str, float] = {}
 
+# Cache giá khớp thời gian thực đã đối soát (reconciled) — dùng chung tức thì giữa các module
+_RECONCILED_LIVE_PRICE_CACHE: Dict[str, Dict[str, Any]] = {}
+_RECONCILED_LIVE_PRICE_CACHE_TS: Dict[str, float] = {}
+
 # Cache riêng cho /api/ai-learning/knowledge/{ticker} — tránh đọc file disk mỗi request
 _KNOWLEDGE_CACHE: Dict[str, Dict[str, Any]] = {}
 _KNOWLEDGE_CACHE_TS: Dict[str, float] = {}
@@ -623,13 +624,10 @@ _TTL_KNOWLEDGE    = 120.0   # AI knowledge per ticker — 2 phút (cập nhật 
 async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refresh: bool = False):
     clean_ticker = ticker.upper().strip()
     now_ts = time.time()
-
-    # 1. Kiểm tra cache bộ nhớ để phản hồi tức thì nếu còn mới (300s TTL)
-    if not refresh:
-        cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
-        cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-        if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
-            return cached_rep
+    cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
+    cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
+    if not refresh and cached_rep and (now_ts - cached_time) < 1800.0 and cached_rep.ticker == clean_ticker:
+        return cached_rep
 
     # 2. Khóa concurrency để tránh gọi đúp song song nhiều crawler cùng 1 mã
     if clean_ticker not in _PRESET_LOCKS:
@@ -640,23 +638,48 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         if not refresh:
             cached_rep = _SYNCHRONIZED_PRESETS_CACHE.get(clean_ticker)
             cached_time = _SYNCHRONIZED_PRESETS_CACHE_TS.get(clean_ticker, 0)
-            if cached_rep and (now_ts - cached_time) < 300.0 and cached_rep.ticker == clean_ticker:
+            if cached_rep and (now_ts - cached_time) < 1800.0 and cached_rep.ticker == clean_ticker:
                 return cached_rep
 
         stock_meta = VIETNAM_STOCK_DIRECTORY.get(clean_ticker, {})
         cached_name = stock_meta.get("name", f"Công ty Cổ phần {clean_ticker}")
         cached_sector = stock_meta.get("sector", "Doanh nghiệp niêm yết")
 
+        # Xác định fallback price ban đầu chính xác cho clean_ticker trước khi gọi crawl:
+        known_prices = {"MWG": 73200.0, "HPG": 21700.0, "FPT": 72800.0, "TCB": 23900.0, "VHM": 42100.0, "VNM": 65000.0, "MSN": 72000.0, "MBB": 24000.0, "ACB": 25000.0, "VIC": 42000.0}
+        initial_price = 0.0
+        if clean_ticker in _LIVE_PRICE_CACHE and _LIVE_PRICE_CACHE[clean_ticker].get("latest_close", 0) > 0:
+            initial_price = float(_LIVE_PRICE_CACHE[clean_ticker]["latest_close"])
+        elif clean_ticker in _PROFILE_CACHE and _PROFILE_CACHE[clean_ticker].get("current_market_price", 0) > 0:
+            initial_price = float(_PROFILE_CACHE[clean_ticker]["current_market_price"])
+        elif clean_ticker in PRESET_DATASETS:
+            rep = PRESET_DATASETS[clean_ticker]
+            if getattr(rep, "current_price", 0) > 0:
+                initial_price = float(rep.current_price)
+            elif rep.consensus_summary and rep.consensus_summary.current_market_price > 0:
+                initial_price = float(rep.consensus_summary.current_market_price)
+        if initial_price <= 0:
+            from company_database import get_company
+            db_c = get_company(clean_ticker)
+            if db_c:
+                initial_price = float(db_c.get("price") or db_c.get("close_price") or 0.0)
+        if initial_price <= 0 and clean_ticker in _TECH_CANDLES_CACHE:
+            candles = _TECH_CANDLES_CACHE[clean_ticker]
+            if candles and isinstance(candles, list) and len(candles) > 0:
+                initial_price = float(candles[-1].get("c", candles[-1].get("close", 0.0)))
+        if initial_price <= 0:
+            initial_price = known_prices.get(clean_ticker, 25000.0)
+
         # Tối ưu hóa siêu tốc: Chạy song song Profile, Giá Live và Lịch Sự Kiện Quyền
         async def _safe_profile():
             try:
-                return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=2.0)
+                return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=1.5)
             except Exception:
                 return {}
 
         async def _safe_price():
             try:
-                return await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=3.0)
+                return await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=2.5)
             except Exception:
                 return None
 
@@ -664,7 +687,7 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
             try:
                 from corporate_actions import sync_ticker_corporate_actions_online, load_corporate_actions_cache
                 load_corporate_actions_cache()
-                await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=3.5)
+                await asyncio.wait_for(sync_ticker_corporate_actions_online(clean_ticker), timeout=1.5)
             except Exception:
                 pass
 
@@ -681,6 +704,9 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
             final_comp_name = report.company_name
             final_sect_name = report.sector
 
+        # Nếu đã có base_reports đầy đủ (>= 3 reports), giảm timeout crawl Vietstock để phản hồi tức thì
+        reports_timeout = 1.5 if (base_reports and len(base_reports) >= 3) else 2.5
+
         async def _safe_reports():
             try:
                 return await asyncio.wait_for(
@@ -689,10 +715,10 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
                         base_reports=base_reports,
                         comp_name=final_comp_name,
                         sector_name=final_sect_name,
-                        market_p=float(stock_meta.get("close", 25000.0)),
+                        market_p=initial_price,
                         max_reports=20
                     ),
-                    timeout=4.5
+                    timeout=reports_timeout
                 )
             except Exception:
                 return base_reports
@@ -703,7 +729,14 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         )
         profile = prof_res if isinstance(prof_res, dict) else {}
         live_info = live_res if isinstance(live_res, dict) else None
-        market_p = live_info.get("latest_close", 25000.0) if live_info else 25000.0
+        market_p = 0.0
+        if live_info and live_info.get("latest_close", 0) > 0:
+            market_p = float(live_info["latest_close"])
+        elif initial_price > 0:
+            market_p = initial_price
+        else:
+            market_p = 25000.0
+
         raw_synced = rep_res if isinstance(rep_res, list) else base_reports
         synced_reports = [r for r in raw_synced if not is_report_expired(r.report_date, max_days=548)]
 
@@ -726,9 +759,10 @@ async def get_preset_by_ticker(ticker: str, sync_live_price: bool = True, refres
         # Nếu market_p hợp lệ, đồng bộ nhanh upside cho synced_reports
         if market_p > 0:
             for r in synced_reports:
-                if r.target_price > 0:
+                if r.target_price > 0 and not getattr(r, "is_technical", False) and not is_report_expired(r.report_date):
                     r.current_price_at_report = market_p
-                    r.upside_percent = round(((r.target_price - market_p) / market_p) * 100.0, 1)
+                    eff_tp = r.adjusted_target_price if (getattr(r, "is_price_adjusted", False) and r.adjusted_target_price) else r.target_price
+                    r.upside_percent = round(((eff_tp - market_p) / market_p) * 100.0, 1)
 
         reconciled = calculate_consensus(
             reports=synced_reports,
@@ -970,21 +1004,30 @@ async def get_financial_overview(ticker: str):
     default_sector = stock_meta.get("sector")
 
     async def _safe_p():
+        # 1. Kiểm tra cache giá khớp thời gian thực đã đối soát (ưu tiên tối đa tính đồng bộ)
+        if clean_ticker in _RECONCILED_LIVE_PRICE_CACHE and (time.time() - _RECONCILED_LIVE_PRICE_CACHE_TS.get(clean_ticker, 0)) < 180.0:
+            cached_info = _RECONCILED_LIVE_PRICE_CACHE[clean_ticker]
+            if cached_info and "latest_close" in cached_info:
+                return float(cached_info["latest_close"])
         try:
-            live_price_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=2.5)
-            return live_price_info.get("latest_close", 25000.0) if live_price_info else 25000.0
+            live_price_info = await asyncio.wait_for(fetch_reconciled_live_price(clean_ticker), timeout=4.5)
+            if live_price_info and "latest_close" in live_price_info:
+                _RECONCILED_LIVE_PRICE_CACHE[clean_ticker] = live_price_info
+                _RECONCILED_LIVE_PRICE_CACHE_TS[clean_ticker] = time.time()
+                return float(live_price_info["latest_close"])
+            return 25000.0
         except Exception:
             return 25000.0
 
     async def _safe_prof():
         try:
-            return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=2.0)
+            return await asyncio.wait_for(fetch_stock_company_profile(clean_ticker), timeout=3.0)
         except Exception:
             return {}
 
     async def _safe_cap():
         try:
-            return await asyncio.wait_for(fetch_stock_corporate_capital(clean_ticker), timeout=2.0)
+            return await asyncio.wait_for(fetch_stock_corporate_capital(clean_ticker), timeout=3.0)
         except Exception:
             return {}
 
@@ -1186,12 +1229,16 @@ async def enrich_peers_with_realized_dividends(peers: Dict[str, Any]) -> Dict[st
 
             price_results = await asyncio.gather(*[_safe_price(tk) for tk in peer_tickers])
 
+            target_tk_upper = peers.get("target_ticker", "").upper()
             for peer, price_info in zip(peer_list, price_results):
                 peer_tk = peer.get("ticker", "")
                 if not peer_tk:
                     continue
                 try:
                     peer_price = float(price_info.get("latest_close", 0)) if price_info else 0
+                    if price_info and "latest_close" in price_info:
+                        _RECONCILED_LIVE_PRICE_CACHE[peer_tk] = price_info
+                        _RECONCILED_LIVE_PRICE_CACHE_TS[peer_tk] = time.time()
                     if peer_price <= 0:
                         dir_info = VIETNAM_STOCK_DIRECTORY.get(peer_tk, {})
                         shares_m = float(peer.get("shares_outstanding_mil") or dir_info.get("shares") or 0)
@@ -1297,6 +1344,18 @@ async def get_peers_comparison(ticker: str):
 
     data = await get_financial_overview(clean_ticker)
     peers = data.get("peers_data", {})
+    val_data = data.get("valuation", {})
+    # Đảm bảo doanh nghiệp mục tiêu luôn đồng bộ 100% P/E, P/B và Vốn hóa với tab Tổng Quan và Định Giá
+    if isinstance(peers, dict) and "peers" in peers and len(peers["peers"]) > 0:
+        for p in peers["peers"]:
+            if isinstance(p, dict) and p.get("ticker", "").upper() == clean_ticker:
+                if val_data.get("pe_live"):
+                    p["pe"] = val_data["pe_live"]
+                if val_data.get("pb_live"):
+                    p["pb"] = val_data["pb_live"]
+                if val_data.get("market_cap_bil"):
+                    p["market_cap_bil"] = val_data["market_cap_bil"]
+                break
     peers = await enrich_peers_with_realized_dividends(peers)
 
     _PEERS_CACHE[clean_ticker] = peers
@@ -1335,6 +1394,8 @@ async def get_overview_mini_chart_series(ticker: str):
         live_info = await fetch_reconciled_live_price(clean_ticker)
         if live_info and "latest_close" in live_info:
             live_price = float(live_info["latest_close"])
+            _RECONCILED_LIVE_PRICE_CACHE[clean_ticker] = live_info
+            _RECONCILED_LIVE_PRICE_CACHE_TS[clean_ticker] = time.time()
             if live_info.get("sources_comparison") and len(live_info["sources_comparison"]) > 0:
                 s0 = live_info["sources_comparison"][0]
                 live_ref = s0.get("ref_price")
@@ -1827,8 +1888,11 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         count = 1500
     cache_key = f"{clean_ticker}_{norm_res}_{count}"
     now_ts = time.time()
-    if cache_key in _TECH_SIGNALS_CACHE and (now_ts - _TECH_SIGNALS_CACHE_TS.get(cache_key, 0)) < 30.0:
-        return _TECH_SIGNALS_CACHE[cache_key]
+    cache_ttl = 300.0 if norm_res in ["D", "W", "M"] else 30.0
+    if cache_key in _TECH_SIGNALS_CACHE and (now_ts - _TECH_SIGNALS_CACHE_TS.get(cache_key, 0)) < cache_ttl:
+        cached_item = _TECH_SIGNALS_CACHE[cache_key]
+        if cached_item and cached_item.get("candles_history") and len(cached_item["candles_history"]) > 0:
+            return cached_item
 
     c = get_company(clean_ticker)
     exchange = (c.get("exchange") if c else "HOSE").upper()
@@ -1841,10 +1905,17 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         pass
 
     # Lấy chuỗi nến thực tế từ SSI FastConnect / VNDirect / Vietstock / DNSE
+    was_real_data = True
     try:
-        candles = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count), timeout=6.0)
+        candles = await asyncio.wait_for(fetch_hybrid_ohlcv_data(clean_ticker, resolution=resolution, count=count), timeout=10.0)
     except Exception:
         candles = []
+
+    # Bảo đảm tuyệt đối không bao giờ trả về danh sách nến rỗng (tránh làm kẹt biểu đồ ở mã cũ)
+    if not candles:
+        was_real_data = False
+        from ssi_fastconnect import generate_fallback_candles
+        candles = generate_fallback_candles(clean_ticker, live_p, resolution=resolution, count=count)
     
     # Tính toán toàn bộ chỉ báo kỹ thuật
     tech = calculate_technical_indicators(candles, live_p)
@@ -1901,11 +1972,1071 @@ async def get_technical_signals(ticker: str, resolution: str = "D", count: int =
         "resolution": resolution,
         "data_engine": "SSI FastConnect & Vietstock Multi-timeframe Feed"
     }
-    _TECH_SIGNALS_CACHE[cache_key] = res_dict
-    _TECH_SIGNALS_CACHE_TS[cache_key] = now_ts
+    if was_real_data and candles and len(candles) > 0:
+        _TECH_SIGNALS_CACHE[cache_key] = res_dict
+        _TECH_SIGNALS_CACHE_TS[cache_key] = now_ts
     return res_dict
 
 
+# -------------------------------------------------------------
+# BỘ LỌC QUÉT TÍN HIỆU FANSI T+ (AMIBROKER AFL) TOÀN THỊ TRƯỜNG
+# Thuần Phân Tích Kỹ Thuật (MACD 12,26,9 + MA20 + Nến Tăng/Giảm)
+# Khối lượng khớp trung bình 10 phiên MA(Volume, 10) >= min_vol
+# -------------------------------------------------------------
+_FANSI_SCREENER_CACHE: Dict[str, Any] = {}
+_FANSI_SCREENER_CACHE_TS: Dict[str, float] = {}
+
+VN30_TICKERS = {
+    "ACB", "BCM", "BID", "BVH", "CTG", "FPT", "GAS", "GVR", "HDB", "HPG",
+    "MBB", "MSN", "MWG", "PLX", "POW", "SHB", "SSB", "SSI", "STB", "TCB",
+    "TPB", "VCB", "VHM", "VIB", "VIC", "VJC", "VNM", "VPB", "VRE"
+}
+
+def _calculate_fansi_core(closes: List[float], opens: List[float], vols: List[float], times: List[int], min_vol: int, min_price: float = 5000.0):
+    n = len(closes)
+    if n < 25:
+        return None
+    
+    # 1. MA 10 Volume
+    ma10_vol = sum(vols[-10:]) / 10.0 if len(vols) >= 10 else sum(vols) / len(vols)
+    if ma10_vol < min_vol:
+        return None
+        
+    # 2. MACD (12, 26, 9)
+    k12 = 2.0 / 13.0
+    k26 = 2.0 / 27.0
+    ema12 = [closes[0]] * n
+    ema26 = [closes[0]] * n
+    for i in range(1, n):
+        ema12[i] = closes[i] * k12 + ema12[i - 1] * (1.0 - k12)
+        ema26[i] = closes[i] * k26 + ema26[i - 1] * (1.0 - k26)
+    macd = [ema12[i] - ema26[i] for i in range(n)]
+
+    ksig = 2.0 / 10.0
+    sig = [macd[0]] * n
+    for i in range(1, n):
+        sig[i] = macd[i] * ksig + sig[i - 1] * (1.0 - ksig)
+
+    # 3. SMA 20
+    sma20 = [0.0] * n
+    for i in range(n):
+        if i >= 19:
+            sma20[i] = sum(closes[i - 19:i + 1]) / 20.0
+        else:
+            sma20[i] = sum(closes[:i + 1]) / (i + 1)
+
+    # 4. Conditions: dk4 (Buy) and dk5 (Sell)
+    buy1 = [False] * n
+    sell1 = [False] * n
+    for i in range(20, n):
+        dk1 = macd[i] > sig[i]
+        dk12 = closes[i] > sma20[i]
+        dk13 = closes[i] > opens[i]
+        buy1[i] = (dk1 and dk12 and dk13)
+
+        dk2 = macd[i] < sig[i]
+        dk22 = closes[i] < sma20[i]
+        dk23 = closes[i] < opens[i]
+        sell1[i] = (dk2 and dk22 and dk23)
+
+    # 5. ExRem(Buy1, Sell1)
+    fs_buy = [False] * n
+    fs_sell = [False] * n
+    st = 0
+    last_sig = None
+    last_sig_bar = -1
+    last_sig_price = 0.0
+
+    for i in range(n):
+        if buy1[i] and st != 1:
+            fs_buy[i] = True
+            st = 1
+            last_sig = "BUY"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+        elif sell1[i] and st != -1:
+            fs_sell[i] = True
+            st = -1
+            last_sig = "SELL"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+
+    if not last_sig or last_sig_bar < 0:
+        return None
+
+    bars_since = (n - 1) - last_sig_bar
+    cur_p = closes[-1]
+    prev_p = closes[-2] if n > 1 else cur_p
+    pct_chg = ((cur_p - prev_p) / prev_p) * 100.0 if prev_p > 0 else 0.0
+
+    # Lợi nhuận tạm tính % từ điểm mua/bán (theo công thức AmiBroker AFL gốc)
+    if last_sig == "BUY" and last_sig_price > 0:
+        profit_pct = ((cur_p - last_sig_price) / last_sig_price) * 100.0
+    elif last_sig == "SELL" and last_sig_price > 0:
+        profit_pct = ((last_sig_price - cur_p) / last_sig_price) * 100.0
+    else:
+        profit_pct = 0.0
+
+    # Chuyển đổi giá về VNĐ nếu là đơn vị nghìn đồng
+    price_vnd = cur_p * 1000.0 if cur_p < 1000.0 else cur_p
+    sig_price_vnd = last_sig_price * 1000.0 if last_sig_price < 1000.0 else last_sig_price
+
+    # Lọc bỏ cổ phiếu siêu nhỏ có thị giá dưới min_price (mặc định < 5.000 đ)
+    if min_price > 0 and price_vnd < min_price:
+        return None
+
+    sig_date = datetime.fromtimestamp(times[last_sig_bar]).strftime("%d/%m/%Y") if times and last_sig_bar < len(times) else ""
+    status_text = "Hôm nay (T+0)" if bars_since == 0 else (f"{bars_since} phiên (T+{bars_since})")
+
+    return {
+        "signal": last_sig,
+        "price": round(price_vnd, 0),
+        "pct_change": round(pct_chg, 2),
+        "signal_price": round(sig_price_vnd, 0),
+        "profit_pct": round(profit_pct, 2),
+        "bars_since": bars_since,
+        "status_text": status_text,
+        "ma10_vol": int(ma10_vol),
+        "today_vol": int(vols[-1]),
+        "signal_date": sig_date,
+        "is_today": (bars_since == 0)
+    }
+
+
+def _calculate_robot1_core(closes: List[float], vols: List[float], times: List[int], min_vol: int, min_price: float = 5000.0):
+    """
+    Thuật toán ROBOT 1 (THE BEAST) - Zero-Lag DEMA Crossover (AmiBroker AFL):
+    M1 = EMA(((2*EMA(C,29/2))-EMA(C,29)), 2);
+    M2 = EMA(((2*EMA(C,29/2))-EMA(C,29)), 5);
+    Buy = Cross(M1, M2); Sell = Cross(M2, M1);
+    Buy = ExRem(Buy, Sell); Sell = ExRem(Sell, Buy);
+    Filter = Buy AND C > Ref(C,-1) AND C >= 5 AND MA(V,10) >= 50000;
+    """
+    n = len(closes)
+    if n < 35:
+        return None
+    
+    # 1. MA 10 Volume
+    ma10_vol = sum(vols[-10:]) / 10.0 if len(vols) >= 10 else sum(vols) / len(vols)
+    if ma10_vol < min_vol:
+        return None
+        
+    cur_p = closes[-1]
+    price_vnd = cur_p * 1000.0 if cur_p < 1000.0 else cur_p
+    if min_price > 0 and price_vnd < min_price:
+        return None
+
+    k_half = 2.0 / (14.5 + 1.0)
+    k_full = 2.0 / (29.0 + 1.0)
+
+    ema_half = [closes[0]] * n
+    ema_full = [closes[0]] * n
+    for i in range(1, n):
+        ema_half[i] = closes[i] * k_half + ema_half[i - 1] * (1.0 - k_half)
+        ema_full[i] = closes[i] * k_full + ema_full[i - 1] * (1.0 - k_full)
+
+    inner = [2.0 * ema_half[i] - ema_full[i] for i in range(n)]
+
+    k2 = 2.0 / (2.0 + 1.0)
+    k5 = 2.0 / (5.0 + 1.0)
+
+    m1 = [inner[0]] * n
+    m2 = [inner[0]] * n
+    for i in range(1, n):
+        m1[i] = inner[i] * k2 + m1[i - 1] * (1.0 - k2)
+        m2[i] = inner[i] * k5 + m2[i - 1] * (1.0 - k5)
+
+    raw_buy = [False] * n
+    raw_sell = [False] * n
+    for i in range(1, n):
+        if m1[i] > m2[i] and m1[i - 1] <= m2[i - 1] and closes[i] > closes[i - 1]:
+            raw_buy[i] = True
+        elif m2[i] > m1[i] and m2[i - 1] <= m1[i - 1]:
+            raw_sell[i] = True
+
+    # ExRem(Buy, Sell)
+    st = 0
+    last_sig = None
+    last_sig_bar = -1
+    last_sig_price = 0.0
+
+    for i in range(n):
+        if raw_buy[i] and st != 1:
+            st = 1
+            last_sig = "BUY"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+        elif raw_sell[i] and st != -1:
+            st = -1
+            last_sig = "SELL"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+
+    if not last_sig or last_sig_bar < 0:
+        return None
+
+    bars_since = (n - 1) - last_sig_bar
+    prev_p = closes[-2] if n > 1 else cur_p
+    pct_chg = ((cur_p - prev_p) / prev_p) * 100.0 if prev_p > 0 else 0.0
+
+    if last_sig == "BUY" and last_sig_price > 0:
+        profit_pct = ((cur_p - last_sig_price) / last_sig_price) * 100.0
+    elif last_sig == "SELL" and last_sig_price > 0:
+        profit_pct = ((last_sig_price - cur_p) / last_sig_price) * 100.0
+    else:
+        profit_pct = 0.0
+
+    sig_price_vnd = last_sig_price * 1000.0 if last_sig_price < 1000.0 else last_sig_price
+    sig_date = datetime.fromtimestamp(times[last_sig_bar]).strftime("%d/%m/%Y") if times and last_sig_bar < len(times) else ""
+    status_text = "Hôm nay (T+0)" if bars_since == 0 else (f"{bars_since} phiên (T+{bars_since})")
+
+    return {
+        "signal": last_sig,
+        "price": round(price_vnd, 0),
+        "pct_change": round(pct_chg, 2),
+        "signal_price": round(sig_price_vnd, 0),
+        "profit_pct": round(profit_pct, 2),
+        "bars_since": bars_since,
+        "status_text": status_text,
+        "ma10_vol": int(ma10_vol),
+        "today_vol": int(vols[-1]),
+        "signal_date": sig_date,
+        "is_today": (bars_since == 0)
+    }
+
+
+def _calculate_robot2_core(closes: List[float], highs: List[float], lows: List[float], vols: List[float], times: List[int], min_vol: int, min_price: float = 5000.0):
+    """
+    Thuật toán ROBOT 2 (ROCKET JET) - Breakout 5 phiên đỉnh / đáy (AmiBroker AFL):
+    Buyperiods = 5; Sellperiods = 5;
+    Buy = C > Ref(HHV(High, Buyperiods), -1);
+    Sell = C < Ref(LLV(Low, Sellperiods), -1);
+    Buy = ExRem(Buy, Sell); Sell = ExRem(Sell, Buy);
+    Filter = (Buy or Sell) AND C*MA(V,10) >= 20000000 AND C >= 5 AND C > Ref(C,-1);
+    """
+    n = len(closes)
+    if n < 20:
+        return None
+    
+    # 1. MA 10 Volume
+    ma10_vol = sum(vols[-10:]) / 10.0 if len(vols) >= 10 else sum(vols) / len(vols)
+    if ma10_vol < min_vol:
+        return None
+        
+    cur_p = closes[-1]
+    price_vnd = cur_p * 1000.0 if cur_p < 1000.0 else cur_p
+    if min_price > 0 and price_vnd < min_price:
+        return None
+
+    h_arr = highs if (highs and len(highs) == n) else closes
+    l_arr = lows if (lows and len(lows) == n) else closes
+
+    p_buy = 5
+    p_sell = 5
+
+    raw_buy = [False] * n
+    raw_sell = [False] * n
+
+    for i in range(p_buy + 1, n):
+        prev_hhv = max(h_arr[i - p_buy : i])
+        prev_llv = min(l_arr[i - p_sell : i])
+
+        if closes[i] > prev_hhv and closes[i] > closes[i - 1]:
+            raw_buy[i] = True
+        elif closes[i] < prev_llv:
+            raw_sell[i] = True
+
+    # ExRem(Buy, Sell)
+    st = 0
+    last_sig = None
+    last_sig_bar = -1
+    last_sig_price = 0.0
+
+    for i in range(n):
+        if raw_buy[i] and st != 1:
+            st = 1
+            last_sig = "BUY"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+        elif raw_sell[i] and st != -1:
+            st = -1
+            last_sig = "SELL"
+            last_sig_bar = i
+            last_sig_price = closes[i]
+
+    if not last_sig or last_sig_bar < 0:
+        return None
+
+    bars_since = (n - 1) - last_sig_bar
+    prev_p = closes[-2] if n > 1 else cur_p
+    pct_chg = ((cur_p - prev_p) / prev_p) * 100.0 if prev_p > 0 else 0.0
+
+    if last_sig == "BUY" and last_sig_price > 0:
+        profit_pct = ((cur_p - last_sig_price) / last_sig_price) * 100.0
+    elif last_sig == "SELL" and last_sig_price > 0:
+        profit_pct = ((last_sig_price - cur_p) / last_sig_price) * 100.0
+    else:
+        profit_pct = 0.0
+
+    sig_price_vnd = last_sig_price * 1000.0 if last_sig_price < 1000.0 else last_sig_price
+    sig_date = datetime.fromtimestamp(times[last_sig_bar]).strftime("%d/%m/%Y") if times and last_sig_bar < len(times) else ""
+    status_text = "Hôm nay (T+0)" if bars_since == 0 else (f"{bars_since} phiên (T+{bars_since})")
+
+    return {
+        "signal": last_sig,
+        "price": round(price_vnd, 0),
+        "pct_change": round(pct_chg, 2),
+        "signal_price": round(sig_price_vnd, 0),
+        "profit_pct": round(profit_pct, 2),
+        "bars_since": bars_since,
+        "status_text": status_text,
+        "ma10_vol": int(ma10_vol),
+        "today_vol": int(vols[-1]),
+        "signal_date": sig_date,
+        "is_today": (bars_since == 0)
+    }
+
+
+def _calculate_rsi_series(closes: List[float], period: int = 14) -> List[float]:
+    """Tính chuỗi RSI(period) chuẩn Wilder's Smoothing."""
+    n = len(closes)
+    rsi = [50.0] * n
+    if n <= period:
+        return rsi
+    gains = [0.0] * n
+    losses = [0.0] * n
+    for i in range(1, n):
+        diff = closes[i] - closes[i - 1]
+        if diff > 0:
+            gains[i] = diff
+        else:
+            losses[i] = -diff
+    
+    avg_gain = sum(gains[1:period + 1]) / float(period)
+    avg_loss = sum(losses[1:period + 1]) / float(period)
+    if avg_loss == 0:
+        rsi[period] = 100.0
+    else:
+        rs = avg_gain / avg_loss
+        rsi[period] = 100.0 - (100.0 / (1.0 + rs))
+        
+    for i in range(period + 1, n):
+        avg_gain = (avg_gain * (period - 1) + gains[i]) / float(period)
+        avg_loss = (avg_loss * (period - 1) + losses[i]) / float(period)
+        if avg_loss == 0:
+            rsi[i] = 100.0
+        else:
+            rs = avg_gain / avg_loss
+            rsi[i] = 100.0 - (100.0 / (1.0 + rs))
+    return rsi
+
+
+def _calculate_divergence_rsi_core(closes: List[float], lows: List[float], vols: List[float], times: List[int], min_vol: int, min_price: float = 5000.0):
+    """
+    Thuật toán PHÂN KỲ DƯƠNG RSI (AmiBroker AFL):
+    DK1 = RSI(14) > Ref(RSI(14),-1) AND 
+          Ref(RSI(14),-1) > Ref(RSI(14),-2) AND 
+          Ref(RSI(14),-2) < Ref(RSI(14),-3) AND
+          Ref(RSI(14),-3) < Ref(RSI(14),-4);
+    DK2 = LLV(RSI(14),4) > LLV(RSI(14),50);
+    DK3 = LLV(L,4) <= LLV(L,50);
+    Filter = DK1 AND DK2 AND DK3 AND C > 5 AND MA(V,10) >= 100000;
+    """
+    n = len(closes)
+    if n < 55:
+        return None
+
+    # 1. MA 10 Volume
+    ma10_vol = sum(vols[-10:]) / 10.0 if len(vols) >= 10 else sum(vols) / len(vols)
+    if ma10_vol < min_vol:
+        return None
+
+    cur_p = closes[-1]
+    price_vnd = cur_p * 1000.0 if cur_p < 1000.0 else cur_p
+    if min_price > 0 and price_vnd < min_price:
+        return None
+
+    l_arr = lows if (lows and len(lows) == n) else closes
+    rsi14 = _calculate_rsi_series(closes, 14)
+
+    raw_buy = [False] * n
+    for i in range(50, n):
+        # DK1: Đáy RSI tại bar i-2 và ngóc lên 2 phiên liên tiếp
+        dk1 = (rsi14[i] > rsi14[i - 1] and 
+               rsi14[i - 1] > rsi14[i - 2] and 
+               rsi14[i - 2] < rsi14[i - 3] and 
+               rsi14[i - 3] < rsi14[i - 4])
+        # DK2: LLV(RSI, 4) > LLV(RSI, 50)
+        llv_rsi_4 = min(rsi14[i - 3 : i + 1])
+        llv_rsi_50 = min(rsi14[i - 49 : i + 1])
+        dk2 = (llv_rsi_4 > llv_rsi_50)
+        # DK3: LLV(L, 4) <= LLV(L, 50)
+        llv_l_4 = min(l_arr[i - 3 : i + 1])
+        llv_l_50 = min(l_arr[i - 49 : i + 1])
+        dk3 = (llv_l_4 <= llv_l_50)
+
+        if dk1 and dk2 and dk3:
+            raw_buy[i] = True
+
+    # Tìm tín hiệu MUA gần nhất
+    last_sig_bar = -1
+    for i in range(50, n):
+        if raw_buy[i]:
+            last_sig_bar = i
+
+    if last_sig_bar < 0:
+        return None
+
+    bars_since = (n - 1) - last_sig_bar
+    if bars_since > 20:
+        return None
+
+    last_sig = "BUY"
+    last_sig_price = closes[last_sig_bar]
+    prev_p = closes[-2] if n > 1 else cur_p
+    pct_chg = ((cur_p - prev_p) / prev_p) * 100.0 if prev_p > 0 else 0.0
+    profit_pct = ((cur_p - last_sig_price) / last_sig_price) * 100.0 if last_sig_price > 0 else 0.0
+
+    sig_price_vnd = last_sig_price * 1000.0 if last_sig_price < 1000.0 else last_sig_price
+    sig_date = datetime.fromtimestamp(times[last_sig_bar]).strftime("%d/%m/%Y") if times and last_sig_bar < len(times) else ""
+    status_text = "Hôm nay (T+0)" if bars_since == 0 else (f"{bars_since} phiên (T+{bars_since})")
+
+    return {
+        "signal": last_sig,
+        "price": round(price_vnd, 0),
+        "pct_change": round(pct_chg, 2),
+        "signal_price": round(sig_price_vnd, 0),
+        "profit_pct": round(profit_pct, 2),
+        "bars_since": bars_since,
+        "status_text": status_text,
+        "ma10_vol": int(ma10_vol),
+        "today_vol": int(vols[-1]),
+        "signal_date": sig_date,
+        "is_today": (bars_since == 0)
+    }
+
+
+def _calculate_divergence_macd_core(closes: List[float], lows: List[float], vols: List[float], times: List[int], min_vol: int, min_price: float = 5000.0):
+    """
+    Thuật toán PHÂN KỲ DƯƠNG MACD (AmiBroker AFL):
+    Dk1 = MACD() > Ref(MACD(),-1) AND 
+          Ref(MACD(),-1) > Ref(MACD(),-2) AND 
+          Ref(MACD(),-2) < Ref(MACD(),-3) AND
+          Ref(MACD(),-3) < Ref(MACD(),-4);
+    Dk2 = LLV(MACD(),7) > LLV(MACD(),50);
+    DK3 = LLV(L,7) <= LLV(L,50);
+    Filter = DK1 AND DK2 AND DK3 AND C > 5 AND C*MA(V,10) >= 20000000 AND C >= Ref(C,-1);
+    """
+    n = len(closes)
+    if n < 55:
+        return None
+
+    # 1. MA 10 Volume
+    ma10_vol = sum(vols[-10:]) / 10.0 if len(vols) >= 10 else sum(vols) / len(vols)
+    if ma10_vol < min_vol:
+        return None
+
+    cur_p = closes[-1]
+    price_vnd = cur_p * 1000.0 if cur_p < 1000.0 else cur_p
+    if min_price > 0 and price_vnd < min_price:
+        return None
+
+    l_arr = lows if (lows and len(lows) == n) else closes
+
+    # MACD line = EMA12 - EMA26
+    k12 = 2.0 / 13.0
+    k26 = 2.0 / 27.0
+    ema12 = [closes[0]] * n
+    ema26 = [closes[0]] * n
+    for i in range(1, n):
+        ema12[i] = closes[i] * k12 + ema12[i - 1] * (1.0 - k12)
+        ema26[i] = closes[i] * k26 + ema26[i - 1] * (1.0 - k26)
+    macd = [ema12[i] - ema26[i] for i in range(n)]
+
+    raw_buy = [False] * n
+    for i in range(50, n):
+        # Dk1: Đáy MACD tại bar i-2 và ngóc lên 2 phiên liên tiếp
+        dk1 = (macd[i] > macd[i - 1] and 
+               macd[i - 1] > macd[i - 2] and 
+               macd[i - 2] < macd[i - 3] and 
+               macd[i - 3] < macd[i - 4])
+        # Dk2: LLV(MACD, 7) > LLV(MACD, 50)
+        llv_macd_7 = min(macd[i - 6 : i + 1])
+        llv_macd_50 = min(macd[i - 49 : i + 1])
+        dk2 = (llv_macd_7 > llv_macd_50)
+        # DK3: LLV(L, 7) <= LLV(L, 50)
+        llv_l_7 = min(l_arr[i - 6 : i + 1])
+        llv_l_50 = min(l_arr[i - 49 : i + 1])
+        dk3 = (llv_l_7 <= llv_l_50)
+        # Giá hôm nay không giảm
+        dk_c = (closes[i] >= closes[i - 1])
+
+        if dk1 and dk2 and dk3 and dk_c:
+            raw_buy[i] = True
+
+    # Tìm tín hiệu MUA gần nhất
+    last_sig_bar = -1
+    for i in range(50, n):
+        if raw_buy[i]:
+            last_sig_bar = i
+
+    if last_sig_bar < 0:
+        return None
+
+    bars_since = (n - 1) - last_sig_bar
+    if bars_since > 20:
+        return None
+
+    last_sig = "BUY"
+    last_sig_price = closes[last_sig_bar]
+    prev_p = closes[-2] if n > 1 else cur_p
+    pct_chg = ((cur_p - prev_p) / prev_p) * 100.0 if prev_p > 0 else 0.0
+    profit_pct = ((cur_p - last_sig_price) / last_sig_price) * 100.0 if last_sig_price > 0 else 0.0
+
+    sig_price_vnd = last_sig_price * 1000.0 if last_sig_price < 1000.0 else last_sig_price
+    sig_date = datetime.fromtimestamp(times[last_sig_bar]).strftime("%d/%m/%Y") if times and last_sig_bar < len(times) else ""
+    status_text = "Hôm nay (T+0)" if bars_since == 0 else (f"{bars_since} phiên (T+{bars_since})")
+
+    return {
+        "signal": last_sig,
+        "price": round(price_vnd, 0),
+        "pct_change": round(pct_chg, 2),
+        "signal_price": round(sig_price_vnd, 0),
+        "profit_pct": round(profit_pct, 2),
+        "bars_since": bars_since,
+        "status_text": status_text,
+        "ma10_vol": int(ma10_vol),
+        "today_vol": int(vols[-1]),
+        "signal_date": sig_date,
+        "is_today": (bars_since == 0)
+    }
+
+
+@app.get("/api/screener/fansi-signals")
+@app.get("/api/screener/robot-signals")
+async def get_fansi_screener(
+    strategy: str = "fansi",
+    exchange: str = "ALL",
+    min_vol: int = 100000,
+    min_price: float = 5000.0,
+    min_rs: int = 0,
+    timing: str = "recent",
+    refresh: bool = False
+):
+    """
+    Bộ lọc quét toàn thị trường các mã cổ phiếu có tín hiệu Mua / Bán FANSI T+, ROBOT 1, ROBOT 2, PHÂN KỲ MACD, PHÂN KỲ RSI (AmiBroker AFL).
+    - strategy: 'fansi', 'robot1', 'robot2', 'div_macd', 'div_rsi'
+    - exchange: 'ALL', 'HOSE', 'HNX', 'UPCOM', 'VN30'
+    - min_vol: Khối lượng khớp trung bình 10 phiên MA(Volume, 10), mặc định >= 100.000 CP/phiên.
+    - min_price: Giá tối thiểu (VNĐ), mặc định >= 5.000 đ để loại bỏ cổ phiếu siêu nhỏ / penny.
+    - min_rs: Sức mạnh giá Relative Strength RS (1-99), mặc định >= 80 khi lọc kỹ thuật theo RS.
+    - timing: 'today' (T+0 hôm nay), 'recent' (T+0 đến T+3), 'all' (tất cả đang nắm giữ tín hiệu)
+    """
+    clean_strat = (strategy or "fansi").lower().strip()
+    clean_ex = (exchange or "ALL").upper().strip()
+    cache_key = f"{clean_strat}_{clean_ex}_{min_vol}_{min_price}_{min_rs}_{timing}"
+    now_ts = time.time()
+
+    if not refresh and cache_key in _FANSI_SCREENER_CACHE and (now_ts - _FANSI_SCREENER_CACHE_TS.get(cache_key, 0)) < 40.0:
+        return _FANSI_SCREENER_CACHE[cache_key]
+
+    from company_database import COMPANY_DATABASE
+    candidates = []
+    for sym, comp in COMPANY_DATABASE.items():
+        c_ex = (comp.get("exchange") or "HOSE").upper().strip()
+        if clean_ex == "VN30" and sym not in VN30_TICKERS:
+            continue
+        elif clean_ex not in ["ALL", "VN30"] and c_ex != clean_ex:
+            continue
+        # Lọc sơ bộ cổ phiếu giá dưới min_price (loại bỏ penny siêu nhỏ)
+        c_price = float(comp.get("market_price") or comp.get("price") or 0.0)
+        if min_price > 0 and c_price > 0 and c_price < min_price:
+            continue
+        # Lọc sơ bộ theo thanh khoản để tối ưu hóa thời gian quét
+        avg_3m = (comp.get("avg_volume_3m_k") or 0) * 1000
+        if avg_3m < min_vol * 0.35:
+            continue
+        candidates.append((sym, comp))
+
+    from_ts = int(now_ts) - 86400 * 100
+    to_ts = int(now_ts)
+    sem = asyncio.Semaphore(30)
+
+    async def _fetch_and_eval(client: httpx.AsyncClient, sym: str, comp: Dict[str, Any]):
+        async with sem:
+            url = f"https://services.entrade.com.vn/chart-api/v2/ohlcs/stock?from={from_ts}&to={to_ts}&symbol={sym}&resolution=1D"
+            try:
+                r = await client.get(url, timeout=3.5)
+                if r.status_code == 200:
+                    d = r.json()
+                    c_arr = d.get("c", [])
+                    o_arr = d.get("o", [])
+                    h_arr = d.get("h", [])
+                    l_arr = d.get("l", [])
+                    v_arr = d.get("v", [])
+                    t_arr = d.get("t", [])
+
+                    if clean_strat == "robot1":
+                        res = _calculate_robot1_core(c_arr, v_arr, t_arr, min_vol, min_price)
+                    elif clean_strat == "robot2":
+                        res = _calculate_robot2_core(c_arr, h_arr, l_arr, v_arr, t_arr, min_vol, min_price)
+                    elif clean_strat == "div_macd":
+                        res = _calculate_divergence_macd_core(c_arr, l_arr, v_arr, t_arr, min_vol, min_price)
+                    elif clean_strat == "div_rsi":
+                        res = _calculate_divergence_rsi_core(c_arr, l_arr, v_arr, t_arr, min_vol, min_price)
+                    else:
+                        res = _calculate_fansi_core(c_arr, o_arr, v_arr, t_arr, min_vol, min_price)
+
+                    if res:
+                        res["symbol"] = sym
+                        res["name"] = comp.get("name", sym)
+                        res["exchange"] = comp.get("exchange", "HOSE")
+                        return res
+            except Exception:
+                pass
+            return None
+
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    async with httpx.AsyncClient(headers=headers, timeout=6.0) as client:
+        tasks = [_fetch_and_eval(client, s, c) for s, c in candidates]
+        results = await asyncio.gather(*tasks)
+
+    valid = [r for r in results if r is not None]
+    if min_price > 0:
+        valid = [r for r in valid if (r.get("price") or 0.0) >= min_price]
+
+    # Gán chỉ số sức mạnh giá Relative Strength (RS) & đồng bộ giá SSI Live cho từng cổ phiếu
+    rs_map = get_market_rs_ratings()
+    try:
+        from crawler import _SSI_EXCHANGE_CACHE
+    except Exception:
+        _SSI_EXCHANGE_CACHE = {}
+
+    for r in valid:
+        sym = (r.get("symbol") or "").upper().strip()
+        r["rs_rating"] = rs_map.get(sym, 50)
+        ssi_data = _SSI_EXCHANGE_CACHE.get(sym) if _SSI_EXCHANGE_CACHE else None
+        if ssi_data:
+            m_p = float(ssi_data.get("matchedPrice") or 0.0)
+            r_p = float(ssi_data.get("refPrice") or 0.0)
+            live_p = m_p if m_p > 0 else r_p
+            if live_p > 0:
+                r["price"] = live_p
+            if ssi_data.get("priceChangePercent") is not None:
+                r["pct_change"] = float(ssi_data.get("priceChangePercent"))
+            if ssi_data.get("nmTotalTradedQty"):
+                r["today_vol"] = int(ssi_data.get("nmTotalTradedQty"))
+        r["price_change_pct"] = r.get("pct_change", 0.0)
+
+    # Lọc theo RS tối thiểu nếu có thiết lập
+    if min_rs > 0:
+        valid = [r for r in valid if (r.get("rs_rating") or 50) >= min_rs]
+
+    # Lọc theo timing
+    if timing == "today":
+        filtered = [r for r in valid if r["bars_since"] == 0]
+    elif timing == "recent":
+        filtered = [r for r in valid if r["bars_since"] <= 3]
+    else:
+        filtered = valid
+
+    buy_list = [r for r in filtered if r["signal"] == "BUY"]
+    sell_list = [r for r in filtered if r["signal"] == "SELL"]
+
+    # Sắp xếp: Tín hiệu mới nhất lên đầu, tiếp đến thanh khoản cao nhất
+    buy_list.sort(key=lambda x: (x["bars_since"], -x["ma10_vol"]))
+    sell_list.sort(key=lambda x: (x["bars_since"], -x["ma10_vol"]))
+
+    ret_payload = {
+        "updated_at": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
+        "strategy": clean_strat,
+        "exchange": clean_ex,
+        "min_vol": min_vol,
+        "min_price": min_price,
+        "min_rs": min_rs,
+        "timing": timing,
+        "summary": {
+            "total_candidates": len(candidates),
+            "total_matched": len(filtered),
+            "buy_count": len(buy_list),
+            "sell_count": len(sell_list),
+            "today_buy_count": sum(1 for b in buy_list if b["bars_since"] == 0),
+            "today_sell_count": sum(1 for s in sell_list if s["bars_since"] == 0)
+        },
+        "buy_signals": buy_list,
+        "sell_signals": sell_list
+    }
+
+    _FANSI_SCREENER_CACHE[cache_key] = ret_payload
+    _FANSI_SCREENER_CACHE_TS[cache_key] = now_ts
+    return ret_payload
+
+
+# -------------------------------------------------------------
+# 5 PHƯƠNG PHÁP BỘ LỌC CỔ PHIẾU CÁC QUỸ ĐẦU TƯ TỔ CHỨC
+# Value, Growth, GARP (Peter Lynch), Quality & Moat, Momentum
+# -------------------------------------------------------------
+_FUND_SCREENER_CACHE: Dict[str, Any] = {}
+_FUND_SCREENER_CACHE_TS: Dict[str, float] = {}
+_RS_RATINGS_CACHE: Dict[str, int] = {}
+_RS_RATINGS_CACHE_TS: float = 0.0
+
+def get_market_rs_ratings() -> Dict[str, int]:
+    global _RS_RATINGS_CACHE, _RS_RATINGS_CACHE_TS
+    now = time.time()
+    if _RS_RATINGS_CACHE and (now - _RS_RATINGS_CACHE_TS) < 300.0:
+        return _RS_RATINGS_CACHE
+    from company_database import COMPANY_DATABASE
+    scores = []
+    for sym, comp in COMPANY_DATABASE.items():
+        c3m = float(comp.get("price_change_3m_pct") or 0.0)
+        c1m = float(comp.get("price_change_1m_pct") or 0.0)
+        cytd = float(comp.get("price_change_ytd_pct") or 0.0)
+        score = c3m * 2.0 + c1m + cytd * 0.5
+        scores.append((sym, score))
+    scores.sort(key=lambda x: x[1])
+    n = max(1, len(scores))
+    rs_map = {}
+    for rank, (sym, sc) in enumerate(scores):
+        percentile = max(1, min(99, int(round((rank + 1) / n * 99))))
+        rs_map[sym] = percentile
+    _RS_RATINGS_CACHE = rs_map
+    _RS_RATINGS_CACHE_TS = now
+    return rs_map
+
+
+@app.get("/api/screener/rs-ranking")
+async def get_rs_ranking_screener(
+    min_rs: int = 0,
+    exchange: str = "ALL",
+    min_vol: int = 10000,
+    min_price: float = 3000.0,
+    refresh: bool = False
+):
+    """
+    Bộ lọc độc lập theo chỉ số sức mạnh giá Relative Strength (RS).
+    Liệt kê toàn bộ các mã cổ phiếu trên thị trường được chấm điểm RS (1-99),
+    sắp xếp từ cao xuống thấp (RS 99, 98, 97... xuống min_rs).
+    Hỗ trợ tùy chỉnh mốc lọc min_rs từ 0 đến 100 (mặc định >= 80).
+    """
+    clean_ex = (exchange or "ALL").upper().strip()
+    cache_key = f"rs_rank_{clean_ex}_{min_price}_{min_vol}"
+    now_ts = time.time()
+
+    if not refresh and cache_key in _FUND_SCREENER_CACHE and (now_ts - _FUND_SCREENER_CACHE_TS.get(cache_key, 0)) < 45.0:
+        raw_items = _FUND_SCREENER_CACHE[cache_key]
+    else:
+        from company_database import COMPANY_DATABASE
+        try:
+            from crawler import fetch_ssi_live_stock_quote, _SSI_EXCHANGE_CACHE
+            await fetch_ssi_live_stock_quote("HPG")
+        except Exception:
+            _SSI_EXCHANGE_CACHE = {}
+
+        rs_map = get_market_rs_ratings()
+        raw_items = []
+        for sym, comp in COMPANY_DATABASE.items():
+            c_ex = (comp.get("exchange") or "HOSE").upper().strip()
+            if clean_ex == "VN30" and sym not in VN30_TICKERS:
+                continue
+            elif clean_ex not in ["ALL", "VN30"] and c_ex != clean_ex:
+                continue
+
+            # ƯU TIÊN SỐ 1: Bảng giá SSI Live trực tuyến (100% khớp biểu đồ nến real-time)
+            ssi_item = _SSI_EXCHANGE_CACHE.get(sym.upper()) if _SSI_EXCHANGE_CACHE else None
+            price = 0.0
+            live_pct = 0.0
+            today_vol = 0
+            if ssi_item:
+                m_p = float(ssi_item.get("matchedPrice") or 0.0)
+                r_p = float(ssi_item.get("refPrice") or 0.0)
+                price = m_p if m_p > 0 else r_p
+                if ssi_item.get("priceChangePercent") is not None:
+                    live_pct = float(ssi_item.get("priceChangePercent") or 0.0)
+                today_vol = int(ssi_item.get("nmTotalTradedQty") or ssi_item.get("matchedVolume") or 0)
+
+            if price <= 0:
+                if sym in _RECONCILED_LIVE_PRICE_CACHE:
+                    lp = _RECONCILED_LIVE_PRICE_CACHE[sym]
+                    price = float(lp.get("latest_close") or 0.0)
+                    live_pct = float(lp.get("change_percent") or 0.0)
+                else:
+                    price = float(comp.get("price") or comp.get("market_price") or 0.0)
+                    live_pct = float(comp.get("price_change_1m_pct") or 0.0)
+
+            if min_price > 0 and price < min_price:
+                continue
+
+            vol_3m = int((comp.get("avg_volume_3m_k") or 0) * 1000)
+            vol_eval = today_vol if today_vol > 0 else vol_3m
+            if min_vol > 0 and vol_eval < min_vol:
+                continue
+
+            val_3m = float(comp.get("avg_value_3m_bil") or 0.0)
+            mcap = float(comp.get("market_cap_bil") or 0.0)
+            p3m = float(comp.get("price_change_3m_pct") or 0.0)
+            p1m = float(comp.get("price_change_1m_pct") or 0.0)
+            rs = rs_map.get(sym, 50)
+
+            raw_items.append({
+                "ticker": sym,
+                "name": comp.get("name", sym),
+                "exchange": c_ex,
+                "price": price,
+                "price_change_pct": round(live_pct, 2),
+                "pct_change": round(live_pct, 2),
+                "price_change_1m_pct": round(p1m, 2),
+                "price_change_3m_pct": round(p3m, 2),
+                "volume": vol_eval,
+                "today_vol": today_vol,
+                "avg_volume_3m": vol_3m,
+                "avg_value_bil": round(val_3m, 2),
+                "market_cap_bil": round(mcap, 1),
+                "rs_rating": rs
+            })
+
+        # Sắp xếp mặc định: RS cao nhất lên đầu, tiếp đến là hiệu suất 3T
+        raw_items.sort(key=lambda x: (x["rs_rating"], x["price_change_3m_pct"]), reverse=True)
+        _FUND_SCREENER_CACHE[cache_key] = raw_items
+        _FUND_SCREENER_CACHE_TS[cache_key] = now_ts
+
+    filtered = [it for it in raw_items if it["rs_rating"] >= min_rs]
+    return {
+        "status": "success",
+        "updated_at": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
+        "total_count": len(filtered),
+        "min_rs": min_rs,
+        "exchange": clean_ex,
+        "items": filtered
+    }
+
+
+@app.get("/api/screener/fund-strategies")
+async def get_fund_screener_strategies(
+    strategy: str = "value",
+    exchange: str = "ALL",
+    min_price: float = 5000.0,
+    min_vol: int = 50000,
+    refresh: bool = False
+):
+    """
+    5 phương pháp tìm kiếm cổ phiếu được các quỹ đầu tư tổ chức sử dụng:
+    1. value: Value Investing (Đầu tư giá trị)
+    2. growth: Growth Investing (Đầu tư tăng trưởng)
+    3. garp: GARP - Peter Lynch (Growth At Reasonable Price)
+    4. quality: Quality & Moat (Đầu tư chất lượng & Lợi thế cạnh tranh)
+    5. momentum: Momentum & Trend (Đà tăng trưởng & Sức mạnh giá RS)
+    """
+    clean_strat = (strategy or "value").lower().strip()
+    clean_ex = (exchange or "ALL").upper().strip()
+    cache_key = f"{clean_strat}_{clean_ex}_{min_price}_{min_vol}"
+    now_ts = time.time()
+
+    if not refresh and cache_key in _FUND_SCREENER_CACHE and (now_ts - _FUND_SCREENER_CACHE_TS.get(cache_key, 0)) < 40.0:
+        return _FUND_SCREENER_CACHE[cache_key]
+
+    from company_database import COMPANY_DATABASE
+    try:
+        from crawler import fetch_ssi_live_stock_quote, _SSI_EXCHANGE_CACHE
+        await fetch_ssi_live_stock_quote("HPG")
+    except Exception:
+        _SSI_EXCHANGE_CACHE = {}
+
+    rs_map = get_market_rs_ratings()
+
+    STRATEGY_META = {
+        "value": {
+            "key": "value",
+            "name": "Giá trị (Value)",
+            "title": "💎 Giá trị (Value Investing)",
+            "subtitle": "Biên an toàn & Định giá hấp dẫn",
+            "philosophy": "Mua doanh nghiệp tốt với giá thấp hơn giá trị nội tại, có biên an toàn (P/E & P/B thấp, ROE ổn định).",
+            "timeframe": "2 - 5 năm",
+            "key_metrics": "P/B, P/E, FCF yield, ROE >= 10%",
+            "suitable_market": "Cuối chu kỳ giảm, thị trường sợ hãi / tích lũy"
+        },
+        "growth": {
+            "key": "growth",
+            "name": "Tăng trưởng (Growth)",
+            "title": "🚀 Tăng trưởng (Growth Investing)",
+            "subtitle": "Bứt phá Doanh thu & Lợi nhuận",
+            "philosophy": "Tìm doanh nghiệp có tốc độ tăng trưởng doanh thu và lợi nhuận vượt trội, duy trì ROE cao.",
+            "timeframe": "1 - 3 năm",
+            "key_metrics": "CAGR, PEG, biên lợi nhuận, LNST > 15%",
+            "suitable_market": "Kinh tế mở rộng, lãi suất thấp, thị trường uptrend"
+        },
+        "garp": {
+            "key": "garp",
+            "name": "GARP (Peter Lynch)",
+            "title": "🎯 GARP (Peter Lynch)",
+            "subtitle": "Tăng trưởng ở mức định giá hợp lý",
+            "philosophy": "Cân bằng giữa tăng trưởng và định giá, sàng lọc cổ phiếu PEG từ 0.25 đến 1.30 theo công thức Peter Lynch.",
+            "timeframe": "2 - 4 năm",
+            "key_metrics": "PEG 0.25 - 1.30, ROE, EPS growth >= 12%",
+            "suitable_market": "Hầu hết các giai đoạn thị trường, đặc biệt phân hóa"
+        },
+        "quality": {
+            "key": "quality",
+            "name": "Chất lượng (Quality & Moat)",
+            "title": "👑 Chất lượng (Quality & Moat)",
+            "subtitle": "Lợi thế cạnh tranh bền vững & Sinh lời vốn cao",
+            "philosophy": "Ưu tiên doanh nghiệp đầu ngành, hiệu quả sinh lời trên vốn (ROE >= 18%) vượt trội và tài chính lành mạnh.",
+            "timeframe": "5 năm trở lên",
+            "key_metrics": "ROIC, CFO/NI, F-Score, ROE >= 18%",
+            "suitable_market": "Mọi giai đoạn, đặc biệt bất ổn / lãi suất cao"
+        },
+        "momentum": {
+            "key": "momentum",
+            "name": "Đà tăng trưởng (Momentum)",
+            "title": "⚡ Đà tăng trưởng (Momentum & Trend)",
+            "subtitle": "Sức mạnh giá Relative Strength & Xu hướng dẫn dắt",
+            "philosophy": "Cổ phiếu mạnh nhất thị trường có xu hướng tiếp tục bứt phá trong trung hạn theo đà dòng tiền.",
+            "timeframe": "3 - 12 tháng",
+            "key_metrics": "RS, MA, khối lượng, Tăng giá 3T >= 5%",
+            "suitable_market": "Xu hướng tăng rõ ràng, dòng tiền sôi động"
+        }
+    }
+
+    meta = STRATEGY_META.get(clean_strat, STRATEGY_META["value"])
+    matched = []
+
+    for sym, comp in COMPANY_DATABASE.items():
+        c_ex = (comp.get("exchange") or "HOSE").upper().strip()
+        if clean_ex == "VN30" and sym not in VN30_TICKERS:
+            continue
+        elif clean_ex not in ["ALL", "VN30"] and c_ex != clean_ex:
+            continue
+
+        # ƯU TIÊN SỐ 1: Bảng giá SSI Live trực tuyến (100% khớp biểu đồ nến real-time)
+        ssi_item = _SSI_EXCHANGE_CACHE.get(sym.upper()) if _SSI_EXCHANGE_CACHE else None
+        price = 0.0
+        live_pct = 0.0
+        today_vol = 0
+        if ssi_item:
+            m_p = float(ssi_item.get("matchedPrice") or 0.0)
+            r_p = float(ssi_item.get("refPrice") or 0.0)
+            price = m_p if m_p > 0 else r_p
+            if ssi_item.get("priceChangePercent") is not None:
+                live_pct = float(ssi_item.get("priceChangePercent") or 0.0)
+            today_vol = int(ssi_item.get("nmTotalTradedQty") or ssi_item.get("matchedVolume") or 0)
+
+        if price <= 0:
+            if sym in _RECONCILED_LIVE_PRICE_CACHE:
+                lp = _RECONCILED_LIVE_PRICE_CACHE[sym]
+                price = float(lp.get("latest_close") or 0.0)
+                live_pct = float(lp.get("change_percent") or 0.0)
+            else:
+                price = float(comp.get("price") or comp.get("market_price") or 0.0)
+                live_pct = float(comp.get("price_change_1m_pct") or 0.0)
+
+        # Lọc giá tối thiểu (mặc định >= 5.000 VNĐ để loại penny)
+        if min_price > 0 and price < min_price:
+            continue
+
+        vol_3m = int((comp.get("avg_volume_3m_k") or 0) * 1000)
+        vol_eval = today_vol if today_vol > 0 else vol_3m
+        # Lọc khối lượng tối thiểu theo tiêu chí phía trên
+        if min_vol > 0 and vol_eval < min_vol:
+            continue
+
+        pe = float(comp.get("pe_ttm") or 0.0)
+        pb = float(comp.get("pb_ttm") or 0.0)
+        roe = float(comp.get("roe_ttm_pct") or 0.0)
+        np_grow = float(comp.get("net_profit_growth_yoy_pct") or 0.0)
+        rev_grow = float(comp.get("revenue_growth_yoy_pct") or 0.0)
+        eps_grow = float(comp.get("eps_growth_yoy_pct") or np_grow)
+        val_3m = float(comp.get("avg_value_3m_bil") or 0.0)
+        mcap = float(comp.get("market_cap_bil") or 0.0)
+        p3m = float(comp.get("price_change_3m_pct") or 0.0)
+        p1m = float(comp.get("price_change_1m_pct") or 0.0)
+        rs = rs_map.get(sym, 50)
+
+        is_match = False
+        highlight_label = ""
+        highlight_val = ""
+        sort_val = 0.0
+
+        if clean_strat == "value":
+            if 0 < pe <= 12.0 and 0 < pb <= 1.6 and roe >= 10.0 and val_3m >= 1.0:
+                is_match = True
+                highlight_label = f"P/E: {pe:.1f} | P/B: {pb:.2f}"
+                highlight_val = f"ROE {roe:.1f}%"
+                sort_val = pe
+
+        elif clean_strat == "growth":
+            if np_grow >= 15.0 and rev_grow >= 10.0 and roe >= 14.0 and val_3m >= 1.5:
+                is_match = True
+                highlight_label = f"LNST +{np_grow:.1f}%"
+                highlight_val = f"DThu +{rev_grow:.1f}%"
+                sort_val = -np_grow
+
+        elif clean_strat == "garp":
+            grow_rate = eps_grow if eps_grow > 0 else np_grow
+            if grow_rate >= 12.0 and 0 < pe <= 22.0:
+                peg = round(pe / grow_rate, 2)
+                if 0.25 <= peg <= 1.30 and roe >= 12.0 and val_3m >= 1.0:
+                    is_match = True
+                    highlight_label = f"PEG: {peg:.2f}"
+                    highlight_val = f"EPS +{grow_rate:.1f}%"
+                    sort_val = peg
+
+        elif clean_strat == "quality":
+            if roe >= 18.0 and mcap >= 1500.0 and 0 < pe <= 25.0 and val_3m >= 1.5:
+                is_match = True
+                highlight_label = f"ROE: {roe:.1f}%"
+                highlight_val = f"Vốn hóa {mcap:,.0f} tỷ"
+                sort_val = -roe
+
+        elif clean_strat == "momentum":
+            if p3m >= 5.0 and p1m >= 0.0 and rs >= 70 and val_3m >= 3.0:
+                is_match = True
+                highlight_label = f"RS: {rs}"
+                highlight_val = f"3T: +{p3m:.1f}%"
+                sort_val = -rs
+
+        if is_match:
+            grow_rate = eps_grow if eps_grow > 0 else np_grow
+            peg_calc = round(pe / grow_rate, 2) if (grow_rate > 0 and pe > 0) else None
+            matched.append({
+                "ticker": sym,
+                "name": comp.get("name", sym),
+                "exchange": c_ex,
+                "price": price,
+                "price_change_pct": round(live_pct, 2),
+                "pct_change": round(live_pct, 2),
+                "volume": vol_eval,
+                "today_vol": today_vol,
+                "avg_volume_3m": vol_3m,
+                "avg_value_bil": round(val_3m, 2),
+                "market_cap_bil": round(mcap, 1),
+                "pe": round(pe, 2) if pe > 0 else None,
+                "pb": round(pb, 2) if pb > 0 else None,
+                "roe": round(roe, 1),
+                "eps_growth": round(eps_grow, 1),
+                "net_profit_growth": round(np_grow, 1),
+                "revenue_growth": round(rev_grow, 1),
+                "peg": peg_calc,
+                "rs_rating": rs,
+                "highlight_label": highlight_label,
+                "highlight_val": highlight_val,
+                "_sort_val": sort_val
+            })
+
+    matched.sort(key=lambda x: x["_sort_val"])
+
+    ret_payload = {
+        "updated_at": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
+        "strategy": clean_strat,
+        "meta": meta,
+        "exchange": clean_ex,
+        "min_price": min_price,
+        "total_matched": len(matched),
+        "items": matched
+    }
+
+    _FUND_SCREENER_CACHE[cache_key] = ret_payload
+    _FUND_SCREENER_CACHE_TS[cache_key] = now_ts
+    return ret_payload
 
 @app.get("/api/search")
 async def search_reports(ticker: str, sector: Optional[str] = ""):

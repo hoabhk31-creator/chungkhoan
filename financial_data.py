@@ -2544,9 +2544,9 @@ def build_sector_peers_data(
     sector_name: str,
     target_ticker: str,
     target_name: str,
-    market_cap_bil: float,
-    target_pe: float = 12.5,
-    target_pb: float = 1.45,
+    market_cap_bil: Optional[float] = None,
+    target_pe: Optional[float] = None,
+    target_pb: Optional[float] = None,
     annual_stm: Optional[Any] = None
 ) -> PeerComparisonData:
     """
@@ -2569,15 +2569,13 @@ def build_sector_peers_data(
     db_icb2 = (target_db.get("icb2") or "").strip() if target_db else ""
 
     target_name = target_name or (target_db.get("name") if target_db else f"CTCP {clean_ticker}")
-    if target_db and target_db.get("market_cap_bil", 0) > 0 and (market_cap_bil is None or market_cap_bil <= 0 or market_cap_bil == 10000.0):
-        market_cap_bil = target_db["market_cap_bil"]
-    market_cap_bil = market_cap_bil or 1000.0
+    if market_cap_bil is None or market_cap_bil <= 0 or market_cap_bil == 10000.0:
+        market_cap_bil = target_db.get("market_cap_bil") if target_db and target_db.get("market_cap_bil") else 1000.0
 
-    if target_db:
-        if (target_pe <= 0 or target_pe > 100) and target_db.get("pe_ttm") and 1.5 <= target_db["pe_ttm"] <= 80:
-            target_pe = target_db["pe_ttm"]
-        if (target_pb <= 0 or target_pb > 50) and target_db.get("pb_ttm") and 0.3 <= target_db["pb_ttm"] <= 20:
-            target_pb = target_db["pb_ttm"]
+    if target_pe is None or target_pe <= 0 or target_pe > 150:
+        target_pe = target_db.get("pe_ttm") if (target_db and target_db.get("pe_ttm") and 1.5 <= target_db["pe_ttm"] <= 80) else 12.5
+    if target_pb is None or target_pb <= 0 or target_pb > 50:
+        target_pb = target_db.get("pb_ttm") if (target_db and target_db.get("pb_ttm") and 0.3 <= target_db["pb_ttm"] <= 20) else 1.45
 
     # 2. Xác định tên ngành và phân loại mô hình doanh nghiệp chuẩn 23 ngành nghề
     initial_sector = db_fiin_sec or sector_name or db_icb4 or db_icb2 or "Doanh nghiệp niêm yết"
@@ -2729,22 +2727,23 @@ def build_sector_peers_data(
         if ssi_peer:
             p_price = float(ssi_peer.get("matchedPrice") or ssi_peer.get("refPrice") or 0)
             if p_price > 0:
-                p_base = c.get("price") or (c.get("close_price") or 0)
-                if p_base and p_base > 0:
-                    # Cập nhật vốn hóa, P/E, P/B theo tỷ lệ biến động giá thực tế
-                    ratio = p_price / p_base
-                    p_mcap = round(p_mcap * ratio, 1)
-                    if p_pe and p_pe > 0:
-                        p_pe = round(p_pe * ratio, 1)
-                    if p_pb and p_pb > 0:
-                        p_pb = round(p_pb * ratio, 2)
+                shs_mil = c.get("shares_outstanding_mil")
+                if shs_mil and shs_mil > 0:
+                    p_mcap = round((shs_mil * p_price) / 1000.0, 1)
+                    if (c.get("net_profit_q1_26_bil") or 0) > 0:
+                        p_pe = round(p_mcap / (c["net_profit_q1_26_bil"] * 4.0), 1)
+                    elif c.get("eps") and c["eps"] > 0:
+                        p_pe = round(p_price / c["eps"], 1)
                 else:
-                    # Nếu không có giá cơ sở, tính từ số lượng cổ phiếu lưu hành
-                    shs_mil = c.get("shares_outstanding_mil")
-                    if shs_mil and shs_mil > 0:
-                        p_mcap = round((shs_mil * p_price) / 1000.0, 1)
-                        if (c.get("net_profit_q1_26_bil") or 0) > 0:
-                            p_pe = round(p_mcap / (c["net_profit_q1_26_bil"] * 4.0), 1)
+                    p_base = c.get("price") or (c.get("close_price") or 0)
+                    if p_base and p_base > 0 and 0.4 <= (p_price / p_base) <= 2.5:
+                        # Cập nhật vốn hóa, P/E, P/B theo tỷ lệ biến động giá thực tế
+                        ratio = p_price / p_base
+                        p_mcap = round(p_mcap * ratio, 1)
+                        if p_pe and p_pe > 0:
+                            p_pe = round(p_pe * ratio, 1)
+                        if p_pb and p_pb > 0:
+                            p_pb = round(p_pb * ratio, 2)
 
         other_peers.append(PeerCompany(
             ticker=t_code,
@@ -4295,8 +4294,8 @@ def get_company_news_and_events(ticker: str) -> Dict[str, Any]:
                 ev_id = f"ca-{ca.get('id')}"
                 ex_str = ca.get("ex_date", "-")
                 ev_title = ca.get("title", "")
-                # Tránh trùng lặp theo ID, ngày GDKHQ hoặc tiêu đề
-                if not any(e.get("id") == ev_id or (e.get("ex_date") == ex_str and e.get("type") == ca.get("event_type")) or e.get("title") == ev_title for e in events):
+                # Tránh trùng lặp theo ID hoặc cùng ngày GDKHQ và cùng loại sự kiện
+                if not any(e.get("id") == ev_id or (e.get("ex_date") == ex_str and e.get("type") == ca.get("event_type")) for e in events):
                     ev_type_label = (
                         "Cổ tức tiền mặt" if ca.get("event_type") == "dividend_cash"
                         else ("Cổ tức cổ phiếu" if ca.get("event_type") == "dividend_stock"
@@ -4450,8 +4449,24 @@ def get_mini_chart_series(
     ask_v = int(live_ask_vol) if live_ask_vol is not None else 69000
     f_buy = float(live_foreign_buy) if live_foreign_buy is not None else 546729
 
-    # Tính toán cổ tức tiền mặt & tỷ suất cổ tức thực tế
-    real_cash_div, real_div_yield = calculate_real_dividend_metrics(clean_ticker, base_price)
+    # Tính toán cổ tức tiền mặt & cổ tức cổ phiếu/thưởng thực tế
+    try:
+        from corporate_actions import get_detailed_corporate_actions_dividend_summary
+        div_sum = get_detailed_corporate_actions_dividend_summary(clean_ticker, base_price)
+        real_cash_div = float(div_sum.get("cash_amount") or 0.0)
+        real_div_yield = round(float(div_sum.get("yield_pct") or 0.0) / 100.0, 4) if div_sum.get("yield_pct") else 0.0
+        stock_div_pct = float(div_sum.get("stock_div_pct") or 0.0)
+        bonus_shares_pct = float(div_sum.get("bonus_pct") or 0.0)
+        stock_div_display = div_sum.get("stock_display") or ("0%" if (stock_div_pct == 0 and bonus_shares_pct == 0) else "")
+    except Exception:
+        real_cash_div, real_div_yield = calculate_real_dividend_metrics(clean_ticker, base_price)
+        stock_div_pct, bonus_shares_pct, stock_div_display = 0.0, 0.0, "0%"
+
+    if real_cash_div <= 0:
+        c_div, d_yield = calculate_real_dividend_metrics(clean_ticker, base_price)
+        if c_div > 0:
+            real_cash_div = c_div
+            real_div_yield = d_yield
     if real_cash_div <= 0 and stock_meta.get("dividend_yield"):
         real_div_yield = float(stock_meta["dividend_yield"]) / 100.0
 
@@ -4525,9 +4540,14 @@ def get_mini_chart_series(
         "ask_vol": ask_v,
         "cash_dividend": real_cash_div,
         "dividend_yield": real_div_yield,
+        "stock_dividend_pct": stock_div_pct,
+        "bonus_shares_pct": bonus_shares_pct,
+        "stock_dividend_display": stock_div_display,
         "eps": eps,
         "forward_pe": round(pe * 0.92, 2) if pe > 0 else 0.0,
         "bvps": bvps,
+        "roe": mults.get("roe_ttm", 0.0),
+        "roa": mults.get("roa_ttm", 0.0),
         "beta": real_beta,
         "pe": pe,
         "pb": pb,
