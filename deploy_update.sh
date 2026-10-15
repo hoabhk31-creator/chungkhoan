@@ -14,9 +14,18 @@ fi
 if [ -f "$ZIP_PATH" ]; then
     echo ">>> Tìm thấy $ZIP_PATH, đang tiến hành giải nén cập nhật..."
     which unzip &>/dev/null || (apt update && apt install -y unzip)
-    unzip -o "$ZIP_PATH" -d "$APP_DIR"
+    # Sao lưu an toàn visitor_stats.json trên VPS trước khi giải nén nếu có
+    if [ -f "$APP_DIR/visitor_stats.json" ]; then
+        cp "$APP_DIR/visitor_stats.json" "/tmp/visitor_stats_backup.json"
+    fi
+    unzip -o "$ZIP_PATH" -d "$APP_DIR" -x "visitor_stats.json" 2>/dev/null || unzip -o "$ZIP_PATH" -d "$APP_DIR"
+    # Khôi phục số liệu người truy cập trên VPS nếu bị ảnh hưởng
+    if [ -f "/tmp/visitor_stats_backup.json" ]; then
+        cp "/tmp/visitor_stats_backup.json" "$APP_DIR/visitor_stats.json"
+        rm -f "/tmp/visitor_stats_backup.json"
+    fi
     rm -f "$ZIP_PATH"
-    echo ">>> Giải nén thành công!"
+    echo ">>> Giải nén thành công và đã bảo toàn nguyên vẹn số liệu người truy cập!"
 fi
 
 cd "$APP_DIR"

@@ -2059,6 +2059,59 @@ EXPANDED_CORPORATE_PROJECTS_DB: Dict[str, List[Dict[str, Any]]] = {
             "occupancy_rate": 95,
             "phase_tag": "Đang vận hành toàn công suất"
         }
+    ],
+    # -------------------------------------------------------------------------
+    # TỔNG CÔNG TY ĐẦU TƯ PHÁT TRIỂN NHÀ VÀ ĐÔ THỊ NAM HÀ NỘI (NHA)
+    # -------------------------------------------------------------------------
+    "NHA": [
+        {
+            "name": "Khu đô thị mới Hòa Mạc (Duy Tiên, Hà Nam)",
+            "scale": "Quy mô 17,5 ha tại thị trấn Hòa Mạc, bao gồm đất ở liền kề, biệt thự và công trình thương mại dịch vụ.",
+            "investment_bil": 520,
+            "progress_pct": 92,
+            "commercial_date": "Đang bàn giao & khai thác quỹ đất",
+            "impact": "Dự án cốt lõi đem lại dòng tiền bán hàng và bàn giao ổn định, hưởng lợi từ việc sáp nhập Duy Tiên lên thị xã.",
+            "legal_status": "Đầy đủ quy hoạch 1/500, hoàn thành nghĩa vụ tiền sử dụng đất, đã cấp GCN QSDĐ cho cư dân",
+            "occupancy_rate": 88,
+            "phase_tag": "Đang bàn giao & khai thác",
+            "source": "Báo cáo Thường niên NHA & BCTC Kiểm toán"
+        },
+        {
+            "name": "Khu đô thị mới Chợ Lương (Yên Bắc, Duy Tiên, Hà Nam)",
+            "scale": "Quy mô 9,8 ha bao gồm phân khu nhà ở thương mại liền kề, shophouse và hạ tầng chợ trung tâm mới.",
+            "investment_bil": 380,
+            "progress_pct": 75,
+            "commercial_date": "Giai đoạn 2025 - 2026",
+            "impact": "Gối đầu tăng trưởng doanh thu bất động sản dân dụng, tỷ lệ hấp thụ cao nhờ vị trí gần KCN Đồng Văn.",
+            "legal_status": "Đã phê duyệt quy hoạch chi tiết 1/500, cơ bản hoàn thành GPMB và hạ tầng giao thông kỹ thuật",
+            "occupancy_rate": 80,
+            "phase_tag": "Đang thi công xây dựng",
+            "source": "Báo cáo Thường niên NHA"
+        },
+        {
+            "name": "Khu đô thị Dịch vụ - Khách sạn Tân Hà (Duy Tiên, Hà Nam)",
+            "scale": "Quy mô 12 ha, tổ hợp nhà ở chuyên gia, dịch vụ thương mại và khách sạn cao tầng phụ trợ KCN.",
+            "investment_bil": 450,
+            "progress_pct": 55,
+            "commercial_date": "Giai đoạn 2026 - 2027",
+            "impact": "Đón đầu làn sóng chuyên gia và kỹ sư làm việc tại các KCN Đồng Văn II, III, IV mở rộng.",
+            "legal_status": "Chấp thuận chủ trương đầu tư, đang hoàn thiện thủ tục thẩm định hồ sơ đất đai",
+            "occupancy_rate": 50,
+            "phase_tag": "Đang thi công & pháp lý",
+            "source": "Nghị quyết ĐHĐCĐ & BCTN NHA"
+        },
+        {
+            "name": "Khu nhà ở đô thị Văn Xá (Kim Bảng, Hà Nam)",
+            "scale": "Quy mô 14 ha đất ở liền kề và công viên cây xanh kết nối tuyến quốc lộ huyết mạch.",
+            "investment_bil": 420,
+            "progress_pct": 40,
+            "commercial_date": "Giai đoạn 2026 - 2028",
+            "impact": "Mở rộng quỹ đất dài hạn tại địa bàn du lịch tâm linh chùa Tam Chúc (Kim Bảng).",
+            "legal_status": "Được UBND tỉnh phê duyệt nhiệm vụ quy hoạch, đang giải phóng mặt bằng",
+            "occupancy_rate": 40,
+            "phase_tag": "Chuẩn bị khởi công / Pháp lý",
+            "source": "BCTN NHA & Nghị quyết HĐQT"
+        }
     ]
 }
 

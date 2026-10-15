@@ -488,6 +488,57 @@ CURATED_CORPORATE_ACTIONS: Dict[str, List[Dict[str, Any]]] = {
             "source": "HOSE & Vietstock"
         }
     ],
+    "HDB": [
+        {
+            "id": "hdb-ca-2026-dividend-stock",
+            "ex_date": "09/10/2026",
+            "record_date": "12/10/2026",
+            "execution_date": "09/10/2026",
+            "event_type": "dividend_stock",
+            "title": "HDB: Trả cổ tức năm 2025 bằng cổ phiếu, tỷ lệ 100:25 (25%)",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.25,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 29800.0,
+            "ref_price_after": 22920.0,
+            "adjustment_factor": 0.8,
+            "description": "Trả cổ tức năm 2025 bằng cổ phiếu, tỷ lệ 100:25 (cổ đông sở hữu 100 CP nhận thêm 25 CP mới).",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "hdb-ca-2026-bonus-share",
+            "ex_date": "09/10/2026",
+            "record_date": "12/10/2026",
+            "execution_date": "09/10/2026",
+            "event_type": "bonus_share",
+            "title": "HDB: Thưởng cổ phiếu, tỷ lệ 100:5 (5%)",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.05,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "ref_price_before": 29800.0,
+            "ref_price_after": 22920.0,
+            "adjustment_factor": 0.9524,
+            "description": "Thưởng cổ phiếu do thực hiện tăng vốn cổ phần từ nguồn vốn chủ sở hữu, tỷ lệ 100:5.",
+            "source": "HOSE & Vietstock"
+        },
+        {
+            "id": "hdb-ca-2025-stock",
+            "ex_date": "18/12/2025",
+            "record_date": "19/12/2025",
+            "execution_date": "18/12/2025",
+            "event_type": "dividend_stock",
+            "title": "HDB: Trả cổ tức năm 2024 bằng cổ phiếu, tỷ lệ 100:25",
+            "cash_amount": 0.0,
+            "stock_ratio": 0.25,
+            "rights_ratio": 0.0,
+            "rights_price": 0.0,
+            "adjustment_factor": 0.8,
+            "description": "Trả cổ tức năm 2024 bằng cổ phiếu tỷ lệ 100:25.",
+            "source": "HOSE & Vietstock"
+        }
+    ],
     "DGC": [
         {
             "id": "dgc-ca-2024",
@@ -1007,8 +1058,11 @@ def get_detailed_corporate_actions_dividend_summary(
             "bonus_pct": 0.0,
             "stock_div_pct": 0.0,
             "total_stock_pct": 0.0,
-            "cash_display": "0 đ (KCT)",
+            "rights_ratio_pct": 0.0,
+            "rights_price": 0.0,
+            "cash_display": "0 đ",
             "stock_display": "0%",
+            "rights_display": "-",
             "source": "none"
         }
 
@@ -1018,6 +1072,8 @@ def get_detailed_corporate_actions_dividend_summary(
     cash_amount = 0.0
     stock_dividend_ratio = 0.0
     bonus_share_ratio = 0.0
+    rights_ratio = 0.0
+    rights_price = 0.0
     has_event_in_window = False
 
     for ev in events:
@@ -1049,17 +1105,26 @@ def get_detailed_corporate_actions_dividend_summary(
             else:
                 stock_dividend_ratio += s
 
+        # 3. Cổ phiếu phát hành thêm (quyền mua)
+        rr = float(ev.get("rights_ratio") or 0.0)
+        rp = float(ev.get("rights_price") or 0.0)
+        if rr > 0 or ev_type in ("rights_issue", "dividend_and_rights") or "quyền mua" in title_desc or "phát hành" in title_desc:
+            rights_ratio += rr
+            if rp > 0:
+                rights_price = rp
+
     yield_pct = round((cash_amount / current_price) * 100.0, 2) if current_price > 0 and cash_amount > 0 else 0.0
     par_pct = round((cash_amount / 10000.0) * 100.0, 1) if cash_amount > 0 else 0.0
     bonus_pct = round(bonus_share_ratio * 100.0, 1)
     stock_div_pct = round(stock_dividend_ratio * 100.0, 1)
     total_stock_pct = round((bonus_share_ratio + stock_dividend_ratio) * 100.0, 1)
+    rights_ratio_pct = round(rights_ratio * 100.0, 1)
 
     # Chuỗi hiển thị tiền mặt
     if cash_amount > 0:
-        cash_display = f"{int(cash_amount):,} đ" if cash_amount.is_integer() else f"{cash_amount:,.1f} đ"
+        cash_display = f"{int(cash_amount):,} đ ({par_pct:.1f}%)" if cash_amount.is_integer() else f"{cash_amount:,.1f} đ ({par_pct:.1f}%)"
     else:
-        cash_display = "0 đ (KCT)"
+        cash_display = "0 đ"
 
     # Chuỗi hiển thị cổ phiếu thưởng / cổ tức cổ phiếu
     stock_parts = []
@@ -1070,7 +1135,18 @@ def get_detailed_corporate_actions_dividend_summary(
         s_str = f"{int(stock_div_pct)}" if stock_div_pct.is_integer() else f"{stock_div_pct:.1f}"
         stock_parts.append(f"Cổ tức CP {s_str}%")
 
-    stock_display = " + ".join(stock_parts) if stock_parts else "0%"
+    stock_display = " + ".join(stock_parts) if stock_parts else (f"{total_stock_pct:.1f}%" if total_stock_pct > 0 else "0%")
+
+    # Chuỗi hiển thị phát hành thêm
+    if rights_ratio_pct > 0:
+        r_str = f"{int(rights_ratio_pct)}" if rights_ratio_pct.is_integer() else f"{rights_ratio_pct:.1f}"
+        if rights_price > 0:
+            rp_str = f"{int(rights_price):,} đ"
+            rights_display = f"{r_str}% (Giá {rp_str})"
+        else:
+            rights_display = f"{r_str}%"
+    else:
+        rights_display = "-"
 
     return {
         "ticker": clean_ticker,
@@ -1080,8 +1156,11 @@ def get_detailed_corporate_actions_dividend_summary(
         "bonus_pct": bonus_pct,
         "stock_div_pct": stock_div_pct,
         "total_stock_pct": total_stock_pct,
+        "rights_ratio_pct": rights_ratio_pct,
+        "rights_price": rights_price,
         "cash_display": cash_display,
         "stock_display": stock_display,
+        "rights_display": rights_display,
         "source": "corporate_actions" if has_event_in_window else "none"
     }
 

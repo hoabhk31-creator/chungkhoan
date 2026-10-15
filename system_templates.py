@@ -282,7 +282,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Bất động sản Dân dụng & KCN (PDR, TCH, KBC, LHG)",
         "sector": "Bất động sản & KCN",
         "is_system": True,
-        "keywords": ["bất động sản", "bđs", "kcn", "khu công nghiệp", "pháp lý", "luật đất đai", "mở bán", "trái phiếu", "quỹ đất", "fdi", "thuê đất", "pdr", "tch", "kbc", "lhg"],
+        "keywords": ["bất động sản", "bđs", "kcn", "khu công nghiệp", "pháp lý", "luật đất đai", "mở bán", "trái phiếu", "quỹ đất", "fdi", "thuê đất", "pdr", "tch", "kbc", "lhg", "hdg", "vic", "vhm", "vre", "nvl", "dig", "dxg", "kdh", "nlg", "idc", "bcm", "vgc", "szc", "ntl", "cii"],
         "catalyst_rules": [
             "Hoàn tất thủ tục pháp lý, phê duyệt quy hoạch 1/500 và cấp giấy phép xây dựng cho các dự án trọng điểm",
             "Các luật mới (Luật Đất đai, Nhà ở, Kinh doanh BĐS) có hiệu lực giúp tháo gỡ điểm nghẽn nguồn cung",
@@ -335,7 +335,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Ngân hàng Thương mại (VCB, MBB, TCB, CTG, ACB)",
         "sector": "Ngân hàng",
         "is_system": True,
-        "keywords": ["ngân hàng", "bank", "vcb", "mbb", "tcb", "ctg", "acb", "vpb", "tín dụng", "nim", "casa", "nợ xấu", "dự phòng", "llr", "bảo phủ nợ xấu"],
+        "keywords": ["ngân hàng", "bank", "vcb", "mbb", "tcb", "ctg", "acb", "vpb", "bid", "msb", "hdb", "stb", "shb", "vib", "tpb", "lpb", "ocb", "eib", "tín dụng", "nim", "casa", "nợ xấu", "dự phòng", "llr", "bảo phủ nợ xấu"],
         "catalyst_rules": [
             "Được Ngân hàng Nhà nước cấp hạn mức tăng trưởng tín dụng (Credit Room) cao vượt trội toàn ngành",
             "Biên lãi ròng (NIM) phục hồi nhờ chi phí vốn (COF) giảm và lãi suất huy động duy trì ở mức thấp",
@@ -388,7 +388,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Hóa chất & Phân bón (DGC, DCM, DPM)",
         "sector": "Hóa chất & Phân bón",
         "is_system": True,
-        "keywords": ["hóa chất", "phân bón", "phốt pho", "p4", "đạm", "ure", "dgc", "dcm", "dpm", "nghi sơn", "apatit", "hết khấu hao"],
+        "keywords": ["hóa chất", "phân bón", "phốt pho", "p4", "đạm", "ure", "dgc", "dcm", "dpm", "csv", "las", "bfc", "ddv", "nghi sơn", "apatit", "hết khấu hao"],
         "catalyst_rules": [
             "Tiến độ giải ngân Capex và vận hành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 (Xút - Clo)",
             "Nhu cầu phốt pho vàng (P4) phục hồi từ ngành sản xuất chip bán dẫn và pin xe điện thế giới",
@@ -441,7 +441,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Dầu khí & Dịch vụ năng lượng (PVS, PVD, GAS, BSR)",
         "sector": "Dầu khí & Năng lượng",
         "is_system": True,
-        "keywords": ["dầu khí", "lô b", "ô môn", "giàn khoan", "lng", "pvs", "pvd", "gas", "bsr", "giá dầu", "brent", "thượng nguồn", "fso", "fpswo"],
+        "keywords": ["dầu khí", "lô b", "ô môn", "giàn khoan", "lng", "pvs", "pvd", "gas", "bsr", "pvp", "pvt", "plx", "oil", "pvb", "pvc", "giá dầu", "brent", "thượng nguồn", "fso", "fpswo"],
         "catalyst_rules": [
             "Đại dự án khí - điện Lô B Ô Môn có Quyết định đầu tư cuối cùng (FID) và trao các gói thầu EPCI lớn",
             "Giá thuê ngày giàn khoan tự nâng (Jack-up) tăng cao vượt 120,000 - 150,000 USD/ngày",
@@ -494,7 +494,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Cảng biển & Vận tải biển (GMD, HAH, VSC)",
         "sector": "Cảng biển & Logistics",
         "is_system": True,
-        "keywords": ["cảng biển", "logistics", "container", "gemalink", "cước tàu", "hải phòng", "cái mép", "gmd", "hah", "vsc", "cụm cảng", "thông quan"],
+        "keywords": ["cảng biển", "logistics", "container", "gemalink", "cước tàu", "hải phòng", "cái mép", "gmd", "hah", "vsc", "dxp", "sgp", "pvp", "tcl", "vip", "vto", "vos", "cụm cảng", "thông quan"],
         "catalyst_rules": [
             "Tiến độ giải ngân và đưa vào khai thác Cảng Gemalink giai đoạn 2A nâng công suất lên 3 triệu TEU/năm",
             "Sản lượng hàng hóa container thông qua các cụm cảng nước sâu Cái Mép - Thị Vải và Lạch Huyện tăng mạnh",
@@ -547,7 +547,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Xây dựng hạ tầng & Đầu tư công (VCG, HHV, C4G, LCG)",
         "sector": "Xây dựng & Đầu tư công",
         "is_system": True,
-        "keywords": ["đầu tư công", "hạ tầng", "cao tốc", "sân bay", "long thành", "backlog", "trúng thầu", "giải ngân", "vcg", "hhv", "c4g", "lcg", "bot"],
+        "keywords": ["đầu tư công", "hạ tầng", "cao tốc", "sân bay", "long thành", "backlog", "trúng thầu", "giải ngân", "vcg", "hhv", "c4g", "lcg", "ctd", "hbc", "bot"],
         "catalyst_rules": [
             "Chính phủ đẩy mạnh giải ngân vốn đầu tư công ngân sách nhà nước đạt trên 95% kế hoạch năm",
             "Trúng thầu các gói thầu hạ tầng quy mô lớn: Đại dự án Sân bay Long Thành, Cao tốc Bắc - Nam giai đoạn 2",
@@ -600,7 +600,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Tiện ích Năng lượng, Điện & Nước (REE, PC1, POW, GEG)",
         "sector": "Tiện ích & Năng lượng",
         "is_system": True,
-        "keywords": ["điện", "năng lượng", "thủy điện", "nhiệt điện", "điện gió", "quy hoạch điện 8", "giá điện", "cơ chế giá", "ree", "pc1", "pow", "geg"],
+        "keywords": ["điện", "năng lượng", "thủy điện", "nhiệt điện", "điện gió", "quy hoạch điện 8", "giá điện", "cơ chế giá", "ree", "pc1", "pow", "geg", "hdg", "nt2", "ppc", "qtp", "hnd", "vsh", "bwe", "tdm"],
         "catalyst_rules": [
             "Chu kỳ thời tiết chuyển sang pha La Nina mang lại lượng mưa dồi dào thúc đẩy sản lượng thủy điện",
             "Quy hoạch phát triển điện lực quốc gia (Quy hoạch Điện 8) ban hành cơ chế giá chuyển tiếp cho NLTT",
@@ -653,7 +653,7 @@ DEFAULT_SYSTEM_TEMPLATES: List[Dict[str, Any]] = [
         "name": "Thủy sản & Nông nghiệp xuất khẩu (VHC, ANV, BAF, DBC)",
         "sector": "Thủy sản & Nông nghiệp",
         "is_system": True,
-        "keywords": ["thủy sản", "cá tra", "tôm", "thịt lợn", "heo", "nông nghiệp", "xuất khẩu", "giá cá", "giá heo", "vhc", "anv", "baf", "dbc"],
+        "keywords": ["thủy sản", "cá tra", "tôm", "thịt lợn", "heo", "nông nghiệp", "cao su", "xuất khẩu", "giá cá", "giá heo", "vhc", "anv", "baf", "dbc", "dri", "hag", "hng", "pan", "idi", "fmc", "asm", "dpr", "phr", "gvr", "trc"],
         "catalyst_rules": [
             "Giá xuất khẩu cá tra fillet và tôm phục hồi mạnh mẽ tại thị trường Mỹ, EU và Trung Quốc",
             "Nhu cầu tiêu thụ thủy sản tại các thị trường xuất khẩu tăng vọt chuẩn bị cho mùa lễ hội cuối năm",

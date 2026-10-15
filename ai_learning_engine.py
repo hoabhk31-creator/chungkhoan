@@ -53,6 +53,219 @@ from system_templates import DEFAULT_SYSTEM_TEMPLATES
 
 
 # -------------------------------------------------------------
+# 1.1. DANH MỤC NGÀNH NGHỀ & QUY TẮC BẢO VỆ MẪU HỌC TOÀN DIỆN
+# -------------------------------------------------------------
+
+ACTUAL_SECURITIES_TICKERS = {
+    "SSI", "VND", "VCI", "HCM", "SHS", "MBS", "FTS", "BSI", "CTS", "AGR",
+    "VIX", "ORS", "VDS", "BVS", "TVS", "EVS", "PSI", "WSS", "IVS", "APS",
+    "BMS", "HBS", "SBS", "TCI", "DSC", "VFS", "APG", "AAS", "CSI", "PHS", "ABW"
+}
+
+ACTUAL_BANKING_TICKERS = {
+    "VCB", "BID", "CTG", "TCB", "MBB", "ACB", "VPB", "HDB", "STB", "SHB",
+    "VIB", "TPB", "MSB", "LPB", "SSB", "OCB", "EIB", "NAB", "BAB", "BVB",
+    "KLB", "NVB", "PGB", "SGB", "VAB", "ABB"
+}
+
+EXPLICIT_TICKER_TEMPLATE_MAP = {
+    # Bất động sản Dân dụng & KCN
+    "HDG": "tpl-bat-dong-san-kcn",
+    "VIC": "tpl-bat-dong-san-kcn",
+    "VHM": "tpl-bat-dong-san-kcn",
+    "VRE": "tpl-bat-dong-san-kcn",
+    "NVL": "tpl-bat-dong-san-kcn",
+    "PDR": "tpl-bat-dong-san-kcn",
+    "DIG": "tpl-bat-dong-san-kcn",
+    "DXG": "tpl-bat-dong-san-kcn",
+    "KDH": "tpl-bat-dong-san-kcn",
+    "NLG": "tpl-bat-dong-san-kcn",
+    "KBC": "tpl-bat-dong-san-kcn",
+    "IDC": "tpl-bat-dong-san-kcn",
+    "BCM": "tpl-bat-dong-san-kcn",
+    "VGC": "tpl-bat-dong-san-kcn",
+    "SZC": "tpl-bat-dong-san-kcn",
+    "LHG": "tpl-bat-dong-san-kcn",
+    "TCH": "tpl-bat-dong-san-kcn",
+    "CII": "tpl-bat-dong-san-kcn",
+    "HDC": "tpl-bat-dong-san-kcn",
+    "NTL": "tpl-bat-dong-san-kcn",
+
+    # Thủy sản & Nông nghiệp / Cao su
+    "DRI": "tpl-thuy-san-nong-nghiep",
+    "VHC": "tpl-thuy-san-nong-nghiep",
+    "ANV": "tpl-thuy-san-nong-nghiep",
+    "BAF": "tpl-thuy-san-nong-nghiep",
+    "DBC": "tpl-thuy-san-nong-nghiep",
+    "HAG": "tpl-thuy-san-nong-nghiep",
+    "HNG": "tpl-thuy-san-nong-nghiep",
+    "PAN": "tpl-thuy-san-nong-nghiep",
+    "DPR": "tpl-thuy-san-nong-nghiep",
+    "PHR": "tpl-thuy-san-nong-nghiep",
+    "GVR": "tpl-thuy-san-nong-nghiep",
+    "TRC": "tpl-thuy-san-nong-nghiep",
+
+    # Cảng biển & Logistics / Vận tải
+    "DXP": "tpl-cang-bien-logistics",
+    "GMD": "tpl-cang-bien-logistics",
+    "HAH": "tpl-cang-bien-logistics",
+    "VSC": "tpl-cang-bien-logistics",
+    "SGP": "tpl-cang-bien-logistics",
+    "PVP": "tpl-cang-bien-logistics",
+    "PVT": "tpl-cang-bien-logistics",
+    "TCL": "tpl-cang-bien-logistics",
+    "VIP": "tpl-cang-bien-logistics",
+    "VTO": "tpl-cang-bien-logistics",
+    "VOS": "tpl-cang-bien-logistics",
+
+    # Hóa chất & Phân bón
+    "DGC": "tpl-hoa-chat-phan-bon",
+    "DCM": "tpl-hoa-chat-phan-bon",
+    "DPM": "tpl-hoa-chat-phan-bon",
+    "CSV": "tpl-hoa-chat-phan-bon",
+    "LAS": "tpl-hoa-chat-phan-bon",
+    "BFC": "tpl-hoa-chat-phan-bon",
+    "DDV": "tpl-hoa-chat-phan-bon",
+
+    # Thép & Vật liệu xây dựng
+    "HPG": "tpl-thep-vat-lieu",
+    "NKG": "tpl-thep-vat-lieu",
+    "HSG": "tpl-thep-vat-lieu",
+    "TLH": "tpl-thep-vat-lieu",
+
+    # Công nghệ thông tin & Viễn thông
+    "FPT": "tpl-cong-nghe-thong-tin",
+    "CMG": "tpl-cong-nghe-thong-tin",
+    "CTR": "tpl-cong-nghe-thong-tin",
+    "ELC": "tpl-cong-nghe-thong-tin",
+    "VGI": "tpl-cong-nghe-thong-tin",
+
+    # Tiện ích Năng lượng, Điện & Nước
+    "POW": "tpl-tien-ich-dien-nuoc",
+    "REE": "tpl-tien-ich-dien-nuoc",
+    "PC1": "tpl-tien-ich-dien-nuoc",
+    "GEG": "tpl-tien-ich-dien-nuoc",
+    "NT2": "tpl-tien-ich-dien-nuoc",
+    "PPC": "tpl-tien-ich-dien-nuoc",
+    "QTP": "tpl-tien-ich-dien-nuoc",
+    "HND": "tpl-tien-ich-dien-nuoc",
+
+    # Bán lẻ & Tiêu dùng
+    "MWG": "tpl-ban-le-tieu-dung",
+    "FRT": "tpl-ban-le-tieu-dung",
+    "PNJ": "tpl-ban-le-tieu-dung",
+    "DGW": "tpl-ban-le-tieu-dung",
+    "MSN": "tpl-ban-le-tieu-dung",
+    "VNM": "tpl-ban-le-tieu-dung",
+    "SAB": "tpl-ban-le-tieu-dung",
+
+    # Dầu khí & Dịch vụ Năng lượng
+    "PVS": "tpl-dau-khi-nang-luong",
+    "PVD": "tpl-dau-khi-nang-luong",
+    "GAS": "tpl-dau-khi-nang-luong",
+    "BSR": "tpl-dau-khi-nang-luong",
+    "PLX": "tpl-dau-khi-nang-luong",
+
+    # Xây dựng & Đầu tư công
+    "VCG": "tpl-xay-dung-dau-tu-cong",
+    "HHV": "tpl-xay-dung-dau-tu-cong",
+    "CTD": "tpl-xay-dung-dau-tu-cong",
+    "LCG": "tpl-xay-dung-dau-tu-cong",
+    "C4G": "tpl-xay-dung-dau-tu-cong",
+    "HBC": "tpl-xay-dung-dau-tu-cong",
+}
+
+
+def resolve_stock_sector_and_template(
+    ticker: str,
+    sector: Optional[str] = None,
+    company_name: Optional[str] = None,
+    text: str = ""
+) -> Tuple[str, Optional[str]]:
+    """
+    Xác định chính xác ngành và Few-Shot Template ID mục tiêu cho cổ phiếu.
+    Đảm bảo 100% không bị nhiễu bởi tên CTCK phát hành báo cáo.
+    """
+    clean_ticker = (ticker or "").upper().strip()
+
+    # 1. Bảng ánh xạ mã cốt lõi
+    if clean_ticker in EXPLICIT_TICKER_TEMPLATE_MAP:
+        return ("", EXPLICIT_TICKER_TEMPLATE_MAP[clean_ticker])
+
+    # 2. Nhóm Ngân hàng
+    if clean_ticker in ACTUAL_BANKING_TICKERS:
+        return ("Ngân hàng", "tpl-ngan-hang-tai-chinh")
+
+    # 3. Nhóm Chứng khoán
+    if clean_ticker in ACTUAL_SECURITIES_TICKERS:
+        return ("Chứng khoán & Tài chính", "tpl-chung-khoan-tai-chinh")
+
+    # 4. Tra cứu thông tin từ COMPANY_DATABASE
+    comp_info = {}
+    try:
+        from company_database import get_company
+        comp_info = get_company(clean_ticker) or {}
+    except Exception:
+        pass
+
+    c_name = (comp_info.get("name") or company_name or "").lower()
+    icb2 = (comp_info.get("icb2") or "").lower()
+    icb4 = (comp_info.get("icb4") or "").lower()
+    fiin = (comp_info.get("fiintrade_sector") or "").lower()
+    sec_raw = (sector or "").lower()
+
+    # Ngân hàng
+    if "ngân hàng" in icb2 or "ngân hàng" in fiin or "ngân hàng" in c_name:
+        return ("Ngân hàng", "tpl-ngan-hang-tai-chinh")
+
+    # Chứng khoán (chỉ chấp nhận nếu tên công ty thực sự là CTCK)
+    if "môi giới chứng khoán" in fiin or ("chứng khoán" in c_name and ("công ty chứng khoán" in c_name or "ctck" in c_name)):
+        return ("Chứng khoán & Tài chính", "tpl-chung-khoan-tai-chinh")
+
+    # Bất động sản
+    if "bất động sản" in icb2 or "bất động sản" in fiin or "bđs" in sec_raw or "địa ốc" in c_name or "đô thị" in c_name or "hà đô" in c_name:
+        return ("Bất động sản & KCN", "tpl-bat-dong-san-kcn")
+
+    # Thép
+    if "thép" in fiin or "thép" in c_name or "thép" in sec_raw:
+        return ("Thép & Vật liệu xây dựng", "tpl-thep-vat-lieu")
+
+    # Cảng biển & Logistics / Vận tải
+    if "cảng" in c_name or "vận tải thủy" in fiin or "logistics" in c_name or "kho vận" in c_name:
+        return ("Cảng biển & Logistics", "tpl-cang-bien-logistics")
+
+    # Dầu khí
+    if "dầu khí" in icb2 or "dầu khí" in fiin or "dầu khí" in c_name:
+        return ("Dầu khí & Năng lượng", "tpl-dau-khi-nang-luong")
+
+    # Công nghệ
+    if "công nghệ" in icb2 or "công nghệ" in fiin or "viễn thông" in c_name:
+        return ("Công nghệ thông tin", "tpl-cong-nghe-thong-tin")
+
+    # Hóa chất & Phân bón
+    if "hóa chất" in icb2 or "hóa chất" in c_name or "phân bón" in c_name:
+        return ("Hóa chất & Phân bón", "tpl-hoa-chat-phan-bon")
+
+    # Cao su / Thủy sản / Nông nghiệp
+    if "cao su" in c_name or "thủy sản" in icb2 or "thủy sản" in c_name or "nông nghiệp" in c_name or "chăn nuôi" in c_name:
+        return ("Thủy sản & Nông nghiệp", "tpl-thuy-san-nong-nghiep")
+
+    # Tiện ích Điện / Nước
+    if "tiện ích" in icb2 or "điện lực" in c_name or "thủy điện" in c_name or "nhiệt điện" in c_name or "nước sạch" in c_name:
+        return ("Tiện ích & Năng lượng", "tpl-tien-ich-dien-nuoc")
+
+    # Xây dựng / Hạ tầng
+    if "xây dựng" in icb2 or "xây dựng" in c_name or "hạ tầng" in c_name or "đầu tư công" in sec_raw:
+        return ("Xây dựng & Đầu tư công", "tpl-xay-dung-dau-tu-cong")
+
+    # Bán lẻ / Tiêu dùng
+    if "bán lẻ" in icb2 or "bán lẻ" in fiin or "thực phẩm" in icb2 or "tiêu dùng" in sec_raw:
+        return ("Bán lẻ & Tiêu dùng", "tpl-ban-le-tieu-dung")
+
+    return (sector or "", None)
+
+
+# -------------------------------------------------------------
 # 2. TEMPLATE STORE MANAGER
 # -------------------------------------------------------------
 
@@ -73,13 +286,22 @@ class TemplateStore:
             try:
                 with open(self.filepath, "r", encoding="utf-8") as f:
                     self.templates = json.load(f)
-                # Đảm bảo các mẫu hệ thống luôn có mặt
-                existing_ids = {t.get("id") for t in self.templates}
+                # Đảm bảo các mẫu hệ thống luôn có mặt và cập nhật keywords chuẩn
+                existing_map = {t.get("id"): i for i, t in enumerate(self.templates)}
                 modified = False
                 for def_t in DEFAULT_SYSTEM_TEMPLATES:
-                    if def_t["id"] not in existing_ids:
+                    tid = def_t["id"]
+                    if tid not in existing_map:
                         self.templates.append(def_t)
                         modified = True
+                    else:
+                        idx = existing_map[tid]
+                        if self.templates[idx].get("is_system"):
+                            # Đồng bộ keywords và sector mới nhất
+                            self.templates[idx]["keywords"] = def_t.get("keywords", [])
+                            self.templates[idx]["sector"] = def_t.get("sector", self.templates[idx].get("sector"))
+                            self.templates[idx]["name"] = def_t.get("name", self.templates[idx].get("name"))
+                            modified = True
                 if modified:
                     self._save()
             except Exception as e:
@@ -142,22 +364,58 @@ class TemplateStore:
         self._save()
         return self.templates
 
-    def find_best_matching_templates(self, text: str, ticker: Optional[str] = None, sector: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Tìm các mẫu học khớp nhất theo mã, ngành và từ khóa văn bản."""
-        search_target = f"{ticker or ''} {sector or ''} {text[:2000]}".lower()
+    def find_best_matching_templates(
+        self,
+        text: str,
+        ticker: Optional[str] = None,
+        sector: Optional[str] = None,
+        company_name: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Tìm các mẫu học khớp nhất theo mã, ngành và từ khóa văn bản với cơ chế Guard chống gán nhầm."""
+        clean_ticker = (ticker or "").upper().strip()
+        auto_sec, target_tpl_id = resolve_stock_sector_and_template(
+            ticker=clean_ticker,
+            sector=sector,
+            company_name=company_name,
+            text=text
+        )
+        eff_sector = auto_sec or sector or ""
+
+        search_target = f"{clean_ticker} {eff_sector} {text[:2000]}".lower()
         scored_templates = []
 
+        is_real_securities = (clean_ticker in ACTUAL_SECURITIES_TICKERS)
+        is_real_bank = (clean_ticker in ACTUAL_BANKING_TICKERS)
+
         for tpl in self.templates:
+            tpl_id = tpl.get("id")
+
+            # SHIELD BẢO VỆ: Không bao giờ gán mẫu Chứng khoán nếu không phải là CTCK thực thụ
+            if tpl_id == "tpl-chung-khoan-tai-chinh" and not is_real_securities:
+                continue
+
+            # SHIELD BẢO VỆ: Không bao giờ gán mẫu Ngân hàng nếu không phải là Ngân hàng thực thụ
+            if tpl_id == "tpl-ngan-hang-tai-chinh" and not is_real_bank:
+                continue
+
             score = 0
+
+            # Ưu tiên tuyệt đối nếu đã giải mã được Template ID mục tiêu
+            if target_tpl_id and tpl_id == target_tpl_id:
+                score += 100
+
             # 1. Trùng mã hoặc ngành
             tpl_sector = (tpl.get("sector") or "").lower()
-            if sector and (sector.lower() in tpl_sector or tpl_sector in sector.lower()):
+            if eff_sector and (eff_sector.lower() in tpl_sector or tpl_sector in eff_sector.lower()):
                 score += 50
-            if ticker and any(k.lower() == ticker.lower() for k in tpl.get("keywords", [])):
+            if clean_ticker and any(k.lower() == clean_ticker.lower() for k in tpl.get("keywords", [])):
                 score += 40
 
             # 2. Khớp từ khóa ngành
             for kw in tpl.get("keywords", []):
+                # Bỏ qua từ khóa "chứng khoán" nếu không phải CTCK để tránh nhiễu do tên CTCK viết báo cáo
+                if kw.lower() in {"chứng khoán", "ctck", "môi giới"} and not is_real_securities:
+                    continue
                 if kw.lower() in search_target:
                     score += 5
 
@@ -167,6 +425,10 @@ class TemplateStore:
         # Trả về các mẫu có điểm số cao nhất (tối thiểu 1 mẫu)
         matched = [t for s, t in scored_templates if s > 0]
         if not matched and self.templates:
+            # Fallback an toàn vào Mẫu Độc Bản Doanh Nghiệp (tpl-doanh-nghiep-doc-ban) thay vì tpl ngẫu nhiên
+            for tpl in self.templates:
+                if tpl.get("id") == "tpl-doanh-nghiep-doc-ban":
+                    return [tpl]
             return [self.templates[0]]
         return matched[:2]
 
@@ -179,15 +441,28 @@ def is_generic_boilerplate(sentence: str) -> bool:
     if not sentence or len(sentence) < 15:
         return True
 
-    # Loại bỏ triệt để bảng BCTC, model định giá DCF và disclaimer
+    s_clean = sentence.lower()
+
+    # Loại bỏ triệt để câu khuyến nghị giá mục tiêu, định giá P/E, P/B, phương pháp định giá và tiêu đề báo cáo
+    if re.search(r'^(?:chúng tôi\s+)?(?:duy trì|lặp lại|nâng|hạ|đưa ra)?\s*khuyến nghị\s+(?:mua|bán|nắm giữ|khả quan|trung lập|theo dõi|tích lũy)', s_clean):
+        return True
+    if any(k in s_clean for k in [
+        "giá mục tiêu", "tiềm năng tăng giá", "phương pháp sotp", "phương pháp dcf",
+        "tỷ lệ chiết khấu", "wacc", "định giá p/e", "định giá p/b", "p/e fy", "p/b fy",
+        "báo cáo phân tích kỹ thuật", "phát hành báo cáo phân tích kỹ thuật", "khuyến nghị mua",
+        "khuyến nghị khả quan", "khuyến nghị nắm giữ", "khuyến nghị bán"
+    ]):
+        return True
+    if re.match(r'^[A-Z0-9]{3,4}\s*:\s*báo cáo phân tích', sentence.strip(), re.I):
+        return True
+
+    # Loại bỏ 100% luận điểm phân tích kỹ thuật (chỉ báo RSI/MACD, nến, hỗ trợ, kháng cự, cắt lỗ...)
     try:
-        from crawler import is_table_or_valuation_or_disclaimer_dump
-        if is_table_or_valuation_or_disclaimer_dump(sentence):
+        from crawler import is_technical_text
+        if is_technical_text(sentence):
             return True
     except Exception:
         pass
-
-    s_clean = sentence.lower()
     
     # Những mẫu câu khuôn mẫu kinh điển
     generic_patterns = [
@@ -226,6 +501,106 @@ def is_generic_boilerplate(sentence: str) -> bool:
     return False
 
 
+def is_content_valid_for_ticker(tkr: str, content: str) -> bool:
+    """
+    Bộ lọc ngăn ngừa nhiễm chéo luận điểm giữa các doanh nghiệp hoặc mảng ngành khác nhau
+    (Cross-company & Cross-sub-industry De-contamination).
+    Đảm bảo 100% luận điểm và rủi ro thuộc về chính doanh nghiệp đang xem.
+    """
+    if not tkr or not content:
+        return True
+    t_clean = tkr.upper().strip()
+    r_l = content.lower()
+
+    # 1. Dầu khí & Năng lượng
+    if t_clean in {"BSR", "PLX", "OIL"}:
+        if any(bad in r_l for bad in ["giàn khoan", "jack-up", "điện gió ngoài khơi", "kho cảng lng", "điện khí lng", "cáp ngầm", "nhơn trạch 3", "nhơn trạch 4"]):
+            return False
+    elif t_clean in {"PVD"}:
+        if any(bad in r_l for bad in ["lọc dầu", "dung quất", "điện gió ngoài khơi", "kho cảng lng", "jet a1"]):
+            return False
+    elif t_clean in {"PVS"}:
+        if any(bad in r_l for bad in ["lọc dầu", "dung quất", "giàn khoan tự nâng", "jack-up"]):
+            return False
+    elif t_clean in {"GAS"}:
+        if any(bad in r_l for bad in ["lọc dầu", "dung quất", "giàn khoan", "jack-up", "điện gió"]):
+            return False
+    elif t_clean in {"GEG", "HDG", "VSH", "SBA", "TTA", "BWE", "TDM"}:
+        if any(bad in r_l for bad in ["nhơn trạch 3", "nhơn trạch 4", "nhà máy điện nhơn trạch"]):
+            return False
+
+    # 2. Thép & Tôn mạ
+    elif t_clean in {"HSG", "NKG", "TLH", "GDA"}:
+        if any(bad in r_l for bad in ["lò cao", "dung quất 2", "tự chủ hrc", "quặng sắt", "than mỡ", "than cốc"]):
+            return False
+    elif t_clean in {"HPG"}:
+        if any(bad in r_l for bad in ["tôn đông á", "tôn nam kim", "tôn hoa sen"]):
+            return False
+
+    # 3. Bán lẻ: Dược phẩm (FRT) vs Bách Hóa/ICT (MWG) vs Vàng trang sức (PNJ)
+    elif t_clean in {"FRT"}:
+        if any(bad in r_l for bad in ["bách hóa xanh", "vàng bạc", "trang sức", "pnj", "erablue"]):
+            return False
+    elif t_clean in {"MWG"}:
+        if any(bad in r_l for bad in ["long châu", "tiêm chủng", "vàng bạc", "trang sức", "pnj"]):
+            return False
+    elif t_clean in {"PNJ"}:
+        if any(bad in r_l for bad in ["long châu", "nhà thuốc", "bách hóa xanh", "điện thoại", "laptop", "ict"]):
+            return False
+
+    # 4. Hóa chất (DGC) vs Phân bón Urê/NPK (DCM, DPM, BFC, LAS)
+    elif t_clean in {"DGC", "CSV"}:
+        if any(bad in r_l for bad in ["đạm cà mau", "đạm phú mỹ", "phân bón urê", "phân ure", "hết khấu hao nhà máy đạm"]):
+            return False
+    elif t_clean in {"DCM", "DPM", "BFC", "LAS"}:
+        if any(bad in r_l for bad in ["phốt pho vàng", "p4", "nghi sơn", "chip bán dẫn", "pin xe điện", "apatit khai trường"]):
+            return False
+
+    # 5. Thủy sản vs Heo vs Cao su
+    elif t_clean in {"DRI", "TRC", "PHR", "DPR", "GVR"}:
+        if any(bad in r_l for bad in ["cá tra", "fillet", "tôm thẻ", "heo hơi", "thịt lợn", "chăn nuôi", "dịch tả lợn", "collagen và gelatin", "por"]):
+            return False
+    elif t_clean in {"VHC", "ANV", "IDI", "FMC", "CMX"}:
+        if any(bad in r_l for bad in ["heo hơi", "thịt lợn", "chăn nuôi lợn", "dịch tả lợn", "cao su", "mủ cao su"]):
+            return False
+    elif t_clean in {"BAF", "DBC", "HAG", "MLS"}:
+        if any(bad in r_l for bad in ["cá tra", "fillet", "tôm thẻ", "bap/asc", "thuế chống bán phá giá cá", "cao su"]):
+            return False
+
+    # 6. BĐS Dân dụng vs KCN & các dự án độc quyền
+    if t_clean in {"PDR", "TCH", "DXG", "NVL", "DIG", "NLG", "KDH", "HDC", "CEO", "CRE", "SCR"}:
+        if any(bad in r_l for bad in [
+            "cho thuê đất kcn", "giá thuê đất kcn", "đất kcn tăng", "kcn tràng duệ", "kcn hựu thạnh", 
+            "kcn phú mỹ", "thu hút fdi nhà xưởng", "nhà xưởng xây sẵn", "vinhomes vũ yên", "vinhomes cổ loa"
+        ]):
+            return False
+        if t_clean not in {"VHM", "VIC", "VRE"}:
+            if any(bad in r_l for bad in ["vinhomes", "vũ yên", "cổ loa", "đan phượng", "ocean park"]):
+                return False
+        if t_clean != "KBC":
+            if any(bad in r_l for bad in ["tràng duệ 3", "kđt tràng cát", "nam sơn hạp lĩnh"]):
+                return False
+        if t_clean != "IDC":
+            if any(bad in r_l for bad in ["hựu thạnh", "kcn phú mỹ 2"]):
+                return False
+        if t_clean == "PDR" and "unbilled bookings" in r_l:
+            return False
+
+    elif t_clean in {"KBC", "IDC", "LHG", "SZC", "BCM", "NTC", "SIP", "D2D"}:
+        if any(bad in r_l for bad in ["bán chung cư", "căn hộ cao cấp", "đại dự án nghỉ dưỡng", "bắc hà thanh", "thuận an 1", "thuận an 2"]):
+            return False
+
+    # 7. Cảng biển vs Vận tải biển
+    if t_clean in {"VSC"}:
+        if any(bad in r_l for bad in ["gemalink", "đội tàu container đóng mới (1,800 teu)", "cước tàu định hạn"]):
+            return False
+    elif t_clean in {"HAH", "VOS"}:
+        if any(bad in r_l for bad in ["cảng nước sâu gemalink", "cảng lạch huyện"]):
+            return False
+
+    return True
+
+
 def extract_advanced_knowledge(
     raw_text: str,
     ticker: Optional[str] = None,
@@ -238,8 +613,27 @@ def extract_advanced_knowledge(
     dựa trên các mẫu Few-Shot Templates và quy tắc ngữ cảnh ngành.
     """
     clean_ticker = (ticker or "CP").upper().strip()
+
+    # Tự động tra cứu thông tin doanh nghiệp từ COMPANY_DATABASE nếu chưa có sector hoặc company_name
+    if (not sector or not company_name) and len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
+        try:
+            from company_database import get_company
+            c_info = get_company(clean_ticker)
+            if c_info:
+                if not company_name:
+                    company_name = c_info.get("name")
+                if not sector:
+                    sector = c_info.get("fiintrade_sector") or c_info.get("icb2") or c_info.get("icb4")
+        except Exception:
+            pass
+
     store = TemplateStore()
-    matched_templates = store.find_best_matching_templates(raw_text, ticker=clean_ticker, sector=sector)
+    matched_templates = store.find_best_matching_templates(
+        raw_text,
+        ticker=clean_ticker,
+        sector=sector,
+        company_name=company_name
+    )
     primary_tpl = matched_templates[0] if matched_templates else None
 
     text = raw_text
@@ -333,13 +727,16 @@ def extract_advanced_knowledge(
             if len(flat_catalysts) >= 15:
                 break
 
+    # Lưu lại số lượng Catalysts bóc tách thực tế từ văn bản nguồn trước khi làm giàu
+    direct_text_catalysts_count = len(flat_catalysts)
+
     # 3. Kết hợp với Tri thức Vi mô Độc bản và Số liệu BCTC Kiểm toán thực tế của chính mã đó (tối đa 15 mục)
     if len(flat_catalysts) < 15 and len(clean_ticker) == 3 and clean_ticker != "TOÀN THỊ TRƯỜNG":
         try:
             from financial_data import get_specific_corporate_catalysts, generate_statement_driven_catalysts
             spec_cats = get_specific_corporate_catalysts(clean_ticker)
             for sc in spec_cats:
-                if sc not in flat_catalysts:
+                if sc not in flat_catalysts and is_content_valid_for_ticker(clean_ticker, sc):
                     flat_catalysts.append(sc)
                 if len(flat_catalysts) >= 15:
                     break
@@ -347,7 +744,7 @@ def extract_advanced_knowledge(
             if len(flat_catalysts) < 15:
                 stmt_info = generate_statement_driven_catalysts(clean_ticker)
                 for sc in stmt_info.get("catalysts", []):
-                    if sc not in flat_catalysts:
+                    if sc not in flat_catalysts and is_content_valid_for_ticker(clean_ticker, sc):
                         flat_catalysts.append(sc)
                     if len(flat_catalysts) >= 15:
                         break
@@ -363,7 +760,7 @@ def extract_advanced_knowledge(
         if is_tpl_truly_matched:
             tpl_cat_rules = primary_tpl.get("catalyst_rules", [])
             for r_text in tpl_cat_rules:
-                if not is_generic_boilerplate(r_text) and r_text not in flat_catalysts:
+                if not is_generic_boilerplate(r_text) and r_text not in flat_catalysts and is_content_valid_for_ticker(clean_ticker, r_text):
                     flat_catalysts.append(r_text)
                 if len(flat_catalysts) >= 15:
                     break
@@ -443,6 +840,7 @@ def extract_advanced_knowledge(
         "template_used": primary_tpl.get("name") if primary_tpl else "Mẫu Độc Bản Doanh Nghiệp",
         "template_id": primary_tpl.get("id") if primary_tpl else "tpl-doanh-nghiep-doc-ban",
         "confidence_score": confidence,
+        "direct_catalysts_count": direct_text_catalysts_count,
         "key_catalysts": flat_catalysts[:15],
         "categorized_catalysts": categorized_catalysts,
         "investment_theses": extracted_theses[:6],
@@ -508,6 +906,15 @@ def save_learned_ticker_catalysts(
         return {}
     clean_ticker = ticker.upper().strip()
 
+    # Tuyệt đối không nạp nếu nguồn hoặc tiêu đề là phân tích kỹ thuật
+    try:
+        from crawler import is_technical_report
+        if is_technical_report(title=title, content=source):
+            print(f"[AI Learning] Bỏ qua báo cáo kỹ thuật ({title}) cho {clean_ticker}.")
+            return {}
+    except Exception:
+        pass
+
     # Kiểm tra hạn phát hành: Báo cáo đã ra hơn 1 năm không đưa vào kho AI tự học
     if report_date and check_report_expired(report_date, max_days=max_age_days):
         print(f"[AI Learning] Báo cáo đã ra cách đây hơn {max_age_days} ngày ({report_date}) - Bỏ qua nạp vào kho AI học cho {clean_ticker}.")
@@ -535,27 +942,27 @@ def save_learned_ticker_catalysts(
     enriched_catalysts = enrich_insights_with_true_essence(catalysts or [], institution=source or "CTCK", is_risk=False)
     enriched_risks = enrich_insights_with_true_essence(risks or [], institution=source or "CTCK", is_risk=True)
 
-    # 1. Khử trùng lặp & chèn Catalysts mới lên đầu (Áp dụng Boilerplate Shield)
-    curr_cats = list(ticker_entry.get("catalysts", []))
+    # 1. Khử trùng lặp & chèn Catalysts mới lên đầu (Áp dụng Boilerplate Shield & Ticker Integrity Filter)
+    curr_cats = [c for c in list(ticker_entry.get("catalysts", [])) if is_content_valid_for_ticker(clean_ticker, c)]
     for c in enriched_catalysts:
         c_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(c)).strip()
-        if len(c_clean) > 10 and not is_generic_boilerplate(c_clean) and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
+        if len(c_clean) > 10 and not is_generic_boilerplate(c_clean) and is_content_valid_for_ticker(clean_ticker, c_clean) and not any(c_clean.lower() == existing.lower() for existing in curr_cats):
             curr_cats.insert(0, c_clean)
     ticker_entry["catalysts"] = curr_cats[:15]  # Giữ tối đa 15 catalysts chất lượng cao
 
-    # 2. Khử trùng lặp & chèn Risks mới (Áp dụng Boilerplate Shield)
-    curr_risks = list(ticker_entry.get("risks", []))
+    # 2. Khử trùng lặp & chèn Risks mới (Áp dụng Boilerplate Shield & Ticker Integrity Filter)
+    curr_risks = [r for r in list(ticker_entry.get("risks", [])) if is_content_valid_for_ticker(clean_ticker, r)]
     for r in enriched_risks:
         r_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(r)).strip()
-        if len(r_clean) > 10 and not is_generic_boilerplate(r_clean) and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
+        if len(r_clean) > 10 and not is_generic_boilerplate(r_clean) and is_content_valid_for_ticker(clean_ticker, r_clean) and not any(r_clean.lower() == existing.lower() for existing in curr_risks):
             curr_risks.insert(0, r_clean)
     ticker_entry["risks"] = curr_risks[:10]
 
     # 3. Luận điểm đầu tư (Theses)
-    curr_theses = list(ticker_entry.get("theses", []))
+    curr_theses = [th for th in list(ticker_entry.get("theses", [])) if is_content_valid_for_ticker(clean_ticker, th)]
     for th in theses or []:
         th_clean = re.sub(r'^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+', '', str(th)).strip()
-        if len(th_clean) > 10 and not is_generic_boilerplate(th_clean) and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
+        if len(th_clean) > 10 and not is_generic_boilerplate(th_clean) and is_content_valid_for_ticker(clean_ticker, th_clean) and not any(th_clean.lower() == existing.lower() for existing in curr_theses):
             curr_theses.insert(0, th_clean)
     ticker_entry["theses"] = curr_theses[:8]
 
@@ -1019,29 +1426,36 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
     if not learned_cats and not learned_risks:
         return report
 
+    try:
+        from crawler import clean_vietnamese_pdf_spacing
+    except Exception:
+        clean_vietnamese_pdf_spacing = lambda x: x
+
     # 1. Cập nhật vào consensus_summary.consensual_catalysts & consensual_risks (Tối đa 15 Catalysts, 10 Risks)
     cs = getattr(report, "consensus_summary", None) or (report.get("consensus_summary") if isinstance(report, dict) else None)
     if cs:
-        new_cs_cats = [c for c in learned_cats[:15] if c and not is_generic_boilerplate(c)]
+        new_cs_cats = [clean_vietnamese_pdf_spacing(c) for c in learned_cats[:15] if c and not is_generic_boilerplate(c) and is_content_valid_for_ticker(ticker, c)]
         existing_cs_cats = list(getattr(cs, "consensual_catalysts", None) or (cs.get("consensual_catalysts") if isinstance(cs, dict) else []) or [])
         for ec in existing_cs_cats:
             if len(new_cs_cats) >= 15:
                 break
-            if not is_generic_boilerplate(ec) and not any(ec.lower() in c.lower() or c.lower() in ec.lower() for c in new_cs_cats):
-                new_cs_cats.append(ec)
+            ec_clean = clean_vietnamese_pdf_spacing(ec)
+            if not is_generic_boilerplate(ec_clean) and is_content_valid_for_ticker(ticker, ec_clean) and not any(ec_clean.lower() in c.lower() or c.lower() in ec_clean.lower() for c in new_cs_cats):
+                new_cs_cats.append(ec_clean)
         final_cs_cats = new_cs_cats[:15]
         if isinstance(cs, dict):
             cs["consensual_catalysts"] = final_cs_cats
         else:
             cs.consensual_catalysts = final_cs_cats
 
-        new_cs_risks = [r for r in learned_risks[:10] if r and not is_generic_boilerplate(r)]
+        new_cs_risks = [clean_vietnamese_pdf_spacing(r) for r in learned_risks[:10] if r and not is_generic_boilerplate(r) and is_content_valid_for_ticker(ticker, r)]
         existing_cs_risks = list(getattr(cs, "consensual_risks", None) or (cs.get("consensual_risks") if isinstance(cs, dict) else []) or [])
         for er in existing_cs_risks:
             if len(new_cs_risks) >= 10:
                 break
-            if not is_generic_boilerplate(er) and not any(er.lower() in r.lower() or r.lower() in er.lower() for r in new_cs_risks):
-                new_cs_risks.append(er)
+            er_clean = clean_vietnamese_pdf_spacing(er)
+            if not is_generic_boilerplate(er_clean) and is_content_valid_for_ticker(ticker, er_clean) and not any(er_clean.lower() in r.lower() or r.lower() in er_clean.lower() for r in new_cs_risks):
+                new_cs_risks.append(er_clean)
         final_cs_risks = new_cs_risks[:10]
         if isinstance(cs, dict):
             cs["consensual_risks"] = final_cs_risks
@@ -1059,14 +1473,28 @@ def apply_learned_catalysts_to_report(report: Any) -> Any:
             # Sắp xếp và phân loại chính xác giữa Catalysts và Risks cho từng CTCK
             final_cats = []
             final_risks = []
-            all_points = r_cats + r_risks
 
-            for p in all_points:
+            # 1. Giữ nguyên và chuẩn hóa các mục rủi ro vốn đã được xác định
+            for p in r_risks:
                 if not p or len(p.strip()) < 15 or is_generic_boilerplate(p):
                     continue
-                p_clean = p.strip()
+                p_clean = clean_vietnamese_pdf_spacing(p.strip())
+                if is_content_valid_for_ticker(ticker, p_clean) and p_clean not in final_risks:
+                    final_risks.append(p_clean)
+
+            # 2. Chuẩn hóa catalysts và bóc tách các mục mang tín hiệu rủi ro sang risks
+            for p in r_cats:
+                if not p or len(p.strip()) < 15 or is_generic_boilerplate(p):
+                    continue
+                p_clean = clean_vietnamese_pdf_spacing(p.strip())
+                if not is_content_valid_for_ticker(ticker, p_clean):
+                    continue
                 p_lower = p_clean.lower()
-                is_risk = any(k in p_lower for k in ["rủi ro", "áp lực", "thách thức", "sụt giảm", "thận trọng", "nợ vay", "chậm tiến độ", "khó khăn", "lãi vay", "chi phí tài chính tăng", "biến động giá", "nợ xấu"])
+                is_risk = any(k in p_lower for k in [
+                    "rủi ro", "áp lực", "thách thức", "sụt giảm", "thận trọng", "nợ vay",
+                    "chậm tiến độ", "khó khăn", "lãi vay", "chi phí tài chính tăng",
+                    "biến động giá", "nợ xấu", "đội vốn", "trượt tiến độ", "biên gộp thu hẹp"
+                ])
                 if is_risk:
                     if p_clean not in final_risks:
                         final_risks.append(p_clean)
@@ -1435,6 +1863,14 @@ class AutonomousLearningScheduler:
                     source = item.get("SourceName", "CTCK")
                     item_code = (item.get("StockCode", "") or "").upper().strip()
 
+                    # TUYỆT ĐỐI BỎ QUA NẾU LÀ BÁO CÁO PHÂN TÍCH KỸ THUẬT (PTKT)
+                    try:
+                        from crawler import is_technical_report
+                        if is_technical_report(title=title, content=content, report_type=item.get("ReportTypeName", ""), url=item.get("Url", "")):
+                            continue
+                    except Exception:
+                        pass
+
                     # Ưu tiên lấy mã từ prefix tiêu đề (VD: "HPG: Báo cáo...", "TCH: Triển vọng...")
                     title_m = re.match(r'^\s*\[?([A-Z0-9]{3,4})\]?\s*[:\-]', title)
                     if title_m:
@@ -1505,6 +1941,8 @@ class AutonomousLearningScheduler:
                             except Exception as ing_err:
                                 print(f"[LearningScheduler] Error auto ingesting to matrix for {clean_ticker}: {ing_err}")
 
+                    direct_cnt = knowledge.get("direct_catalysts_count") or min(5, len(knowledge.get("key_catalysts", [])))
+                    total_cnt = len(knowledge.get("key_catalysts", []))
                     log_entry = {
                         "id": f"log-{uuid.uuid4().hex[:8]}",
                         "ticker": clean_ticker,
@@ -1512,7 +1950,8 @@ class AutonomousLearningScheduler:
                         "institution": source,
                         "learned_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
                         "template_name": knowledge.get("template_used", "Mẫu Độc Bản Doanh Nghiệp"),
-                        "catalysts_extracted": len(knowledge.get("key_catalysts", [])),
+                        "catalysts_extracted": direct_cnt,
+                        "total_knowledge_catalysts": total_cnt,
                         "theses_extracted": len(knowledge.get("investment_theses", [])),
                         "confidence": knowledge.get("confidence_score", 0.92),
                         "status": "SUCCESS",
@@ -1575,6 +2014,14 @@ class AutonomousLearningScheduler:
                         title = item.get("Title", "") or ""
                         content = item.get("Content", "") or title
                         source = item.get("SourceName", "CTCK")
+
+                        # TUYỆT ĐỐI BỎ QUA NẾU LÀ BÁO CÁO PHÂN TÍCH KỸ THUẬT (PTKT)
+                        try:
+                            from crawler import is_technical_report
+                            if is_technical_report(title=title, content=content, report_type=item.get("ReportTypeName", ""), url=item.get("Url", "")):
+                                continue
+                        except Exception:
+                            pass
 
                         market_p = 25000.0
                         if fetch_reconciled_live_price:
@@ -1670,6 +2117,8 @@ class AutonomousLearningScheduler:
                                 except Exception as ing_err:
                                     print(f"[LearningScheduler] Error auto ingesting to matrix for {clean_ticker}: {ing_err}")
 
+                        direct_cnt = knowledge.get("direct_catalysts_count") or min(5, len(knowledge.get("key_catalysts", [])))
+                        total_cnt = len(knowledge.get("key_catalysts", []))
                         log_entry = {
                             "id": f"log-{uuid.uuid4().hex[:8]}",
                             "ticker": clean_ticker,
@@ -1677,7 +2126,8 @@ class AutonomousLearningScheduler:
                             "institution": source,
                             "learned_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
                             "template_name": knowledge.get("template_used", "Mẫu chung"),
-                            "catalysts_extracted": len(knowledge.get("key_catalysts", [])),
+                            "catalysts_extracted": direct_cnt,
+                            "total_knowledge_catalysts": total_cnt,
                             "theses_extracted": len(knowledge.get("investment_theses", [])),
                             "confidence": knowledge.get("confidence_score", 0.90),
                             "status": "SUCCESS",
@@ -2384,7 +2834,8 @@ async def analyze_template_image_ai(
                 "Lưu ý: Bóc tách chi tiết, nhiều dòng, có số liệu cụ thể. Trả về JSON thuần túy không kèm markdown thừa."
             )
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            model_name = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
             payload = {
                 "contents": [
                     {
@@ -2516,5 +2967,71 @@ async def analyze_template_image_ai(
 # Singleton instances
 ai_scheduler = AutonomousLearningScheduler()
 template_store = TemplateStore()
+
+
+def get_scheduler() -> AutonomousLearningScheduler:
+    """Truy xuất singleton instance của AutonomousLearningScheduler."""
+    return ai_scheduler
+
+
+def integrate_pdf_extracted_knowledge(
+    ticker: str,
+    institution: str,
+    catalysts: List[str],
+    risks: List[str],
+    report_date: Optional[str] = None,
+    source_url: str = ""
+) -> Dict[str, Any]:
+    """
+    Liên kết liền mạch giữa tiến trình bóc tách PDF và Kho tri thức AI Tự học.
+    - Lưu vào ai_learned_catalysts.json (giới hạn Top 15 Catalysts, Top 10 Risks độc bản)
+    - Tự động khử trùng lặp và loại bỏ boilerplate
+    - TUYỆT ĐỐI LOẠI BỎ 100% BÁO CÁO VÀ LUẬN ĐIỂM PHÂN TÍCH KỸ THUẬT (PTKT)
+    - Ghi nhận vào ai_learning_history.json
+    - Đảm bảo Tab 'Báo cáo đa tổ chức' và Tab 'AI tự học' đồng nhất 100%
+    """
+    if not ticker or (not catalysts and not risks):
+        return {}
+    clean_ticker = ticker.upper().strip()
+    inst_name = institution or "CTCK Research"
+
+    # Tuyệt đối từ chối nạp báo cáo kỹ thuật vào kho AI tự học
+    try:
+        from crawler import is_technical_report, is_technical_text
+        if is_technical_report(url=source_url, content=f"{inst_name} {' '.join(catalysts[:2])}"):
+            print(f"[AI Learning] Bỏ qua báo cáo kỹ thuật PDF ({source_url}) cho {clean_ticker}.")
+            return {}
+        catalysts = [c for c in (catalysts or []) if not is_technical_text(c)]
+        risks = [r for r in (risks or []) if not is_technical_text(r)]
+    except Exception:
+        pass
+
+    if not catalysts and not risks:
+        return {}
+
+    saved = save_learned_ticker_catalysts(
+        ticker=clean_ticker,
+        catalysts=catalysts,
+        risks=risks,
+        source=inst_name,
+        title=f"Phân tích chuyên sâu từ báo cáo PDF {inst_name}",
+        report_date=report_date
+    )
+
+    try:
+        ai_scheduler.record_learned_event(
+            ticker=clean_ticker,
+            title=f"Bóc tách PDF tự động: {inst_name}",
+            institution=inst_name,
+            catalysts_count=len(catalysts),
+            risks_count=len(risks),
+            source="PDF Scan Engine",
+            preview_catalysts=catalysts[:2] if catalysts else [],
+            report_date=report_date
+        )
+    except Exception as e:
+        print(f"[AI Learning Event] Lỗi ghi nhận: {e}")
+
+    return saved
 
 

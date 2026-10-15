@@ -496,6 +496,13 @@ CORPORATE_OFFICIAL_WEBSITES: Dict[str, Dict[str, Any]] = {
         "ir_url": "https://vpbank.com.vn/quan-he-nha-dau-tu",
         "keywords": ["VPBank NEO", "Tòa nhà VPBank Tower", "Hệ sinh thái số"]
     },
+    "NHA": {
+        "name": "Tổng Công ty Đầu tư Phát triển Nhà và Đô thị Nam Hà Nội",
+        "domain": "namhanoi.vn",
+        "projects_url": "http://namhanoi.vn/du-an.html",
+        "ir_url": "http://namhanoi.vn/quan-he-co-dong.html",
+        "keywords": ["Khu đô thị mới Hòa Mạc", "KĐT Hòa Mạc", "KĐT Chợ Lương", "KĐT Tân Hà", "KĐT Văn Xá", "Cụm công nghiệp Hoàng Đông"]
+    },
     "SSI": {
         "name": "CTCP Chứng khoán SSI",
         "domain": "ssi.com.vn",
@@ -952,6 +959,15 @@ async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any
     Truy vấn và quét thông tin dự án trực tiếp từ Website chính thức của doanh nghiệp niêm yết.
     """
     clean_ticker = (ticker or "").upper().strip()
+    
+    # Bỏ qua quét dự án BĐS/XDCB cho nhóm ngành Tài chính, Ngân hàng, Chứng khoán, Bảo hiểm
+    try:
+        from adaptive_growth_engine import classify_business_model
+        if classify_business_model(clean_ticker).get("model_key") in ["BANKING", "SECURITIES", "INSURANCE"]:
+            return []
+    except Exception:
+        pass
+
     site_info = await resolve_official_corporate_website(clean_ticker)
 
     domain = site_info.get("domain", "")
@@ -979,6 +995,7 @@ async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any
                     text = tag.get_text().strip()
                     if not text or len(text) < 8 or len(text) > 120:
                         continue
+                    t_lower = text.lower()
                     
                     # Bỏ qua email, số điện thoại, liên hệ, footer
                     if "@" in text or "tel:" in t_lower or "hotline" in t_lower or "copyright" in t_lower or "chính sách" in t_lower:
@@ -995,11 +1012,11 @@ async def scan_corporate_website_for_projects(ticker: str) -> List[Dict[str, Any
                         "name": c,
                         "scale": f"Dự án trọng điểm công bố trên website chính thức {domain}",
                         "investment_bil": 0,
-                        "progress_pct": 75,
+                        "progress_pct": None,
                         "commercial_date": "Đang triển khai & Mở bán",
                         "impact": f"Góp phần gia tăng doanh thu và mở rộng thị phần của {clean_ticker}.",
                         "legal_status": "Đầy đủ hồ sơ phê duyệt & niêm yết chính thức trên website doanh nghiệp",
-                        "occupancy_rate": 80,
+                        "occupancy_rate": None,
                         "phase_tag": "Đang mở bán & thi công",
                         "source": f"Website chính thức: {domain}"
                     })
@@ -1026,6 +1043,14 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
     clean_ticker = (ticker or "").upper().strip()
     extracted_projects: List[Dict[str, Any]] = []
 
+    # Bỏ qua quét dự án BĐS/XDCB cho nhóm ngành Tài chính, Ngân hàng, Chứng khoán, Bảo hiểm
+    try:
+        from adaptive_growth_engine import classify_business_model
+        if classify_business_model(clean_ticker).get("model_key") in ["BANKING", "SECURITIES", "INSURANCE"]:
+            return []
+    except Exception:
+        pass
+
     # 0. Ưu tiên số 1: Nếu doanh nghiệp đã có danh mục dự án chuẩn hóa từ BCTN & BCTC kiểm toán
     site_cfg = CORPORATE_OFFICIAL_WEBSITES.get(clean_ticker, {})
     if site_cfg.get("default_projects"):
@@ -1038,9 +1063,20 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
             with open(pdf_cache_path, "r", encoding="utf-8") as f:
                 pdf_cache = json.load(f)
             
+            # Hạn định thời gian: Tuyệt đối không lấy báo cáo/tài liệu quá 1.5 năm (18 tháng / 550 ngày)
+            MAX_REPORT_AGE_SECONDS = 550 * 86400
+            now_ts = time.time()
+
+            # Lọc chính xác theo ranh giới từ và phân biệt chữ HOA để tránh NHA dính nha_dau_tu, DAT dính dat_dai...
+            ticker_boundary_pattern = re.compile(rf'(?:^|[_\-/\.])({clean_ticker})(?:[_\-\./]|$)')
             for url, val in pdf_cache.items():
-                if clean_ticker not in url.upper():
+                if not ticker_boundary_pattern.search(url):
                     continue
+                # Bỏ qua tài liệu quá 1.5 năm trở lại đây
+                report_ts = val.get("ts")
+                if report_ts and (now_ts - report_ts > MAX_REPORT_AGE_SECONDS):
+                    continue
+
                 cats = val.get("cats", [])
                 EXCLUDED_COMMENTARY = [
                     "dòng tiền", "tiền mặt", "lợi nhuận", "doanh thu", "lnst", "ebitda",
@@ -1050,7 +1086,7 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                     "dự báo tốc độ", "đóng góp doanh thu", "bán niên", "kết quả kinh doanh",
                     "khuyến nghị", "giá mục tiêu", "p/e", "p/b", "căng thẳng", "chậm trong",
                     "sẽ ghi nhận", "chỉ mới", "dở dang", "tạm ngừng", "được phê duyệt",
-                    "cho công ty", "giai đoạn đầu"
+                    "cho công ty", "giai đoạn đầu", "bán sỉ", "bán lẻ", "tái cấu trúc", "trang sau"
                 ]
 
                 for c in cats:
@@ -1058,52 +1094,67 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                     c_lower = c_clean.lower()
                     
                     # 1. Trích xuất tên dự án thực thụ (nhận diện tiền tố Dự án, DA, KĐT, KCN, Biệt thự...)
-                    pattern = r'(?:dự án|da\b|d/a\b|kđt\b|khu đô thị|kcn\b|khu công nghiệp|tổ hợp|chung cư|khu biệt thự|biệt thự|nhà máy|khu du lịch|hoa viên)\s+([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ0-9a-zđàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ\s]{3,50})'
+                    pattern = r'(?:dự án|da\b|d/a\b|kđt\b|khu đô thị|kcn\b|khu công nghiệp|tổ hợp|chung cư|khu biệt thự|biệt thự|nhà máy|khu du lịch|hoa viên)\s+([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ0-9a-zđàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ\s]{3,60})'
                     m_proj = re.search(pattern, c_clean, re.IGNORECASE)
                     
                     proj_name = None
                     if m_proj:
                         raw_matched = m_proj.group(0).strip()
-                        # Cắt bỏ phần phụ sau dấu phẩy hoặc từ chỉ thông số diện tích/quy mô/tiến độ
                         cut_parts = re.split(r'[,;:(\n]|\s+(?:diện tích|quy mô|với|khởi công|tỷ lệ|giai đoạn|đã bán|ước tính)\s+', raw_matched, flags=re.IGNORECASE)
                         proj_name = cut_parts[0].strip()
                         
-                        # Chuẩn hóa tiền tố DA / D/A -> Dự án
+                        # Chuẩn hóa tiền tố
                         if re.match(r'^(?:da|d/a)\s+', proj_name, re.IGNORECASE):
                             proj_name = re.sub(r'^(?:da|d/a)\s+', 'Dự án ', proj_name, flags=re.IGNORECASE)
-                        # Chuẩn hóa kđt -> Khu đô thị
                         if re.match(r'^kđt\s+', proj_name, re.IGNORECASE):
                             proj_name = re.sub(r'^kđt\s+', 'Khu đô thị ', proj_name, flags=re.IGNORECASE)
-                        # Chuẩn hóa kcn -> Khu công nghiệp
                         if re.match(r'^kcn\s+', proj_name, re.IGNORECASE):
                             proj_name = re.sub(r'^kcn\s+', 'Khu công nghiệp ', proj_name, flags=re.IGNORECASE)
                             
                         # Làm sạch các từ nối/trợ từ ở đuôi
-                        proj_name = re.sub(r'\s+(?:và|hoặc|được|cho|với|tại|của|ở|nằm|có|do|khi|này|trên)$', '', proj_name, flags=re.IGNORECASE)
+                        proj_name = re.sub(r'\s+(?:và|hoặc|được|cho|với|tại|của|ở|nằm|có|do|khi|này|trên|hơn so|như|gồm)$', '', proj_name, flags=re.IGNORECASE).strip()
                         
-                        # Loại bỏ các cụm động từ sai (VD: "dự án ghi nhận", "dự án đã bán", "dự án còn lại")
+                        # Loại bỏ các cụm câu cắt vụn vô nghĩa
                         INVALID_PROJ_PATTERNS = [
                             r'dự án ghi nhận', r'dự án đã', r'dự án còn', r'dự án này', r'dự án trên',
-                            r'dự án có', r'dự án được', r'dự án sẽ', r'dự án đem lại', r'dự án dở dang'
+                            r'dự án có', r'dự án được', r'dự án sẽ', r'dự án đem lại', r'dự án dở dang',
+                            r'dự án và', r'dự án của', r'dự án tại', r'dự án chính', r'dự án cũ',
+                            r'dự án mở bán mới như', r'dự án lớn và', r'dự án gia tăng', r'dự án trọng điểm của'
                         ]
                         if any(re.search(pat, proj_name, re.IGNORECASE) for pat in INVALID_PROJ_PATTERNS):
                             proj_name = None
-                    
-                    # Nếu câu thuần túy là nhận định tài chính/dòng tiền mà không có tên dự án riêng biệt -> Bỏ qua
-                    if any(ex in c_lower for ex in EXCLUDED_COMMENTARY):
-                        if not proj_name or len(proj_name) < 8:
-                            continue
+                        
+                        # Tên dự án chuẩn phải có danh từ riêng viết hoa và độ dài từ 10 đến 80 ký tự
+                        if proj_name:
+                            p_words = proj_name.split()
+                            has_proper_name = any(w[0].isupper() for w in p_words[1:] if len(w) > 1)
+                            if not has_proper_name or len(proj_name) < 10 or len(proj_name) > 80:
+                                proj_name = None
 
-                    # Nếu không trích xuất được tên dự án riêng và câu quá dài hoặc không rõ ràng -> Bỏ qua
                     if not proj_name:
-                        if any(w in c_lower for w in ["dự án", "khu đô thị", "kcn", "khu công nghiệp", "nhà máy", "tổ hợp", "cảng"]):
-                            # Chỉ lấy nếu câu ngắn gọn dưới 60 ký tự mô tả công trình
-                            if len(c_clean) <= 60 and not any(k in c_lower for k in ["tăng", "giảm", "tỷ đồng", "lợi nhuận", "lãi", "lỗ"]):
-                                proj_name = c_clean
-                        if not proj_name:
-                            continue
+                        continue
 
-                    # Trích xuất quy mô vốn nếu có (chuẩn hóa dấu phân cách phần nghìn tiếng Việt)
+                    # Bóc tách tiến độ thực tế nếu có trong câu, TUYỆT ĐỐI KHÔNG BỊA ĐẶT SỐ LIỆU
+                    prog_val = None
+                    m_prog = re.search(r'(?:tiến độ|hoàn thành|xong)\s*(?:đạt)?\s*(\d{1,3})\s*%', c_clean, re.I)
+                    if m_prog:
+                        try:
+                            prog_val = int(m_prog.group(1))
+                            if prog_val > 100: prog_val = 100
+                        except Exception:
+                            prog_val = None
+
+                    # Bóc tách tỷ lệ lấp đầy thực tế nếu có
+                    occ_val = None
+                    m_occ = re.search(r'(?:lấp đầy|tỷ lệ lấp đầy)\s*(?:đạt)?\s*(\d{1,3})\s*%', c_clean, re.I)
+                    if m_occ:
+                        try:
+                            occ_val = int(m_occ.group(1))
+                            if occ_val > 100: occ_val = 100
+                        except Exception:
+                            occ_val = None
+
+                    # Trích xuất quy mô vốn nếu có
                     m_inv = re.search(r'(\d+(?:[\.,]\d+)?)\s*(?:nghìn tỷ|tỷ đồng|tỷ đ|triệu USD)', c_clean, re.I)
                     inv_bil = 0
                     if m_inv:
@@ -1126,15 +1177,15 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
 
                     extracted_projects.append({
                         "name": proj_name,
-                        "scale": f"Dự án trọng điểm công bố trong BCTN, Báo cáo kiểm toán & Nghị quyết của {clean_ticker}",
+                        "scale": f"Dự án công bố trong BCTN & BCTC của {clean_ticker}",
                         "investment_bil": round(inv_bil, 0) if inv_bil > 0 else 0,
-                        "progress_pct": 80,
-                        "commercial_date": "Giai đoạn 2025 - 2027",
+                        "progress_pct": prog_val,  # None nếu không có số liệu, KHÔNG BỊA ĐẶT
+                        "commercial_date": "Đang triển khai",
                         "impact": c_clean,
-                        "legal_status": "Hồ sơ công bố thông tin đại chúng minh bạch theo quy định UBCKNN",
-                        "occupancy_rate": 85,
-                        "phase_tag": "Đang mở bán & thi công",
-                        "source": "Báo cáo Thường niên / BCTC Bán niên Soát xét"
+                        "legal_status": "Theo thuyết minh BCTC / BCTN công bố",
+                        "occupancy_rate": occ_val,  # None nếu không có số liệu
+                        "phase_tag": "Đang triển khai",
+                        "source": "Báo cáo Thường niên / BCTC Soát xét"
                     })
         except Exception as e:
             print(f"[ProjectDiscovery] Lỗi đọc pdf cache: {e}")
@@ -1158,11 +1209,11 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                             "name": f"Hạng mục Chi phí XDCB Dở dang Trọng điểm ({clean_ticker})",
                             "scale": f"Giá trị công trình dở dang lũy kế {val:,.1f} tỷ đồng trên BCTC kiểm toán",
                             "investment_bil": round(val * 1.25, 0),
-                            "progress_pct": 80,
+                            "progress_pct": None,
                             "commercial_date": "Hoàn thiện 2025 - 2026",
                             "impact": f"Tài sản cố định hình thành từ đầu tư xây dựng cơ bản dở dang sẵn sàng bàn giao vận hành.",
                             "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
-                            "occupancy_rate": 85,
+                            "occupancy_rate": None,
                             "phase_tag": "Đang thi công xây dựng",
                             "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
                         })
@@ -1173,11 +1224,11 @@ async def extract_projects_from_annual_and_semiannual_reports(ticker: str) -> Li
                             "name": f"Dự án Bất động sản trong Hàng tồn kho Dở dang ({clean_ticker})",
                             "scale": f"Giá trị sản phẩm dở dang lũy kế {val:,.1f} tỷ đồng trên BCTC kiểm toán",
                             "investment_bil": round(val, 0),
-                            "progress_pct": 85,
+                            "progress_pct": None,
                             "commercial_date": "Đang hoàn thiện & Bàn giao",
                             "impact": f"Quỹ dự án bất động sản dở dang sẵn sàng bàn giao ghi nhận doanh thu.",
                             "legal_status": "Đã được kiểm toán độc lập xác nhận trong BCTC Bán niên / Năm",
-                            "occupancy_rate": 80,
+                            "occupancy_rate": None,
                             "phase_tag": "Đang mở bán & thi công",
                             "source": "Thuyết minh BCTC Bán niên Soát xét / BCTN"
                         })
@@ -1303,6 +1354,15 @@ async def discover_company_projects_master(ticker: str, force_refresh: bool = Fa
 
     discovered_combined = web_projs + rep_projs
     all_projects = merge_and_deduplicate_projects(base_projects, discovered_combined)
+
+    # Tuyệt đối không gán dự án BĐS/XDCB cho nhóm ngành Tài chính, Ngân hàng, Chứng khoán, Bảo hiểm
+    try:
+        from adaptive_growth_engine import classify_business_model
+        model_info = classify_business_model(clean_ticker, sector, company_name)
+        if model_info.get("model_key") in ["BANKING", "SECURITIES", "INSURANCE"]:
+            all_projects = []
+    except Exception:
+        pass
 
     total_capex = sum(p.get("investment_bil", 0) for p in all_projects if isinstance(p.get("investment_bil"), (int, float)))
 

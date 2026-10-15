@@ -102,7 +102,7 @@ INDUSTRY_MODELS: Dict[str, Dict[str, Any]] = {
         "icon": "hard-hat",
         "badge_text": "Xây dựng & Hạ tầng",
         "badge_class": "bg-amber-950/80 text-amber-300 border-amber-700/80",
-        "keywords": ["xây dựng", "xây lắp", "nhà thầu", "hạ tầng", "cầu đường", "cao tốc", "construction"]
+        "keywords": ["xây dựng", "xây lắp", "nhà thầu", "hạ tầng", "cầu đường", "cao tốc", "giao thông", "bot", "construction"]
     },
     # 12. Vật liệu Xây dựng (Đá, Xi măng, Nhựa, Kính)
     "BUILDING_MATERIALS": {
@@ -266,12 +266,14 @@ TICKER_MODEL_MAP: Dict[str, str] = {
     "DGC": "CHEMICALS_FERTILIZERS", "DCM": "CHEMICALS_FERTILIZERS", "DPM": "CHEMICALS_FERTILIZERS",
     "BFC": "CHEMICALS_FERTILIZERS", "LAS": "CHEMICALS_FERTILIZERS", "CSV": "CHEMICALS_FERTILIZERS",
     "DDV": "CHEMICALS_FERTILIZERS", "HVT": "CHEMICALS_FERTILIZERS", "SFG": "CHEMICALS_FERTILIZERS",
+    "AVG": "CHEMICALS_FERTILIZERS",
     
     # 11. Xây dựng & Hạ tầng
     "CTD": "CONSTRUCTION_INFRA", "HBC": "CONSTRUCTION_INFRA", "VCG": "CONSTRUCTION_INFRA",
     "HHV": "CONSTRUCTION_INFRA", "CII": "CONSTRUCTION_INFRA", "FCN": "CONSTRUCTION_INFRA",
     "C4G": "CONSTRUCTION_INFRA", "LCG": "CONSTRUCTION_INFRA", "DPG": "CONSTRUCTION_INFRA",
     "HTN": "CONSTRUCTION_INFRA", "PHC": "CONSTRUCTION_INFRA", "SCG": "CONSTRUCTION_INFRA",
+    "BOT": "CONSTRUCTION_INFRA",
     
     # 12. Vật liệu Xây dựng (Đá, Xi măng, Nhựa)
     "VLB": "BUILDING_MATERIALS", "KSB": "BUILDING_MATERIALS", "DHA": "BUILDING_MATERIALS",
@@ -325,6 +327,7 @@ TICKER_MODEL_MAP: Dict[str, str] = {
     "NBC": "MINING_RESOURCES", "CST": "MINING_RESOURCES", "TDN": "MINING_RESOURCES",
     "MDC": "MINING_RESOURCES", "BMC": "MINING_RESOURCES", "TVD": "MINING_RESOURCES",
     "THT": "MINING_RESOURCES", "HLC": "MINING_RESOURCES", "KHB": "MINING_RESOURCES",
+    "ACM": "MINING_RESOURCES",
     
     # 22. Cấp nước & Tiện ích Môi trường
     "BWE": "WATER_ENVIRONMENT", "TDM": "WATER_ENVIRONMENT", "DNW": "WATER_ENVIRONMENT",
@@ -336,9 +339,26 @@ TICKER_MODEL_MAP: Dict[str, str] = {
 }
 
 
+def _strip_vietnamese_accents(s: str) -> str:
+    import unicodedata
+    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').replace('đ', 'd').replace('Đ', 'D').lower()
+
+
+# Sắp xếp trước danh sách từ khóa theo độ dài giảm dần để ưu tiên match từ khóa dài chính xác
+_SORTED_INDUSTRY_KEYWORDS = []
+for _k, _conf in INDUSTRY_MODELS.items():
+    if _k == "HOLDING_CONGLOMERATE":
+        continue
+    for _kw in _conf["keywords"]:
+        _clean_kw = _strip_vietnamese_accents(_kw)
+        _SORTED_INDUSTRY_KEYWORDS.append((_kw, _clean_kw, _k))
+_SORTED_INDUSTRY_KEYWORDS.sort(key=lambda x: len(x[1]), reverse=True)
+
+
 def classify_business_model(ticker: str, sector: str = "", company_name: str = "") -> Dict[str, Any]:
     """
     Phân loại chính xác tuyệt đối mã cổ phiếu vào 1 trong 23 nhóm ngành chuẩn của TTCK Việt Nam.
+    Hỗ trợ đối chiếu không dấu, nhận diện ranh giới từ (word boundary) tránh nhầm lẫn ký tự con.
     """
     clean_ticker = (ticker or "").upper().strip()
     
@@ -349,17 +369,20 @@ def classify_business_model(ticker: str, sector: str = "", company_name: str = "
     if not model_key:
         s_lower = (sector or "").lower()
         n_lower = (company_name or "").lower()
-        full_text = f"{s_lower} {n_lower}"
+        full_text = f"{clean_ticker} {s_lower} {n_lower}".strip()
+        norm_text = _strip_vietnamese_accents(full_text)
         
-        for k, conf in INDUSTRY_MODELS.items():
-            if k == "HOLDING_CONGLOMERATE":
-                continue
-            for kw in conf["keywords"]:
-                if kw in full_text:
-                    model_key = k
+        for orig_kw, clean_kw, mod_key in _SORTED_INDUSTRY_KEYWORDS:
+            if len(clean_kw) <= 4:
+                # Dùng regex boundary cho từ ngắn để tránh 'ai' dính vào 'thai', 'khoan' dính vào 'khoang'
+                pattern = r'(?<![a-z0-9])' + re.escape(clean_kw) + r'(?![a-z0-9])'
+                if re.search(pattern, norm_text):
+                    model_key = mod_key
                     break
-            if model_key:
-                break
+            else:
+                if clean_kw in norm_text or orig_kw in full_text:
+                    model_key = mod_key
+                    break
                 
     if not model_key:
         model_key = "HOLDING_CONGLOMERATE"
@@ -483,6 +506,18 @@ def generate_adaptive_growth_notes(
     theo đúng bản chất của 23 nhóm ngành TTCK Việt Nam.
     """
     clean_ticker = ticker.upper().strip()
+
+    # 0. ƯU TIÊN SỐ 1: Nạp trực tiếp Thẻ Động lực AI trích xuất từ Gemini Flash (trong 1.5 năm)
+    try:
+        from gemini_growth_extractor import load_gemini_growth_cache
+        g_cache = load_gemini_growth_cache()
+        if clean_ticker in g_cache:
+            cards = g_cache[clean_ticker].get("growth_cards", [])
+            if cards:
+                return cards
+    except Exception as e:
+        pass
+
     model_info = classify_business_model(clean_ticker, sector, company_name)
     model_type = model_info["model_key"]
     fin = _extract_company_financial_context(clean_ticker)
@@ -491,9 +526,9 @@ def generate_adaptive_growth_notes(
     vietstock_doc_url = f"https://finance.vietstock.vn/{clean_ticker}/tai-tai-lieu.htm"
     ssc_news_url = "https://congbothongtin.ssc.gov.vn/faces/NewsSearch5"
     
-    rev_val = fin["rev_ttm"] or (fin["last_rev"] * 4) or 1000.0
-    np_val = fin["np_ttm"] or (fin["last_np"] * 4) or 100.0
-    margin = fin["gross_margin_pct"] or 20.0
+    rev_val = fin["rev_ttm"] or (fin["last_rev"] * 4) or 0
+    np_val = fin["np_ttm"] or (fin["last_np"] * 4) or 0
+    margin = fin["gross_margin_pct"] or 0
     cfo_val = fin["cfo"]
     inv_val = fin["inventories"]
     cash_val = fin["cash_and_eq"]
@@ -502,9 +537,44 @@ def generate_adaptive_growth_notes(
     fa_val = fin["fixed_assets"]
 
     # -------------------------------------------------------------------------
+    # 0. NGÂN HÀNG THƯƠNG MẠI (BANKING)
+    # -------------------------------------------------------------------------
+    if model_type == "BANKING":
+        notes.append({
+            "id": f"{clean_ticker}-credit-growth-plan",
+            "type": "BANK_CREDIT_GROWTH",
+            "title": f"Kế hoạch Tăng trưởng Tín dụng & Chỉ tiêu Lợi nhuận ĐHĐCĐ ({clean_ticker})",
+            "category_tag": "Tín dụng & ĐHĐCĐ",
+            "tag_class": "bg-indigo-950/80 text-indigo-300 border-indigo-700/80",
+            "metrics": [
+                {"label": "Tăng trưởng tín dụng", "value": "Bám sát room NHNN"},
+                {"label": "Nguồn vốn tự có", "value": f"{fin.get('owner_equity', 0):,.1f} tỷ đ"},
+                {"label": "Định hướng LNTT", "value": "Tăng trưởng bền vững"}
+            ],
+            "content": f"Động lực tăng trưởng tín dụng tập trung vào các lĩnh vực sản xuất kinh doanh ưu tiên, dự án hạ tầng trọng điểm và bán lẻ. Kế hoạch kinh doanh được ĐHĐCĐ thông qua với trọng tâm cân đối biên lãi thuần NIM và tối ưu hóa hệ số an toàn vốn CAR.",
+            "source": "Nghị quyết ĐHĐCĐ & BCTC Soát xét gần nhất",
+            "source_url": vietstock_doc_url
+        })
+        notes.append({
+            "id": f"{clean_ticker}-digital-casa",
+            "type": "DIGITAL_BANKING_CASA",
+            "title": f"Chiến lược Ngân hàng số, Tiền gửi CASA & Quản trị Rủi ro",
+            "category_tag": "CASA & Ngân hàng số",
+            "tag_class": "bg-cyan-950/80 text-cyan-300 border-cyan-700/80",
+            "metrics": [
+                {"label": "Tỷ lệ CASA", "value": "Duy trì top đầu"},
+                {"label": "Tỷ lệ CIR", "value": "Tối ưu hóa số"},
+                {"label": "Chất lượng nợ NPL", "value": "Kiểm soát < 1.5%"}
+            ],
+            "content": f"Chiến lược số hóa toàn diện giúp thu hút dòng tiền gửi thanh toán CASA dồi dào, hạ thấp chi phí vốn đầu vào (COF). Tỷ lệ chi phí trên thu nhập (CIR) được cải thiện nhờ tự động hóa quy trình nghiệp vụ.",
+            "source": "Báo cáo Thường niên & BCTC Soát xét",
+            "source_url": vietstock_doc_url
+        })
+
+    # -------------------------------------------------------------------------
     # 1. CHỨNG KHOÁN (SECURITIES)
     # -------------------------------------------------------------------------
-    if model_type == "SECURITIES":
+    elif model_type == "SECURITIES":
         notes.append({
             "id": f"{clean_ticker}-margin-market-share",
             "type": "MARGIN_GROWTH",
@@ -780,11 +850,11 @@ def generate_adaptive_growth_notes(
             "category_tag": "Chỉ tiêu ĐHĐCĐ 2026",
             "tag_class": "bg-emerald-950/80 text-emerald-300 border-emerald-700/80",
             "metrics": [
-                {"label": "Doanh thu TTM", "value": f"{rev_val:,.1f} tỷ đ"},
-                {"label": "LNST TTM", "value": f"{np_val:,.1f} tỷ đ"},
-                {"label": "Biên lãi gộp", "value": f"{margin:.1f}%"}
+                {"label": "Doanh thu TTM", "value": f"{rev_val:,.1f} tỷ đ" if rev_val > 0 else "Theo BCTC kiểm toán"},
+                {"label": "LNST TTM", "value": f"{np_val:,.1f} tỷ đ" if np_val > 0 else "Theo BCTC kiểm toán"},
+                {"label": "Vốn chủ sở hữu", "value": f"{fin['owner_equity']:,.1f} tỷ đ" if fin.get('owner_equity') else "Theo BCTC"}
             ],
-            "content": f"Doanh nghiệp đặt mục tiêu nâng cao hiệu quả vận hành cốt lõi, bám sát các chỉ tiêu sản lượng và doanh thu được ĐHĐCĐ thường niên thông qua; đẩy mạnh mở rộng thị phần và kiểm soát chi phí hoạt động chặt chẽ.",
+            "content": f"Doanh nghiệp bám sát các chỉ tiêu sản lượng và doanh thu được ĐHĐCĐ thường niên thông qua; đẩy mạnh mở rộng thị phần và kiểm soát chi phí hoạt động chặt chẽ.",
             "source": "Nghị quyết ĐHĐCĐ & Báo cáo Thường niên",
             "source_url": vietstock_doc_url
         })

@@ -28,6 +28,9 @@ SSI_BASE_URL = "https://fc-data.ssi.com.vn/api/v2/Market"
 VIETSTOCK_CHART_API = "https://api.vietstock.vn/tvnew/history"
 VIETNAM_DCHART_API = "https://dchart-api.vndirect.com.vn/dchart/history"
 
+# Bộ nhớ đệm nến thực tế lịch sử (Bảo vệ chống giật hình và không bao giờ dùng nến giả lập sine wave)
+_LAST_KNOWN_REAL_CANDLES: Dict[str, List[Dict[str, Any]]] = {}
+
 # Danh mục 9 API SSI FastConnect Data chính thức
 SSI_API_CATALOG = [
     {
@@ -433,11 +436,12 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         "Accept": "*/*"
     }
 
-    # Bảo đảm cache SSI luôn sẵn sàng cho mã này để đồng bộ nến trong phiên
+    # Đồng bộ ngầm cache SSI (không block tiến trình nạp nến DNSE/VNDirect siêu tốc)
     try:
         from crawler import _SSI_EXCHANGE_CACHE, fetch_ssi_live_stock_quote
         if clean not in _SSI_EXCHANGE_CACHE:
-            await fetch_ssi_live_stock_quote(clean)
+            import asyncio
+            asyncio.create_task(fetch_ssi_live_stock_quote(clean))
     except Exception:
         pass
 
@@ -452,18 +456,25 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
         lows = data.get("l", [])
         vols = data.get("v", [])
 
-        mult = 1000.0 if closes[-1] < 1000.0 else 1.0
+        valid_last_c = next((c for c in reversed(closes) if c is not None and c > 0), 25.0)
+        mult = 1000.0 if valid_last_c < 1000.0 else 1.0
         n = len(closes)
         limit = len(closes) if is_period_agg else min(count, n)
         start_idx = 0 if is_period_agg else max(0, n - count)
         for i in range(start_idx, n):
-            ts = times[i] if i < len(times) else (now_ts - (n - i) * sec_unit)
+            ts = times[i] if i < len(times) and times[i] else (now_ts - (n - i) * sec_unit)
             dt = datetime.fromtimestamp(ts)
-            c_val = round(float(closes[i]) * mult, 0)
-            o_val = round(float(opens[i]) * mult, 0) if i < len(opens) else c_val
-            h_val = round(float(highs[i]) * mult, 0) if i < len(highs) else c_val
-            l_val = round(float(lows[i]) * mult, 0) if i < len(lows) else c_val
-            v_val = float(vols[i]) if i < len(vols) else 0.0
+            c_raw = closes[i] if closes[i] is not None else 0.0
+            o_raw = opens[i] if (i < len(opens) and opens[i] is not None) else c_raw
+            h_raw = highs[i] if (i < len(highs) and highs[i] is not None) else max(c_raw, o_raw)
+            l_raw = lows[i] if (i < len(lows) and lows[i] is not None) else min(c_raw, o_raw)
+            v_raw = vols[i] if (i < len(vols) and vols[i] is not None) else 0.0
+
+            c_val = round(float(c_raw) * mult, 0)
+            o_val = round(float(o_raw) * mult, 0) if o_raw > 0 else c_val
+            h_val = round(float(h_raw) * mult, 0) if h_raw > 0 else max(c_val, o_val)
+            l_val = round(float(l_raw) * mult, 0) if l_raw > 0 else min(c_val, o_val)
+            v_val = float(v_raw)
 
             time_str = dt.strftime("%Y-%m-%d %H:%M") if sec_unit < 86400 else dt.strftime("%Y-%m-%d")
             result.append({
@@ -484,11 +495,20 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
                 from datetime import timezone, timedelta
                 vn_tz = timezone(timedelta(hours=7))
                 now_vn = datetime.now(vn_tz)
-                if now_vn.weekday() < 5:
+                # Chỉ đồng bộ nến trong ngày khi đang trong hoặc sau phiên giao dịch (Thứ 2 - Thứ 6 từ 09:00 sáng trở đi)
+                # TRƯỚC 09:00 SÁNG: Thị trường chưa mở cửa phiên mới, tuyệt đối không tạo nến mới để tránh lặp nến hôm qua
+                if now_vn.weekday() < 5 and now_vn.hour >= 9:
                     today_str = now_vn.strftime("%d/%m/%Y")
                     today_iso = now_vn.strftime("%Y-%m-%d")
-                    from crawler import _SSI_EXCHANGE_CACHE
+                    from crawler import _SSI_EXCHANGE_CACHE, _LIVE_PRICE_CACHE
                     ssi_data = _SSI_EXCHANGE_CACHE.get(clean)
+                    rec_data = _LIVE_PRICE_CACHE.get(clean)
+                    m_p = 0.0
+                    r_p = 0.0
+                    o_p = 0.0
+                    h_p = 0.0
+                    l_p = 0.0
+                    vol = 0.0
                     if ssi_data:
                         m_p = float(ssi_data.get("matchedPrice") or 0.0)
                         r_p = float(ssi_data.get("refPrice") or 0.0)
@@ -496,7 +516,32 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
                         h_p = float(ssi_data.get("highest") or 0.0)
                         l_p = float(ssi_data.get("lowest") or 0.0)
                         vol = float(ssi_data.get("nmTotalTradedQty") or 0.0)
+                    if m_p <= 0 and rec_data:
+                        m_p = float(rec_data.get("latest_close") or 0.0)
+                        r_p = float(rec_data.get("reference_price") or 0.0)
+                        o_p = float(rec_data.get("open_price") or 0.0)
+                        h_p = float(rec_data.get("high_price") or 0.0)
+                        l_p = float(rec_data.get("low_price") or 0.0)
+                        vol = float(rec_data.get("volume") or 0.0)
 
+                    # Bổ sung dự phòng r_p từ corporate actions nếu bảng giá thiếu
+                    if r_p <= 0:
+                        try:
+                            from corporate_actions import get_ticker_corporate_actions, parse_action_date
+                            cas = get_ticker_corporate_actions(clean, auto_sync=False)
+                            today_d = now_vn.date()
+                            for ca in cas:
+                                if parse_action_date(ca.get("ex_date", "")) == today_d:
+                                    factor = ca.get("adjustment_factor")
+                                    if factor and factor > 0 and result:
+                                        r_p = round(float(result[-1]["close"]) * factor, -1)
+                                        break
+                        except Exception:
+                            pass
+
+                    # Chỉ cập nhật/thêm nến nếu đã có giao dịch phát sinh trong phiên hôm nay
+                    has_realtime_trade = (vol > 0 or o_p > 0 or m_p > 0)
+                    if has_realtime_trade:
                         live_c = m_p if m_p > 0 else (o_p if o_p > 0 else r_p)
                         if live_c > 0:
                             live_o = o_p if o_p > 0 else live_c
@@ -509,14 +554,38 @@ async def fetch_vietstock_ohlcv(symbol: str, resolution: str = "D", count: int =
                             last_iso = str(last_bar.get("time_str", ""))[:10]
 
                             if last_date == today_str or last_iso == today_iso:
-                                # Đã có nến hôm nay -> Cập nhật giá và khối lượng thời gian thực
+                                # Đã có nến hôm nay -> Chuẩn hóa nến phiên trước (result[-2]) nếu lệch giá tham chiếu điều chỉnh
+                                if len(result) >= 2 and r_p > 0 and float(result[-2].get("close", 0)) > 0:
+                                    prev_c = float(result[-2]["close"])
+                                    if abs(prev_c - r_p) / r_p > 0.005:
+                                        adj_factor = r_p / prev_c
+                                        for b in result[:-1]:
+                                            b["open"] = round(b["open"] * adj_factor, -1)
+                                            b["high"] = round(b["high"] * adj_factor, -1)
+                                            b["low"] = round(b["low"] * adj_factor, -1)
+                                            b["close"] = round(b["close"] * adj_factor, -1)
+                                        result[-2]["close"] = r_p
+
+                                # Cập nhật giá và khối lượng thời gian thực cho nến hôm nay
                                 last_bar["close"] = live_c
                                 if live_o > 0: last_bar["open"] = live_o
                                 last_bar["high"] = max(last_bar.get("high", live_h), live_h)
                                 last_bar["low"] = min(last_bar.get("low", live_l), live_l) if last_bar.get("low", 0) > 0 else live_l
                                 if vol > 0: last_bar["volume"] = max(last_bar.get("volume", 0), vol)
                             else:
-                                # Chưa có nến hôm nay -> Append cây nến Realtime của phiên hôm nay
+                                # Chưa có nến hôm nay -> Chuẩn hóa toàn bộ lịch sử nến theo giá tham chiếu điều chỉnh phiên hôm nay
+                                if r_p > 0 and float(last_bar.get("close", 0)) > 0:
+                                    prev_c = float(last_bar["close"])
+                                    if abs(prev_c - r_p) / r_p > 0.005:
+                                        adj_factor = r_p / prev_c
+                                        for b in result:
+                                            b["open"] = round(b["open"] * adj_factor, -1)
+                                            b["high"] = round(b["high"] * adj_factor, -1)
+                                            b["low"] = round(b["low"] * adj_factor, -1)
+                                            b["close"] = round(b["close"] * adj_factor, -1)
+                                        last_bar["close"] = r_p
+
+                                # Append cây nến Realtime của phiên hôm nay
                                 result.append({
                                     "time": today_ts,
                                     "time_str": today_iso,
@@ -641,13 +710,16 @@ async def fetch_hybrid_ohlcv_data(symbol: str, resolution: str = "D", count: int
     # 2. Thử Vietstock / VNDirect / DNSE Market Feeds
     feed_candles = await fetch_vietstock_ohlcv(clean, resolution=norm_res, count=count)
     if feed_candles and len(feed_candles) >= 5:
+        _LAST_KNOWN_REAL_CANDLES[f"{clean}_{norm_res}"] = feed_candles
         return feed_candles
 
-    # 3. Fallback: Lấy giá đóng cửa thực tế từ CSDL 658 doanh nghiệp và tạo chuỗi nến biến động thực tế
-    from company_database import get_company
-    comp = get_company(clean)
-    base_price = (comp.get("price") if comp and comp.get("price") > 0 else 25000.0)
-    return generate_fallback_candles(clean, base_price, resolution=norm_res, count=count)
+    # 3. Fallback an toàn: Trả về nến thực tế gần nhất đã lưu trong bộ nhớ đệm
+    cached_real = _LAST_KNOWN_REAL_CANDLES.get(f"{clean}_{norm_res}")
+    if cached_real and len(cached_real) >= 5:
+        return cached_real
+
+    # Tuyệt đối KHÔNG sinh nến giả lập toán học (sine wave) làm méo mó biểu đồ thực tế
+    return []
 
 
 def generate_fallback_candles(symbol: str, base_price: float = 25000.0, resolution: str = "D", count: int = 1500) -> List[Dict[str, Any]]:

@@ -1392,6 +1392,78 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
         ),
         matrix_table=[
             ReportItem(
+                institution="VFS Research",
+                report_date="23/09/2026",
+                recommendation="MUA",
+                target_price=48000,
+                current_price_at_report=33400,
+                upside_percent=43.71,
+                pe_forward=10.0,
+                pb_forward=1.45,
+                revenue_forecast="34,940 tỷ đồng (+6.8% YoY)",
+                npat_forecast="2,084 tỷ đồng (+8.5% YoY)",
+                npat_forecast_value=2084,
+                key_catalysts=[
+                    "Dự báo doanh thu thuần năm 2026F bứt phá đạt 34.940 tỷ đồng, lợi nhuận sau thuế đạt 2.084 tỷ đồng (biên lợi nhuận ròng 5,97%).",
+                    "Nền tảng tài chính siêu vững mạnh với lượng tiền mặt và tiền gửi ngắn hạn lên đến 11.500 tỷ đồng, không có áp lực nợ vay.",
+                    "Kế hoạch tăng vốn điều lệ lên trên 10.000 tỷ đồng để đáp ứng quy mô tổng thầu EPCI chuỗi siêu dự án Lô B - Ô Môn và Lạc Đà Vàng."
+                ],
+                key_risks=[
+                    "Biến động giá dầu thế giới giảm dưới 70 USD/thùng có thể ảnh hưởng đến tiến độ dự án thượng nguồn.",
+                    "Tiến độ giải ngân đầu tư công và các quyết định phê duyệt hành chính."
+                ],
+                valuation_method="P/E hợp lý 10.0x & Định giá DCF",
+                source_url="http://static1.vietstock.vn/edocs/22257/VFS_Bao_cao_ngan_doanh_nghiep_PVS_kcpu.pdf"
+            ),
+            ReportItem(
+                institution="VCBS Research",
+                report_date="17/09/2026",
+                recommendation="MUA",
+                target_price=41759,
+                current_price_at_report=33400,
+                upside_percent=25.03,
+                pe_forward=11.5,
+                pb_forward=1.52,
+                revenue_forecast="39,095 tỷ đồng (+20% svck)",
+                npat_forecast="2,364 tỷ đồng (+24% svck)",
+                npat_forecast_value=2364,
+                key_catalysts=[
+                    "Dự phóng doanh thu thuần 2026 đạt 39.095 tỷ đồng (+20% svck) và LNST đạt 2.364 tỷ đồng (+24% svck).",
+                    "Lượng backlog M&C khổng lồ từ các dự án trọng điểm Lô B - Ô Môn, Lạc Đà Vàng và gói thầu EPIC-1 tại Qatar bảo đảm nguồn việc dồi dào.",
+                    "Duy trì ROE ở mức cao 15% và EPS TTM đạt 4.621 đồng, định giá hấp dẫn kết hợp phương pháp DCF và P/E."
+                ],
+                key_risks=[
+                    "Tiến độ triển khai thực tế của chuỗi dự án Lô B và các gói thầu trao thầu FID.",
+                    "Biến động chi phí nguyên vật liệu sắt thép và tỷ giá ngoại tệ."
+                ],
+                valuation_method="Định giá DCF & P/E mục tiêu",
+                source_url="http://static1.vietstock.vn/edocs/22184/p_ptnc_bao_cao_cap_nhat_pvs_17_09_26.pdf"
+            ),
+            ReportItem(
+                institution="VPX Research",
+                report_date="26/08/2026",
+                recommendation="MUA",
+                target_price=48200,
+                current_price_at_report=33400,
+                upside_percent=44.31,
+                pe_forward=12.5,
+                pb_forward=1.58,
+                revenue_forecast="17,288 tỷ đồng (6T đạt 52% KH)",
+                npat_forecast="6T: 998 tỷ đồng (+63% svck, đạt 101% KH)",
+                npat_forecast_value=1800,
+                key_catalysts=[
+                    "KQKD tăng trưởng bứt phá: Doanh thu Q2 đạt 8.589 tỷ đồng (+17% svck), LNST Q2 đạt 563 tỷ đồng (+80% svck); lũy kế 6T LNST đạt 998 tỷ đồng (+63% svck) hoàn thành 101% kế hoạch cả năm.",
+                    "Lĩnh vực tàu kỹ thuật, sửa chữa bảo dưỡng tăng trưởng trên 100% svck; cơ khí xây lắp chiếm 60,7% tỷ trọng doanh thu với các dự án Lô B, Lạc Đà Vàng, Sư Tử Trắng 2B.",
+                    "Kế hoạch tăng vốn điều lệ thêm 20% giúp mở rộng năng lực tham gia các gói thầu EPCI quốc tế lớn."
+                ],
+                key_risks=[
+                    "Biên lợi nhuận gộp mảng cơ khí chịu ảnh hưởng bởi biến động giá thép và chi phí nhân công ngoài khơi.",
+                    "Tiến độ nghiệm thu các hạng mục thi công ngoài biển."
+                ],
+                valuation_method="P/E Forward 12.5x & P/B 1.6x",
+                source_url="http://static1.vietstock.vn/edocs/21856/PVS_Bao_cao_cap_nhat_nhanh_KQKD_Q2.pdf"
+            ),
+            ReportItem(
                 institution="Vietcap (VCSC)",
                 report_date="17/08/2026",
                 recommendation="MUA",
@@ -1424,9 +1496,9 @@ PRESET_DATASETS: Dict[str, FullMatrixReport] = {
                 upside_percent=53.59,
                 pe_forward=16.2,
                 pb_forward=1.78,
-                revenue_forecast="25,500 tỷ VND (+31.8% YoY)",
-                npat_forecast="1,380 tỷ VND (+29.8% YoY)",
-                npat_forecast_value=1380,
+                revenue_forecast="37,013 tỷ đồng (+13% YoY)",
+                npat_forecast="2,257 tỷ đồng (+22% YoY)",
+                npat_forecast_value=2257,
                 key_catalysts=[
                     "Khối lượng công việc M&C cơ khí biển giai đoạn 2024 - 2028 đạt đỉnh lịch sử nhờ Lô B, Lạc Đà Vàng và Sư Tử Trắng 2B.",
                     "Biên lợi nhuận gộp mảng chế tạo cơ khí cải thiện lên 6.5 - 7.5% nhờ điều khoản bù trượt giá nguyên vật liệu trong hợp đồng mới.",

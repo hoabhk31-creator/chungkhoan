@@ -8,6 +8,13 @@ import webbrowser
 import threading
 import uvicorn
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 
 def open_browser():
     time.sleep(1.5)

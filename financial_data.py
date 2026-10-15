@@ -3710,6 +3710,86 @@ def get_company_news_and_events(ticker: str) -> Dict[str, Any]:
                 "url": vietstock_hub
             }
         ],
+        "HDB": [
+            {
+                "id": "hdb-ev-1",
+                "title": "HDB: Trả cổ tức năm 2025 bằng cổ phiếu, tỷ lệ 100:25 (25%)",
+                "event_type": "Cổ tức cổ phiếu",
+                "type": "dividend_stock",
+                "event_date": "09/10/2026",
+                "ex_date": "09/10/2026",
+                "record_date": "12/10/2026",
+                "payment_date": "09/10/2026",
+                "details": "Trả cổ tức năm 2025 bằng cổ phiếu theo tỷ lệ 100:25 (cổ đông sở hữu 100 cổ phiếu được nhận thêm 25 cổ phiếu mới).",
+                "impact": "Tăng vốn điều lệ, củng cố hệ số an toàn vốn (CAR) và mở rộng dư địa tăng trưởng tín dụng.",
+                "url": vietstock_hub
+            },
+            {
+                "id": "hdb-ev-2",
+                "title": "HDB: Thưởng cổ phiếu do tăng vốn cổ phần từ nguồn vốn CSH, tỷ lệ 100:5 (5%)",
+                "event_type": "Cổ phiếu thưởng",
+                "type": "bonus_share",
+                "event_date": "09/10/2026",
+                "ex_date": "09/10/2026",
+                "record_date": "12/10/2026",
+                "payment_date": "09/10/2026",
+                "details": "Thưởng cổ phiếu do thực hiện tăng vốn cổ phần từ nguồn vốn chủ sở hữu, tỷ lệ 100:5.",
+                "impact": "Tối ưu hóa nguồn thặng dư vốn và tăng thanh khoản cho cổ phiếu trên thị trường.",
+                "url": vietstock_hub
+            },
+            {
+                "id": "hdb-ev-3",
+                "title": "HDB: Hội nghị gặp gỡ Nhà đầu tư & Chuyên viên phân tích (Analyst Meeting)",
+                "event_type": "Gặp gỡ NĐT",
+                "type": "meeting",
+                "event_date": "25/08/2026",
+                "ex_date": "-",
+                "record_date": "-",
+                "payment_date": "-",
+                "details": "HDBank tổ chức hội nghị cập nhật kết quả kinh doanh 6 tháng đầu năm và định hướng chiến lược tăng trưởng ngân hàng số.",
+                "impact": "Tăng cường minh bạch và gắn kết cùng các định chế tài chính và quỹ đầu tư lớn.",
+                "url": vietstock_hub
+            },
+            {
+                "id": "hdb-ev-4",
+                "title": "HDB: Công bố Báo cáo tài chính soát xét bán niên năm 2026",
+                "event_type": "Công bố BCTC",
+                "type": "financial",
+                "event_date": "15/08/2026",
+                "ex_date": "-",
+                "record_date": "-",
+                "payment_date": "-",
+                "details": "Lợi nhuận trước thuế bán niên tăng trưởng trên 26% YoY, chất lượng tài sản duy trì nhóm đầu ngành.",
+                "impact": "Khẳng định hiệu quả sinh lời ROE vượt trội trên 23%.",
+                "url": vietstock_hub
+            },
+            {
+                "id": "hdb-ev-5",
+                "title": "HDB: Đại hội đồng cổ đông thường niên năm 2026",
+                "event_type": "ĐHĐCĐ thường niên",
+                "type": "meeting",
+                "event_date": "22/04/2026",
+                "ex_date": "22/03/2026",
+                "record_date": "23/03/2026",
+                "payment_date": "-",
+                "details": "ĐHĐCĐ thông qua phương án chi trả cổ tức tổng tỷ lệ 30% (25% cổ tức CP và 5% thưởng CP).",
+                "impact": "Kế hoạch kinh doanh và phân phối lợi nhuận hấp dẫn được cổ đông đồng thuận cao.",
+                "url": vietstock_hub
+            },
+            {
+                "id": "hdb-ev-6",
+                "title": "HDB: Trả cổ tức năm 2024 bằng cổ phiếu, tỷ lệ 100:25",
+                "event_type": "Cổ tức cổ phiếu",
+                "type": "dividend_stock",
+                "event_date": "18/12/2025",
+                "ex_date": "18/12/2025",
+                "record_date": "19/12/2025",
+                "payment_date": "20/01/2026",
+                "details": "Chi trả cổ tức năm 2024 bằng cổ phiếu tỷ lệ 100:25.",
+                "impact": "Gia tăng vốn điều lệ phục vụ mở rộng mạng lưới và tín dụng bán lẻ.",
+                "url": vietstock_hub
+            }
+        ],
         "HPG": [
             {
                 "id": "hpg-ev-1",
@@ -5471,6 +5551,74 @@ SPECIFIC_CORPORATE_CATALYSTS: Dict[str, List[str]] = {
         "Vị thế độc quyền 100% thị phần vận tải dầu thô và khí LPG nội địa, đảm bảo hợp đồng bao tiêu dài hạn từ BSR (Dung Quất) và NSRP (Nghi Sơn).",
         "Biên lợi nhuận gộp mảng vận tải bứt phá mạnh mẽ lên 28.5% nhờ hiệu suất khai thác cao và giá cước tái ký hợp đồng định hạn tăng 30 - 40%."
     ],
+    "BSR": [
+        "Dự án Nâng cấp mở rộng Nhà máy Lọc dầu Dung Quất chính thức khởi công tháng 8/2026 với tổng vốn đầu tư 36.000 - 40.000 tỷ đồng (gói EPC ~1,2 tỷ USD), nâng công suất chế biến lên 171.000 thùng/ngày.",
+        "Biên lọc dầu (Crack Spread) các sản phẩm chủ lực (Diesel, Mogas 95, Jet A1) duy trì vùng hấp dẫn giúp biên lợi nhuận gộp phục hồi mạnh mẽ.",
+        "Kế hoạch nâng tiêu chuẩn khí thải sản phẩm lên Euro V và nâng sản lượng nhiên liệu bay Jet A1 lên gấp 2,5 lần đáp ứng nhu cầu hàng không phục hồi.",
+        "Lợi thế hạ tầng cảng biển và bể chứa nước sâu giúp BSR tối ưu hóa cơ cấu nguồn dầu ngọt nhẹ Bạch Hổ và mở rộng giỏ dầu thô nhập khẩu chi phí cạnh tranh.",
+        "Kế hoạch chuyển sàn niêm yết từ UPCoM sang Sở Giao dịch Chứng khoán TP.HCM (HOSE) là chất xúc tác định giá và thu hút dòng vốn ngoại.",
+        "Vị thế tiền mặt và tiền gửi ngân hàng dồi dào, thặng dư dòng tiền kinh doanh hỗ trợ chính sách chi trả cổ tức tiền mặt cho cổ đông."
+    ],
+    "HSG": [
+        "Mạng lưới bán lẻ hơn 500 chi nhánh Hoa Sen Home toàn quốc giúp tối ưu hóa biên lợi nhuận mảng phân phối vật liệu xây dựng.",
+        "Sản lượng xuất khẩu tôn mạ sang các thị trường trọng điểm Mỹ và Châu Âu tăng trưởng mạnh mẽ đón đầu chu kỳ phục hồi nhu cầu xây dựng.",
+        "Cơ cấu tài chính an toàn, nợ vay ròng giảm mạnh và dòng tiền kinh doanh thặng dư hỗ trợ chính sách cổ tức cho cổ đông.",
+        "Hưởng lợi khi giá HRC nguyên liệu đầu vào ổn định và chính sách chống bán phá giá tôn mạ bảo vệ thị trường nội địa."
+    ],
+    "NKG": [
+        "Dự án Nhà máy Tôn Nam Kim Phú Mỹ quy mô 1.2 triệu tấn/năm mở rộng mạnh mẽ công suất tôn mạ cao cấp phục vụ xuất khẩu.",
+        "Thị phần xuất khẩu tôn mạ sang Bắc Mỹ và EU duy trì vị thế Top 2 toàn ngành nhờ đạt chuẩn kiểm định chất lượng khắt khe.",
+        "Chủ động quản trị tồn kho và tối ưu hóa chi phí vận chuyển quốc tế giúp biên lợi nhuận gộp phục hồi vững chắc.",
+        "Nhu cầu tôn mạ xây dựng công nghiệp trong nước khởi sắc theo đà giải ngân vốn FDI và mở rộng nhà xưởng."
+    ],
+    "GAS": [
+        "Chuỗi kho cảng nhập khẩu khí thiên nhiên hóa lỏng LNG Thị Vải (giai đoạn 1 công suất 1 triệu tấn/năm) đã vận hành thương mại cung cấp khí cho các nhà máy điện.",
+        "Đại dự án khí Lô B - Ô Môn trao các gói thầu EPCI mở ra nguồn cung khí tự nhiên khổng lồ đảm bảo tăng trưởng 20 năm tới.",
+        "Vị thế độc quyền phân phối khí khô và khí hóa lỏng LPG toàn quốc với nền tảng tài chính thặng dư tiền mặt lớn trên 30.000 tỷ đồng.",
+        "Hưởng lợi từ cơ chế giá bán điện khí LNG mới được ban hành giúp khơi thông các hợp đồng mua bán khí dài hạn."
+    ],
+    "PLX": [
+        "Hệ thống hơn 2.700 cửa hàng xăng dầu trực thuộc trên toàn quốc nắm giữ trên 50% thị phần bán lẻ xăng dầu Việt Nam.",
+        "Triển khai đồng loạt thanh toán không dùng tiền mặt và số hóa chuỗi dịch vụ gia tăng (bãi đỗ xe, trạm sạc điện, cửa hàng tiện lợi).",
+        "Nghị định mới về kinh doanh xăng dầu rút ngắn chu kỳ điều hành giá giúp Petrolimex giảm thiểu rủi ro biến động giá vốn hàng tồn kho.",
+        "Dòng tiền kinh doanh dồi dào và chính sách chi trả cổ tức tiền mặt đều đặn thuộc hàng cao nhất nhóm doanh nghiệp Nhà nước."
+    ],
+    "BAF": [
+        "Chiến lược mở rộng chuỗi trang trại heo khép kín Feed-Farm-Food (3F) chuẩn an toàn sinh học cao giúp giảm thiểu tối đa rủi ro dịch bệnh.",
+        "Sản lượng heo thương phẩm xuất bán tăng trưởng trên 60% YoY, hướng tới mục tiêu cung ứng hàng triệu con heo sạch ra thị trường.",
+        "Giá heo hơi nội địa phục hồi và neo ở vùng giá có lãi cao trên 62.000 - 68.000 đ/kg giúp biên lợi nhuận gộp bứt phá.",
+        "Mô hình thịt heo ăn chay tạo thương hiệu khác biệt, mở rộng thị phần tại chuỗi siêu thị Siba Food và các kênh bán lẻ hiện đại."
+    ],
+    "DBC": [
+        "Nhà máy vaccine dịch tả lợn châu Phi (ASF) DABACO hoàn thành kiểm nghiệm và thương mại hóa, mở ra nguồn doanh thu công nghệ sinh học đột phá.",
+        "Quy mô đàn lợn nái và lợn thịt hạt nhân mở rộng mạnh mẽ tại các cụm trang trại mới ở Thanh Hóa, Bình Phước.",
+        "Giá nguyên liệu thức ăn chăn nuôi (ngô, khô đậu tương) thế giới hạ nhiệt giúp biên lợi nhuận mảng thức ăn chăn nuôi cải thiện.",
+        "Chuỗi giá trị 3F hoàn chỉnh từ giống, thức ăn đến chế biến thực phẩm giúp kiểm soát giá thành sản xuất tối ưu."
+    ],
+    "PDR": [
+        "Xóa sạch toàn bộ dư nợ trái phiếu doanh nghiệp, tái cấu trúc bảng cân đối kế toán an toàn và sạch nợ xấu.",
+        "Đủ điều kiện mở bán các đại dự án pháp lý hoàn chỉnh: Bắc Hà Thanh (Quy Nhơn), Thuận An 1 & 2 (Bình Dương) mang lại dòng tiền lớn.",
+        "Quỹ đất sạch hơn 4.000 ha tại các vị trí đắc địa đón đầu sự phục hồi của thị trường bất động sản dân dụng và hạ tầng giao thông.",
+        "Hưởng lợi trực tiếp từ 3 bộ luật Bất động sản mới giúp đẩy nhanh tiến độ phê duyệt tính tiền sử dụng đất."
+    ],
+    "DXG": [
+        "Đại dự án Gem Sky World (Đồng Nai) và chuỗi dự án căn hộ Opal tiếp tục bàn giao và mở bán phân khu mới mang lại doanh thu đột biến.",
+        "Hệ thống môi giới Đất Xanh Services (DXS) chiếm lĩnh thị phần số 1 toàn quốc phục hồi mạnh mẽ theo thanh khoản thị trường.",
+        "Tháo gỡ pháp lý đại dự án Gem Riverside (TP. Thủ Đức) là chất xúc tác định giá then chốt mở khóa giá trị tài sản ròng RNAV.",
+        "Áp lực tài chính giảm bớt nhờ tái cơ cấu các khoản nợ vay và phát hành tăng vốn thành công."
+    ],
+    "STB": [
+        "Xử lý dứt điểm các khoản nợ xấu tồn đọng thuộc Đề án tái cơ cấu Sacombank, chuẩn bị hoàn tất đấu giá 32.5% cổ phần VAMC thu về thặng dư lớn.",
+        "Biên lãi thuần NIM phục hồi mạnh mẽ nhờ chi phí vốn COF giảm và room tăng trưởng tín dụng bán lẻ được mở rộng.",
+        "Chất lượng tài sản cải thiện rõ nét, tỷ lệ nợ xấu NPL nội bảng được kiểm soát dưới 1.5% giúp giảm mạnh chi phí trích lập dự phòng.",
+        "Kỳ vọng chia cổ tức trở lại cho cổ đông sau nhiều năm tích lũy nguồn lợi nhuận giữ lại khổng lồ trên 20.000 tỷ đồng."
+    ],
+    "HDB": [
+        "Tăng trưởng tín dụng dẫn đầu toàn ngành (trên 20%/năm) nhờ chiến lược tập trung vào tài trợ chuỗi nông nghiệp, tiêu dùng và khách hàng cá nhân.",
+        "Hệ sinh thái số hóa HD SAISON và Vietjet mang lại nguồn khách hàng và dòng tiền giao dịch dồi dào, biên lợi nhuận dịch vụ vượt trội.",
+        "Tỷ suất sinh lời trên vốn chủ sở hữu ROE duy trì đều đặn trên 22 - 24% thuộc Top đầu hệ thống ngân hàng thương mại cổ phần.",
+        "Chính sách chi trả cổ tức cao và đều đặn (25 - 30% kết hợp tiền mặt và cổ phiếu) là điểm tựa vững chắc cho nhà đầu tư."
+    ],
     "GMD": [
         "Cảng nước sâu Gemalink giai đoạn 2 hoàn thành nâng tổng công suất lên 3 triệu TEU, đón trọn xu hướng dịch chuyển xuất khẩu đi Mỹ/EU.",
         "Sản lượng hàng hóa thông qua cụm cảng Cái Mép - Thị Vải và Nam Đình Vũ tăng trưởng 2 chữ số theo đà hồi phục ngoại thương.",
@@ -5666,6 +5814,11 @@ SPECIFIC_CORPORATE_RISKS: Dict[str, List[str]] = {
         "Biến động giá dầu nhiên liệu hàng hải (VLSFO / MGO) làm gia tăng chi phí giá vốn vận hành chuyến tàu.",
         "Rủi ro biến động tỷ giá USD/VND và lãi suất đối với các khoản vay ngoại tệ tài trợ mua sắm mở rộng đội tàu."
     ],
+    "BSR": [
+        "Biên lọc dầu (crack spread) toàn cầu có rủi ro hạ nhiệt khi các tổ hợp lọc hóa dầu quốc tế mới gia tăng nguồn cung.",
+        "Biến động mạnh của giá dầu thô Brent thế giới ảnh hưởng đến việc trích lập dự phòng giảm giá hàng tồn kho.",
+        "Áp lực thu xếp vốn và chi phí lãi vay trong giai đoạn cao điểm triển khai dự án nâng cấp mở rộng Dung Quất."
+    ],
     "GMD": [
         "Cạnh tranh công suất cảng biển tại khu vực Cái Mép - Thị Vải và Đình Vũ gia tăng khi có thêm các bến mới đi vào hoạt động.",
         "Tốc độ tăng trưởng thương mại toàn cầu chậm lại ảnh hưởng trực tiếp đến sản lượng container thông qua.",
@@ -5755,6 +5908,7 @@ SPECIFIC_CORPORATE_MOAT: Dict[str, str] = {
     "IDC": "IDICO sở hữu quỹ đất sạch KCN lớn tại các vị trí đắc địa phía Nam, mô hình kinh doanh tích hợp điện - nước - hạ tầng đem lại dòng tiền mặt dồi dào.",
     "PVD": "PVD nắm giữ vị thế độc quyền cung cấp giàn khoan tự nâng tại Việt Nam với đội giàn trẻ, hiện đại đạt chuẩn an toàn quốc tế Zero-LTI.",
     "PVS": "PVS là tổng thầu cơ khí dầu khí và điện gió ngoài khơi (EPCI) số 1 Việt Nam với hệ thống cảng bãi chế tạo hiện đại đạt tiêu chuẩn xuất khẩu sang châu Âu.",
+    "BSR": "Lọc Hóa Dầu Bình Sơn (BSR) sở hữu con hào kinh tế từ vị thế nhà máy lọc dầu đầu tiên của Việt Nam đáp ứng hơn 30% nhu cầu xăng dầu cả nước, gắn liền với cụm cảng nước sâu Dung Quất và hệ thống phân phối nhiên liệu chiến lược quốc gia.",
     "GMD": "Gemadept sở hữu hệ sinh thái cảng biển nước sâu đón tàu mẹ tải trọng lớn nhất Việt Nam (Gemalink, Nam Đình Vũ), nắm giữ vị trí yết hầu trong chuỗi logistics xuất nhập khẩu.",
     "VHM": "Vinhomes nắm giữ vị thế độc tôn với quỹ đất sạch lớn nhất cả nước, năng lực triển khai các đại đô thị 'All-in-one' thần tốc và thương hiệu BĐS số 1 Việt Nam.",
     "HDC": "Lợi thế cạnh tranh (Economic Moat) độc tôn của HODECO (HDC) là vị thế nhà phát triển bất động sản số 1 tại Bà Rịa - Vũng Tàu với bề dày hơn 30 năm uy tín, nắm giữ quỹ đất sạch quy mô trên 400 ha tại trung tâm TP. Vũng Tàu với giá vốn đền bù ban đầu cực thấp, kết hợp năng lực hoàn thiện pháp lý và bàn giao dự án chuẩn mực giúp công ty đạt biên lợi nhuận gộp thuộc Top cao nhất toàn ngành BĐS dân cư (~65-74%).",
