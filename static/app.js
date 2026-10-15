@@ -39,122 +39,235 @@ function cleanVietnameseFontSpacing(text) {
     s = s.replace(/(\d)\s*%/g, '$1%');
     s = s.replace(/\bQ\s*([1-4])\s*[\.\/]\s*(2[0-9])\b/gi, 'Q$1/20$2');
 
-    // 1. Phục hồi tách từ nếu bị dính chữ (đặc biệt là 'đ'/'Đ' dính liền hoặc chữ hoa liền sau)
-    s = s.replace(/([a-zA-Záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ])([đĐ])/g, '$1 $2');
-    s = s.replace(/([a-zà-ỹ])([A-ZĐ][a-zà-ỹ]+)/g, '$1 $2');
-
-    // Tách các từ ghép tiếng Việt phổ biến bị dính liền do lỗi regex trước đây
-    const mergedPairs = [
-        [/\bTốiưu\b/gi, 'Tối ưu'],
-        [/\bphảnánh\b/gi, 'phản ánh'],
-        [/\bdựán\b/gi, 'dự án'],
-        [/\bĐịnhgiá\b/gi, 'Định giá'],
-        [/\bĐịnhgiáP/gi, 'Định giá P'],
-        [/\blợiích\b/gi, 'lợi ích'],
-        [/\bhànghóa\b/gi, 'hàng hóa'],
-        [/\bkếhoạch\b/gi, 'kế hoạch'],
-        [/\blợinhuận\b/gi, 'lợi nhuận'],
-        [/\bdoanhnghiệp\b/gi, 'doanh nghiệp'],
-        [/\bsảnlượng\b/gi, 'sản lượng'],
-        [/\bthịtrường\b/gi, 'thị trường'],
-        [/\bquặngsắt\b/gi, 'quặng sắt'],
-        [/\blòcao\b/gi, 'lò cao'],
-        [/\bcổtức\b/gi, 'cổ tức'],
-        [/\btiềnmặt\b/gi, 'tiền mặt'],
-        [/\bchíphí\b/gi, 'chi phí'],
-        [/\bbánhàng\b/gi, 'bán hàng'],
-        [/\bquảnlý\b/gi, 'quản lý'],
-        [/\bgiáthép\b/gi, 'giá thép'],
-        [/\btăngtrưởng\b/gi, 'tăng trưởng'],
-        [/\bhồiphục\b/gi, 'hồi phục'],
-        [/\bsảnxuất\b/gi, 'sản xuất'],
-        [/\bkiểmsoát\b/gi, 'kiểm soát'],
-        [/\bgiáthành\b/gi, 'giá thành'],
-        [/\bphânphối\b/gi, 'phân phối'],
-        [/\bchínhsách\b/gi, 'chính sách'],
-        [/\bbảohộ\b/gi, 'bảo hộ'],
-        [/\bthuếtựvệ\b/gi, 'thuế tự vệ'],
-        [/\bchốngbánphágiá\b/gi, 'chống bán phá giá'],
-        [/\bnhậpkhẩu\b/gi, 'nhập khẩu'],
-        [/\bxuấtkhẩu\b/gi, 'xuất khẩu'],
-        [/\bthựchiện\b/gi, 'thực hiện'],
-        [/\bxâydựng\b/gi, 'xây dựng'],
-        [/\bpháthành\b/gi, 'phát hành'],
-        [/\bdựphóng\b/gi, 'dự phóng']
+    // 1. Phục hồi các từ viết tắt in hoa tiêu đề
+    const headerReps = [
+        [/\bT\s*Ó\s*M\s+T\s*Ắ\s*T\s+NH\s*Ậ\s*N\s+Đ\s*Ị\s*NH\s*:?/gi, 'TÓM TẮT NHẬN ĐỊNH: '],
+        [/\bL\s*U\s*Ậ\s*N\s+Đ\s*I\s*Ể\s*M\s+Đ\s*Ầ\s*U\s+T\s*Ư\s*:?/gi, 'LUẬN ĐIỂM ĐẦU TƯ: '],
+        [/\bR\s+Ủ\s+I\s+R\s+O\s+(?:C\s*H\s*Í\s*NH|CHÍNH)\s*:?|\bRỦI\s*RO\s+CHÍNH\s*:+/gi, 'RỦI RO CHÍNH: '],
+        [/\bR\s+Ủ\s+I\s+R\s+O\s*:?|\bRỦI\s*RO\s*:+/gi, 'RỦI RO: '],
+        [/\bĐ\s*I\s*Ể\s*M\s+NH\s*Ấ\s*N\s*:?/gi, 'ĐIỂM NHẤN: '],
+        [/\bK\s*H\s*U\s*Y\s*Ế\s*N\s+N\s*G\s*H\s*Ị\s*:?/gi, 'KHUYẾN NGHỊ: '],
+        [/\bD\s*Ự\s+P\s*H\s*Ó\s*N\s*G\s*:?/gi, 'DỰ PHÓNG: '],
+        [/\bĐ\s*H\s*Đ\s*C\s*Đ\b/gi, 'ĐHĐCĐ'],
+        [/\bH\s*Đ\s*Q\s*T\b/gi, 'HĐQT'],
+        [/\bS\s*L\s*C\s*P\b/gi, 'SLCP'],
+        [/\bK\s*L\s*G\s*D\b/gi, 'KLGD'],
+        [/\bE\s*V\s*\/\s*E\s*B\s*I\s*T\s*D\s*A\b/gi, 'EV/EBITDA'],
+        [/\bP\s*\/\s*E\b/gi, 'P/E'],
+        [/\bP\s*\/\s*B\b/gi, 'P/B'],
+        [/\bN\s*I\s*M\b/gi, 'NIM'],
+        [/\bC\s*A\s*S\s*A\b/gi, 'CASA'],
     ];
-    for (const [p, r] of mergedPairs) {
+    for (const [p, r] of headerReps) {
         s = s.replace(p, r);
     }
 
-    // 2. Bảng từ ghép/từ tài chính tiếng Việt thường bị ngắt ký tự (Kerning fix)
-    const patterns = [
-        [/\bLũy\s+k\s*ế\b/gi, 'Lũy kế'],
-        [/\bk\s*ế\s*ho\s*ạ\s*ch\b/gi, 'kế hoạch'],
-        [/\bk\s*ế\b/gi, 'kế'],
-        [/\bl\s*ợ\s*i\s*nhu\s*ậ\s*n\b/gi, 'lợi nhuận'],
-        [/\bl\s*ợ\s*i\b/gi, 'lợi'],
-        [/\bnhu\s*ậ\s*n\b/gi, 'nhuận'],
-        [/\btr\s*ư\s*ớ\s*c\b/gi, 'trước'],
-        [/\bsau\s+thu\s*ế\b/gi, 'sau thuế'],
-        [/\bthu\s*ế\b/gi, 'thuế'],
-        [/\bl\s*ầ\s*n\s*l\s*ư\s*ợ\s*t\b/gi, 'lần lượt'],
-        [/\bl\s*ầ\s*n\b/gi, 'lần'],
-        [/\bl\s*ư\s*ợ\s*t\b/gi, 'lượt'],
-        [/\bđ\s*ạ\s*t\b/gi, 'đạt'],
-        [/\bt\s*ỷ\s*đ\s*ồ\s*ng\b/gi, 'tỷ đồng'],
-        [/\bt\s*ỷ\b/gi, 'tỷ'],
-        [/\bđ\s*ồ\s*ng\b/gi, 'đồng'],
-        [/\bc\s*ả\s*năm\b/gi, 'cả năm'],
-        [/\bc\s*ả\b/gi, 'cả'],
-        [/\bđ\s*ư\s*ợ\s*c\b/gi, 'được'],
-        [/\bd\s*ẫ\s*n\s*d\s*ắ\s*t\b/gi, 'dẫn dắt'],
-        [/\bd\s*ẫ\s*n\b/gi, 'dẫn'],
-        [/\bd\s*ắ\s*t\b/gi, 'dắt'],
-        [/\bb\s*ở\s*i\b/gi, 'bởi'],
-        [/\bl\s*ĩ\s*nh\s*v\s*ự\s*c\b/gi, 'lĩnh vực'],
-        [/\bv\s*ự\s*c\b/gi, 'vực'],
-        [/\bd\s*ị\s*ch\s*v\s*ụ\b/gi, 'dịch vụ'],
-        [/\bd\s*ị\s*ch\b/gi, 'dịch'],
-        [/\bv\s*ụ\b/gi, 'vụ'],
-        [/\bs\s*ử\s*a\s*ch\s*ữ\s*a\b/gi, 'sửa chữa'],
-        [/\bs\s*ử\s*a\b/gi, 'sửa'],
-        [/\bch\s*ữ\s*a\b/gi, 'chữa'],
-        [/\bb\s*ả\s*o\s*d\s*ư\s*ỡ\s*ng\b/gi, 'bảo dưỡng'],
-        [/\bb\s*ả\s*o\b/gi, 'bảo'],
-        [/\bd\s*ư\s*ỡ\s*ng\b/gi, 'dưỡng'],
-        [/\bm\s*ạ\s*nh\b/gi, 'mạnh'],
-        [/\bch\s*ế\s*t\s*ạ\s*o\b/gi, 'chế tạo'],
-        [/\bc\s*ơ\s*kh\s*í\b/gi, 'cơ khí'],
-        [/\bchi\s*ế\s*m\b/gi, 'chiếm'],
-        [/\bt\s*ỷ\s*tr\s*ọ\s*ng\b/gi, 'tỷ trọng'],
-        [/\bl\s*ớ\s*n\b/gi, 'lớn'],
-        [/\bv\s*ớ\s*i\b/gi, 'với'],
-        [/\bqu\s*ý\b/gi, 'quý'],
-        [/\bli\s*ề\s*n\s*tr\s*ư\s*ớ\s*c\b/gi, 'liền trước'],
-        [/\bli\s*ề\s*n\b/gi, 'liền'],
-        [/\bgi\s*ả\s*m\b/gi, 'giảm'],
-        [/\bt\s*ă\s*ng\b/gi, 'tăng'],
-        [/\bt\s*ă\s*ng\s*tr\s*ư\s*ở\s*ng\b/gi, 'tăng trưởng'],
-        [/\bc\s*ổ\s*ph\s*i\s*ế\s*u\b/gi, 'cổ phiếu'],
-        [/\bv\s*ậ\s*n\s*ch\s*u\s*y\s*ể\s*n\b/gi, 'vận chuyển'],
-        [/\bqu\s*ố\s*c\s*t\s*ế\b/gi, 'quốc tế'],
-        [/\bh\s*ợ\s*p\s*đ\s*ồ\s*ng\b/gi, 'hợp đồng'],
-        [/\bx\s*u\s*ấ\s*t\s*kh\s*ẩ\s*u\b/gi, 'xuất khẩu']
+    // 2. Phục hồi các âm tiết và nguyên âm tiếng Việt bị tách khoảng trắng do font kerning
+    const V_TONED = 'áàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ';
+    const V_TONED_ALL = V_TONED + V_TONED.toUpperCase();
+    const V_PLAIN = 'aăâeêioôơuưy';
+    const V_PLAIN_ALL = V_PLAIN + V_PLAIN.toUpperCase();
+    const ALL_V = V_PLAIN_ALL + V_TONED_ALL;
+
+    const ONSET = '(?:b|c|ch|d|đ|g|gh|gi|h|k|kh|l|m|n|ng|ngh|nh|p|ph|qu|r|s|t|th|tr|v|x)';
+    const CODA = '(?:ng|nh|ch|c|m|n|p|t)';
+
+    // Khôi phục nguyên âm ghép hợp lệ
+    s = s.replace(new RegExp(`([${V_PLAIN_ALL}])\\s+([${V_TONED_ALL}])`, 'g'), '$1$2');
+    s = s.replace(new RegExp(`([${V_TONED_ALL}])\\s+([${V_PLAIN_ALL}])`, 'g'), '$1$2');
+    s = s.replace(new RegExp(`([${V_PLAIN_ALL}])\\s+([${V_PLAIN_ALL}])`, 'g'), '$1$2');
+
+    for (let i = 0; i < 4; i++) {
+        // Vowel + space + Coda (Ưu tiên coda trước để bảo toàn âm tiết gốc)
+        s = s.replace(new RegExp(`([${ALL_V}])\\s+(${CODA})\\b`, 'gi'), '$1$2');
+        // Onset + space + Vowel
+        s = s.replace(new RegExp(`\\b(${ONSET})\\s+([${ALL_V}])`, 'gi'), '$1$2');
+        // Single onset letter + space + vowel
+        s = s.replace(new RegExp(`\\b([a-zA-ZĐđ]{1,3})\\s+([${ALL_V}])\\b`, 'g'), '$1$2');
+        // c h ỉ -> chỉ
+        s = s.replace(new RegExp(`\\b([a-zA-ZĐđ])\\s+([a-zA-ZĐđ])\\s+([${ALL_V}])\\b`, 'g'), '$1$2$3');
+    }
+
+    // Đảm bảo các từ hai nguyên âm có dấu không bao giờ dính nhau (như 'Dựán' -> 'Dự án')
+    s = s.replace(new RegExp(`([${V_TONED_ALL}])([${V_TONED_ALL}])`, 'g'), '$1 $2');
+
+    // 3. Tách ranh giới câu, dấu câu và các trường hợp dính chữ
+    const V_LOWER = 'a-zàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ';
+    const V_UPPER = 'A-ZÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ';
+    const ALL_CHARS = V_LOWER + V_UPPER;
+
+    s = s.replace(new RegExp(`([\\)\\%\\,\\;\\:\\/])([${ALL_CHARS}])`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`(\\.)([${V_UPPER}])`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`([${V_LOWER}])([${V_UPPER}][${V_LOWER}]+)`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`([${V_UPPER}]{2,})([${V_LOWER}]{2,})`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`([${V_LOWER}]{2,})([${V_UPPER}]{2,})`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`([${ALL_CHARS}])(\\d)`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`(\\d)([${ALL_CHARS}])`, 'g'), '$1 $2');
+    s = s.replace(new RegExp(`([${ALL_CHARS}])([đĐ][${V_LOWER}]+)`, 'g'), '$1 $2');
+
+    // 4. Tách các từ ghép tiếng Việt bị dính liền do PDF font kerning / thiếu khoảng trắng
+    const mergedPairs = [
+        ['giáchủ', 'giá chủ'], ['suở', 'su ở'], ['Rủiro', 'Rủi ro'], ['rocần', 'ro cần'],
+        ['thâmhụtước', 'thâm hụt ước'], ['hụtước', 'hụt ước'], ['thâmhụt', 'thâm hụt'],
+        ['hụtcước', 'hụt ước'], ['từsản', 'từ sản'], ['thuhoạt', 'thu hoạt'],
+        ['chínhtăng', 'chính tăng'], ['vàsản', 'và sản'], ['củngcố', 'củng cố'],
+        ['cốvị', 'cố vị'], ['thếhưởng', 'thế hưởng'], ['giáhấp', 'giá hấp'],
+        ['vịthế', 'vị thế'], ['hưởnglợi', 'hưởng lợi'], ['hấpdẫn', 'hấp dẫn'],
+        ['giáhấpdẫn', 'giá hấp dẫn'], ['Định giáhấpdẫn', 'Định giá hấp dẫn'],
+        ['hạngắn', 'hạn gắn'], ['lượngmủ', 'lượng mủ'], ['mủdự', 'mủ dự'],
+        ['vàsầu', 'và sầu'], ['riêngtrước', 'riêng trước'], ['kỳtăng', 'kỳ tăng'],
+        ['mớitừ', 'mới từ'], ['xuhướngtăng', 'xu hướng tăng'], ['hướngtăng', 'hướng tăng'],
+        ['tăngngắn', 'tăng ngắn'], ['hạnmạnh', 'hạn mạnh'], ['ảnhhưởngsản', 'ảnh hưởng sản'],
+        ['sẽcòn', 'sẽ còn'], ['hỗtrợ', 'hỗ trợ'], ['tôigiả', 'tôi giả'],
+        ['cơcấu', 'cơ cấu'], ['cấunăm', 'cấu năm'], ['nămthứ', 'năm thứ'], ['liêntiếp', 'liên tiếp'],
+        ['hụtcước', 'hụt ước'], ['ước tính', 'ước tính'], ['nghìntấn', 'nghìn tấn'],
+        ['suygiảm', 'suy giảm'], ['giảmchủ', 'giảm chủ'], ['chủyếu', 'chủ yếu'], ['yếutại', 'yếu tại'],
+        ['câytrồng', 'cây trồng'], ['trồngmới', 'trồng mới'], ['mớicần', 'mới cần'],
+        ['nămmới', 'năm mới'], ['khóphục', 'khó phục'], ['phụchồi', 'phục hồi'],
+        ['dùgiá', 'dù giá'], ['giáđã', 'giá đã'], ['Cầutăng', 'Cầu tăng'], ['tăngvừa', 'tăng vừa'],
+        ['vừaphải', 'vừa phải'], ['phảinhưng', 'phải nhưng'], ['nhưngít', 'nhưng ít'],
+        ['giáchủ', 'giá chủ'], ['cungquyết', 'cung quyết'], ['quyếtđịnh', 'quyết định'],
+        ['nguyênmức', 'nguyên mức'], ['mứccộng', 'mức cộng'], ['cộngthêm', 'cộng thêm'],
+        ['thêmtối', 'thêm tối'], ['tốithiểu', 'tối thiểu'], ['đạtchứng', 'đạt chứng'],
+        ['chứngchỉ', 'chứng chỉ'], ['đạtchuẩn', 'đạt chuẩn'], ['chuẩnvới', 'chuẩn với'],
+        ['nhưngmới', 'nhưng mới'], ['mớichiếm', 'mới chiếm'], ['sảnlượng', 'sản lượng'],
+        ['lượngnên', 'lượng nên'], ['Dưđịa', 'Dư địa'], ['địanằm', 'địa nằm'],
+        ['nằmở', 'nằm ở'], ['tỷtrọng', 'tỷ trọng'], ['ápdụng', 'áp dụng'],
+        ['dụngtừ', 'dụng từ'], ['chúngtôi', 'chúng tôi'], ['tôidự', 'tôi dự'],
+        ['dựphóng', 'dự phóng'], ['doanhthu', 'doanh thu'], ['thucủa', 'thu của'],
+        ['vàlãi', 'và lãi'], ['lãiròng', 'lãi ròng'], ['đạtkhoảng', 'đạt khoảng'],
+        ['giảđịnh', 'giả định'], ['tíchcực', 'tích cực'], ['sovới', 'so với'],
+        ['trungbình', 'trung bình'], ['Triểnvọng', 'Triển vọng'], ['dàihạn', 'dài hạn'],
+        ['ngắnhạn', 'ngắn hạn'], ['gắnvới', 'gắn với'], ['chukỳ', 'chu kỳ'],
+        ['dựkiến', 'dự kiến'], ['kiếngiảm', 'kiến giảm'], ['đượcbù', 'được bù'],
+        ['bùđắp', 'bù đắp'], ['đắpbởi', 'đắp bởi'], ['bởinguồn', 'bởi nguồn'],
+        ['nguồnthu', 'nguồn thu'], ['thutừ', 'thu từ'], ['sầuriêng', 'sầu riêng'],
+        ['trướckhi', 'trước khi'], ['khibước', 'khi bước'], ['bướcvào', 'bước vào'],
+        ['tăngtrưởngmới', 'tăng trưởng mới'], ['từnăm', 'từ năm'], ['nhờvườn', 'nhờ vườn'],
+        ['xuhướng', 'xu hướng'], ['mạnhmẽ', 'mạnh mẽ'], ['khibứt', 'khi bứt'],
+        ['bứtphá', 'bứt phá'], ['dứtkhoát', 'dứt khoát'], ['caocủa', 'cao của'],
+        ['thanhkhoản', 'thanh khoản'], ['Độnglực', 'Động lực'], ['chínhđến', 'chính đến'],
+        ['đếntừ', 'đến từ'], ['tiêuthụ', 'tiêu thụ'], ['thụtăng', 'thụ tăng'],
+        ['tăngmạnh', 'tăng mạnh'], ['baogồm', 'bao gồm'], ['hàngtồn', 'hàng tồn'],
+        ['tồnkho', 'tồn kho'], ['tíchlũy', 'tích lũy'], ['lũycuối', 'lũy cuối'],
+        ['trongbối', 'trong bối'], ['bốicảnh', 'bối cảnh'], ['suở', 'su ở'],
+        ['biênlợi', 'biên lợi'], ['lợinhuận', 'lợi nhuận'], ['nhuậngộp', 'nhuận gộp'],
+        ['gộpcải', 'gộp cải'], ['cảithiện', 'cải thiện'], ['cùngkỳ', 'cùng kỳ'],
+        ['kếthợp', 'kết hợp'], ['hoạtđộng', 'hoạt động'], ['tănggấp', 'tăng gấp'],
+        ['gấpđôi', 'gấp đôi'], ['tổngdiện', 'tổng diện'], ['diệntích', 'diện tích'],
+        ['sẽđược', 'sẽ được'], ['đượctrình', 'được trình'], ['tốiđa', 'tối đa'],
+        ['sẽgiảm', 'sẽ giảm'], ['giảmdần', 'giảm dần'], ['Rủiro', 'Rủi ro'],
+        ['Thờitiết', 'Thời tiết'], ['ảnhhưởng', 'ảnh hưởng'], ['thuhoạch', 'thu hoạch'],
+        ['Nhàmáy', 'Nhà máy'], ['chếbiến', 'chế biến'], ['từda', 'từ da'],
+        ['khótính', 'khó tính'], ['giátrị', 'giá trị'], ['mởrộng', 'mở rộng'],
+        ['phágiá', 'phá giá'], ['kỳrà', 'rà soát'], ['ràsoát', 'rà soát'],
+        ['BộThương', 'Bộ Thương'], ['thứcăn', 'thức ăn'], ['khôdầu', 'khô dầu'],
+        ['giávốn', 'giá vốn'], ['tiêuthụthủy', 'tiêu thụ thủy'], ['thụthủy', 'thụ thủy'],
+        ['lễhội', 'lễ hội'], ['Giáxuất', 'Giá xuất'], ['vàtôm', 'và tôm'],
+        ['mẽtại', 'mẽ tại'], ['thịtrường', 'thị trường'], ['thịphần', 'thị phần'],
+        ['thuếchống', 'thuế chống'], ['vàdịch', 'và dịch'],
+        ['Tốiưu', 'Tối ưu'], ['phảnánh', 'phản ánh'], ['dựán', 'dự án'],
+        ['Địnhgiá', 'Định giá'], ['ĐịnhgiáP', 'Định giá P'], ['lợiích', 'lợi ích'],
+        ['hànghóa', 'hàng hóa'], ['kếhoạch', 'kế hoạch'], ['doanhnghiệp', 'doanh nghiệp'],
+        ['quặngsắt', 'quặng sắt'], ['lòcao', 'lò cao'], ['cổtức', 'cổ tức'],
+        ['tiềnmặt', 'tiền mặt'], ['chíphí', 'chi phí'], ['bánhàng', 'bán hàng'],
+        ['quảnlý', 'quản lý'], ['giáthép', 'giá thép'], ['tăngtrưởng', 'tăng trưởng'],
+        ['hồiphục', 'hồi phục'], ['sảnxuất', 'sản xuất'], ['kiểmsoát', 'kiểm soát'],
+        ['giáthành', 'giá thành'], ['phânphối', 'phân phối'], ['chínhsách', 'chính sách'],
+        ['bảohộ', 'bảo hộ'], ['thuếtựvệ', 'thuế tự vệ'], ['chốngbánphágiá', 'chống bán phá giá'],
+        ['nhậpkhẩu', 'nhập khẩu'], ['xuấtkhẩu', 'xuất khẩu'], ['thựchiện', 'thực hiện'],
+        ['xâydựng', 'xây dựng'], ['pháthành', 'phát hành']
     ];
-    for (const [pat, rep] of patterns) {
-        s = s.replace(pat, rep);
+    for (const [p, r] of mergedPairs) {
+        const reg = new RegExp(p, 'gi');
+        s = s.replace(reg, r);
     }
 
-    // 3. Chỉ ghép các ký tự đơn lẻ hoặc đoạn âm tiết bị ngắt rời (bắt buộc chặn biên từ \b để không dính các từ độc lập)
-    const vnAccent = '[áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]';
-    const regIso1 = new RegExp(`\\b([a-zA-ZđĐ]{1,2})\\s+(${vnAccent})\\b`, 'gi');
-    const regIso2 = new RegExp(`\\b(${vnAccent})\\s+([a-zA-ZđĐ]{1,2})\\b`, 'gi');
-    for (let i = 0; i < 3; i++) {
-        s = s.replace(regIso1, '$1$2');
-        s = s.replace(regIso2, '$1$2');
+    // 5. Khôi phục triệt để các cụm từ chuyên ngành tài chính
+    const fixes = [
+        [/\bc\s*ả\s+n\s*ư\s*ớ\s*c\b/gi, 'cả nước'],
+        [/\bc\s*ả\s+n\s*ư\s*ớ\./gi, 'cả nước.'],
+        [/\br\s*ộ\s*ng\s+h\s*ơ\s*n\b/gi, 'rộng hơn'],
+        [/\br\s*ộ\s*ng\s+h\s*ơ\./gi, 'rộng hơn.'],
+        [/\bh\s*ơ\s*n\b/gi, 'hơn'],
+        [/\bh\s*ơ\./gi, 'hơn.'],
+        [/\bth\s*ự\s*c\s*thi\b/gi, 'thực thi'],
+        [/\br\s*ủ\s*i\s*ro\b/gi, 'rủi ro'],
+        [/\bđ\s*ư\s*a\b/gi, 'đưa'],
+        [/\bđ\s*o\s*ạ\s*n\b/gi, 'đoạn'],
+        [/\bđ\s*á\s*nh\b/gi, 'đánh'],
+        [/\bb\s*ư\s*ớ\s*c\b/gi, 'bước'],
+        [/\btr\s*ư\s*ợ\s*t\b/gi, 'trượt'],
+        [/\bchuy\s*ệ\s*n\b/gi, 'chuyện'],
+        [/\bđ\s*ộ\s*i\s+v\s*ố\s*n\b/gi, 'đội vốn'],
+        [/\bth\s*u\s+h\s*ẹ\s*p\b/gi, 'thu hẹp'],
+        [/\bg\s*ầ\s*n\s+nh\s*ấ\s*t\b/gi, 'gần nhất'],
+        [/\bg\s*i\s*ả\s*m\s+d\s*ầ\s*n\b/gi, 'giảm dần'],
+        [/\bh\s*ấ\s*p\s+d\s*ẫ\s*n\b/gi, 'hấp dẫn'],
+        [/\bch\s*ế\s*bi\s*ế\s*n\b/gi, 'chế biến'],
+        [/\bd\s*ư\s*cung\b/gi, 'dư cung'],
+        [/\bd\s*ự\s*báo\b/gi, 'dự báo'],
+        [/\bđ\s*i\s*ể\s*m\b/gi, 'điểm'],
+        [/\bch\s*ỉ\b/gi, 'chỉ'],
+        [/\bv\s*ẫ\s*n\b/gi, 'vẫn'],
+        [/\bkh\s*ở\s*i\s+đ\s*ộ\s*ng\b/gi, 'khởi động'],
+        [/\bđ\s*ộ\s*c\s+qu\s*y\s*ề\s*n\b/gi, 'độc quyền'],
+        [/\bchính\s+sách\b/gi, 'chính sách'],
+        [/\bchi\s*ế\s*n\s+l\s*ư\s*ợ\s*c\b/gi, 'chiến lược'],
+        [/\bchuy\s*ể\s*n\s+nh\s*ư\s*ợ\s*ng\b/gi, 'chuyển nhượng'],
+        [/\bkh\s*ắ\s*c\s+ph\s*ụ\s*c\b/gi, 'khắc phục'],
+        [/\bđ\s*á\s*p\s+ứ\s*n\s*g\b/gi, 'đáp ứng'],
+        [/\bchi\s+ph\s*ố\s*i\b/gi, 'chi phối'],
+        [/\bđ\s*ạ\s*i\s+chúng\b/gi, 'đại chúng'],
+        [/\bch\s*ủ\s+y\s*ế\s*u\b/gi, 'chủ yếu'],
+        [/\bc\s*ơ\s+s\s*ở\b/gi, 'cơ sở'],
+        [/\bv\s*ư\s*ợ\s*t\b/gi, 'vượt'],
+        [/\bc\s*ổ\s+t\s*ứ\s*c\b/gi, 'cổ tức'],
+        [/\bt\s*ự\s+do\b/gi, 'tự do'],
+        [/\bt\s*ự\b/gi, 'tự'],
+        [/\bs\s*ố\s+l\s*i\s*ệ\s*u\b/gi, 'số liệu'],
+        [/\bli\s*ệ\s*u\b/gi, 'liệu'],
+        [/\bt\s*r\s*ư\s*ở\s*n\s*g\b/gi, 'trưởng'],
+        [/\bc\s*ả\s*i\s+t\s*h\s*i\s*ệ\s*n\b/gi, 'cải thiện'],
+        [/\bc\s*ố\s+t\s+l\s*õ\s*i\b/gi, 'cốt lõi'],
+        [/\bs\s*ứ\s*c\s+é\s*p\b/gi, 'sức ép'],
+        [/\bt\s*r\s*ư\s*ớ\s*c\s+t\s*h\s*u\s*ế\b/gi, 'trước thuế'],
+        [/\bt\s*ổ\s*n\s*g\s+t\s*h\s*u\b/gi, 'tổng thu'],
+        [/\bl\s*ậ\s*p\s+đ\s*ỉ\s*n\s*h\b/gi, 'lập đỉnh'],
+        [/\bl\s*ị\s*c\s*h\s+s\s*ử\b/gi, 'lịch sử'],
+        [/\bs\s*ụ\s*t\s+g\s*i\s*ả\s*m\b/gi, 'sụt giảm'],
+        [/\bm\s*ặ\s*t\s+b\s*ằ\s*n\s*g\b/gi, 'mặt bằng'],
+        [/\bc\s*h\s*u\s+k\s*ỳ\b/gi, 'chu kỳ'],
+        [/\bt\s*h\s*u\s+h\s*ẹ\s*p\b/gi, 'thu hẹp'],
+        [/\bd\s*o\s*a\s*n\s*h\s+t\s*h\s*u\b/gi, 'doanh thu'],
+        [/\bt\s*ư\s+n\s*h\s*â\s*n\b/gi, 'tư nhân'],
+        [/\bh\s*ợ\s*p\s+n\s*h\s*ấ\s*t\b/gi, 'hợp nhất'],
+        [/\bchâuÁ\b/gi, 'châu Á'],
+        [/\bDựán\b/gi, 'Dự án'],
+        [/\bchuẩ\s*n\b/gi, 'chuẩn'],
+        [/\bEuro\s*V\b/gi, 'Euro V'],
+        [/\bĐỔI\s+TÊN\b/gi, 'Đổi tên'],
+    ];
+    for (const [p, r] of fixes) {
+        s = s.replace(p, r);
     }
 
-    return s.replace(/\s+/g, ' ').trim();
+    // Chuẩn hóa lại các tiêu đề
+    s = s.replace(/\bTÓM TẮT NHẬN ĐỊNH\s*:*:?\s*/gi, 'TÓM TẮT NHẬN ĐỊNH: ');
+    s = s.replace(/\bLUẬN (?:ĐIỂM|điểm) ĐẦU TƯ\s*:*:?\s*/gi, 'LUẬN ĐIỂM ĐẦU TƯ: ');
+    s = s.replace(/\bRỦI RO CHÍNH\s*:*:?\s*/gi, 'RỦI RO CHÍNH: ');
+    s = s.replace(/\bRỦI RO\s*:+:?\s*/gi, 'RỦI RO: ');
+
+    // Làm sạch tiền tố tiêu đề và số đếm thừa dạng "01", "02" ở đầu câu
+    s = s.replace(/^(?:LUẬN\s*(?:ĐIỂM|điểm)\s*ĐẦU\s*TƯ\s*[:\-]?\s*(?:0[1-9]|[1-9])?\s*:?|ĐIỂM\s*NHẤN\s*[:\-]?\s*(?:0[1-9]|[1-9])?\s*:?)\s*/gi, '');
+    s = s.replace(/^(?:RỦI\s*RO\s*CHÍNH\s*[:\-]?\s*(?:0[1-9]|[1-9])?\s*:?|RỦI\s*RO\s*[:\-]\s*(?:0[1-9]|[1-9])?\s*:?)\s*/gi, '');
+    s = s.replace(/^(?:0[1-9]|[1-9])\s*[:\.\-]?\s*/g, '');
+
+    s = s.replace(/\s+/g, ' ').trim();
+    if (s.length > 0) {
+        s = s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    return s;
 }
 
 /**
@@ -349,17 +462,18 @@ function extractRobustFinancialSentences(text) {
         }
     });
 
-    // 4. Loại bỏ mẩu cụt từ và chuẩn hóa câu
+    // 4. Chuẩn hóa câu trọn vẹn và bảo toàn đầy đủ ý nghĩa
     const finalSentences = [];
     healed.forEach(s => {
         let sc = s.replace(/\.{3,}$/, '').trim();
-        if (sc.length < 25) return;
+        if (sc.length < 20) return;
+        // Chỉ loại bỏ nếu từ cuối cùng là ký tự rác đơn lẻ (như số trang hay ký tự đặc biệt thừa)
         const words = sc.split(' ');
-        if (words.length > 0 && words[words.length - 1].length <= 2 && !['x', 'đ', 'tỷ', 'vốn', 'mỏ'].includes(words[words.length - 1].toLowerCase())) {
+        if (words.length > 3 && words[words.length - 1].length === 1 && !/[0-9a-zA-Zà-ỹÀ-Ỹ]/.test(words[words.length - 1])) {
             words.pop();
             sc = words.join(' ').trim();
         }
-        if (sc.length < 25) return;
+        if (sc.length < 20) return;
         sc = sc.charAt(0).toUpperCase() + sc.slice(1);
         if (!/[\.\?!]$/.test(sc)) {
             sc += '.';
@@ -397,6 +511,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const techTab = document.getElementById("tab-technical");
             if (techTab && !techTab.classList.contains("hidden")) {
                 syncTechnicalDataRealtime(activeTicker);
+            }
+
+            // Tự động cập nhật nến trực tiếp cho Biểu đồ Bộ lọc cổ phiếu mỗi 3 giây
+            const screenerTab = document.getElementById("tab-screener");
+            if (screenerTab && !screenerTab.classList.contains("hidden")) {
+                const scTicker = screenerCurrentTicker || (document.getElementById("screener-symbol-input") && document.getElementById("screener-symbol-input").value) || activeTicker;
+                if (scTicker && typeof syncScreenerCandleRealtime === "function") {
+                    syncScreenerCandleRealtime(scTicker);
+                }
             }
         } catch(e) { console.warn("live sync error:", e); }
     }, 3000);
@@ -636,6 +759,10 @@ function switchTab(tabId) {
                 if (typeof resizeScreenerCharts === "function") {
                     resizeScreenerCharts();
                 }
+                const scTicker = screenerCurrentTicker || (document.getElementById("screener-symbol-input") && document.getElementById("screener-symbol-input").value) || getActiveTicker();
+                if (scTicker && typeof syncScreenerCandleRealtime === "function") {
+                    syncScreenerCandleRealtime(scTicker);
+                }
             }
         }, 60);
     }
@@ -731,6 +858,9 @@ function switchTab(tabId) {
         }
         if (chartPeBands) chartPeBands.resize();
         if (chartPbBands) chartPbBands.resize();
+        if (valuationActiveSubtab === "filter" && !dividendFilterLoaded && !dividendFilterLoading) {
+            loadDividendCorporateActionsData();
+        }
     }
     if (tabId === "tab-technical") {
         onSwitchToTechnicalTab();
@@ -1107,6 +1237,27 @@ function renderQuickProfileHeader(prof) {
         desc.textContent = prof.description;
         desc.classList.add("line-clamp-3");
     }
+}
+
+function parseDateToTimestamp(dStr) {
+    if (!dStr || typeof dStr !== "string") return 0;
+    const clean = dStr.trim();
+    const m = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10)).getTime();
+    const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) return new Date(clean).getTime() || 0;
+    const my = clean.match(/(\d{1,2})\/(\d{4})/);
+    if (my) return new Date(parseInt(my[2], 10), parseInt(my[1], 10) - 1, 1).getTime();
+    const y = clean.match(/\b(20\d\d)\b/);
+    if (y) return new Date(parseInt(y[1], 10), 0, 1).getTime();
+    return 0;
+}
+
+function isReportOlderThanDays(dStr, maxDays = 548) {
+    const ts = parseDateToTimestamp(dStr);
+    if (!ts) return false;
+    const diffDays = (Date.now() - ts) / (1000 * 60 * 60 * 24);
+    return diffDays > maxDays;
 }
 
 /**
@@ -1546,12 +1697,16 @@ async function selectTicker(ticker) {
     const input = document.getElementById("central-ticker-input");
     if (input) input.value = cleanTicker;
 
-    // Đồng bộ tức thì Biểu đồ Kỹ thuật trong Tab Bộ lọc Cổ phiếu (Cột 3)
+    // Đồng bộ tức thì Biểu đồ Kỹ thuật trong Tab Bộ lọc Cổ phiếu (Cột 3) nếu đang khác mã
     try {
         if (typeof selectScreenerTicker === "function") {
-            selectScreenerTicker(cleanTicker, false);
+            if (typeof screenerCurrentTicker === "undefined" || screenerCurrentTicker !== cleanTicker) {
+                selectScreenerTicker(cleanTicker, false);
+            }
         } else if (typeof loadScreenerChartData === "function") {
-            loadScreenerChartData(cleanTicker);
+            if (typeof screenerCurrentTicker === "undefined" || screenerCurrentTicker !== cleanTicker) {
+                loadScreenerChartData(cleanTicker);
+            }
         }
     } catch (e) {
         console.warn("sync screener chart error:", e);
@@ -1717,7 +1872,17 @@ async function selectTicker(ticker) {
             // Tự động kiểm tra và đồng bộ hóa báo cáo từ nguồn Báo cáo Phân tích Doanh nghiệp nếu matrix_table còn rỗng
             if (reportData && (!reportData.matrix_table || reportData.matrix_table.length === 0)) {
                 try {
-                    const crRes = await fetch(`/api/company-reports?ticker=${cleanTicker}`);
+                    const [crRes, caRes] = await Promise.all([
+                        fetch(`/api/company-reports?ticker=${cleanTicker}`).catch(() => null),
+                        fetch(`/api/corporate-actions/${cleanTicker}`).catch(() => null)
+                    ]);
+                    let corporateActionsList = [];
+                    if (caRes && caRes.ok) {
+                        try {
+                            const caJson = await caRes.json();
+                            corporateActionsList = caJson.corporate_actions || [];
+                        } catch (e) {}
+                    }
                     if (crRes && crRes.ok) {
                         const crData = await crRes.json();
                         if (crData && crData.reports && crData.reports.length > 0) {
@@ -1737,9 +1902,16 @@ async function selectTicker(ticker) {
                                     return;
                                 }
 
+                                // 1.1 LOẠI BỎ TOÀN BỘ BÁO CÁO ĐÃ QUÁ 1.5 NĂM (> 548 NGÀY) ĐỂ TUÂN THỦ NGUYÊN TẮC FACT & DATA FIRST
+                                const repDate = rep.date || rep.ReleaseDate || "";
+                                if (isReportOlderThanDays(repDate, 548)) {
+                                    return;
+                                }
+
                                 seenInsts.add(inst.toLowerCase());
 
                                 const sourceText = rep.full_content || rep.snippet || repTitle || "";
+                                const curP = reportData.current_price || 25000;
                                 let tp = 0;
                                 const tpMatch = repTitle.match(/(\d{1,3}(?:[.,]\d{3})+)\s*(?:đồng|đ|vnd)/i);
                                 if (tpMatch) {
@@ -1752,21 +1924,111 @@ async function selectTicker(ticker) {
                                         if (parsed > 10000) tp = parsed;
                                     }
                                 }
+
+                                // Bóc tách Khuyến nghị thông minh, ưu tiên Tiêu đề và loại bỏ ngữ cảnh kinh doanh ("giá bán", "sản lượng bán", "bán lẻ", ...)
                                 let rec = "MUA";
-                                const tUpper = (repTitle + " " + sourceText).toUpperCase();
-                                if (tUpper.includes("KHẢ QUAN") || tUpper.includes("OUTPERFORM")) rec = "KHẢ QUAN";
-                                else if (tUpper.includes("TÍCH LŨY") || tUpper.includes("ACCUMULATE")) rec = "TÍCH LŨY";
-                                else if (tUpper.includes("NẮM GIỮ") || tUpper.includes("HOLD") || tUpper.includes("TRUNG LẬP")) rec = "NẮM GIỮ";
-                                else if (tUpper.includes("BÁN") || tUpper.includes("SELL")) rec = "BÁN";
+                                const titleUpper = (repTitle || "").toUpperCase();
+                                const cleanTextForSell = (sourceText || "")
+                                    .toUpperCase()
+                                    .replace(/\b(GIÁ BÁN|SẢN LƯỢNG BÁN|KÊNH BÁN|ĐIỂM BÁN|CHI PHÍ BÁN|BÁN LẺ|BÁN BUÔN|BÁN HÀNG|HÀNG BÁN|DOANH SỐ BÁN|MẶT HÀNG BÁN|BÁN RA|BÁN NIÊM YẾT)\b/g, " ");
 
-                                let cats = extractRobustFinancialSentences(sourceText);
-                                if (cats.length === 0 && rep.snippet) {
-                                    cats = extractRobustFinancialSentences(rep.snippet);
+                                if (titleUpper.includes("MUA MẠNH") || titleUpper.includes("STRONG BUY")) {
+                                    rec = "MUA MẠNH";
+                                } else if (titleUpper.includes("MUA") || titleUpper.includes("BUY")) {
+                                    rec = "MUA";
+                                } else if (titleUpper.includes("KHẢ QUAN") || titleUpper.includes("OUTPERFORM") || titleUpper.includes("TÍCH CỰC") || titleUpper.includes("POSITIVE")) {
+                                    rec = "KHẢ QUAN";
+                                } else if (titleUpper.includes("TÍCH LŨY") || titleUpper.includes("TÍCH LUỸ") || titleUpper.includes("ACCUMULATE")) {
+                                    rec = "TÍCH LŨY";
+                                } else if (titleUpper.includes("TRUNG LẬP") || titleUpper.includes("NEUTRAL") || titleUpper.includes("MARKET PERFORM")) {
+                                    rec = "TRUNG LẬP";
+                                } else if (titleUpper.includes("NẮM GIỮ") || titleUpper.includes("HOLD")) {
+                                    rec = "NẮM GIỮ";
+                                } else if (titleUpper.includes("KHUYẾN NGHỊ BÁN") || titleUpper.includes("GIẢM TỶ TRỌNG") || titleUpper.includes("HẠ TỶ TRỌNG") || titleUpper.includes("UNDERPERFORM")) {
+                                    rec = "BÁN";
+                                } else {
+                                    const recContextMatch = sourceText.match(/(?:khuyến nghị|đánh giá|recommendation|tín hiệu)[:\s]*(MUA\s*MẠNH|STRONG\s*BUY|MUA|BUY|KHẢ\s*QUAN|OUTPERFORM|TÍCH\s*LŨY|ACCUMULATE|NẮM\s*GIỮ|HOLD|TRUNG\s*LẬP|NEUTRAL|BÁN|SELL|GIẢM\s*TỶ\s*TRỌNG)/i);
+                                    if (recContextMatch) {
+                                        const rawFound = recContextMatch[1].toUpperCase();
+                                        if (rawFound.includes("MUA MẠNH") || rawFound.includes("STRONG BUY")) rec = "MUA MẠNH";
+                                        else if (rawFound.includes("MUA") || rawFound.includes("BUY")) rec = "MUA";
+                                        else if (rawFound.includes("KHẢ QUAN") || rawFound.includes("OUTPERFORM")) rec = "KHẢ QUAN";
+                                        else if (rawFound.includes("TÍCH LŨY") || rawFound.includes("ACCUMULATE")) rec = "TÍCH LŨY";
+                                        else if (rawFound.includes("NẮM GIỮ") || rawFound.includes("HOLD")) rec = "NẮM GIỮ";
+                                        else if (rawFound.includes("TRUNG LẬP") || rawFound.includes("NEUTRAL")) rec = "TRUNG LẬP";
+                                        else if (rawFound.includes("BÁN") || rawFound.includes("SELL") || rawFound.includes("GIẢM TỶ TRỌNG")) rec = "BÁN";
+                                    } else {
+                                        const fullUpper = (titleUpper + " " + cleanTextForSell);
+                                        if (fullUpper.includes("KHẢ QUAN") || fullUpper.includes("OUTPERFORM")) rec = "KHẢ QUAN";
+                                        else if (fullUpper.includes("TÍCH LŨY") || fullUpper.includes("ACCUMULATE")) rec = "TÍCH LŨY";
+                                        else if (fullUpper.includes("NẮM GIỮ") || fullUpper.includes("HOLD") || fullUpper.includes("TRUNG LẬP")) rec = "NẮM GIỮ";
+                                        else if (fullUpper.includes("KHUYẾN NGHỊ BÁN") || fullUpper.includes("SELL") || fullUpper.includes("GIẢM TỶ TRỌNG")) rec = "BÁN";
+                                        else rec = "MUA";
+                                    }
                                 }
-                                if (cats.length === 0) cats.push(`Báo cáo phân tích định giá ${cleanTicker} từ ${inst}.`);
 
-                                const curP = reportData.current_price || 25000;
-                                const upPct = (tp > 0 && curP > 0) ? Math.round(((tp - curP) / curP) * 1000) / 10 : null;
+                                // Sanity Check: Nếu Target Price > Thị giá (Upside >= 5%), tuyệt đối không cho phép khuyến nghị BÁN nếu tiêu đề không nêu rõ
+                                if (rec === "BÁN" && tp > 0 && curP > 0 && ((tp - curP) / curP) >= 0.05) {
+                                    if (!titleUpper.includes("BÁN") && !titleUpper.includes("GIẢM TỶ TRỌNG")) {
+                                        rec = "MUA";
+                                    }
+                                }
+
+                                const isBoilerplateSentence = (txt) => {
+                                    if (!txt || typeof txt !== "string") return true;
+                                    const tl = txt.toLowerCase();
+                                    if (/^(?:chúng tôi\s+)?(?:duy trì|lặp lại|nâng|hạ|đưa ra)?\s*khuyến nghị\s+(?:mua|bán|khả quan|nắm giữ|trung lập|theo dõi|tích lũy)/i.test(tl)) return true;
+                                    if (tl.includes("giá mục tiêu") || tl.includes("tiềm năng tăng giá") || tl.includes("phương pháp sotp") || tl.includes("phương pháp dcf") || tl.includes("tỷ lệ chiết khấu")) return true;
+                                    if (tl.startsWith("báo cáo phân tích") || tl.startsWith("công ty chứng khoán") || tl.includes("vui lòng xem chi tiết")) return true;
+                                    return false;
+                                };
+
+                                let cats = extractRobustFinancialSentences(sourceText).filter(s => !isBoilerplateSentence(s));
+                                if (cats.length === 0 && rep.snippet) {
+                                    cats = extractRobustFinancialSentences(rep.snippet).filter(s => !isBoilerplateSentence(s));
+                                }
+                                if (cats.length === 0) cats.push(`Triển vọng kinh doanh và dự án trọng điểm của ${cleanTicker} theo phân tích từ ${inst}.`);
+
+                                const repTs = parseDateToTimestamp(repDate);
+                                let isPriceAdjusted = false;
+                                let adjustedTp = tp;
+                                let adjNotes = [];
+                                if (tp > 0 && repTs > 0 && corporateActionsList && corporateActionsList.length > 0) {
+                                    const nowTs = Date.now();
+                                    const sortedCas = [...corporateActionsList].sort((a, b) => {
+                                        const tsa = parseDateToTimestamp(a.ex_date);
+                                        const tsb = parseDateToTimestamp(b.ex_date);
+                                        return tsa - tsb;
+                                    });
+                                    let currTp = tp;
+                                    for (const ev of sortedCas) {
+                                        const exTs = parseDateToTimestamp(ev.ex_date);
+                                        if (exTs > 0 && repTs < exTs && exTs <= nowTs) {
+                                            const dCash = Number(ev.cash_amount || 0);
+                                            const beta = Number(ev.stock_ratio || 0);
+                                            const alpha = Number(ev.rights_ratio || 0);
+                                            const pIssue = Number(ev.rights_price || 0);
+                                            const effectiveRightsVal = (alpha > 0 && (currTp <= 0 || pIssue < currTp)) ? (pIssue * alpha) : 0.0;
+                                            const effectiveAlpha = (alpha > 0 && (currTp <= 0 || pIssue < currTp)) ? alpha : 0.0;
+                                            const denom = 1.0 + beta + effectiveAlpha;
+                                            if (denom > 0 && currTp > 0) {
+                                                const pAdj = Math.max(100.0, (currTp - dCash + effectiveRightsVal) / denom);
+                                                if (pAdj < currTp - 0.01) {
+                                                    currTp = pAdj;
+                                                    isPriceAdjusted = true;
+                                                    adjNotes.push(`Đ/C GDKHQ ${ev.ex_date}: ${ev.title || ev.event_type || 'Quyền'}`);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (isPriceAdjusted) {
+                                        adjustedTp = Math.round(currTp);
+                                    }
+                                }
+
+                                const effTpForUpside = (isPriceAdjusted && adjustedTp > 0) ? adjustedTp : tp;
+                                const upPct = (effTpForUpside > 0 && curP > 0) ? Math.round(((effTpForUpside - curP) / curP) * 1000) / 10 : null;
+                                const rawUpPct = (tp > 0 && curP > 0) ? Math.round(((tp - curP) / curP) * 1000) / 10 : null;
 
                                 // 2. Bóc tách Doanh thu & LNST dự phóng thực tế từ bài viết (Ưu tiên số cả năm / FY)
                                 let revForecast = (rep.revenue_forecast && rep.revenue_forecast !== "—") ? rep.revenue_forecast : "";
@@ -1903,6 +2165,10 @@ async function selectTicker(ticker) {
                                     report_date: rep.date || new Date().toLocaleDateString('vi-VN'),
                                     recommendation: rec,
                                     target_price: tp,
+                                    adjusted_target_price: isPriceAdjusted ? adjustedTp : null,
+                                    is_price_adjusted: isPriceAdjusted,
+                                    adjustment_notes: adjNotes,
+                                    unadjusted_upside_percent: isPriceAdjusted ? rawUpPct : null,
                                     current_price_at_report: curP,
                                     upside_percent: upPct,
                                     pe_forward: peFwd,
@@ -1917,16 +2183,73 @@ async function selectTicker(ticker) {
                             });
                             if (newMatrixItems.length > 0) {
                                 reportData.matrix_table = newMatrixItems;
-                                const validTps = newMatrixItems.filter(x => x.target_price > 0).map(x => x.target_price);
+                                const validTps = newMatrixItems.filter(x => x.target_price > 0).map(x => (x.is_price_adjusted && x.adjusted_target_price) ? x.adjusted_target_price : x.target_price);
+                                const rawValidTps = newMatrixItems.filter(x => x.target_price > 0).map(x => x.target_price);
                                 if (validTps.length > 0) {
                                     const meanTp = Math.round(validTps.reduce((a, b) => a + b, 0) / validTps.length);
+                                    const rawMeanTp = Math.round(rawValidTps.reduce((a, b) => a + b, 0) / rawValidTps.length);
+                                    const sortedTps = [...validTps].sort((a, b) => a - b);
+                                    const midIdx = Math.floor(sortedTps.length / 2);
+                                    const medianTp = (sortedTps.length % 2 !== 0) 
+                                        ? sortedTps[midIdx] 
+                                        : Math.round((sortedTps[midIdx - 1] + sortedTps[midIdx]) / 2);
+
                                     reportData.consensus_summary.mean_target_price = meanTp;
+                                    reportData.consensus_summary.raw_mean_target_price = rawMeanTp;
+                                    reportData.consensus_summary.median_target_price = medianTp;
                                     reportData.consensus_summary.min_target_price = Math.min(...validTps);
                                     reportData.consensus_summary.max_target_price = Math.max(...validTps);
                                     const curP = reportData.current_price || 25000;
-                                    reportData.consensus_summary.average_upside = Math.round(((meanTp - curP) / curP) * 1000) / 10;
-                                    reportData.consensus_summary.consensus_rating = "MUA / KHẢ QUAN (Bullish Consensus)";
+                                    const avgUp = Math.round(((meanTp - curP) / curP) * 1000) / 10;
+                                    reportData.consensus_summary.average_upside = avgUp;
+                                    reportData.consensus_summary.market_to_fair_value_ratio = Math.round((curP / meanTp) * 1000) / 10;
+                                    const spreadPct = Math.round(((Math.max(...validTps) - Math.min(...validTps)) / Math.min(...validTps)) * 1000) / 10;
+                                    reportData.consensus_summary.target_price_spread_percent = spreadPct;
+                                    const hasAdj = newMatrixItems.some(x => x.is_price_adjusted);
+                                    reportData.consensus_summary.is_corporate_action_adjusted = hasAdj;
+                                    reportData.consensus_summary.has_price_adjustment = hasAdj;
+                                    reportData.consensus_summary.adjusted_reports_count = newMatrixItems.filter(x => x.is_price_adjusted).length;
+                                    if (corporateActionsList && corporateActionsList.length > 0) {
+                                        reportData.corporate_actions = corporateActionsList;
+                                        reportData.consensus_summary.applied_corporate_actions = corporateActionsList;
+                                    }
+
+                                    // Tính consensus_score (1.0 - 5.0) chuẩn xác theo tỷ lệ khuyến nghị của các tổ chức
+                                    let buyVotes = 0, holdVotes = 0, sellVotes = 0;
+                                    newMatrixItems.forEach(it => {
+                                        const rU = (it.recommendation || "").toUpperCase();
+                                        if (rU.includes("MUA") || rU.includes("KHẢ QUAN") || rU.includes("TÍCH LŨY") || rU.includes("BUY")) buyVotes++;
+                                        else if (rU.includes("BÁN") || rU.includes("SELL") || rU.includes("GIẢM TỶ TRỌNG")) sellVotes++;
+                                        else holdVotes++;
+                                    });
+                                    const totalVotes = buyVotes + holdVotes + sellVotes;
+                                    let calculatedScore = 4.5;
+                                    if (totalVotes > 0) {
+                                        calculatedScore = Math.round(((buyVotes * 5.0 + holdVotes * 3.0 + sellVotes * 1.0) / totalVotes) * 10) / 10;
+                                    } else if (avgUp >= 20.0) {
+                                        calculatedScore = 5.0;
+                                    } else if (avgUp >= 10.0) {
+                                        calculatedScore = 4.2;
+                                    }
+                                    reportData.consensus_summary.consensus_score = calculatedScore;
+
+                                    if (avgUp >= 20.0) {
+                                        reportData.consensus_summary.consensus_rating = "KỲ VỌNG TĂNG GIÁ RẤT MẠNH";
+                                    } else if (avgUp >= 10.0) {
+                                        reportData.consensus_summary.consensus_rating = "KỲ VỌNG TĂNG GIÁ MẠNH";
+                                    } else if (avgUp >= 0.0) {
+                                        reportData.consensus_summary.consensus_rating = "KHẢ QUAN / TÍCH LŨY";
+                                    } else {
+                                        reportData.consensus_summary.consensus_rating = "CHÚ Ý GẦN KỲ VỌNG GIÁ";
+                                    }
+
                                     reportData.consensus_summary.recommended_buy_zone = `${(curP * 0.95).toLocaleString('vi-VN')} - ${(curP * 1.02).toLocaleString('vi-VN')} VND`;
+                                    reportData.consensus_summary.stop_loss_threshold = `Thủng mốc ${(curP * 0.90).toLocaleString('vi-VN')} VND hoặc khi các giả định tăng trưởng cốt lõi bị vi phạm`;
+                                    reportData.consensus_summary.key_triggers = [
+                                        `Theo dõi số liệu doanh thu và lợi nhuận ròng công bố định kỳ từng quý của ${cleanTicker} so với mức dự phóng trung bình (${meanTp.toLocaleString('vi-VN')} VND).`,
+                                        `Tiến độ giải ngân CAPEX và ngày vận hành thương mại thực tế của các dự án trọng điểm.`,
+                                        `Biến động giá nguyên vật liệu đầu vào và các chính sách thuế bảo hộ thương mại liên quan.`
+                                    ];
                                 }
                                 // Đồng bộ hóa các luận điểm Catalysts và Rủi ro đồng thuận trực tiếp từ danh sách CTCK
                                 const allSyncCats = [];
@@ -1935,16 +2258,16 @@ async function selectTicker(ticker) {
                                     (item.key_catalysts || []).forEach(c => {
                                         if (!c || typeof c !== 'string') return;
                                         const cFormatted = cleanVietnameseFontSpacing(c);
-                                        if (isTableOrGarbageDump(cFormatted)) return;
+                                        if (isTableOrGarbageDump(cFormatted) || isTechnicalOrInvalidCatalyst(cFormatted) || isCrossContaminatedCatalyst(cleanTicker, cFormatted)) return;
                                         const cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                                        if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !allSyncCats.includes(cClean)) allSyncCats.push(cClean);
+                                        if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !isTechnicalOrInvalidCatalyst(cClean) && !isCrossContaminatedCatalyst(cleanTicker, cClean) && !allSyncCats.includes(cClean)) allSyncCats.push(cClean);
                                     });
                                     (item.key_risks || []).forEach(k => {
                                         if (!k || typeof k !== 'string') return;
                                         const kFormatted = cleanVietnameseFontSpacing(k);
-                                        if (isTableOrGarbageDump(kFormatted)) return;
+                                        if (isTableOrGarbageDump(kFormatted) || isTechnicalOrInvalidCatalyst(kFormatted) || isCrossContaminatedCatalyst(cleanTicker, kFormatted)) return;
                                         const kClean = kFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                                        if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !allSyncRisks.includes(kClean)) allSyncRisks.push(kClean);
+                                        if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !isTechnicalOrInvalidCatalyst(kClean) && !isCrossContaminatedCatalyst(cleanTicker, kClean) && !allSyncRisks.includes(kClean)) allSyncRisks.push(kClean);
                                     });
                                 });
                                 reportData.consensus_summary.consensual_catalysts = allSyncCats.slice(0, 15);
@@ -2071,6 +2394,48 @@ function renderAll(report) {
     if (window.lucide) lucide.createIcons();
 }
 
+function getConsensusRecommendationText(upside, hasValidValuation) {
+    if (!hasValidValuation || upside === null || upside === undefined || isNaN(Number(upside))) {
+        return {
+            text: "CẦN THEO DÕI THÊM (Chưa có định giá)",
+            colorClass: "text-amber-400",
+            icon: "eye"
+        };
+    }
+    const val = Math.round(Number(upside) * 10) / 10;
+    if (val >= 20.0) {
+        return {
+            text: "KỲ VỌNG TĂNG GIÁ RẤT MẠNH",
+            colorClass: "text-emerald-400",
+            icon: "trending-up"
+        };
+    } else if (val >= 7.0) {
+        return {
+            text: "KỲ VỌNG TĂNG GIÁ MẠNH",
+            colorClass: "text-emerald-400",
+            icon: "trending-up"
+        };
+    } else if (val > 0.0) {
+        return {
+            text: "CHÚ Ý GẦN KỲ VỌNG GIÁ",
+            colorClass: "text-sky-400",
+            icon: "target"
+        };
+    } else if (val === 0.0) {
+        return {
+            text: "ĐẠT KỲ VỌNG GIÁ",
+            colorClass: "text-amber-400",
+            icon: "check-circle"
+        };
+    } else {
+        return {
+            text: "ĐÃ VƯỢT GIÁ KỲ VỌNG",
+            colorClass: "text-rose-400",
+            icon: "alert-triangle"
+        };
+    }
+}
+
 function renderHero(report) {
     if (!report) return;
     const activeTicker = getActiveTicker();
@@ -2114,50 +2479,8 @@ function renderHero(report) {
     const repCountEl = document.getElementById("display-report-count");
     if (repCountEl) repCountEl.textContent = `${activeCount} Báo cáo`;
 
-function getConsensusRecommendationText(upside, hasValidValuation) {
-    if (!hasValidValuation || upside === null || upside === undefined || isNaN(Number(upside))) {
-        return {
-            text: "CẦN THEO DÕI THÊM (Chưa có định giá)",
-            colorClass: "text-amber-400",
-            icon: "eye"
-        };
-    }
-    const val = Math.round(Number(upside) * 10) / 10;
-    if (val >= 20.0) {
-        return {
-            text: "KỲ VỌNG TĂNG GIÁ RẤT MẠNH",
-            colorClass: "text-emerald-400",
-            icon: "trending-up"
-        };
-    } else if (val >= 7.0) {
-        return {
-            text: "KỲ VỌNG TĂNG GIÁ MẠNH",
-            colorClass: "text-emerald-400",
-            icon: "trending-up"
-        };
-    } else if (val > 0.0) {
-        return {
-            text: "CHÚ Ý GẦN KỲ VỌNG GIÁ",
-            colorClass: "text-sky-400",
-            icon: "target"
-        };
-    } else if (val === 0.0) {
-        return {
-            text: "ĐẠT KỲ VỌNG GIÁ",
-            colorClass: "text-amber-400",
-            icon: "check-circle"
-        };
-    } else {
-        return {
-            text: "ĐÃ VƯỢT GIÁ KỲ VỌNG",
-            colorClass: "text-rose-400",
-            icon: "alert-triangle"
-        };
-    }
-}
-
     // Metrics
-    const hasValidValuation = cs.mean_target_price > 0 && !(cs.consensus_rating || "").includes("THEO DÕI") && !(cs.consensus_rating || "").includes("Chưa có định giá");
+    const hasValidValuation = activeCount > 0 && Number(cs.mean_target_price) > 0 && !(cs.consensus_rating || "").includes("THEO DÕI") && !(cs.consensus_rating || "").includes("Chưa có định giá");
     const isExceeded = hasValidValuation && (cs.average_upside < 0 || cs.current_market_price > cs.mean_target_price);
 
     const recInfo = getConsensusRecommendationText(cs.average_upside, hasValidValuation);
@@ -2181,7 +2504,19 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
         }
     }
     if (scoreEl) {
-        scoreEl.textContent = hasValidValuation ? cs.consensus_score : "—";
+        if (!hasValidValuation) {
+            scoreEl.textContent = "—";
+        } else {
+            let calcScore = Number(cs.consensus_score);
+            if (!calcScore || calcScore <= 0) {
+                const up = Number(cs.average_upside) || 0;
+                if (up >= 20.0) calcScore = 5.0;
+                else if (up >= 10.0) calcScore = 4.5;
+                else if (up >= 0.0) calcScore = 3.8;
+                else calcScore = 2.5;
+            }
+            scoreEl.textContent = calcScore.toFixed(1);
+        }
     }
 
     // 2. Thẻ Giá mục tiêu TB & Upside
@@ -2321,10 +2656,13 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
     if (medianEl) {
         if (!hasValidValuation) {
             medianEl.textContent = "—";
-        } else if (cs.has_price_adjustment) {
-            medianEl.innerHTML = `${cs.median_target_price.toLocaleString("vi-VN")} VND <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-1 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
         } else {
-            medianEl.textContent = `${cs.median_target_price.toLocaleString("vi-VN")} VND`;
+            const medPrice = (cs.median_target_price && Number(cs.median_target_price) > 0) ? Number(cs.median_target_price) : Number(cs.mean_target_price);
+            if (cs.has_price_adjustment) {
+                medianEl.innerHTML = `${medPrice.toLocaleString("vi-VN")} VND <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-1 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
+            } else {
+                medianEl.textContent = `${medPrice.toLocaleString("vi-VN")} VND`;
+            }
         }
     }
 
@@ -2332,10 +2670,14 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
     if (minMaxEl) {
         if (!hasValidValuation) {
             minMaxEl.textContent = "—";
-        } else if (cs.has_price_adjustment) {
-            minMaxEl.innerHTML = `${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")} <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-0.5 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
         } else {
-            minMaxEl.textContent = `${cs.min_target_price.toLocaleString("vi-VN")} - ${cs.max_target_price.toLocaleString("vi-VN")}`;
+            const minP = (cs.min_target_price && Number(cs.min_target_price) > 0) ? Number(cs.min_target_price) : (Number(cs.mean_target_price) || 0);
+            const maxP = (cs.max_target_price && Number(cs.max_target_price) > 0) ? Number(cs.max_target_price) : (Number(cs.mean_target_price) || 0);
+            if (cs.has_price_adjustment) {
+                minMaxEl.innerHTML = `${minP.toLocaleString("vi-VN")} - ${maxP.toLocaleString("vi-VN")} <span class="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-normal ml-0.5 inline-block" title="Đã tự động điều chỉnh theo ngày GDKHQ">Đ/C</span>`;
+            } else {
+                minMaxEl.textContent = `${minP.toLocaleString("vi-VN")} - ${maxP.toLocaleString("vi-VN")}`;
+            }
         }
     }
 
@@ -2368,7 +2710,7 @@ function getConsensusRecommendationText(upside, hasValidValuation) {
 
     if (priceToFairEl) {
         if (!hasValidValuation) {
-            priceToFairEl.textContent = "Chưa có định giá còn hiệu lực (<1 năm)";
+            priceToFairEl.textContent = "Chưa có định giá còn hiệu lực (<1.5 năm)";
             priceToFairEl.className = "text-[11px] text-slate-400 font-mono font-bold";
         } else if (isExceeded) {
             const overRatio = (ratio - 100).toFixed(1);
@@ -2505,6 +2847,110 @@ function isReportOlderThanDays(dStr, maxDays = 548) {
     return diffDays > maxDays;
 }
 
+function isTechnicalOrInvalidCatalyst(text) {
+    if (!text || typeof text !== 'string') return true;
+    const lower = text.toLowerCase();
+    const noAccent = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // 1. Chỉ báo & thuật ngữ kỹ thuật
+    const techKws = [
+        'rsi', 'macd', 'bollinger', 'stochastic', 'ichimoku', 'fibonacci', 'fibo',
+        'chỉ báo kỹ thuật', 'chi bao ky thuat', 'chi bao ki thuat', 'kỹ thuật', 'ky thuat', 'kĩ thuật', 'ki thuat',
+        'quá mua', 'qua mua', 'quá bán', 'qua ban', 'đường ma', 'duong ma',
+        'nến nhật', 'nen nhat', 'nến doji', 'nen doji', 'nến đảo chiều', 'nen dao chieu',
+        'vùng hỗ trợ', 'vung ho tro', 'ngưỡng hỗ trợ', 'nguong ho tro',
+        'vùng kháng cự', 'vung khang cu', 'ngưỡng kháng cự', 'nguong khang cu', 'kháng cự', 'khang cu',
+        'phân kỳ âm', 'phan ky am', 'phân kỳ dương', 'phan ky duong',
+        'điểm cắt vàng', 'golden cross', 'death cross', 'cắt lỗ', 'cat lo', 'stop loss',
+        'lướt sóng', 'luot song', 'khung tuần', 'khung tuan', 'khung ngày', 'khung ngay',
+        'tạo đáy', 'tao day', 'tạo đỉnh', 'tao dinh', 'bước vào nhịp tăng', 'buoc vao nhip tang',
+        'cân bằng cung cầu', 'can bang cung cau', 'chiến lược giải ngân', 'chien luoc giai ngan',
+        'vùng cản', 'vung can', 'vượt cản', 'vuot can', 'thủng nền', 'thung nen',
+        'pha điều chỉnh', 'pha dieu chinh', 'đỉnh cũ', 'dinh cu', 'chỉ báo', 'chi bao'
+    ];
+    for (const kw of techKws) {
+        if (lower.includes(kw) || noAccent.includes(kw)) return true;
+    }
+    if (/\b(?:ma|ema|sma)\s*\d+\b/i.test(lower)) return true;
+    if (/\brsi\s*(?:\(\d+\))?\b/i.test(lower)) return true;
+    if (/\bmacd\b/i.test(lower)) return true;
+    return false;
+}
+
+function isCrossContaminatedCatalyst(ticker, text) {
+    if (!text || typeof text !== 'string') return false;
+    const tkr = (ticker || '').toUpperCase().trim();
+    const lower = text.toLowerCase();
+    
+    // 1. Dầu khí & Năng lượng
+    if (['BSR', 'PLX', 'OIL'].includes(tkr)) {
+        if (['giàn khoan', 'jack-up', 'điện gió ngoài khơi', 'kho cảng lng', 'điện khí lng', 'nhơn trạch 3'].some(bad => lower.includes(bad))) return true;
+    } else if (tkr === 'PVD') {
+        if (['lọc dầu', 'dung quất', 'điện gió ngoài khơi', 'kho cảng lng'].some(bad => lower.includes(bad))) return true;
+    } else if (tkr === 'PVS') {
+        if (['lọc dầu', 'dung quất', 'giàn khoan tự nâng'].some(bad => lower.includes(bad))) return true;
+    } else if (['GEG', 'HDG', 'VSH', 'BWE', 'TDM'].includes(tkr)) {
+        if (['nhơn trạch 3', 'nhơn trạch 4', 'nhà máy điện nhơn trạch'].some(bad => lower.includes(bad))) return true;
+    }
+
+    // 2. Thép & Tôn mạ
+    if (['HSG', 'NKG', 'TLH', 'GDA'].includes(tkr)) {
+        if (['lò cao', 'dung quất 2', 'tự chủ hrc', 'quặng sắt', 'than mỡ', 'than cốc'].some(bad => lower.includes(bad))) return true;
+    }
+
+    // 3. Bán lẻ & Dược
+    if (tkr === 'FRT') {
+        if (['bách hóa xanh', 'vàng bạc', 'trang sức', 'pnj', 'erablue'].some(bad => lower.includes(bad))) return true;
+    } else if (tkr === 'MWG') {
+        if (['long châu', 'tiêm chủng', 'vàng bạc', 'trang sức', 'pnj'].some(bad => lower.includes(bad))) return true;
+    } else if (tkr === 'PNJ') {
+        if (['long châu', 'nhà thuốc', 'bách hóa xanh', 'điện thoại', 'laptop'].some(bad => lower.includes(bad))) return true;
+    }
+
+    // 4. Cao su vs Thủy sản vs Heo
+    if (['DRI', 'TRC', 'PHR', 'DPR', 'GVR'].includes(tkr)) {
+        if (['cá tra', 'fillet', 'tôm thẻ', 'heo hơi', 'thịt lợn', 'chăn nuôi', 'dịch tả lợn', 'collagen và gelatin'].some(bad => lower.includes(bad))) return true;
+    } else if (['VHC', 'ANV', 'IDI', 'FMC'].includes(tkr)) {
+        if (['heo hơi', 'thịt lợn', 'chăn nuôi lợn', 'dịch tả lợn', 'cao su', 'mủ cao su'].some(bad => lower.includes(bad))) return true;
+    } else if (['BAF', 'DBC', 'HAG'].includes(tkr)) {
+        if (['cá tra', 'fillet', 'tôm thẻ', 'cao su'].some(bad => lower.includes(bad))) return true;
+    }
+
+    // 5. BĐS Dân dụng vs KCN & dự án độc quyền
+    if (['PDR', 'TCH', 'DXG', 'NVL', 'DIG', 'NLG', 'KDH', 'HDC', 'CEO'].includes(tkr)) {
+        if (['cho thuê đất kcn', 'giá thuê đất kcn', 'đất kcn tăng', 'kcn tràng duệ', 'kcn hựu thạnh', 'kcn phú mỹ', 'thu hút fdi nhà xưởng'].some(bad => lower.includes(bad))) return true;
+        if (!['VHM', 'VIC', 'VRE'].includes(tkr)) {
+            if (['vinhomes', 'vũ yên', 'cổ loa', 'đan phượng', 'ocean park'].some(bad => lower.includes(bad))) return true;
+        }
+        if (tkr !== 'KBC' && ['tràng duệ 3', 'kđt tràng cát', 'nam sơn hạp lĩnh'].some(bad => lower.includes(bad))) return true;
+        if (tkr !== 'IDC' && ['hựu thạnh', 'kcn phú mỹ 2'].some(bad => lower.includes(bad))) return true;
+        if (tkr === 'PDR' && lower.includes('unbilled bookings')) return true;
+    } else if (['KBC', 'IDC', 'LHG', 'SZC', 'BCM'].includes(tkr)) {
+        if (['bán chung cư', 'căn hộ cao cấp', 'bắc hà thanh', 'thuận an 1', 'thuận an 2'].some(bad => lower.includes(bad))) return true;
+    }
+
+    // 6. Cảng biển
+    if (tkr === 'VSC' && lower.includes('gemalink')) return true;
+
+    return false;
+}
+
+function isTechnicalReportItem(r) {
+    if (!r) return true;
+    if (r.is_technical || r.report_type === "technical") return true;
+    const rec = (r.recommendation || "").toUpperCase();
+    if (rec.includes("PTKT") || rec.includes("KỸ THUẬT") || rec.includes("KĨ THUẬT") || rec.includes("LƯỚT SÓNG")) return true;
+    const val = (r.valuation_method || "").toUpperCase();
+    if (val.includes("KỸ THUẬT") || val.includes("KĨ THUẬT") || val.includes("TRADING")) return true;
+    const inst = (r.institution || "").toUpperCase();
+    if (inst.includes("PTKT") || inst.includes("KỸ THUẬT") || inst.includes("KĨ THUẬT")) return true;
+    const url = (r.source_url || "").toLowerCase();
+    if (url.includes("ptkt") || url.includes("technical") || url.includes("ki_thuat") || url.includes("ky_thuat")) return true;
+    const cats = r.key_catalysts || [];
+    if (cats.length > 0 && cats.every(c => isTechnicalOrInvalidCatalyst(c))) return true;
+    return false;
+}
+
 function renderMatrixTable(report) {
     const table = document.getElementById("matrix-table-element");
     if (!table || !report) return;
@@ -2515,9 +2961,9 @@ function renderMatrixTable(report) {
         return;
     }
     // Sắp xếp ngày phát hành từ mới nhất tới cũ nhất (từ trái sang phải)
-    // Tự động lọc ẩn toàn bộ các báo cáo đã quá 1.5 năm (> 548 ngày) để tránh khuyến nghị lỗi thời
+    // Tự động lọc ẩn toàn bộ các báo cáo đã quá 1.5 năm (> 548 ngày) VÀ BÁO CÁO PHÂN TÍCH KỸ THUẬT (PTKT)
     const reports = (report.matrix_table || [])
-        .filter(r => !isReportOlderThanDays(r.report_date, 548))
+        .filter(r => !isReportOlderThanDays(r.report_date, 548) && !isTechnicalReportItem(r))
         .slice()
         .sort((a, b) => parseDateToTimestamp(b.report_date) - parseDateToTimestamp(a.report_date));
     report.matrix_table = reports;
@@ -2751,28 +3197,42 @@ function renderMatrixTable(report) {
             </div>
             <span class="text-[10px] text-slate-500">Động cơ thúc đẩy tăng giá</span>
         </td>`;
+
+    // Tự động phân tách và chuyển các luận điểm rủi ro (RỦI RO CHÍNH, thách thức, đội vốn...)
+    // sang đúng hàng Key Risks, tránh tuyệt đối tình trạng lọt vào mục Catalysts
     reports.forEach(r => {
-        let catHtml = `<ul class="space-y-1.5 text-[11px] text-slate-300 text-left">`;
+        if (!r.key_risks) r.key_risks = [];
+        if (Array.isArray(r.key_catalysts)) {
+            const preservedCats = [];
+            r.key_catalysts.forEach(c => {
+                if (!c || typeof c !== 'string') return;
+                const cLower = c.toLowerCase();
+                const isRisk = /\b(rủi\s*ro|áp\s*lực|thách\s*thức|chậm\s*tiến\s*độ|trượt\s*tiến\s*độ|đội\s*vốn|suy\s*giảm)\b/i.test(cLower) ||
+                               /^(?:rủi\s*ro|r\s*ủ\s*i\s*r\s*o)/i.test(c.trim()) ||
+                               (cLower.includes('biên gộp') && (cLower.includes('thu hẹp') || cLower.includes('lùi')));
+                if (isRisk) {
+                    let cleanR = c.replace(/^(?:(?:RỦI\s*RO\s*CHÍNH|Rủi\s*ro\s*chính)\s*[:\.]?\s*\d*[:\.]?|(?:RỦI\s*RO|Rủi\s*ro)\s*[:\.]\s*\d*|(?:RỦI\s*RO|Rủi\s*ro)\s+\d+[:\.]?|\d+\.\s*RỦI\s*RO\s*CHÍNH:?\s*\d*)\s*/gi, '').trim();
+                    if (!cleanR) cleanR = c.trim();
+                    if (!r.key_risks.includes(cleanR)) {
+                        r.key_risks.push(cleanR);
+                    }
+                } else {
+                    preservedCats.push(c);
+                }
+            });
+            r.key_catalysts = preservedCats;
+        }
+    });
+
+    reports.forEach(r => {
+        let catHtml = `<ul class="space-y-1.5 text-[11px] text-slate-300 text-left font-sans leading-relaxed tracking-normal">`;
         let validCats = [];
         (r.key_catalysts || []).forEach(c => {
             if (!c || typeof c !== 'string') return;
             const cFormatted = cleanVietnameseFontSpacing(c);
-            if (isTableOrGarbageDump(cFormatted)) return;
-            if (cFormatted.length > 130 && !cFormatted.includes('\n')) {
-                const subs = extractRobustFinancialSentences(cFormatted);
-                if (subs.length > 0) {
-                    subs.forEach(sc => {
-                        let scClean = cleanVietnameseFontSpacing(sc).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                        if (scClean.length >= 20 && !isTableOrGarbageDump(scClean) && !validCats.includes(scClean)) {
-                            if (!/[\.\?!]$/.test(scClean)) scClean += '.';
-                            validCats.push(scClean);
-                        }
-                    });
-                    return;
-                }
-            }
+            if (isTableOrGarbageDump(cFormatted) || isTechnicalOrInvalidCatalyst(cFormatted)) return;
             let cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-            if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !validCats.includes(cClean)) {
+            if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !isTechnicalOrInvalidCatalyst(cClean) && !validCats.includes(cClean)) {
                 if (!/[\.\?!]$/.test(cClean)) cClean += '.';
                 validCats.push(cClean);
             }
@@ -2781,29 +3241,30 @@ function renderMatrixTable(report) {
             // KHÔNG dùng text mặc định chung — hiển thị trống để tránh trùng lặp nội dung giữa CTCK
             catHtml += `<li class="text-slate-500 text-[10px] italic text-center py-2">Chưa trích xuất được luận điểm từ báo cáo này</li>`;
             catHtml += `</ul>`;
-            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top font-sans">${catHtml}</td>`;
         } else {
             r.key_catalysts = validCats.slice(0, 15);
-            r.key_catalysts.forEach((c, idx) => {
-                catHtml += `<li class="flex items-start gap-1.5">
-                    <span class="text-cyan-400 font-mono font-bold shrink-0">${idx + 1}.</span>
-                    <span>${c}</span>
+            r.key_catalysts.forEach((c) => {
+                catHtml += `<li class="flex items-start gap-2 leading-relaxed tracking-normal font-sans">
+                    <span class="text-cyan-400 font-bold shrink-0 text-[13px] leading-tight">•</span>
+                    <span class="font-sans flex-1">${c}</span>
                 </li>`;
             });
             catHtml += `</ul>`;
-            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${catHtml}</td>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top font-sans">${catHtml}</td>`;
         }
     });
     
     // Cột đồng thuận Catalysts (tối đa 15 catalysts từ kho AI và CTCK)
-    let consensualCatsHtml = `<div class="text-cyan-300 font-bold mb-1.5 flex items-center gap-1">
+    const currentMatrixTicker = (report.ticker || '').toUpperCase().trim();
+    let consensualCatsHtml = `<div class="text-cyan-300 font-bold mb-1.5 flex items-center gap-1 font-sans">
         <i data-lucide="check-circle" class="w-3.5 h-3.5 text-cyan-400"></i>
         <span>Điểm giao thoa đồng thuận:</span>
     </div>`;
     let cCats = (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0)
         ? report.consensus_summary.consensual_catalysts
             .map(c => cleanVietnameseFontSpacing(c))
-            .filter(c => c && c.length >= 20 && !isTableOrGarbageDump(c))
+            .filter(c => c && c.length >= 20 && !isTableOrGarbageDump(c) && !isTechnicalOrInvalidCatalyst(c) && !isCrossContaminatedCatalyst(currentMatrixTicker, c))
             .slice(0, 15)
         : [];
     if (cCats.length === 0 && reports.length > 0) {
@@ -2812,7 +3273,7 @@ function renderMatrixTable(report) {
             (r.key_catalysts || []).forEach(c => {
                 if (!c || typeof c !== 'string') return;
                 const cClean = cleanVietnameseFontSpacing(c).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !derived.includes(cClean)) derived.push(cClean);
+                if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !isTechnicalOrInvalidCatalyst(cClean) && !isCrossContaminatedCatalyst(currentMatrixTicker, cClean) && !derived.includes(cClean)) derived.push(cClean);
             });
         });
         cCats = derived.slice(0, 15);
@@ -2820,19 +3281,19 @@ function renderMatrixTable(report) {
             report.consensus_summary.consensual_catalysts = cCats;
         }
     }
-    consensualCatsHtml += `<ul class="space-y-1.5 text-slate-300 text-[11px] leading-relaxed">`;
+    consensualCatsHtml += `<ul class="space-y-1.5 text-slate-300 text-[11px] leading-relaxed font-sans tracking-normal">`;
     if (cCats.length === 0) {
-        consensualCatsHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
+        consensualCatsHtml += `<li class="text-slate-500 italic text-center py-2 font-sans">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
     } else {
         cCats.forEach(c => {
-            consensualCatsHtml += `<li class="flex items-start gap-1.5">
+            consensualCatsHtml += `<li class="flex items-start gap-1.5 font-sans leading-relaxed tracking-normal">
                 <span class="text-cyan-400 font-bold shrink-0">•</span>
-                <span>${c}</span>
+                <span class="font-sans">${c}</span>
             </li>`;
         });
     }
     consensualCatsHtml += `</ul>`;
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
+    tbodyHtml += `<td class="p-3 font-sans text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
         <div style="width: 420px; min-width: 420px; max-width: 450px;">${consensualCatsHtml}</div>
     </td></tr>`;
 
@@ -2846,58 +3307,45 @@ function renderMatrixTable(report) {
             <span class="text-[10px] text-slate-500">Cảnh báo rủi ro định lượng</span>
         </td>`;
     reports.forEach(r => {
-        let riskHtml = `<ul class="space-y-1.5 text-[11px] text-rose-300/85 text-left">`;
+        let riskHtml = `<ul class="space-y-1.5 text-[11px] text-rose-300/85 text-left font-sans leading-relaxed tracking-normal">`;
         let validRisks = [];
         (r.key_risks || []).forEach(k => {
             if (!k || typeof k !== 'string') return;
             const kFormatted = cleanVietnameseFontSpacing(k);
-            if (isTableOrGarbageDump(kFormatted)) return;
-            if (kFormatted.length > 130 && !kFormatted.includes('\n')) {
-                const subs = extractRobustFinancialSentences(kFormatted);
-                if (subs.length > 0) {
-                    subs.forEach(sk => {
-                        let skClean = cleanVietnameseFontSpacing(sk).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                        if (skClean.length >= 20 && !isTableOrGarbageDump(skClean) && !validRisks.includes(skClean)) {
-                            if (!/[\.\?!]$/.test(skClean)) skClean += '.';
-                            validRisks.push(skClean);
-                        }
-                    });
-                    return;
-                }
-            }
+            if (isTableOrGarbageDump(kFormatted) || isTechnicalOrInvalidCatalyst(kFormatted)) return;
             let kClean = kFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-            if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !validRisks.includes(kClean)) {
+            if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !isTechnicalOrInvalidCatalyst(kClean) && !validRisks.includes(kClean)) {
                 if (!/[\.\?!]$/.test(kClean)) kClean += '.';
                 validRisks.push(kClean);
             }
         });
         if (validRisks.length === 0) {
             // KHÔNG dùng text rủi ro mặc định chung — hiển thị trống để tránh trùng lặp
-            riskHtml += `<li class="text-slate-500 text-[10px] italic text-center py-2">Chưa trích xuất được rủi ro từ báo cáo này</li>`;
+            riskHtml += `<li class="text-slate-500 text-[10px] italic text-center py-2 font-sans">Chưa trích xuất được rủi ro từ báo cáo này</li>`;
             riskHtml += `</ul>`;
-            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${riskHtml}</td>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top font-sans">${riskHtml}</td>`;
         } else {
             r.key_risks = validRisks.slice(0, 10);
             r.key_risks.forEach((k, idx) => {
-                riskHtml += `<li class="flex items-start gap-1.5">
+                riskHtml += `<li class="flex items-start gap-1.5 font-sans leading-relaxed tracking-normal">
                     <span class="text-rose-500 shrink-0 font-bold">•</span>
-                    <span>${k}</span>
+                    <span class="font-sans">${k}</span>
                 </li>`;
             });
             riskHtml += `</ul>`;
-            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top">${riskHtml}</td>`;
+            tbodyHtml += `<td class="p-3 border-b border-slate-800/80 min-w-[280px] align-top font-sans">${riskHtml}</td>`;
         }
     });
     
     // Cột đồng thuận Risks
-    let consensualRisksHtml = `<div class="text-rose-400 font-bold mb-1.5 flex items-center gap-1">
+    let consensualRisksHtml = `<div class="text-rose-400 font-bold mb-1.5 flex items-center gap-1 font-sans">
         <i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-rose-400"></i>
         <span>Rủi ro cần giám sát:</span>
     </div>`;
     let cRisks = (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0)
         ? report.consensus_summary.consensual_risks
             .map(k => cleanVietnameseFontSpacing(k))
-            .filter(k => k && k.length >= 20 && !isTableOrGarbageDump(k))
+            .filter(k => k && k.length >= 20 && !isTableOrGarbageDump(k) && !isTechnicalOrInvalidCatalyst(k) && !isCrossContaminatedCatalyst(currentMatrixTicker, k))
             .slice(0, 10)
         : [];
     if (cRisks.length === 0 && reports.length > 0) {
@@ -2906,7 +3354,7 @@ function renderMatrixTable(report) {
             (r.key_risks || []).forEach(k => {
                 if (!k || typeof k !== 'string') return;
                 const kClean = cleanVietnameseFontSpacing(k).replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
-                if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !derivedR.includes(kClean)) derivedR.push(kClean);
+                if (kClean.length >= 20 && !isTableOrGarbageDump(kClean) && !isTechnicalOrInvalidCatalyst(kClean) && !isCrossContaminatedCatalyst(currentMatrixTicker, kClean) && !derivedR.includes(kClean)) derivedR.push(kClean);
             });
         });
         cRisks = derivedR.slice(0, 10);
@@ -2914,19 +3362,19 @@ function renderMatrixTable(report) {
             report.consensus_summary.consensual_risks = cRisks;
         }
     }
-    consensualRisksHtml += `<ul class="space-y-1.5 text-rose-300/90 text-[11px] leading-relaxed">`;
+    consensualRisksHtml += `<ul class="space-y-1.5 text-rose-300/90 text-[11px] leading-relaxed font-sans tracking-normal">`;
     if (cRisks.length === 0) {
-        consensualRisksHtml += `<li class="text-slate-500 italic text-center py-2">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
+        consensualRisksHtml += `<li class="text-slate-500 italic text-center py-2 font-sans">Chưa có đủ báo cáo để tổng hợp đồng thuận</li>`;
     } else {
         cRisks.forEach(k => {
-            consensualRisksHtml += `<li class="flex items-start gap-1.5">
+            consensualRisksHtml += `<li class="flex items-start gap-1.5 font-sans leading-relaxed tracking-normal">
                 <span class="text-rose-500 font-bold shrink-0">•</span>
-                <span>${k}</span>
+                <span class="font-sans">${k}</span>
             </li>`;
         });
     }
     consensualRisksHtml += `</ul>`;
-    tbodyHtml += `<td class="p-3 font-mono text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
+    tbodyHtml += `<td class="p-3 font-sans text-xs bg-slate-950/60 border-b border-slate-800/80 align-top" style="width: 420px; min-width: 420px; max-width: 450px;">
         <div style="width: 420px; min-width: 420px; max-width: 450px;">${consensualRisksHtml}</div>
     </td></tr>`;
 
@@ -3241,7 +3689,7 @@ function renderCausality(report, bundleOverride = null) {
     if (report.consensus_summary && report.consensus_summary.consensual_catalysts && report.consensus_summary.consensual_catalysts.length > 0) {
         catalysts = report.consensus_summary.consensual_catalysts
             .map(c => cleanVietnameseFontSpacing(c))
-            .filter(c => c && c.length >= 20 && !isTechnicalOrInvalidCatalyst(c) && !isTableOrGarbageDump(c))
+            .filter(c => c && c.length >= 20 && !isTechnicalOrInvalidCatalyst(c) && !isTableOrGarbageDump(c) && !isCrossContaminatedCatalyst(activeTicker, c))
             .slice(0, 15);
     }
     // Nếu consensus_summary chưa có sẵn: trích xuất trực tiếp điểm chung từ các CTCK trong Bảng Ma trận
@@ -3251,7 +3699,7 @@ function renderCausality(report, bundleOverride = null) {
             (r.key_catalysts || []).forEach(c => {
                 if (!c || typeof c !== 'string') return;
                 const cFormatted = cleanVietnameseFontSpacing(c);
-                if (isTechnicalOrInvalidCatalyst(cFormatted) || isTableOrGarbageDump(cFormatted)) return;
+                if (isTechnicalOrInvalidCatalyst(cFormatted) || isTableOrGarbageDump(cFormatted) || isCrossContaminatedCatalyst(activeTicker, cFormatted)) return;
                 const cClean = cFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
                 if (cClean.length >= 20 && !isTableOrGarbageDump(cClean) && !derivedCats.includes(cClean)) {
                     derivedCats.push(cClean);
@@ -3286,7 +3734,7 @@ function renderCausality(report, bundleOverride = null) {
     if (report.consensus_summary && report.consensus_summary.consensual_risks && report.consensus_summary.consensual_risks.length > 0) {
         risks = report.consensus_summary.consensual_risks
             .map(rk => cleanVietnameseFontSpacing(rk))
-            .filter(rk => rk && rk.length >= 20 && !isTechnicalOrInvalidCatalyst(rk) && !isTableOrGarbageDump(rk))
+            .filter(rk => rk && rk.length >= 20 && !isTechnicalOrInvalidCatalyst(rk) && !isTableOrGarbageDump(rk) && !isCrossContaminatedCatalyst(activeTicker, rk))
             .slice(0, 10);
     }
     // Nếu consensus_summary chưa có sẵn: trích xuất trực tiếp điểm rủi ro chung từ các CTCK trong Bảng Ma trận
@@ -3296,7 +3744,7 @@ function renderCausality(report, bundleOverride = null) {
             (r.key_risks || []).forEach(rk => {
                 if (!rk || typeof rk !== 'string') return;
                 const rkFormatted = cleanVietnameseFontSpacing(rk);
-                if (isTechnicalOrInvalidCatalyst(rkFormatted) || isTableOrGarbageDump(rkFormatted)) return;
+                if (isTechnicalOrInvalidCatalyst(rkFormatted) || isTableOrGarbageDump(rkFormatted) || isCrossContaminatedCatalyst(activeTicker, rkFormatted)) return;
                 const rkClean = rkFormatted.replace(/^[•\-\*\>\➢\★\►\s\d\.\/\:\)]+/, '').trim();
                 if (rkClean.length >= 20 && !isTableOrGarbageDump(rkClean) && !derivedRisks.includes(rkClean)) {
                     derivedRisks.push(rkClean);
@@ -6129,7 +6577,8 @@ function renderCatalystsAndProjects(data) {
         } else {
             let html = "";
             data.projects.forEach((p, pIdx) => {
-                const prog = Math.min(100, Math.max(0, Number(p.progress_pct || 0)));
+                const hasRealProg = p.progress_pct !== undefined && p.progress_pct !== null && p.progress_pct !== "";
+                const prog = hasRealProg ? Math.min(100, Math.max(0, Number(p.progress_pct))) : null;
                 const occ = p.occupancy_rate !== undefined && p.occupancy_rate !== null ? Math.min(100, Math.max(0, Number(p.occupancy_rate))) : null;
                 const legalStatus = p.legal_status || "";
                 const phaseTag = p.phase_tag || "";
@@ -6159,11 +6608,13 @@ function renderCatalystsAndProjects(data) {
                         </span>
                     `;
                 }
-                badgesHtml += `
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800" title="Tiến độ thi công / hoàn thiện">
-                        Tiến độ: ${prog}%
-                    </span>
-                `;
+                if (prog !== null) {
+                    badgesHtml += `
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800" title="Tiến độ thi công / hoàn thiện">
+                            Tiến độ: ${prog}%
+                        </span>
+                    `;
+                }
 
                 html += `
                 <div class="bg-slate-950/85 border border-slate-800 rounded-lg p-3.5 space-y-2.5 hover:border-cyan-700/60 transition-all shadow-sm">
@@ -6193,16 +6644,17 @@ function renderCatalystsAndProjects(data) {
                         </div>
                     </div>
 
+                    ${prog !== null ? `
                     <!-- Progress bar -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-[10px] font-mono text-slate-400">
-                            <span>Tiến độ xây dựng</span>
+                            <span>Tiến độ thực tế</span>
                             <span class="text-emerald-400 font-bold">${prog}%</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                             <div class="bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: ${prog}%"></div>
                         </div>
-                    </div>
+                    </div>` : ''}
 
                     <!-- Details Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-800/60">
@@ -10589,9 +11041,9 @@ function updateTvProRobotSignal(ticker, strategyKey = null) {
     if (drawerTableBody && afl.markers && afl.markers.length > 0) {
         const recentMarkers = [...afl.markers].reverse().slice(0, 5);
         drawerTableBody.innerHTML = recentMarkers.map(m => {
-            const isBuy = m.position === "belowBar";
+            const isBuy = m.position === "belowBar" || m.shape === "arrowUp";
             const colorClass = isBuy ? "text-emerald-400" : "text-rose-400";
-            const typeText = isBuy ? "MUA" : "BÁN";
+            const typeText = isBuy ? "▲ MUA" : "▼ BÁN";
             return `
                 <tr class="border-b border-slate-800/60">
                     <td class="py-1 px-2 font-mono ${colorClass} font-bold">${typeText}</td>
@@ -11561,18 +12013,46 @@ function initFireantChart(symbol, interval = "D") {
                         currentCrosshairX = null;
                         if (typeof updateFireantSubpanesLegend === "function") updateFireantSubpanesLegend(null);
                         if (typeof syncSubPanesWithRange === "function") syncSubPanesWithRange();
+                        // Khi chuột rời khỏi biểu đồ, khôi phục lại hiển thị cây nến mới nhất
+                        if (lastFireantCandles && lastFireantCandles.length > 0) {
+                            const last = lastFireantCandles[lastFireantCandles.length - 1];
+                            const prev = lastFireantCandles.length > 1 ? lastFireantCandles[lastFireantCandles.length - 2] : last;
+                            const lastMa20 = (activeIndicators.ma && currentFireantMa20Series && lastCalculatedMa20Data && lastCalculatedMa20Data.length) ? lastCalculatedMa20Data[lastCalculatedMa20Data.length - 1].value : null;
+                            const lastMa50 = (activeIndicators.ma && currentFireantMa50Series && lastCalculatedMa50Data && lastCalculatedMa50Data.length) ? lastCalculatedMa50Data[lastCalculatedMa50Data.length - 1].value : null;
+                            updateFireantLegend(last.open, last.high, last.low, last.close, lastMa20, lastMa50, last.close - prev.close, last.volume);
+                        }
                         return;
                     }
                     const priceData = (param.seriesData && mainSeries) ? param.seriesData.get(mainSeries) : null;
                     const ma20Val = (param.seriesData && currentFireantMa20Series && activeIndicators.ma) ? param.seriesData.get(currentFireantMa20Series) : null;
                     const ma50Val = (param.seriesData && currentFireantMa50Series && activeIndicators.ma) ? param.seriesData.get(currentFireantMa50Series) : null;
 
+                    // Tìm cây nến tương ứng với vị trí chuột đang trỏ để lấy Khối lượng và Chênh lệch
+                    let hoveredVol = undefined;
+                    let hoveredDiff = undefined;
+                    if (lastFireantCandles && lastFireantCandles.length > 0) {
+                        let idx = -1;
+                        if (param.time) {
+                            idx = lastFireantCandles.findIndex(cd => cd.time === param.time);
+                        }
+                        if (idx < 0 && typeof param.logical === "number") {
+                            const lIdx = Math.round(param.logical);
+                            if (lIdx >= 0 && lIdx < lastFireantCandles.length) idx = lIdx;
+                        }
+                        if (idx >= 0) {
+                            const cd = lastFireantCandles[idx];
+                            hoveredVol = cd.volume;
+                            const prevClose = idx > 0 ? lastFireantCandles[idx - 1].close : cd.open;
+                            hoveredDiff = cd.close - prevClose;
+                        }
+                    }
+
                     if (priceData) {
                         const o = priceData.open !== undefined ? priceData.open : priceData.value;
                         const h = priceData.high !== undefined ? priceData.high : priceData.value;
                         const l = priceData.low !== undefined ? priceData.low : priceData.value;
                         const c = priceData.close !== undefined ? priceData.close : priceData.value;
-                        updateFireantLegend(o, h, l, c, ma20Val ? ma20Val.value : null, ma50Val ? ma50Val.value : null);
+                        updateFireantLegend(o, h, l, c, ma20Val ? ma20Val.value : null, ma50Val ? ma50Val.value : null, hoveredDiff, hoveredVol);
                     }
 
                     currentCrosshairX = param.point.x;
@@ -11620,17 +12100,19 @@ function applyChartMarkers(closes, ma20Data = [], ma50Data = []) {
 
     const markers = [];
 
-    // 1. TÍN HIỆU ROBOT (FANSI, ROBOT 1, ROBOT 2) TỪ AMIBROKER AFL (CHỈ MŨI TÊN, KHÔNG CHỮ)
+    // 1. TÍN HIỆU ROBOT (FANSI, ROBOT 1, ROBOT 2, PHÂN KỲ MACD, PHÂN KỲ RSI) TỪ AMIBROKER AFL (CHỈ MŨI TÊN, KHÔNG CHỮ)
     if (showFansiSignals) {
         const strat = currentFansiRobotStrategy || "fansi";
         const afl = calcScreenerAflSignals(closes, strat);
         if (afl && afl.markers && afl.markers.length > 0) {
             for (const m of afl.markers) {
+                const isBuy = (m.shape === "arrowUp" || m.position === "belowBar");
+                const markerColor = isBuy ? "#10b981" : "#ef4444";
                 markers.push({
                     time: m.time,
                     position: m.position,
-                    color: m.color,
-                    shape: m.shape,
+                    color: markerColor,
+                    shape: isBuy ? "arrowUp" : "arrowDown",
                     text: "",
                     size: 1
                 });
@@ -11663,7 +12145,7 @@ function applyChartMarkers(closes, ma20Data = [], ma50Data = []) {
                     markers.push({
                         time: t,
                         position: "aboveBar",
-                        color: "#f43f5e",
+                        color: "#ef4444",
                         shape: "arrowDown",
                         text: "MA Cross"
                     });
@@ -12037,7 +12519,8 @@ function updateFireantLegend(open, high, low, close, ma20, ma50, changeDiff, vol
 
     if (lChange && close !== undefined && open !== undefined) {
         const diff = changeDiff !== undefined ? changeDiff : (close - open);
-        const pct = open > 0 ? ((diff / open) * 100).toFixed(2) : "0.00";
+        const baseP = (changeDiff !== undefined && (close - changeDiff) > 0) ? (close - changeDiff) : (open > 0 ? open : close);
+        const pct = baseP > 0 ? ((diff / baseP) * 100).toFixed(2) : "0.00";
         const sign = diff >= 0 ? "+" : "";
         lChange.textContent = `${sign}${Number(diff).toLocaleString("vi-VN")} (${sign}${pct}%)`;
         lChange.className = diff >= 0 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold";
@@ -14247,9 +14730,42 @@ async function refreshTechnicalData() {
 // -------------------------------------------------------------
 let currentFansiRobotStrategy = "fansi"; // 'fansi' | 'robot1' | 'robot2' | 'div_macd' | 'div_rsi'
 
+function updateTechStratButtonsUI(strat) {
+    if (!strat) strat = "fansi";
+    const strats = ["fansi", "robot1", "robot2", "div_macd", "div_rsi"];
+    strats.forEach(s => {
+        const btn = document.getElementById(`tech-strat-btn-${s}`);
+        if (!btn) return;
+        if (s === strat) {
+            let activeCls = "border-emerald-500/80 bg-emerald-950/90 text-emerald-300";
+            if (s === "robot1") activeCls = "border-amber-500/80 bg-amber-950/90 text-amber-300";
+            else if (s === "robot2") activeCls = "border-sky-500/80 bg-sky-950/90 text-sky-300";
+            else if (s === "div_macd") activeCls = "border-indigo-500/80 bg-indigo-950/90 text-indigo-300";
+            else if (s === "div_rsi") activeCls = "border-rose-500/80 bg-rose-950/90 text-rose-300";
+            btn.className = `tech-strat-btn active px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${activeCls} shadow-md`;
+        } else {
+            btn.className = "tech-strat-btn px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-700/80 hover:border-slate-500/60 shadow-sm";
+        }
+    });
+}
+
+function switchTechnicalFilterStrategy(strat) {
+    if (!strat) strat = "fansi";
+    showFansiSignals = true;
+    if (typeof currentTechnicalChartMode !== "undefined" && currentTechnicalChartMode !== "fansi") {
+        if (typeof switchTechnicalChartMode === "function") switchTechnicalChartMode("fansi");
+    }
+    updateTechStratButtonsUI(strat);
+    switchFansiRobotStrategy(strat);
+}
+
 function switchFansiRobotStrategy(strat) {
     if (!strat) strat = "fansi";
     currentFansiRobotStrategy = strat;
+    showFansiSignals = true;
+
+    // Cập nhật thanh 5 nút cố định trên biểu đồ kỹ thuật
+    updateTechStratButtonsUI(strat);
 
     const btnFansi = document.getElementById("fansi-strat-tab-fansi");
     const btnRobot1 = document.getElementById("fansi-strat-tab-robot1");
@@ -14841,6 +15357,8 @@ async function exportFansiScreenerPdf() {
     container.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     container.style.boxSizing = "border-box";
     container.style.margin = "0 auto";
+    container.style.position = "relative";
+    container.style.overflow = "hidden";
 
     container.innerHTML = `
         <!-- HEADER BÁO CÁO -->
@@ -14946,14 +15464,50 @@ async function exportFansiScreenerPdf() {
         ` : ''}
 
         <!-- FOOTER -->
-        <div style="margin-top: 14px; padding-top: 6px; border-top: 1px solid #cbd5e1; display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8;">
-            <span>Hệ thống Nghiên cứu & Định lượng Đầu tư IERM • Báo cáo tự động hóa</span>
-            <span>Báo cáo lưu hành nội bộ</span>
+        <div style="margin-top: 14px; padding-top: 6px; border-top: 1px solid #cbd5e1; font-size: 8px; color: #94a3b8;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Hệ thống Nghiên cứu & Định lượng Đầu tư IERM • Báo cáo tự động hóa</span>
+                <span>Báo cáo lưu hành nội bộ</span>
+            </div>
+            <div style="color: #64748b; font-style: italic; line-height: 1.4; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
+                Điều khoản miễn trừ: "Đây là tín hiệu theo phân tích kỹ thuật, không phải khuyến nghị. Nhà đầu tư chỉ coi đây là nguồn tham khảo và xem xét kỹ trước khi ra quyết định."
+            </div>
         </div>
     `;
 
     wrapper.appendChild(container);
     document.body.appendChild(wrapper);
+
+    // Tự động tính toán số trang thực tế và phân bổ 1 watermark chéo chính giữa MỖI trang
+    const onePageHeightPx = 1060 * (198 / 285); // Chiều cao 1 trang A4 Landscape trong container (~736.4px)
+    const initialHeight = Math.max(container.scrollHeight, container.offsetHeight);
+    const totalPages = Math.max(1, Math.ceil(initialHeight / onePageHeightPx));
+
+    // Đảm bảo chiều cao container khớp trọn vẹn số trang để trang cuối hiển thị trọn vẹn watermark
+    container.style.minHeight = `${Math.round(totalPages * onePageHeightPx - 8)}px`;
+
+    // Phân bổ 1 watermark zstock.pro.vn nằm chính giữa từng trang riêng biệt
+    for (let k = 0; k < totalPages; k++) {
+        const centerY = Math.round((k + 0.5) * onePageHeightPx);
+        const wm = document.createElement("div");
+        wm.className = "pdf-page-watermark";
+        wm.style.position = "absolute";
+        wm.style.top = `${centerY}px`;
+        wm.style.left = "50%";
+        wm.style.transform = "translate(-50%, -50%) rotate(-24deg)";
+        wm.style.fontSize = "64px";
+        wm.style.fontWeight = "900";
+        wm.style.letterSpacing = "6px";
+        wm.style.color = "rgba(2, 132, 199, 0.08)";
+        wm.style.whiteSpace = "nowrap";
+        wm.style.pointerEvents = "none";
+        wm.style.zIndex = "25";
+        wm.style.userSelect = "none";
+        wm.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        wm.style.textTransform = "lowercase";
+        wm.innerText = "zstock.pro.vn";
+        container.appendChild(wm);
+    }
 
     try {
         if (typeof html2pdf !== 'undefined') {
@@ -14974,7 +15528,7 @@ async function exportFansiScreenerPdf() {
                     <title>${filename}</title>
                     <style>
                         @page { size: A4 landscape; margin: 8mm; }
-                        body { margin: 0; padding: 10px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; }
+                        body { margin: 0; padding: 10px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; position: relative; overflow: hidden; }
                         table { page-break-inside: auto; }
                         tr { page-break-inside: avoid; page-break-after: auto; }
                     </style>
@@ -15497,11 +16051,13 @@ async function confirmAdminAuth() {
         }
     } catch (err) {
         if (errBox) {
-            errBox.textContent = `❌ ${err.message}`;
+            const isFetchFail = err.message && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError"));
+            errBox.textContent = isFetchFail 
+                ? "❌ Mất kết nối tới máy chủ (Failed to fetch). Đang kết nối lại, vui lòng thử lại sau vài giây!" 
+                : `❌ ${err.message}`;
             errBox.classList.remove("hidden");
         }
         if (pwdInput) {
-            pwdInput.value = "";
             pwdInput.focus();
         }
     } finally {
@@ -15531,6 +16087,21 @@ function logoutAdmin() {
 // INGESTION MODAL & MULTI-CHANNEL DATA HANDLERS
 // -------------------------------------------------------------
 function openIngestionModal() {
+    // YÊU CẦU QUYỀN ADMIN: Nếu chưa đăng nhập, bật modal xác thực mật khẩu Admin trước
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(
+            () => {
+                // Đăng nhập thành công -> Tiến hành mở modal Nhập Báo Cáo
+                openIngestionModal();
+            },
+            () => {
+                // Người dùng hủy đăng nhập -> Không mở nội dung bên trong
+                showToast("Bạn cần đăng nhập quyền Quản trị viên để truy cập mục Nhập Báo Cáo!", true);
+            }
+        );
+        return;
+    }
+
     const modal = document.getElementById("ingestion-modal");
     if (!modal) return;
     modal.classList.remove("hidden");
@@ -15574,6 +16145,8 @@ function openIngestionModal() {
 function closeIngestionModal() {
     const modal = document.getElementById("ingestion-modal");
     if (modal) modal.classList.add("hidden");
+    // Mỗi khi đóng/thoát modal Nhập Báo Cáo, tự động thu hồi quyền Admin để lần sau nhấp vào bắt buộc phải gõ pass lại
+    logoutAdmin();
 }
 
 function switchIngestMode(modeId) {
@@ -15768,9 +16341,9 @@ async function performSearch() {
                             <span>Đã Trong Ma Trận</span>
                         </button>
                     ` : isLearned ? `
-                        <button disabled title="Báo cáo này đã được AI học và lưu trữ trong kho tri thức, không cần nạp trùng" class="px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold flex items-center gap-1 cursor-default">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i>
-                            <span>✓ Đã Học</span>
+                        <button id="${btnId}" onclick="addDiscoveredReport('${encodedInst}', '${encodedTicker}', '${encodedUrl}', '${encodedTitle}', '${btnId}')" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white border border-purple-500 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95" title="Đã có trong kho tri thức AI — Bấm để nạp trực tiếp vào Ma trận phân tích">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-purple-200"></i>
+                            <span>+ Đưa Vào Ma Trận</span>
                         </button>
                     ` : `
                         <button id="${btnId}" onclick="addDiscoveredReport('${encodedInst}', '${encodedTicker}', '${encodedUrl}', '${encodedTitle}', '${btnId}')" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
@@ -15785,7 +16358,7 @@ async function performSearch() {
         if (box) box.innerHTML = html;
         if (window.lucide) lucide.createIcons();
 
-        // === AUTO-EXTRACT: Nếu toggle bật VÀ có báo cáo mới (chưa học & chưa trong ma trận) → tự động bóc tách ===
+        // === AUTO-EXTRACT: Nếu toggle bật VÀ có báo cáo mới (chưa có trong ma trận) → tự động bóc tách ===
         if (autoExtractEnabled && newCount > 0) {
             showToast(`⚡ Tự động bóc tách ${newCount} báo cáo mới cho ${ticker}...`);
             setTimeout(() => extractAllDiscoveredReports(encodeURIComponent(ticker)), 600);
@@ -15817,11 +16390,11 @@ async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encod
     const rawUrl = decodeURIComponent(encodedUrl);
     const title = decodeURIComponent(encodedTitle);
 
-    // Tự động cấp quyền phiên admin mặc định nếu chưa đăng nhập để bóc tách liền mạch
     if (!isAdminAuthenticated()) {
-        sessionStorage.setItem("ierm_admin_user", "admin");
-        sessionStorage.setItem("ierm_admin_pass", "325396");
-        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+        openAdminAuthModal(() => {
+            addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encodedTitle, btnId);
+        });
+        return;
     }
 
     const btn = document.getElementById(btnId);
@@ -15862,18 +16435,26 @@ async function addDiscoveredReport(encodedInst, encodedTicker, encodedUrl, encod
         }
 
         const data = await resp.json();
-        if (data.already_learned) {
-            if (btn) {
-                btn.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i><span>✓ Đã Học</span>`;
-                btn.className = "px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
-                btn.disabled = true;
-                if (window.lucide) lucide.createIcons();
-            }
-            showToast(`Báo cáo từ ${institution} đã được AI học trước đó (tránh trùng lặp)!`);
+        const extracted = data.extracted_report;
+        if (!extracted) {
+            showToast(`Không thể trích xuất số liệu từ báo cáo ${institution}`, true);
             return;
         }
 
-        const extracted = data.extracted_report;
+        if (title && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
+            extracted.key_catalysts = [title];
+        }
+
+        await integrateNewReport(extracted, ticker);
+
+        if (btn) {
+            btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>✓ Đã Nạp</span>`;
+            btn.className = "px-3 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
+            btn.disabled = true;
+            if (window.lucide) lucide.createIcons();
+        }
+        const tpStr = (extracted.target_price && Number(extracted.target_price) > 0) ? ` (Target: ${Number(extracted.target_price).toLocaleString("vi-VN")} đ)` : '';
+        showToast(`Đã đưa báo cáo từ ${institution} vào Ma trận đa tổ chức!${tpStr}`);
         if (title && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
             extracted.key_catalysts = [title];
         }
@@ -15906,9 +16487,10 @@ async function extractAllDiscoveredReports(encodedTicker) {
     }
 
     if (!isAdminAuthenticated()) {
-        sessionStorage.setItem("ierm_admin_user", "admin");
-        sessionStorage.setItem("ierm_admin_pass", "325396");
-        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+        openAdminAuthModal(() => {
+            extractAllDiscoveredReports(encodedTicker);
+        });
+        return;
     }
 
     const btnAll = document.getElementById("btn-extract-all-reports");
@@ -15947,9 +16529,8 @@ async function extractAllDiscoveredReports(encodedTicker) {
             alreadyAdded = false;
         }
 
-        const isLearned = Boolean(item.already_learned);
-        if (alreadyAdded || isLearned) {
-            if (progressBox) progressBox.innerHTML = `[${idx+1}/${total}] <strong>${rawInst}</strong>: ${alreadyAdded ? 'Đã có trong ma trận' : 'Đã được AI học trước đó'}, bỏ qua...`;
+        if (alreadyAdded) {
+            if (progressBox) progressBox.innerHTML = `[${idx+1}/${total}] <strong>${rawInst}</strong>: Đã có trong ma trận, bỏ qua...`;
             continue;
         }
 
@@ -15978,24 +16559,18 @@ async function extractAllDiscoveredReports(encodedTicker) {
 
             if (resp.ok) {
                 const resData = await resp.json();
-                if (resData.already_learned) {
+                const extracted = resData.extracted_report;
+                if (extracted) {
+                    if (rawTitle && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
+                        extracted.key_catalysts = [rawTitle];
+                    }
+                    await integrateNewReport(extracted, ticker);
+                    successCount++;
                     if (itemBtn) {
-                        itemBtn.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i><span>✓ Đã Học</span>`;
-                        itemBtn.className = "px-3 py-1.5 bg-slate-900 text-cyan-400 border border-cyan-800/80 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
+                        itemBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>✓ Đã Nạp</span>`;
+                        itemBtn.className = "px-3 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
                         if (window.lucide) lucide.createIcons();
                     }
-                    continue;
-                }
-                const extracted = resData.extracted_report;
-                if (rawTitle && (!extracted.key_catalysts || extracted.key_catalysts.length === 0)) {
-                    extracted.key_catalysts = [rawTitle];
-                }
-                await integrateNewReport(extracted, ticker);
-                successCount++;
-                if (itemBtn) {
-                    itemBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>✓ Đã Nạp</span>`;
-                    itemBtn.className = "px-3 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-lg text-xs font-mono font-bold cursor-default flex items-center gap-1";
-                    if (window.lucide) lucide.createIcons();
                 }
             } else {
                 if (itemBtn) {
@@ -16049,9 +16624,10 @@ function quickFillUrl(type) {
 
 async function crawlDirectUrl() {
     if (!isAdminAuthenticated()) {
-        sessionStorage.setItem("ierm_admin_user", "admin");
-        sessionStorage.setItem("ierm_admin_pass", "325396");
-        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+        openAdminAuthModal(() => {
+            crawlDirectUrl();
+        });
+        return;
     }
 
     const url = (document.getElementById("direct-url-input").value || "").trim();
@@ -16167,9 +16743,10 @@ async function uploadPdfReport() {
     }
 
     if (!isAdminAuthenticated()) {
-        sessionStorage.setItem("ierm_admin_user", "admin");
-        sessionStorage.setItem("ierm_admin_pass", "325396");
-        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+        openAdminAuthModal(() => {
+            uploadPdfReport();
+        });
+        return;
     }
 
     const ticker = (document.getElementById("pdf-ticker-input") ? document.getElementById("pdf-ticker-input").value : "").trim().toUpperCase() || (currentReport ? currentReport.ticker : "HPG");
@@ -16285,9 +16862,10 @@ async function analyzeRawText() {
     }
 
     if (!isAdminAuthenticated()) {
-        sessionStorage.setItem("ierm_admin_user", "admin");
-        sessionStorage.setItem("ierm_admin_pass", "325396");
-        if (typeof updateAdminStatusUI === "function") updateAdminStatusUI();
+        openAdminAuthModal(() => {
+            analyzeRawText();
+        });
+        return;
     }
 
     const btn = document.getElementById("btn-analyze-raw");
@@ -16393,11 +16971,30 @@ async function loadAiLearningDashboard() {
             }
         }
 
+        // Cập nhật trạng thái kích hoạt Gemini 1.5 Flash
+        const geminiBadge = document.getElementById("gemini-status-badge");
+        const geminiInput = document.getElementById("gemini-api-key-input");
+        if (geminiBadge) {
+            if (cfgRes.gemini_flash_enabled) {
+                geminiBadge.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+                geminiBadge.textContent = `✓ ĐÃ KÍCH HOẠT (${cfgRes.gemini_key_masked || "ONLINE"})`;
+                if (geminiInput && !geminiInput.value) {
+                    geminiInput.placeholder = `Đang kích hoạt Key: ${cfgRes.gemini_key_masked}`;
+                }
+            } else {
+                geminiBadge.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-800";
+                geminiBadge.textContent = "Chế độ Heuristic (Chưa nạp Key)";
+            }
+        }
+
         // 3. Render danh sách mẫu học
         renderAiTemplatesList(tplsRes);
 
         // 4. Render nhật ký tự học
         renderAiHistoryList(histRes);
+
+        // 5. Render danh sách các bản sao lưu tri thức AI
+        loadAiBackupsList();
 
         if (window.lucide) lucide.createIcons();
     } catch (e) {
@@ -16482,6 +17079,12 @@ function renderAiHistoryList(history) {
 
     container.innerHTML = history.map(item => {
         const confPct = Math.round((item.confidence || 0.9) * 100);
+        const directCount = item.catalysts_extracted || 0;
+        const totalCount = item.total_knowledge_catalysts || directCount;
+        let catBadgeHtml = `<span class="text-emerald-400 font-bold text-xs">+${directCount} Catalysts</span>`;
+        if (totalCount > directCount) {
+            catBadgeHtml = `<div><span class="text-emerald-400 font-bold text-xs">+${directCount} Bóc tách</span> <span class="text-cyan-400 text-[10px] font-mono">(${totalCount} Kho AI)</span></div>`;
+        }
         return `
             <div class="p-2 bg-slate-950/70 border border-slate-800/80 rounded-lg flex items-center justify-between gap-3 hover:border-slate-700">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -16499,7 +17102,7 @@ function renderAiHistoryList(history) {
                 </div>
                 <div class="flex items-center gap-3 shrink-0 text-right">
                     <div>
-                        <span class="text-emerald-400 font-bold text-xs">+${item.catalysts_extracted || 0} Catalysts</span>
+                        ${catBadgeHtml}
                         <div class="text-[10px] text-purple-400 font-mono">Độ tin cậy: ${confPct}%</div>
                     </div>
                     <span class="w-2 h-2 rounded-full bg-emerald-400" title="Học thành công"></span>
@@ -16903,6 +17506,53 @@ async function deleteCustomTemplate(templateId) {
     }
 }
 
+async function saveGeminiApiKey() {
+    if (!isAdminAuthenticated()) {
+        openAdminAuthModal(() => {
+            saveGeminiApiKey();
+        });
+        return;
+    }
+
+    const input = document.getElementById("gemini-api-key-input");
+    const key = (input ? input.value : "").trim();
+    if (!key) {
+        showToast("Vui lòng nhập mã Google Gemini API Key!", true);
+        return;
+    }
+
+    try {
+        showToast("Đang lưu và kích hoạt Gemini 1.5 Flash...");
+        const resp = await fetch("/api/ai-learning/gemini-key", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
+            body: JSON.stringify({ api_key: key })
+        });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || "Lỗi lưu API Key");
+        }
+
+        const res = await resp.json();
+        showToast(res.message || "Đã kích hoạt thành công Gemini 1.5 Flash!");
+        if (input) input.value = "";
+        loadAiLearningDashboard();
+    } catch (e) {
+        showToast(`Lỗi: ${e.message}`, true);
+    }
+}
+
 async function resetTemplatesToDefaults() {
     if (!isAdminAuthenticated()) {
         openAdminAuthModal(() => {
@@ -16938,6 +17588,208 @@ async function resetTemplatesToDefaults() {
 async function refreshAiLearningHistory() {
     await loadAiLearningDashboard();
     showToast("Đã cập nhật nhật ký tự học mới nhất!");
+}
+
+// -------------------------------------------------------------
+// BẢO TỒN VÀ SAO LƯU TRI THỨC AI KHI DEPLOY PHIÊN BẢN MỚI
+// -------------------------------------------------------------
+
+async function loadAiBackupsList() {
+    const listEl = document.getElementById("ai-backups-list");
+    if (!listEl) return;
+    try {
+        const resp = await fetch("/api/ai-learning/backups");
+        if (!resp.ok) throw new Error("Lỗi tải danh sách bản sao lưu");
+        const backups = await resp.json();
+
+        if (!backups || backups.length === 0) {
+            listEl.innerHTML = `<div class="text-slate-500 italic p-2 text-center text-[11px]">Chưa có bản sao lưu nào. Hãy bấm "Sao Lưu Ngay" để bảo toàn dữ liệu.</div>`;
+            return;
+        }
+
+        listEl.innerHTML = backups.map(b => {
+            const stats = b.stats || {};
+            let statText = "";
+            if (stats.total_catalysts !== undefined) {
+                const tickers = stats.total_tickers || 104;
+                const reportsStr = stats.lifetime_reports ? `${Number(stats.lifetime_reports).toLocaleString()} Báo cáo` : `${stats.total_reports || 500} Báo cáo`;
+                statText = `⚡ ${Number(stats.total_catalysts).toLocaleString()} Động lực độc bản (${tickers} mã) • ${reportsStr} • ${stats.total_templates || 14} Mẫu`;
+            }
+            return `
+                <div class="flex items-center justify-between p-2 rounded bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all text-[11px]">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i data-lucide="file-archive" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                        <div class="truncate">
+                            <span class="text-slate-200 font-bold block truncate">${b.filename}</span>
+                            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                                <span>📅 ${b.created_at}</span>
+                                <span>•</span>
+                                <span>💾 ${b.size_kb} KB</span>
+                                ${statText ? `<span>•</span><span class="text-emerald-400">${statText}</span>` : ""}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        <a href="/api/ai-learning/backups/download/${encodeURIComponent(b.filename)}" download="${b.filename}" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 flex items-center gap-1 text-[10px]" title="Tải về máy tính">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            <span class="hidden sm:inline">Tải về</span>
+                        </a>
+                        <button onclick="triggerRestoreBackup('${b.filename}')" class="px-2 py-1 rounded bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-800/80 flex items-center gap-1 text-[10px]" title="Khôi phục hoặc hợp nhất vào kho hiện tại">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            <span class="hidden sm:inline">Khôi phục</span>
+                            <i data-lucide="lock" class="w-2.5 h-2.5 text-amber-400 admin-lock-indicator"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        if (window.lucide) lucide.createIcons();
+    } catch (e) {
+        listEl.innerHTML = `<div class="text-red-400 italic p-2 text-center text-[11px]">Lỗi: ${e.message}</div>`;
+    }
+}
+
+async function triggerCreateKnowledgeBackup() {
+    try {
+        showToast("Đang nén và chuẩn bị tệp sao lưu tri thức AI (.zip)...");
+        const resp = await fetch("/api/ai-learning/backups/create?tag=manual", {
+            method: "POST",
+            headers: {
+                ...getAdminAuthHeaders()
+            }
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || "Lỗi tạo bản sao lưu");
+        }
+
+        const res = await resp.json();
+        showToast(`Sao lưu thành công! Đang tải file ${res.filename} (${res.size_kb} KB)...`);
+
+        // Tự động kích hoạt tải tệp .zip về máy tính cá nhân của người dùng
+        if (res.filename) {
+            const downloadUrl = `/api/ai-learning/backups/download/${encodeURIComponent(res.filename)}`;
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = res.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            window.location.assign("/api/ai-learning/backups/create-and-download?tag=manual");
+        }
+
+        loadAiBackupsList();
+    } catch (e) {
+        showToast(`Lỗi: ${e.message}`, true);
+        // Fallback tải trực tiếp
+        window.location.assign("/api/ai-learning/backups/create-and-download?tag=manual");
+    }
+}
+
+async function triggerRestoreBackup(filename) {
+    if (!checkAdminPermission()) {
+        showToast("Chức năng chỉ dành cho Quản trị viên!", true);
+        openAdminAuthModal();
+        return;
+    }
+
+    if (!confirm(`Bạn có chắc muốn khôi phục tri thức AI từ bản sao lưu "${filename}"?\n\nDữ liệu sẽ được hợp nhất thông minh (bổ sung Catalysts & Mẫu học mà không làm mất dữ liệu hiện có).`)) {
+        return;
+    }
+
+    try {
+        showToast("Đang khôi phục và giải nén tri thức AI...");
+        const resp = await fetch("/api/ai-learning/backups/restore", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAdminAuthHeaders()
+            },
+            body: JSON.stringify({
+                filename: filename,
+                merge: true
+            })
+        });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || "Lỗi khôi phục sao lưu");
+        }
+
+        const res = await resp.json();
+        showToast(res.message || "Đã khôi phục tri thức thành công!");
+        loadAiLearningDashboard();
+    } catch (e) {
+        showToast(`Lỗi: ${e.message}`, true);
+    }
+}
+
+async function handleUploadKnowledgeBackup(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!checkAdminPermission()) {
+        showToast("Chức năng chỉ dành cho Quản trị viên!", true);
+        openAdminAuthModal();
+        event.target.value = "";
+        return;
+    }
+
+    if (!file.name.endsWith(".zip")) {
+        showToast("Vui lòng chọn đúng tệp tin .zip đã sao lưu trước đó!", true);
+        event.target.value = "";
+        return;
+    }
+
+    if (!confirm(`Xác nhận tải lên và hợp nhất gói tri thức từ file "${file.name}"?\nDữ liệu cũ sẽ được bảo toàn và cập nhật thêm các tri thức từ gói sao lưu này.`)) {
+        event.target.value = "";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("merge", "true");
+
+    try {
+        showToast("Đang tải lên và phân tích gói tri thức AI...");
+        const resp = await fetch("/api/ai-learning/backups/upload", {
+            method: "POST",
+            headers: {
+                ...getAdminAuthHeaders()
+            },
+            body: formData
+        });
+
+        if (resp.status === 403) {
+            logoutAdmin();
+            showToast("Quyền Quản trị viên không hợp lệ. Vui lòng đăng nhập lại!", true);
+            openAdminAuthModal();
+            return;
+        }
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || "Lỗi tải lên gói sao lưu");
+        }
+
+        const res = await resp.json();
+        showToast(res.message || "Tải lên và khôi phục tri thức thành công!");
+        loadAiLearningDashboard();
+    } catch (e) {
+        showToast(`Lỗi: ${e.message}`, true);
+    } finally {
+        event.target.value = "";
+    }
 }
 
 // Hàm hợp nhất báo cáo mới vào hệ thống và kích hoạt tái tính toán consensus toàn diện
@@ -17163,6 +18015,27 @@ async function refreshLivePrice(isManual = false) {
                         // ignore
                     }
                 }
+            }
+        }
+
+        // 3b. Tab Bộ lọc cổ phiếu: Cập nhật nến mới nhất trên screenerCandleSeries nếu đang xem mã ticker này
+        if (screenerCandleSeries && typeof screenerCurrentTicker === "string" && screenerCurrentTicker.toUpperCase() === ticker.toUpperCase() && currentScreenerCandlesData && currentScreenerCandlesData.length > 0) {
+            const lastIdx = currentScreenerCandlesData.length - 1;
+            const lastCandle = currentScreenerCandlesData[lastIdx];
+            if (lastCandle) {
+                lastCandle.close = Number(newPrice);
+                if (Number(newPrice) > (lastCandle.high || Number(newPrice))) lastCandle.high = Number(newPrice);
+                if (Number(newPrice) < (lastCandle.low || Number(newPrice))) lastCandle.low = Number(newPrice);
+                try {
+                    screenerCandleSeries.update({
+                        time: lastCandle.time,
+                        open: Number(lastCandle.open),
+                        high: Number(lastCandle.high),
+                        low: Number(lastCandle.low),
+                        close: Number(lastCandle.close)
+                    });
+                    updateScreenerLegendDisplay(lastCandle, currentScreenerCandlesData.length > 1 ? currentScreenerCandlesData[lastIdx - 1] : null);
+                } catch (scErr) {}
             }
         }
 
@@ -17752,7 +18625,7 @@ async function openCtckReportsModal() {
                     formattedC = `<strong class="text-amber-300 font-bold">${c.substring(0, colonIdx)}:</strong><span>${c.substring(colonIdx + 1)}</span>`;
                 }
                 catHtml += `<li class="flex items-start gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 shadow-xs">
-                    <span class="text-amber-400 font-mono font-bold shrink-0 bg-amber-950/80 px-1.5 py-0.5 rounded text-[10px] border border-amber-800/60">${cIdx + 1}</span>
+                    <span class="text-amber-400 font-bold shrink-0 text-[14px] leading-tight">•</span>
                     <div class="leading-relaxed text-slate-200">${formattedC}</div>
                 </li>`;
             });
@@ -19336,7 +20209,7 @@ async function exportPeersPdf() {
 
 
 // -------------------------------------------------------------
-// ZALO QR MODAL HANDLER
+// ZALO QR & GROUP QR MODAL HANDLER
 // -------------------------------------------------------------
 function openZaloQrModal() {
     const modal = document.getElementById("modal-zalo-qr");
@@ -19353,10 +20226,26 @@ function closeZaloQrModal() {
     }
 }
 
-// Bấm phím Escape hoặc bấm ra ngoài nền để đóng Modal Zalo QR
+function openZaloGroupQrModal() {
+    const modal = document.getElementById("modal-zalo-group-qr");
+    if (modal) {
+        modal.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+    }
+}
+
+function closeZaloGroupQrModal() {
+    const modal = document.getElementById("modal-zalo-group-qr");
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+}
+
+// Bấm phím Escape hoặc bấm ra ngoài nền để đóng Modal Zalo QR & Group QR
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         closeZaloQrModal();
+        closeZaloGroupQrModal();
     }
 });
 
@@ -19364,6 +20253,10 @@ document.addEventListener("click", (e) => {
     const modal = document.getElementById("modal-zalo-qr");
     if (modal && !modal.classList.contains("hidden") && e.target === modal) {
         closeZaloQrModal();
+    }
+    const groupModal = document.getElementById("modal-zalo-group-qr");
+    if (groupModal && !groupModal.classList.contains("hidden") && e.target === groupModal) {
+        closeZaloGroupQrModal();
     }
 });
 
@@ -19506,6 +20399,8 @@ let screenerUserCustomSort = null; // Trạng thái sort do người dùng click
 let screenerAutoScanEnabled = true;
 let screenerAutoScanTimer = null;
 let screenerAutoScanCountdown = 10;
+let screenerRequestSeq = 0; // Tránh race-condition nhảy kết quả giữa các bộ lọc khi chuyển đổi
+let screenerAbortController = null;
 
 // Chart references for Column 3
 let chartScreenerTv = null;
@@ -19675,12 +20570,77 @@ function startScreenerAutoScanLoop() {
         if (screenerAutoScanCountdown <= 0) {
             screenerAutoScanCountdown = 10;
             // Quét tự động chạy ngầm, không làm giật cuộn chuột hay mất mã đang xem
-            selectScreenerStrategy(screenerCurrentStrategy, true, true);
+            selectScreenerStrategy(screenerCurrentStrategy, false, true);
         }
     }, 1000);
 }
 
 // -------------------------------------------------------------
+
+let screenerAllFundData = [];
+
+function applyTechInMemoryFilter() {
+    if (!screenerAllTechBuys && !screenerAllTechSells) return;
+    let buys = screenerAllTechBuys || [];
+    let sells = screenerAllTechSells || [];
+
+    if (screenerCurrentTiming === "today") {
+        buys = buys.filter(b => b.bars_since === 0);
+        sells = sells.filter(s => s.bars_since === 0);
+    }
+    if (screenerCurrentMinVol > 0) {
+        buys = buys.filter(b => (b.ma10_vol !== undefined && b.ma10_vol !== null ? b.ma10_vol : (b.today_vol || b.volume || 0)) >= screenerCurrentMinVol);
+        sells = sells.filter(s => (s.ma10_vol !== undefined && s.ma10_vol !== null ? s.ma10_vol : (s.today_vol || s.volume || 0)) >= screenerCurrentMinVol);
+    }
+    if (screenerCurrentMinPrice > 0) {
+        buys = buys.filter(b => (b.price || b.signal_price || 0) >= screenerCurrentMinPrice);
+        sells = sells.filter(s => (s.price || s.signal_price || 0) >= screenerCurrentMinPrice);
+    }
+    if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+        if (screenerCurrentExchange === "VN30") {
+            const vn30 = ["ACB", "BCM", "BID", "BVH", "CTG", "FPT", "GAS", "GVR", "HDB", "HPG", "MBB", "MSN", "MWG", "PLX", "POW", "SHB", "SSB", "SSI", "STB", "TCB", "TPB", "VCB", "VHM", "VIB", "VIC", "VJC", "VNM", "VPB", "VRE"];
+            buys = buys.filter(b => vn30.includes((b.symbol || "").toUpperCase()));
+            sells = sells.filter(s => vn30.includes((s.symbol || "").toUpperCase()));
+        } else {
+            buys = buys.filter(b => (b.exchange || "").toUpperCase() === screenerCurrentExchange);
+            sells = sells.filter(s => (s.exchange || "").toUpperCase() === screenerCurrentExchange);
+        }
+    }
+
+    screenerCachedTechBuys = buys;
+    screenerCachedTechSells = sells;
+    const countEl = document.getElementById("screener-result-count");
+    if (countEl) countEl.textContent = `(${buys.length + sells.length} mã)`;
+    const buyCountEl = document.getElementById("screener-tech-buy-count");
+    const sellCountEl = document.getElementById("screener-tech-sell-count");
+    if (buyCountEl) buyCountEl.textContent = `${buys.length} mã`;
+    if (sellCountEl) sellCountEl.textContent = `${sells.length} mã`;
+    renderTechScreenerTables(screenerCachedTechBuys, screenerCachedTechSells);
+}
+
+function applyFundInMemoryFilter() {
+    if (!screenerAllFundData || screenerAllFundData.length === 0) return;
+    let items = screenerAllFundData;
+    if (screenerCurrentMinVol > 0) {
+        items = items.filter(it => (it.volume || 0) >= screenerCurrentMinVol);
+    }
+    if (screenerCurrentMinPrice > 0) {
+        items = items.filter(it => (it.price || 0) >= screenerCurrentMinPrice);
+    }
+    if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+        if (screenerCurrentExchange === "VN30") {
+            const vn30 = ["ACB", "BCM", "BID", "BVH", "CTG", "FPT", "GAS", "GVR", "HDB", "HPG", "MBB", "MSN", "MWG", "PLX", "POW", "SHB", "SSB", "SSI", "STB", "TCB", "TPB", "VCB", "VHM", "VIB", "VIC", "VJC", "VNM", "VPB", "VRE"];
+            items = items.filter(it => vn30.includes((it.ticker || "").toUpperCase()));
+        } else {
+            items = items.filter(it => (it.exchange || "").toUpperCase() === screenerCurrentExchange);
+        }
+    }
+    screenerCachedFundData = items;
+    const countEl = document.getElementById("screener-result-count");
+    if (countEl) countEl.textContent = `(${items.length} mã)`;
+    renderFundScreenerTable(screenerCachedFundData);
+}
+
 // XỬ LÝ TIÊU CHÍ LỌC PHÍA TRÊN (SÀN, KL TB 10N, THỊ GIÁ)
 // -------------------------------------------------------------
 function handleScreenerCriteriaChange() {
@@ -19703,7 +20663,15 @@ function handleScreenerCriteriaChange() {
         activeExBtn.classList.remove("text-slate-400");
     }
 
-    selectScreenerStrategy(screenerCurrentStrategy, true);
+    if (screenerCurrentStrategy === "rs") {
+        applyRsFilter();
+    } else if (["fansi", "robot1", "robot2", "div_macd", "div_rsi"].includes(screenerCurrentStrategy)) {
+        applyTechInMemoryFilter();
+        selectScreenerStrategy(screenerCurrentStrategy, false, true);
+    } else {
+        applyFundInMemoryFilter();
+        selectScreenerStrategy(screenerCurrentStrategy, false, true);
+    }
 }
 
 // -------------------------------------------------------------
@@ -19762,7 +20730,7 @@ function applyRsFilter() {
         }
 
         // 3. Tiêu chí phía trên: Khối lượng tối thiểu (KL TB 10N / 3T)
-        const vol = s.volume !== undefined ? s.volume : (s.today_vol || s.ma10_vol || 0);
+        const vol = s.volume !== undefined ? s.volume : (s.avg_volume_3m || s.ma10_vol || s.today_vol || 0);
         if (minVol > 0 && vol < minVol) return false;
 
         // 4. Tiêu chí phía trên: Thị giá tối thiểu
@@ -19811,7 +20779,8 @@ function renderRsScreenerTable(items) {
         const p = it.price || 0;
         const pFmt = p >= 1000 ? (p / 1000).toFixed(2) : p.toFixed(2);
         const chg = it.price_change_pct || 0;
-        const chgSign = chg >= 0 ? "+" : "";
+        const chgArrow = chg > 0 ? "▲ +" : (chg < 0 ? "▼ " : "");
+        const chgText = chgArrow + chg.toFixed(2) + "%";
         const chgClass = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-300");
 
         const vol = it.volume || 0;
@@ -19847,7 +20816,7 @@ function renderRsScreenerTable(items) {
                     ${pFmt}
                 </td>
                 <td class="py-2 px-1 text-right font-semibold ${chgClass}">
-                    ${chgSign}${chg.toFixed(2)}%
+                    ${chgText}
                 </td>
                 <td class="py-2 px-1 text-right text-slate-400 text-[11px]">
                     ${volStr}
@@ -19950,13 +20919,28 @@ function setScreenerTiming(timing) {
     }
 
     if (screenerCurrentMode === "tech") {
-        selectScreenerStrategy(screenerCurrentStrategy || "fansi", true);
+        applyTechInMemoryFilter();
+        selectScreenerStrategy(screenerCurrentStrategy || "fansi", false, true);
     }
 }
+
+// BỘ NHỚ ĐỆM KẾT QUẢ BỘ LỌC CLIENT (STALE-WHILE-REVALIDATE) - PHẢN HỒI TỨC THÌ 0.00S
+const screenerClientCache = window.screenerClientCache || {};
+window.screenerClientCache = screenerClientCache;
 
 async function selectScreenerStrategy(stratKey, forceReload = false, silent = false) {
     if (!stratKey) stratKey = "fansi";
     screenerCurrentStrategy = stratKey;
+
+    // Hủy bỏ mọi request đang bay của bộ lọc trước để tránh tranh chấp kết quả (Race Condition)
+    if (screenerAbortController) {
+        try { screenerAbortController.abort(); } catch(e) {}
+    }
+    screenerAbortController = new AbortController();
+    const currentSeq = ++screenerRequestSeq;
+
+    // Reset bộ đếm auto-scan về 10s để không bắn đè ngay khi vừa click chuyển bộ lọc
+    screenerAutoScanCountdown = 10;
 
     // Highlight card
     document.querySelectorAll(".screener-card").forEach(c => {
@@ -20007,11 +20991,14 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
         try {
             if (!screenerAllRsStocks || screenerAllRsStocks.length === 0 || forceReload) {
                 const url = `/api/screener/rs-ranking?exchange=ALL&min_rs=0&min_vol=0&min_price=0${forceReload ? '&refresh=true' : ''}`;
-                const res = await fetch(url);
+                const res = await fetch(url, { signal: screenerAbortController.signal });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+                if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
                 screenerAllRsStocks = data.items || [];
             }
+
+            if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
 
             // Áp dụng bộ lọc kết hợp: RS bên trái + Tiêu chí Sàn, KL TB, Thị giá phía trên
             applyRsFilter();
@@ -20023,6 +21010,8 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
                 loadScreenerChartData(screenerCurrentTicker, silent);
             }
         } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
             console.error("selectScreenerStrategy rs error:", err);
             if (rsTbody) rsTbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
         }
@@ -20050,10 +21039,82 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
         }
 
         try {
-            const url = `/api/screener/fansi-signals?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}&timing=${encodeURIComponent(screenerCurrentTiming)}${forceReload ? '&refresh=true' : ''}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+            const cacheKey = `tech_${stratKey}_${screenerCurrentExchange}_${screenerCurrentMinVol}_${screenerCurrentMinPrice}_${screenerCurrentTiming}`;
+            const cachedEntry = !forceReload ? screenerClientCache[cacheKey] : null;
+            const now = Date.now();
+
+            let data = null;
+            let needBackgroundFetch = true;
+
+            if (cachedEntry && (now - cachedEntry.ts) < 60000) {
+                // ĐÃ CÓ TRONG BỘ NHỚ ĐỆM CLIENT: Render tức thì 0.00s!
+                data = cachedEntry.data;
+                if ((now - cachedEntry.ts) < 25000) {
+                    needBackgroundFetch = false;
+                }
+            }
+
+            if (!data) {
+                const url = `/api/screener/fansi-signals?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}&timing=${encodeURIComponent(screenerCurrentTiming)}${forceReload ? '&refresh=true' : ''}`;
+                const res = await fetch(url, { signal: screenerAbortController.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                data = await res.json();
+                if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
+                screenerClientCache[cacheKey] = { data: data, ts: Date.now() };
+                needBackgroundFetch = false;
+            } else if (needBackgroundFetch) {
+                // Chạy đồng bộ nền trong lúc người dùng đã có bảng xem ngay
+                const bgSeq = currentSeq;
+                const url = `/api/screener/fansi-signals?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}&timing=${encodeURIComponent(screenerCurrentTiming)}`;
+                fetch(url).then(r => r.ok ? r.json() : null).then(freshData => {
+                    if (freshData && bgSeq === screenerRequestSeq && screenerCurrentStrategy === stratKey) {
+                        screenerClientCache[cacheKey] = { data: freshData, ts: Date.now() };
+                        let bList = freshData.buy_signals || [];
+                        let sList = freshData.sell_signals || [];
+
+                        // 1. Lọc theo timing
+                        if (screenerCurrentTiming === "today") {
+                            bList = bList.filter(b => b.bars_since === 0);
+                            sList = sList.filter(s => s.bars_since === 0);
+                        }
+
+                        // 2. Lọc nghiêm ngặt theo tiêu chí (KL TB 10N, Thị giá, Sàn)
+                        if (screenerCurrentMinVol > 0) {
+                            bList = bList.filter(b => (b.ma10_vol !== undefined && b.ma10_vol !== null ? b.ma10_vol : (b.today_vol || b.volume || 0)) >= screenerCurrentMinVol);
+                            sList = sList.filter(s => (s.ma10_vol !== undefined && s.ma10_vol !== null ? s.ma10_vol : (s.today_vol || s.volume || 0)) >= screenerCurrentMinVol);
+                        }
+                        if (screenerCurrentMinPrice > 0) {
+                            bList = bList.filter(b => (b.price || b.signal_price || 0) >= screenerCurrentMinPrice);
+                            sList = sList.filter(s => (s.price || s.signal_price || 0) >= screenerCurrentMinPrice);
+                        }
+                        if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+                            bList = bList.filter(b => (b.exchange || "").toUpperCase() === screenerCurrentExchange);
+                            sList = sList.filter(s => (s.exchange || "").toUpperCase() === screenerCurrentExchange);
+                        }
+
+                        screenerAllTechBuys = bList;
+                        screenerAllTechSells = sList;
+                        screenerCachedTechBuys = bList;
+                        screenerCachedTechSells = sList;
+
+                        // 3. Giữ nguyên trạng thái sắp xếp
+                        if (screenerUserCustomSort) {
+                            applyScreenerSort(screenerCachedTechBuys, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+                            applyScreenerSort(screenerCachedTechSells, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+                        }
+
+                        // 4. Cập nhật các badge số lượng mã
+                        const totalBg = bList.length + sList.length;
+                        if (countEl) countEl.textContent = `(${totalBg} mã)`;
+                        const buyCountElBg = document.getElementById("screener-tech-buy-count");
+                        const sellCountElBg = document.getElementById("screener-tech-sell-count");
+                        if (buyCountElBg) buyCountElBg.textContent = `${bList.length} mã`;
+                        if (sellCountElBg) sellCountElBg.textContent = `${sList.length} mã`;
+
+                        renderTechScreenerTables(screenerCachedTechBuys, screenerCachedTechSells);
+                    }
+                }).catch(() => {});
+            }
 
             let buys = data.buy_signals || [];
             let sells = data.sell_signals || [];
@@ -20066,8 +21127,8 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
 
             // Đồng bộ nghiêm ngặt với các tiêu chí lọc phía trên (Sàn, KL TB, Thị giá)
             if (screenerCurrentMinVol > 0) {
-                buys = buys.filter(b => (b.today_vol || b.ma10_vol || b.volume || 0) >= screenerCurrentMinVol);
-                sells = sells.filter(s => (s.today_vol || s.ma10_vol || s.volume || 0) >= screenerCurrentMinVol);
+                buys = buys.filter(b => (b.ma10_vol !== undefined && b.ma10_vol !== null ? b.ma10_vol : (b.today_vol || b.volume || 0)) >= screenerCurrentMinVol);
+                sells = sells.filter(s => (s.ma10_vol !== undefined && s.ma10_vol !== null ? s.ma10_vol : (s.today_vol || s.volume || 0)) >= screenerCurrentMinVol);
             }
             if (screenerCurrentMinPrice > 0) {
                 buys = buys.filter(b => (b.price || b.signal_price || 0) >= screenerCurrentMinPrice);
@@ -20118,6 +21179,8 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
                 loadScreenerChartData(screenerCurrentTicker, silent);
             }
         } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
             console.error("selectScreenerStrategy technical error:", err);
             if (buyTbody) buyTbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
             if (sellTbody) sellTbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
@@ -20136,10 +21199,55 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
         }
 
         try {
-            const url = `/api/screener/fund-strategies?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}${forceReload ? '&refresh=true' : ''}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+            const cacheKey = `fund_${stratKey}_${screenerCurrentExchange}_${screenerCurrentMinVol}_${screenerCurrentMinPrice}`;
+            const cachedEntry = !forceReload ? screenerClientCache[cacheKey] : null;
+            const now = Date.now();
+
+            let data = null;
+            let needBackgroundFetch = true;
+
+            if (cachedEntry && (now - cachedEntry.ts) < 60000) {
+                // ĐÃ CÓ TRONG BỘ NHỚ ĐỆM CLIENT: Render tức thì 0.00s!
+                data = cachedEntry.data;
+                if ((now - cachedEntry.ts) < 30000) {
+                    needBackgroundFetch = false;
+                }
+            }
+
+            if (!data) {
+                const url = `/api/screener/fund-strategies?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}${forceReload ? '&refresh=true' : ''}`;
+                const res = await fetch(url, { signal: screenerAbortController.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                data = await res.json();
+                if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
+                screenerClientCache[cacheKey] = { data: data, ts: Date.now() };
+                needBackgroundFetch = false;
+            } else if (needBackgroundFetch) {
+                const bgSeq = currentSeq;
+                const url = `/api/screener/fund-strategies?strategy=${encodeURIComponent(stratKey)}&exchange=${encodeURIComponent(screenerCurrentExchange)}&min_vol=${screenerCurrentMinVol}&min_price=${screenerCurrentMinPrice}`;
+                fetch(url).then(r => r.ok ? r.json() : null).then(freshData => {
+                    if (freshData && bgSeq === screenerRequestSeq && screenerCurrentStrategy === stratKey) {
+                        screenerClientCache[cacheKey] = { data: freshData, ts: Date.now() };
+                        let fItems = freshData.items || [];
+                        if (screenerCurrentMinVol > 0) {
+                            fItems = fItems.filter(it => (it.volume || 0) >= screenerCurrentMinVol);
+                        }
+                        if (screenerCurrentMinPrice > 0) {
+                            fItems = fItems.filter(it => (it.price || 0) >= screenerCurrentMinPrice);
+                        }
+                        if (screenerCurrentExchange && screenerCurrentExchange !== "ALL") {
+                            fItems = fItems.filter(it => (it.exchange || "").toUpperCase() === screenerCurrentExchange);
+                        }
+                        screenerAllFundData = fItems;
+                        screenerCachedFundData = fItems;
+                        if (screenerUserCustomSort) {
+                            applyScreenerSort(screenerCachedFundData, screenerUserCustomSort.col, screenerUserCustomSort.dir);
+                        }
+                        if (countEl) countEl.textContent = `(${fItems.length} mã)`;
+                        renderFundScreenerTable(screenerCachedFundData);
+                    }
+                }).catch(() => {});
+            }
             let items = data.items || [];
 
             // Đồng bộ nghiêm ngặt với các tiêu chí lọc phía trên (Sàn, KL TB, Thị giá)
@@ -20153,6 +21261,7 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
                 items = items.filter(it => (it.exchange || "").toUpperCase() === screenerCurrentExchange);
             }
 
+            screenerAllFundData = items;
             screenerCachedFundData = items;
 
             // Giữ nguyên trạng thái sắp xếp của người dùng qua các chu kỳ auto-scan
@@ -20171,11 +21280,332 @@ async function selectScreenerStrategy(stratKey, forceReload = false, silent = fa
                 selectScreenerTicker(items[0].ticker, false);
             }
         } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            if (currentSeq !== screenerRequestSeq || screenerCurrentStrategy !== stratKey) return;
             console.error("selectScreenerStrategy fundamental error:", err);
             if (fundTbody) fundTbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400 font-mono text-xs">Lỗi: ${err.message}</td></tr>`;
         }
     }
 }
+
+// -------------------------------------------------------------
+// XUẤT BÁO CÁO PDF DANH MỤC RS KÈM WATERMARK ZSTOCK.PRO.VN TỪNG TRANG
+// -------------------------------------------------------------
+async function exportRsToPdf() {
+    let items = (screenerCurrentStrategy === 'rs' ? screenerCachedRsData : null);
+    if (!items || items.length === 0) {
+        if (screenerAllRsStocks && screenerAllRsStocks.length > 0) {
+            items = screenerAllRsStocks.filter(it => (it.rs_rating || 0) >= (screenerCurrentMinRs || 80));
+        }
+    }
+    if (!items || items.length === 0) {
+        showToast("⚠️ Không có dữ liệu cổ phiếu RS phù hợp để xuất file!");
+        return;
+    }
+
+    showToast("⏳ Đang chuẩn bị báo cáo PDF danh mục RS...");
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const fileDate = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const filename = `IERM_RS_Screener_${fileDate}.pdf`;
+
+    // Phân trang chuẩn cho tài liệu PDF A4 Landscape:
+    // Trang 1: 15 cổ phiếu (chừa khoảng trống cho Header đầy đủ & thông tin bộ lọc)
+    // Trang 2 trở đi: 18 cổ phiếu (header thu gọn kèm tiêu đề cột thead đầy đủ trên mọi trang)
+    const ROWS_P1 = 15;
+    const ROWS_OTHER = 18;
+    const pageChunks = [];
+
+    if (items.length <= ROWS_P1) {
+        pageChunks.push({ startIndex: 0, items: items });
+    } else {
+        pageChunks.push({ startIndex: 0, items: items.slice(0, ROWS_P1) });
+        let cursor = ROWS_P1;
+        while (cursor < items.length) {
+            pageChunks.push({
+                startIndex: cursor,
+                items: items.slice(cursor, cursor + ROWS_OTHER)
+            });
+            cursor += ROWS_OTHER;
+        }
+    }
+
+    const totalPages = pageChunks.length;
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.width = "100%";
+    wrapper.style.height = "0";
+    wrapper.style.overflow = "hidden";
+    wrapper.style.zIndex = "-9999";
+    wrapper.style.pointerEvents = "none";
+
+    const container = document.createElement("div");
+    container.style.width = "1080px";
+    container.style.backgroundColor = "#ffffff";
+    container.style.color = "#0f172a";
+    container.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    container.style.boxSizing = "border-box";
+
+    // Khung thead chuẩn hiển thị trên tất cả các trang
+    const theadHtml = `
+        <thead>
+            <tr style="background-color: #f1f5f9; color: #334155; font-size: 10px; text-transform: uppercase; border-top: 1px solid #cbd5e1; border-bottom: 2px solid #94a3b8; font-weight: 700;">
+                <th style="padding: 7px 6px; text-align: center; width: 35px;">STT</th>
+                <th style="padding: 7px 8px; text-align: left; width: 65px;">Mã CP</th>
+                <th style="padding: 7px 8px; text-align: left;">Tên Doanh Nghiệp</th>
+                <th style="padding: 7px 6px; text-align: center; width: 55px;">Sàn</th>
+                <th style="padding: 7px 8px; text-align: center; width: 70px;">Điểm RS</th>
+                <th style="padding: 7px 8px; text-align: right; width: 85px;">Thị Giá (đ)</th>
+                <th style="padding: 7px 8px; text-align: right; width: 75px;">% Ngày</th>
+                <th style="padding: 7px 8px; text-align: right; width: 75px;">% 1 Tháng</th>
+                <th style="padding: 7px 8px; text-align: right; width: 75px;">% 3 Tháng</th>
+                <th style="padding: 7px 8px; text-align: right; width: 95px;">Khối Lượng</th>
+                <th style="padding: 7px 8px; text-align: right; width: 80px;">Vốn Hóa (Tỷ)</th>
+            </tr>
+        </thead>
+    `;
+
+    let pagesHtml = "";
+
+    pageChunks.forEach((chunk, pageIdx) => {
+        const isFirstPage = (pageIdx === 0);
+        const isLastPage = (pageIdx === totalPages - 1);
+
+        const rowsHtml = chunk.items.map((it, localIdx) => {
+            const globalIdx = chunk.startIndex + localIdx;
+            const sym = (it.ticker || it.symbol || "").toUpperCase();
+            const name = it.name || sym;
+            const ex = (it.exchange || "HOSE").toUpperCase();
+            const rs = it.rs_rating || 50;
+            const price = it.price || 0;
+            const priceFmt = price.toLocaleString('vi-VN');
+            const chg = it.price_change_pct !== undefined ? it.price_change_pct : (it.pct_change || 0);
+            const chgColor = chg > 0 ? "#16a34a" : (chg < 0 ? "#dc2626" : "#64748b");
+            const chgSign = chg > 0 ? "+" : "";
+            const p1m = it.price_change_1m_pct !== undefined ? it.price_change_1m_pct : 0;
+            const p1mColor = p1m > 0 ? "#16a34a" : (p1m < 0 ? "#dc2626" : "#64748b");
+            const p3m = it.price_change_3m_pct !== undefined ? it.price_change_3m_pct : 0;
+            const p3mColor = p3m > 0 ? "#16a34a" : (p3m < 0 ? "#dc2626" : "#64748b");
+            const vol = it.volume || it.today_vol || 0;
+            const volFmt = vol.toLocaleString('vi-VN');
+            const mcap = it.market_cap_bil ? it.market_cap_bil.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-";
+            const rowBg = globalIdx % 2 === 0 ? "#ffffff" : "#f8fafc";
+
+            return `
+                <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+                    <td style="padding: 6px 6px; text-align: center; color: #64748b; font-weight: 500;">${globalIdx + 1}</td>
+                    <td style="padding: 6px 8px; font-weight: 700; color: #0284c7; font-size: 12px;">${sym}</td>
+                    <td style="padding: 6px 8px; color: #334155; font-weight: 500; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</td>
+                    <td style="padding: 6px 6px; text-align: center;"><span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">${ex}</span></td>
+                    <td style="padding: 6px 8px; text-align: center;"><span style="display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background-color: #faf5ff; color: #7e22ce; border: 1px solid #d8b4fe;">${rs}</span></td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 700; color: #0f172a;">${priceFmt}</td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 700; color: ${chgColor};">${chgSign}${chg.toFixed(2)}%</td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 600; color: ${p1mColor};">${p1m > 0 ? '+' : ''}${p1m.toFixed(1)}%</td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 600; color: ${p3mColor};">${p3m > 0 ? '+' : ''}${p3m.toFixed(1)}%</td>
+                    <td style="padding: 6px 8px; text-align: right; color: #475569; font-weight: 500;">${volFmt}</td>
+                    <td style="padding: 6px 8px; text-align: right; color: #475569;">${mcap}</td>
+                </tr>
+            `;
+        }).join("");
+
+        // Header riêng cho từng trang: Trang 1 đầy đủ, trang sau thu gọn
+        let headerHtml = "";
+        if (isFirstPage) {
+            headerHtml = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0284c7; padding-bottom: 10px; margin-bottom: 12px; position: relative; z-index: 2;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="background-color: #0284c7; color: #ffffff; font-weight: 900; font-size: 13px; padding: 3px 8px; border-radius: 5px; letter-spacing: 1px;">IERM QUANT</span>
+                            <span style="color: #64748b; font-size: 11px; font-weight: 600;">• zstock.pro.vn</span>
+                        </div>
+                        <h1 style="margin: 6px 0 3px 0; font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: -0.3px;">BÁO CÁO ĐỊNH LƯỢNG SỨC MẠNH GIÁ RS (RELATIVE STRENGTH)</h1>
+                        <p style="margin: 0; font-size: 11px; color: #64748b;">Xếp hạng sức mạnh giá cổ phiếu toàn thị trường theo chuẩn William O'Neil (CANSLIM 52 Tuần)</p>
+                    </div>
+                    <div style="text-align: right; font-size: 11px; color: #475569; line-height: 1.5;">
+                        <div><strong>Thời gian xuất:</strong> ${dateStr}</div>
+                        <div><strong>Tiêu chí:</strong> Sàn ${screenerCurrentExchange || 'ALL'} · RS ≥ ${screenerCurrentMinRs || 80}</div>
+                        <div><strong>Quy mô đạt chuẩn:</strong> <span style="color: #0284c7; font-weight: 700; font-size: 13px;">${items.length} cổ phiếu</span></div>
+                    </div>
+                </div>
+            `;
+        } else {
+            headerHtml = `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 8px; margin-bottom: 10px; position: relative; z-index: 2;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background-color: #0284c7; color: #ffffff; font-weight: 900; font-size: 11px; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.8px;">IERM QUANT</span>
+                        <span style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase;">BÁO CÁO ĐỊNH LƯỢNG SỨC MẠNH GIÁ RS (RELATIVE STRENGTH)</span>
+                    </div>
+                    <div style="text-align: right; font-size: 10px; color: #64748b;">
+                        <span><strong>${dateStr}</strong></span> • <span>Sàn ${screenerCurrentExchange || 'ALL'} · RS ≥ ${screenerCurrentMinRs || 80}</span> • <span style="font-weight: 700; color: #0284c7;">Trang ${pageIdx + 1}/${totalPages}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Footer riêng cho từng trang (Đã bỏ ẩn nguồn cấp dữ liệu theo yêu cầu)
+        const footerHtml = `
+            <div style="margin-top: auto; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 9px; color: #94a3b8; position: relative; z-index: 2;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                    <span style="font-weight: 600; color: #64748b;">Hệ thống Nghiên cứu & Định lượng Đầu tư IERM</span>
+                    <span style="color: #64748b;">Trang web: <strong style="color: #0284c7;">zstock.pro.vn</strong> • <span style="font-weight: 700; color: #0f172a;">Trang ${pageIdx + 1} / ${totalPages}</span></span>
+                </div>
+                ${isLastPage ? `
+                <div style="color: #64748b; font-style: italic; line-height: 1.4; padding-top: 4px; border-top: 1px dashed #e2e8f0; font-size: 8.5px;">
+                    Điều khoản miễn trừ: "Báo cáo định lượng Relative Strength (RS) theo phương pháp William O'Neil (CANSLIM) nhằm hỗ trợ theo dõi sức mạnh giá so với thị trường chung, không phải lời khuyên hay khuyến nghị đầu tư. Nhà đầu tư tự chịu trách nhiệm về quyết định của mình."
+                </div>` : ''}
+            </div>
+        `;
+
+        // Watermark riêng cho từng trang
+        const watermarkHtml = `
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-24deg); font-size: 64px; font-weight: 900; letter-spacing: 6px; color: rgba(2, 132, 199, 0.08); white-space: nowrap; pointer-events: none; z-index: 1; user-select: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: lowercase;">
+                zstock.pro.vn
+            </div>
+        `;
+
+        pagesHtml += `
+            <div class="pdf-page-block" style="width: 1080px; min-height: 710px; box-sizing: border-box; padding: 18px 24px 14px 24px; position: relative; background-color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; page-break-inside: avoid; break-inside: avoid;">
+                ${watermarkHtml}
+                <div>
+                    ${headerHtml}
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; position: relative; z-index: 2;">
+                        ${theadHtml}
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                ${footerHtml}
+            </div>
+            ${pageIdx < totalPages - 1 ? '<div class="html2pdf__page-break" style="page-break-after: always; break-after: page;"></div>' : ''}
+        `;
+    });
+
+    container.innerHTML = pagesHtml;
+    wrapper.appendChild(container);
+    document.body.appendChild(wrapper);
+
+    try {
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin: [4, 4, 4, 4],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 1120 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+            await html2pdf().set(opt).from(container).save();
+            showToast(`✅ Đã xuất thành công file PDF: ${filename}`);
+        } else {
+            const printWin = window.open('', '_blank', 'width=1120,height=750');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>${filename}</title>
+                    <style>
+                        @page { size: A4 landscape; margin: 6mm; }
+                        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; position: relative; }
+                        .pdf-page-block { page-break-after: always; break-after: page; }
+                        .html2pdf__page-break { page-break-after: always; break-after: page; }
+                        table { page-break-inside: avoid; }
+                        tr { page-break-inside: avoid; }
+                    </style>
+                </head>
+                <body>
+                    ${container.innerHTML}
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            showToast(`✅ Đã mở trang in PDF: ${filename}`);
+        }
+    } catch(e) {
+        console.error("exportRsToPdf error:", e);
+        showToast(`❌ Lỗi khi xuất file PDF: ${e.message}`);
+    } finally {
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// XUẤT FILE EXCEL / CSV DANH MỤC RS CHUẨN FONT TIẾNG VIỆT UTF-8
+// -------------------------------------------------------------
+function exportRsToExcel() {
+    let items = (screenerCurrentStrategy === 'rs' ? screenerCachedRsData : null);
+    if (!items || items.length === 0) {
+        if (screenerAllRsStocks && screenerAllRsStocks.length > 0) {
+            items = screenerAllRsStocks.filter(it => (it.rs_rating || 0) >= (screenerCurrentMinRs || 80));
+        }
+    }
+    if (!items || items.length === 0) {
+        showToast("⚠️ Không có dữ liệu cổ phiếu RS phù hợp để xuất file!");
+        return;
+    }
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const fileDate = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const filename = `IERM_RS_Screener_${fileDate}.csv`;
+
+    const titleRow = `"BÁO CÁO ĐỊNH LƯỢNG SỨC MẠNH GIÁ RS (RELATIVE STRENGTH) - IERM QUANT"`;
+    const infoRow = `"Thời gian xuất: ${dateStr} | Tiêu chí: Sàn ${screenerCurrentExchange || 'ALL'} · RS >= ${screenerCurrentMinRs || 80} | Quy mô: ${items.length} cổ phiếu | Trang web: zstock.pro.vn"`;
+    const blankRow = `""`;
+    const headers = ["STT", "Mã CP", "Tên Doanh Nghiệp", "Sàn", "Điểm RS", "Thị Giá (VNĐ)", "% Thay Đổi Ngày", "% 1 Tháng", "% 3 Tháng", "Khối Lượng Giao Dịch", "Vốn Hóa (Tỷ VND)"];
+    
+    const csvRows = [titleRow, infoRow, blankRow, headers.join(",")];
+    items.forEach((it, idx) => {
+        const sym = (it.ticker || it.symbol || "").toUpperCase();
+        const name = `"${(it.name || sym).replace(/"/g, '""')}"`;
+        const ex = (it.exchange || "HOSE").toUpperCase();
+        const rs = it.rs_rating || 50;
+        const price = it.price || 0;
+        const chg = it.price_change_pct !== undefined ? it.price_change_pct : (it.pct_change || 0);
+        const p1m = it.price_change_1m_pct !== undefined ? it.price_change_1m_pct : 0;
+        const p3m = it.price_change_3m_pct !== undefined ? it.price_change_3m_pct : 0;
+        const vol = it.volume || it.today_vol || 0;
+        const mcap = it.market_cap_bil || 0;
+
+        csvRows.push([
+            idx + 1,
+            sym,
+            name,
+            ex,
+            rs,
+            price,
+            `"${chg > 0 ? '+' : ''}${chg.toFixed(2)}%"`,
+            `"${p1m > 0 ? '+' : ''}${p1m.toFixed(1)}%"`,
+            `"${p3m > 0 ? '+' : ''}${p3m.toFixed(1)}%"`,
+            vol,
+            mcap ? mcap.toFixed(1) : 0
+        ].join(","));
+    });
+
+    const csvContent = "\uFEFF" + csvRows.join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast(`✅ Đã xuất thành công file Excel: ${filename}`);
+}
+
 
 function renderTechScreenerTables(buys, sells) {
     const buyTbody = document.getElementById("screener-tech-buy-tbody");
@@ -20192,8 +21622,10 @@ function renderTechScreenerTables(buys, sells) {
                 const price = b.price || 0;
                 const priceFmt = (price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2));
                 const chg = b.pct_change || 0;
-                const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
-                const vol = b.today_vol || b.ma10_vol || 0;
+                const chgArrow = chg > 0 ? "▲ +" : (chg < 0 ? "▼ " : "");
+                const chgText = chgArrow + chg.toFixed(2) + `%`;
+                const chgColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-300");
+                const vol = b.ma10_vol || b.today_vol || 0;
                 const volFmt = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M" : (vol / 1000).toFixed(0) + "K";
                 const rowBg = isSelected ? "bg-cyan-950/80 border-l-2 border-cyan-400 font-bold" : "hover:bg-slate-800/60";
 
@@ -20211,7 +21643,7 @@ function renderTechScreenerTables(buys, sells) {
                         <td class="py-1.5 px-1 text-right font-mono font-semibold text-emerald-400 text-xs">
                             ${priceFmt}
                         </td>
-                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-emerald-400 text-xs">
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold ${chgColor} text-xs">
                             ${chgText}
                         </td>
                         <td class="py-1.5 px-1 text-right font-mono text-[11px] text-slate-300">
@@ -20244,8 +21676,10 @@ function renderTechScreenerTables(buys, sells) {
                 const price = s.price || 0;
                 const priceFmt = (price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2));
                 const chg = s.pct_change || 0;
-                const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
-                const vol = s.today_vol || s.ma10_vol || 0;
+                const chgArrow = chg > 0 ? "▲ +" : (chg < 0 ? "▼ " : "");
+                const chgText = chgArrow + chg.toFixed(2) + `%`;
+                const chgColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-300");
+                const vol = s.ma10_vol || s.today_vol || 0;
                 const volFmt = vol >= 1000000 ? (vol / 1000000).toFixed(2) + "M" : (vol / 1000).toFixed(0) + "K";
                 const rowBg = isSelected ? "bg-cyan-950/80 border-l-2 border-cyan-400 font-bold" : "hover:bg-slate-800/60";
 
@@ -20263,7 +21697,7 @@ function renderTechScreenerTables(buys, sells) {
                         <td class="py-1.5 px-1 text-right font-mono font-semibold text-rose-400 text-xs">
                             ${priceFmt}
                         </td>
-                        <td class="py-1.5 px-1 text-right font-mono font-semibold text-rose-400 text-xs">
+                        <td class="py-1.5 px-1 text-right font-mono font-semibold ${chgColor} text-xs">
                             ${chgText}
                         </td>
                         <td class="py-1.5 px-1 text-right font-mono text-[11px] text-slate-300">
@@ -20301,9 +21735,10 @@ function renderFundScreenerTable(items) {
         const price = item.price || 0;
         const priceFmt = price >= 1000 ? (price / 1000).toFixed(2) : price.toFixed(2);
         const chg = item.price_change_pct !== undefined ? item.price_change_pct : (item.pct_change || 0);
-        const chgText = (chg > 0 ? `+` : ``) + chg.toFixed(2) + `%`;
-        const chgColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-red-400" : "text-amber-400");
-        const priceColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-red-400" : "text-amber-400");
+        const chgArrow = chg > 0 ? "▲ +" : (chg < 0 ? "▼ " : "");
+        const chgText = chgArrow + chg.toFixed(2) + `%`;
+        const chgColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-400");
+        const priceColor = chg > 0 ? "text-emerald-400" : (chg < 0 ? "text-rose-400" : "text-amber-400");
         const vol = item.volume || 0;
         const volFmt = vol.toLocaleString("en-US");
         const rs = item.rs_rating || 50;
@@ -20358,8 +21793,8 @@ function applyScreenerSort(list, col, dir) {
             va = Number(a.price_change_pct !== undefined ? a.price_change_pct : (a.pct_change || 0));
             vb = Number(b.price_change_pct !== undefined ? b.price_change_pct : (b.pct_change || 0));
         } else if (col === "volume" || col === "vol") {
-            va = Number(a.volume !== undefined ? a.volume : (a.today_vol || a.ma10_vol || 0));
-            vb = Number(b.volume !== undefined ? b.volume : (b.today_vol || b.ma10_vol || 0));
+            va = Number(a.ma10_vol !== undefined ? a.ma10_vol : (a.volume !== undefined ? a.volume : (a.today_vol || 0)));
+            vb = Number(b.ma10_vol !== undefined ? b.ma10_vol : (b.volume !== undefined ? b.volume : (b.today_vol || 0)));
         } else if (col === "rs_rating" || col === "rs") {
             va = Number(a.rs_rating !== undefined ? a.rs_rating : 50);
             vb = Number(b.rs_rating !== undefined ? b.rs_rating : 50);
@@ -20597,6 +22032,45 @@ async function selectScreenerTicker(ticker, syncGlobal = true) {
 
 let currentScreenerCandlesData = [];
 
+function updateScreenerLegendDisplay(candle, prevCandle) {
+    if (!candle) return;
+    const prevClose = prevCandle ? prevCandle.close : candle.open;
+    const diff = candle.close - prevClose;
+    const diffPct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+
+    const oEl = document.getElementById("screener-ohlc-o");
+    const hEl = document.getElementById("screener-ohlc-h");
+    const lEl = document.getElementById("screener-ohlc-l");
+    const cEl = document.getElementById("screener-ohlc-c");
+    const chgEl = document.getElementById("screener-ohlc-chg");
+    const liveTag = document.getElementById("screener-chart-live-price-tag");
+    const ohlcVol = document.getElementById("screener-ohlc-vol");
+    const legVol = document.getElementById("screener-legend-vol");
+    const volStat = document.getElementById("screener-vol-detail-stat");
+
+    const cFmt = candle.close >= 1000 ? (candle.close / 1000).toFixed(2) : Number(candle.close).toFixed(2);
+    if (oEl) oEl.textContent = candle.open >= 1000 ? (candle.open / 1000).toFixed(2) : Number(candle.open).toFixed(2);
+    if (hEl) hEl.textContent = candle.high >= 1000 ? (candle.high / 1000).toFixed(2) : Number(candle.high).toFixed(2);
+    if (lEl) lEl.textContent = candle.low >= 1000 ? (candle.low / 1000).toFixed(2) : Number(candle.low).toFixed(2);
+    if (cEl) cEl.textContent = cFmt;
+    if (chgEl) {
+        chgEl.textContent = `${diff >= 0 ? '+' : ''}${(diff / 1000).toFixed(2)} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
+        chgEl.className = diff >= 0 ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold";
+    }
+    if (liveTag) {
+        liveTag.textContent = `${Number(candle.close).toLocaleString('vi-VN')} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
+        liveTag.className = `font-mono font-bold text-xs ${diffPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+    }
+
+    if (candle.volume !== undefined && candle.volume !== null) {
+        const v = Number(candle.volume);
+        const volStr = v >= 1000000 ? (v / 1000000).toFixed(2) + "M CP" : (v >= 1000 ? (v / 1000).toFixed(0) + "K CP" : v.toLocaleString("vi-VN") + " CP");
+        if (ohlcVol) ohlcVol.textContent = volStr;
+        if (legVol) legVol.textContent = volStr;
+        if (volStat) volStat.textContent = volStr;
+    }
+}
+
 function centerScreenerChart() {
     if (!chartScreenerTv || !chartScreenerVolTv || !screenerCandleSeries) return;
     try {
@@ -20782,6 +22256,36 @@ function initScreenerTvChartInstance() {
             isScreenerSyncingRange = false;
         }
     });
+
+    // Đồng bộ Crosshair move cho Screener Chart và cập nhật OHLC + Khối lượng theo ngày đang trỏ chuột
+    const onScreenerCrosshairMove = (param) => {
+        try {
+            if (!currentScreenerCandlesData || currentScreenerCandlesData.length === 0) return;
+            if (!param || !param.point || param.point.x < 0) {
+                const n = currentScreenerCandlesData.length;
+                updateScreenerLegendDisplay(currentScreenerCandlesData[n - 1], n > 1 ? currentScreenerCandlesData[n - 2] : null);
+                return;
+            }
+            let idx = -1;
+            if (param.time) {
+                idx = currentScreenerCandlesData.findIndex(c => c.time === param.time);
+            }
+            if (idx < 0 && typeof param.logical === "number") {
+                const lIdx = Math.round(param.logical);
+                if (lIdx >= 0 && lIdx < currentScreenerCandlesData.length) idx = lIdx;
+            }
+            if (idx >= 0) {
+                updateScreenerLegendDisplay(currentScreenerCandlesData[idx], idx > 0 ? currentScreenerCandlesData[idx - 1] : null);
+            }
+        } catch (e) {}
+    };
+
+    if (typeof chartScreenerTv.subscribeCrosshairMove === "function") {
+        chartScreenerTv.subscribeCrosshairMove(onScreenerCrosshairMove);
+    }
+    if (typeof chartScreenerVolTv.subscribeCrosshairMove === "function") {
+        chartScreenerVolTv.subscribeCrosshairMove(onScreenerCrosshairMove);
+    }
 
     if (window.ResizeObserver) {
         const ro = new ResizeObserver(() => {
@@ -20992,7 +22496,9 @@ function calcScreenerAflSignals(candles, strategyKey) {
         for (let i = 0; i < n; i++) macdLine[i] = ema12[i] - ema26[i];
 
         const rawBuy = new Array(n).fill(false);
+        const rawSell = new Array(n).fill(false);
         for (let i = 50; i < n; i++) {
+            // DK MUA: Phân kỳ dương MACD
             const dk1 = (macdLine[i] > macdLine[i - 1] && 
                          macdLine[i - 1] > macdLine[i - 2] && 
                          macdLine[i - 2] < macdLine[i - 3] && 
@@ -21014,21 +22520,63 @@ function calcScreenerAflSignals(candles, strategyKey) {
             if (dk1 && dk2 && dk3 && dkC) {
                 rawBuy[i] = true;
             }
+
+            // DK BÁN: Phân kỳ âm MACD (AmiBroker AFL chuẩn cập nhật)
+            // MACD() < Ref(MACD(),-1) AND Ref(MACD(),-1)<Ref(MACD(),-2) AND Ref(MACD(),-2)>Ref(MACD(),-3) AND Ref(MACD(),-3)>Ref(MACD(),-4)
+            // AND HHV(MACD(),7)<HHV(MACD(),50) AND HHV(H,5) >= HHV(H,50) AND C<REF(C,-1)
+            const dk1Sell = (macdLine[i] < macdLine[i - 1] && 
+                             macdLine[i - 1] < macdLine[i - 2] && 
+                             macdLine[i - 2] > macdLine[i - 3] && 
+                             macdLine[i - 3] > macdLine[i - 4]);
+            let maxMacd7 = -Infinity, maxMacd50 = -Infinity;
+            for (let j = i - 6; j <= i; j++) {
+                if (macdLine[j] > maxMacd7) maxMacd7 = macdLine[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (macdLine[j] > maxMacd50) maxMacd50 = macdLine[j];
+            }
+            const dk2Sell = (maxMacd7 < maxMacd50);
+
+            let maxH5_macd = -Infinity, maxH50_macd = -Infinity;
+            for (let j = i - 4; j <= i; j++) {
+                if (hiVals[j] > maxH5_macd) maxH5_macd = hiVals[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (hiVals[j] > maxH50_macd) maxH50_macd = hiVals[j];
+            }
+            const dk3Sell = (maxH5_macd >= maxH50_macd);
+            const dk4Sell = (clVals[i] < clVals[i - 1]);
+
+            if (dk1Sell && dk2Sell && dk3Sell && dk4Sell) {
+                rawSell[i] = true;
+            }
         }
 
         const markers = [];
         let lastSignal = null;
         let lastSignalBar = -1;
-        for (let i = 0; i < n; i++) {
+        for (let i = 50; i < n; i++) {
             if (rawBuy[i]) {
                 lastSignal = "BUY";
                 lastSignalBar = i;
                 markers.push({
                     time: candles[i].time,
                     position: "belowBar",
-                    color: "#6366f1",
+                    color: "#10b981",
                     shape: "arrowUp",
                     text: "MUA (PK MACD)",
+                    size: 2
+                });
+            }
+            if (rawSell[i]) {
+                lastSignal = "SELL";
+                lastSignalBar = i;
+                markers.push({
+                    time: candles[i].time,
+                    position: "aboveBar",
+                    color: "#ef4444",
+                    shape: "arrowDown",
+                    text: "BÁN (PK MACD)",
                     size: 2
                 });
             }
@@ -21037,10 +22585,7 @@ function calcScreenerAflSignals(candles, strategyKey) {
         return { markers, lastSignal, barsSince };
 
     } else if (strat === "div_rsi") {
-        // Thuật toán PHÂN KỲ DƯƠNG RSI (AmiBroker AFL):
-        // DK1 = RSI(14) > Ref(RSI(14),-1) AND Ref(RSI(14),-1) > Ref(RSI(14),-2) AND Ref(RSI(14),-2) < Ref(RSI(14),-3) AND Ref(RSI(14),-3) < Ref(RSI(14),-4);
-        // DK2 = LLV(RSI(14),4) > LLV(RSI(14),50);
-        // DK3 = LLV(L,4) <= LLV(L,50);
+        // Thuật toán PHÂN KỲ RSI (AmiBroker AFL Mua & Bán):
         if (n < 50) return { markers: [], lastSignal: null, barsSince: 999 };
 
         const p = 14;
@@ -21064,7 +22609,9 @@ function calcScreenerAflSignals(candles, strategyKey) {
         }
 
         const rawBuy = new Array(n).fill(false);
+        const rawSell = new Array(n).fill(false);
         for (let i = 50; i < n; i++) {
+            // DK MUA: Phân kỳ dương RSI
             const dk1 = (rsi[i] > rsi[i - 1] && 
                          rsi[i - 1] > rsi[i - 2] && 
                          rsi[i - 2] < rsi[i - 3] && 
@@ -21085,21 +22632,63 @@ function calcScreenerAflSignals(candles, strategyKey) {
             if (dk1 && dk2 && dk3) {
                 rawBuy[i] = true;
             }
+
+            // DK BÁN: Phân kỳ âm RSI (AmiBroker AFL chuẩn cập nhật)
+            // RSI() < Ref(RSI(),-1) AND Ref(RSI(),-1)<Ref(RSI(),-2) AND Ref(RSI(),-2)>Ref(RSI(),-3) AND Ref(RSI(),-3)>Ref(RSI(),-4)
+            // AND HHV(RSI(),3)<HHV(RSI(),50) AND HHV(H,5) >= HHV(H,50) AND C<REF(C,-1)
+            const dk1Sell = (rsi[i] < rsi[i - 1] && 
+                             rsi[i - 1] < rsi[i - 2] && 
+                             rsi[i - 2] > rsi[i - 3] && 
+                             rsi[i - 3] > rsi[i - 4]);
+            let maxRsi3 = -Infinity, maxRsi50 = -Infinity;
+            for (let j = i - 2; j <= i; j++) {
+                if (rsi[j] > maxRsi3) maxRsi3 = rsi[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (rsi[j] > maxRsi50) maxRsi50 = rsi[j];
+            }
+            const dk2Sell = (maxRsi3 < maxRsi50);
+
+            let maxH5_rsi = -Infinity, maxH50_rsi = -Infinity;
+            for (let j = i - 4; j <= i; j++) {
+                if (hiVals[j] > maxH5_rsi) maxH5_rsi = hiVals[j];
+            }
+            for (let j = i - 49; j <= i; j++) {
+                if (hiVals[j] > maxH50_rsi) maxH50_rsi = hiVals[j];
+            }
+            const dk3Sell = (maxH5_rsi >= maxH50_rsi);
+            const dk4Sell = (clVals[i] < clVals[i - 1]);
+
+            if (dk1Sell && dk2Sell && dk3Sell && dk4Sell) {
+                rawSell[i] = true;
+            }
         }
 
         const markers = [];
         let lastSignal = null;
         let lastSignalBar = -1;
-        for (let i = 0; i < n; i++) {
+        for (let i = 50; i < n; i++) {
             if (rawBuy[i]) {
                 lastSignal = "BUY";
                 lastSignalBar = i;
                 markers.push({
                     time: candles[i].time,
                     position: "belowBar",
-                    color: "#f43f5e",
+                    color: "#10b981",
                     shape: "arrowUp",
                     text: "MUA (PK RSI)",
+                    size: 2
+                });
+            }
+            if (rawSell[i]) {
+                lastSignal = "SELL";
+                lastSignalBar = i;
+                markers.push({
+                    time: candles[i].time,
+                    position: "aboveBar",
+                    color: "#ef4444",
+                    shape: "arrowDown",
+                    text: "BÁN (PK RSI)",
                     size: 2
                 });
             }
@@ -21206,11 +22795,31 @@ function calcScreenerAflSignals(candles, strategyKey) {
     }
 }
 
+let isSyncingScreenerCandle = false;
+async function syncScreenerCandleRealtime(ticker) {
+    if (isSyncingScreenerCandle) return;
+    const clean = (ticker || screenerCurrentTicker || "HPG").trim().toUpperCase();
+    if (screenerCurrentTicker && clean !== screenerCurrentTicker) return;
+    isSyncingScreenerCandle = true;
+    try {
+        const res = await fetch(`/api/technical/${encodeURIComponent(clean)}?resolution=D&count=1500`);
+        if (res.ok) {
+            const data = await res.json();
+            if (clean !== screenerCurrentTicker) return;
+            await loadScreenerChartData(clean, true, data);
+        }
+    } catch (e) {
+        // silent fail
+    } finally {
+        isSyncingScreenerCandle = false;
+    }
+}
+
 let screenerChartRequestSeq = 0;
 let screenerChartAbortCtrl = null;
 window._SCREENER_CANDLES_CACHE = window._SCREENER_CANDLES_CACHE || {};
 
-async function loadScreenerChartData(ticker, isSilent = false) {
+async function loadScreenerChartData(ticker, isSilent = false, dataOverride = null) {
     if (!ticker) return;
     const cleanSym = ticker.trim().toUpperCase();
 
@@ -21243,19 +22852,16 @@ async function loadScreenerChartData(ticker, isSilent = false) {
             initScreenerTvChartInstance();
         }
 
-        // Tối ưu hóa 1: Kiểm tra bộ nhớ đệm nến riêng của Bộ lọc (cho phép chuyển qua lại tức thì nhưng làm mới nhanh trong phiên)
-        let data = null;
-        const screenerCandleTtl = (isSilent || screenerAutoScanEnabled) ? 10000 : 20000;
-        if (window._SCREENER_CANDLES_CACHE && window._SCREENER_CANDLES_CACHE[cleanSym]) {
-            const entry = window._SCREENER_CANDLES_CACHE[cleanSym];
-            if (Date.now() - entry.ts < screenerCandleTtl && entry.data && entry.data.candles_history && entry.data.candles_history.length > 0) {
-                data = entry.data;
-            }
-        }
+        let data = dataOverride;
 
-        // Tối ưu hóa 2: Kiểm tra bộ nhớ đệm chung Client Cache (chỉ khi không yêu cầu realtime mới)
-        if (!data && !isSilent && !screenerAutoScanEnabled && window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[cleanSym] && window._CLIENT_TICKER_CACHE[cleanSym].tech && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history && window._CLIENT_TICKER_CACHE[cleanSym].tech.candles_history.length > 20) {
-            data = window._CLIENT_TICKER_CACHE[cleanSym].tech;
+        // Tối ưu hóa: Stale-While-Revalidate - Nếu đã từng tải mã này trong phiên làm việc, render nến ngay tức thì 0.00s
+        let usedCachedData = false;
+        if (!data && window._SCREENER_CANDLES_CACHE && window._SCREENER_CANDLES_CACHE[cleanSym]) {
+            const entry = window._SCREENER_CANDLES_CACHE[cleanSym];
+            if (entry.data && entry.data.candles_history && entry.data.candles_history.length > 0) {
+                data = entry.data;
+                usedCachedData = true;
+            }
         }
 
         if (!data) {
@@ -21264,6 +22870,13 @@ async function loadScreenerChartData(ticker, isSilent = false) {
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             data = await res.json();
+        } else if (usedCachedData && isNewTicker) {
+            // Đã hiển thị tức thì từ bộ nhớ đệm, chạy đồng bộ nền cập nhật phiên mới nhất mà không gián đoạn giao diện
+            setTimeout(() => {
+                if (cleanSym === screenerCurrentTicker && typeof syncScreenerCandleRealtime === "function") {
+                    syncScreenerCandleRealtime(cleanSym);
+                }
+            }, 80);
         }
 
         // BẢO VỆ CHỐNG LỆCH PHA (RACE CONDITION GUARD):
@@ -21318,6 +22931,9 @@ async function loadScreenerChartData(ticker, isSilent = false) {
 
         // Lưu vào bộ nhớ đệm
         window._SCREENER_CANDLES_CACHE[cleanSym] = { data: data, ts: Date.now() };
+        if (window._CLIENT_TICKER_CACHE && window._CLIENT_TICKER_CACHE[cleanSym]) {
+            window._CLIENT_TICKER_CACHE[cleanSym].tech = data;
+        }
 
         if (chartScreenerTv && chartScreenerVolTv && screenerCandleSeries && screenerVolSeries) {
             candles.sort((a, b) => a.time - b.time);
@@ -21344,7 +22960,7 @@ async function loadScreenerChartData(ticker, isSilent = false) {
                 const lo = Number(c.low || Math.min(cl, op));
                 const tm = Number(c.time);
                 if (tm > 0 && cl > 0) {
-                    candleData.push({ time: tm, open: op, high: hi, low: lo, close: cl });
+                    candleData.push({ time: tm, open: op, high: hi, low: lo, close: cl, volume: Number(c.volume || 0) });
                     volData.push({
                         time: tm,
                         value: Number(c.volume || 0),
@@ -21398,7 +23014,15 @@ async function loadScreenerChartData(ticker, isSilent = false) {
                 // 4. Gắn Markers tín hiệu theo robot/bộ lọc tương ứng
                 const afl = calcScreenerAflSignals(uniqueCandles, screenerCurrentStrategy);
                 if (screenerCandleSeries && typeof screenerCandleSeries.setMarkers === "function") {
-                    screenerCandleSeries.setMarkers(afl.markers || []);
+                    const cleanMarkers = (afl.markers || []).map(m => {
+                        const isBuy = (m.shape === "arrowUp" || m.position === "belowBar");
+                        return {
+                            ...m,
+                            color: isBuy ? "#10b981" : "#ef4444",
+                            shape: isBuy ? "arrowUp" : "arrowDown"
+                        };
+                    });
+                    screenerCandleSeries.setMarkers(cleanMarkers);
                 }
 
                 // 5. CANH CHỈNH BIỂU ĐỒ: Đổi mã mới -> căn giữa 55 nến; Auto-refresh cùng mã -> giữ nguyên dải zoom
@@ -21450,39 +23074,8 @@ async function loadScreenerChartData(ticker, isSilent = false) {
             // Đọc thông số nến cuối cùng (OHLC & Live Price)
             const last = uniqueCandles[uniqueCandles.length - 1];
             if (last) {
-                const prevClose = uniqueCandles.length > 1 ? uniqueCandles[uniqueCandles.length - 2].close : last.open;
-                const diff = last.close - prevClose;
-                const diffPct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
-
-                const oEl = document.getElementById("screener-ohlc-o");
-                const hEl = document.getElementById("screener-ohlc-h");
-                const lEl = document.getElementById("screener-ohlc-l");
-                const cEl = document.getElementById("screener-ohlc-c");
-                const chgEl = document.getElementById("screener-ohlc-chg");
-                const liveTag = document.getElementById("screener-chart-live-price-tag");
-
-                const cFmt = last.close >= 1000 ? (last.close / 1000).toFixed(2) : last.close.toFixed(2);
-                if (oEl) oEl.textContent = last.open >= 1000 ? (last.open / 1000).toFixed(2) : last.open.toFixed(2);
-                if (hEl) hEl.textContent = last.high >= 1000 ? (last.high / 1000).toFixed(2) : last.high.toFixed(2);
-                if (lEl) lEl.textContent = last.low >= 1000 ? (last.low / 1000).toFixed(2) : last.low.toFixed(2);
-                if (cEl) cEl.textContent = cFmt;
-                if (chgEl) {
-                    chgEl.textContent = `${diff >= 0 ? '+' : ''}${(diff / 1000).toFixed(2)} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
-                    chgEl.className = diff >= 0 ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold";
-                }
-                if (liveTag) {
-                    liveTag.textContent = `${last.close.toLocaleString('vi-VN')} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
-                    liveTag.className = `font-mono font-bold text-xs ${diffPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-                }
-
-                // Volume Legend
-                const legVol = document.getElementById("screener-legend-vol");
-                const volStat = document.getElementById("screener-vol-detail-stat");
-                if (last.volume) {
-                    const volStr = last.volume >= 1000000 ? (last.volume / 1000000).toFixed(2) + "M CP" : (last.volume / 1000).toFixed(0) + "K CP";
-                    if (legVol) legVol.textContent = volStr;
-                    if (volStat) volStat.textContent = volStr;
-                }
+                const prevCandle = uniqueCandles.length > 1 ? uniqueCandles[uniqueCandles.length - 2] : null;
+                updateScreenerLegendDisplay(last, prevCandle);
             }
 
             // Phục hồi độ mờ ban đầu cho biểu đồ khi đã vẽ xong nến mới
@@ -21531,6 +23124,857 @@ function refreshCurrentScreener() {
         if (icon) icon.classList.remove("animate-spin");
     });
 }
+
+
+// ===========================================================================
+// SUB-TAB ĐỊNH GIÁ & BỘ LỌC CỔ TỨC / SỰ KIỆN QUYỀN / DỮ LIỆU TÀI CHÍNH
+// ===========================================================================
+
+let valuationActiveSubtab = "calc"; // "calc" | "filter"
+let dividendRawData = [];
+let dividendFilteredData = [];
+let dividendFilterLoaded = false;
+let dividendFilterLoading = false;
+let dividendFilterCurrentEx = "ALL";
+let dividendFilterSearchTimer = null;
+let dividendSortState = { col: "market_cap", order: "desc" };
+
+// 19 trường dữ liệu đầy đủ theo yêu cầu:
+// 13 cột mặc định ban đầu: Mã CP, Sàn, Ngành, SLCP lưu hành, Vốn hóa, EPS, PE, PB, Giá đóng cửa, KL TB 10 phiên, Cổ tức tiền, Cổ tức CP + Thưởng, Phát hành thêm
+// 6 trường tùy chọn: ROE, ROA, Doanh thu quý, LN quý, Doanh thu năm, LN năm
+const DIVIDEND_COLUMNS_DEF = [
+    { key: "ticker", label: "Mã CP", default: true, align: "left", sortable: true, locked: true },
+    { key: "exchange", label: "Sàn", default: true, align: "center", sortable: true },
+    { key: "industry", label: "Ngành nghề", default: true, align: "left", sortable: true },
+    { key: "shares_outstanding", label: "SLCP Lưu Hành", default: true, align: "right", sortable: true },
+    { key: "market_cap", label: "Vốn Hóa (Tỷ)", default: true, align: "right", sortable: true },
+    { key: "eps", label: "EPS (đ)", default: true, align: "right", sortable: true },
+    { key: "pe", label: "P/E", default: true, align: "right", sortable: true },
+    { key: "pb", label: "P/B", default: true, align: "right", sortable: true },
+    { key: "price", label: "Giá Đóng Cửa", default: true, align: "right", sortable: true },
+    { key: "avg_volume_10d", label: "KL TB 10 Phiên", default: true, align: "right", sortable: true },
+    { key: "cash_dividend", label: "Cổ Tức Tiền", default: true, align: "right", sortable: true },
+    { key: "stock_dividend", label: "Cổ Tức CP + Thưởng", default: true, align: "right", sortable: true },
+    { key: "rights_issue", label: "Phát Hành Thêm", default: true, align: "right", sortable: true },
+    // 6 chỉ số tài chính bổ sung
+    { key: "roe", label: "ROE (%)", default: false, align: "right", sortable: true },
+    { key: "roa", label: "ROA (%)", default: false, align: "right", sortable: true },
+    { key: "revenue_quarter", label: "DT Quý (Tỷ)", default: false, align: "right", sortable: true },
+    { key: "net_profit_quarter", label: "LN Quý (Tỷ)", default: false, align: "right", sortable: true },
+    { key: "revenue_year", label: "DT Năm (Tỷ)", default: false, align: "right", sortable: true },
+    { key: "net_profit_year", label: "LN Năm (Tỷ)", default: false, align: "right", sortable: true }
+];
+
+let dividendVisibleCols = new Set(
+    DIVIDEND_COLUMNS_DEF.filter(c => c.default).map(c => c.key)
+);
+
+function switchValuationSubtab(subtab) {
+    valuationActiveSubtab = subtab;
+    const calcPane = document.getElementById("subtab-pane-valuation-calc");
+    const filterPane = document.getElementById("subtab-pane-valuation-filter");
+    const calcBtn = document.getElementById("btn-val-subtab-calc");
+    const filterBtn = document.getElementById("btn-val-subtab-filter");
+
+    if (subtab === "calc") {
+        if (calcPane) calcPane.classList.remove("hidden");
+        if (filterPane) filterPane.classList.add("hidden");
+        if (calcBtn) {
+            calcBtn.className = "px-4 py-1.5 rounded-lg bg-cyan-600 text-white font-bold border border-cyan-500 transition-all flex items-center gap-1.5 shrink-0 shadow-md";
+        }
+        if (filterBtn) {
+            filterBtn.className = "px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-cyan-500 transition-all flex items-center gap-1.5 shrink-0";
+        }
+    } else {
+        if (calcPane) calcPane.classList.add("hidden");
+        if (filterPane) filterPane.classList.remove("hidden");
+        if (calcBtn) {
+            calcBtn.className = "px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-cyan-500 transition-all flex items-center gap-1.5 shrink-0";
+        }
+        if (filterBtn) {
+            filterBtn.className = "px-4 py-1.5 rounded-lg bg-cyan-600 text-white font-bold border border-cyan-500 transition-all flex items-center gap-1.5 shrink-0 shadow-md";
+        }
+        if (!dividendFilterLoaded && !dividendFilterLoading) {
+            loadDividendCorporateActionsData();
+        }
+        setTimeout(initDividendTableDragToScroll, 50);
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+async function loadDividendCorporateActionsData() {
+    dividendFilterLoading = true;
+    const loadingEl = document.getElementById("dividend-screener-loading");
+    const emptyEl = document.getElementById("dividend-screener-empty");
+    if (loadingEl) loadingEl.classList.remove("hidden");
+    if (emptyEl) emptyEl.classList.add("hidden");
+
+    try {
+        const resp = await fetch("/api/screener/dividend-corporate-actions?exchange=ALL&sort_by=market_cap&sort_order=desc");
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        dividendRawData = data.items || [];
+        dividendFilterLoaded = true;
+
+        const totalEl = document.getElementById("div-filter-total-badge");
+        if (totalEl) totalEl.textContent = data.total_market_stocks || dividendRawData.length;
+
+        syncDividendColumnCheckboxes();
+        triggerDividendFilter();
+    } catch (e) {
+        console.error("loadDividendCorporateActionsData error:", e);
+        showToast(`❌ Lỗi tải dữ liệu bộ lọc: ${e.message}`);
+    } finally {
+        dividendFilterLoading = false;
+        if (loadingEl) loadingEl.classList.add("hidden");
+    }
+}
+
+function syncDividendColumnCheckboxes() {
+    DIVIDEND_COLUMNS_DEF.forEach(col => {
+        const chk = document.getElementById(`col-chk-${col.key}`);
+        if (chk) {
+            chk.checked = dividendVisibleCols.has(col.key);
+        }
+    });
+    const countEl = document.getElementById("div-cols-count-badge");
+    if (countEl) countEl.textContent = dividendVisibleCols.size;
+}
+
+function toggleDividendCol(colKey) {
+    if (colKey === "ticker") return; // Ticker is locked
+    if (dividendVisibleCols.has(colKey)) {
+        dividendVisibleCols.delete(colKey);
+    } else {
+        dividendVisibleCols.add(colKey);
+    }
+    syncDividendColumnCheckboxes();
+    renderDividendTable();
+}
+
+function resetDividendColumnsToDefault() {
+    dividendVisibleCols = new Set(
+        DIVIDEND_COLUMNS_DEF.filter(c => c.default).map(c => c.key)
+    );
+    syncDividendColumnCheckboxes();
+    renderDividendTable();
+    showToast("Đã khôi phục 13 cột hiển thị mặc định.");
+}
+
+function selectAllDividendColumns() {
+    dividendVisibleCols = new Set(DIVIDEND_COLUMNS_DEF.map(c => c.key));
+    syncDividendColumnCheckboxes();
+    renderDividendTable();
+    showToast("Đã hiển thị tất cả 19 cột dữ liệu.");
+}
+
+function toggleDividendColumnMenu(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById("div-cols-dropdown");
+    if (!menu) return;
+    const isHidden = menu.classList.contains("hidden");
+    if (isHidden) {
+        menu.classList.remove("hidden");
+        const closeHandler = (e) => {
+            if (!menu.contains(e.target) && e.target.id !== "btn-toggle-div-cols") {
+                menu.classList.add("hidden");
+                document.removeEventListener("click", closeHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener("click", closeHandler), 10);
+    } else {
+        menu.classList.add("hidden");
+    }
+}
+
+function setDividendExchangeFilter(ex) {
+    dividendFilterCurrentEx = ex;
+    document.querySelectorAll(".div-ex-btn").forEach(btn => {
+        const bEx = btn.getAttribute("data-ex");
+        if (bEx === ex) {
+            btn.className = "div-ex-btn px-2.5 py-1 rounded font-bold bg-cyan-600 text-white transition-all";
+        } else {
+            btn.className = "div-ex-btn px-2.5 py-1 rounded text-slate-400 hover:text-white transition-all";
+        }
+    });
+    triggerDividendFilter();
+}
+
+function onDividendFilterSearchInput() {
+    clearTimeout(dividendFilterSearchTimer);
+    dividendFilterSearchTimer = setTimeout(() => {
+        triggerDividendFilter();
+    }, 250);
+}
+
+function triggerDividendFilter() {
+    if (!dividendRawData || dividendRawData.length === 0) return;
+
+    const searchInput = document.getElementById("div-filter-search-input");
+    const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+    const hasCash = !!(document.getElementById("div-chk-cash")?.checked);
+    const hasStock = !!(document.getElementById("div-chk-stock")?.checked);
+    const hasRights = !!(document.getElementById("div-chk-rights")?.checked);
+
+    dividendFilteredData = dividendRawData.filter(it => {
+        // 1. Sàn
+        if (dividendFilterCurrentEx !== "ALL" && it.exchange !== dividendFilterCurrentEx) {
+            return false;
+        }
+        // 2. Tìm kiếm mã hoặc tên
+        if (query) {
+            const sym = (it.ticker || "").toLowerCase();
+            const nm = (it.name || "").toLowerCase();
+            if (!sym.includes(query) && !nm.includes(query)) return false;
+        }
+        // 3. Có cổ tức tiền
+        if (hasCash && (!it.cash_dividend || it.cash_dividend.amount <= 0)) {
+            return false;
+        }
+        // 4. Có cổ tức CP / Thưởng
+        if (hasStock && (!it.stock_dividend || it.stock_dividend.total_pct <= 0)) {
+            return false;
+        }
+        // 5. Có phát hành thêm
+        if (hasRights && (!it.rights_issue || it.rights_issue.ratio_pct <= 0)) {
+            return false;
+        }
+        return true;
+    });
+
+    // Sắp xếp
+    sortFilteredDividendData();
+
+    // Cập nhật số lượng
+    const countBadge = document.getElementById("div-filter-count-badge");
+    if (countBadge) countBadge.textContent = dividendFilteredData.length;
+
+    renderDividendTable();
+}
+
+function sortFilteredDividendData() {
+    const { col, order } = dividendSortState;
+    const isDesc = (order === "desc");
+
+    dividendFilteredData.sort((a, b) => {
+        let valA = null;
+        let valB = null;
+
+        if (col === "ticker") {
+            return isDesc ? b.ticker.localeCompare(a.ticker) : a.ticker.localeCompare(b.ticker);
+        } else if (col === "exchange") {
+            return isDesc ? b.exchange.localeCompare(a.exchange) : a.exchange.localeCompare(b.exchange);
+        } else if (col === "industry") {
+            return isDesc ? (b.industry || "").localeCompare(a.industry || "") : (a.industry || "").localeCompare(b.industry || "");
+        } else if (col === "cash_dividend") {
+            valA = a.cash_dividend?.amount || 0;
+            valB = b.cash_dividend?.amount || 0;
+        } else if (col === "stock_dividend") {
+            valA = a.stock_dividend?.total_pct || 0;
+            valB = b.stock_dividend?.total_pct || 0;
+        } else if (col === "rights_issue") {
+            valA = a.rights_issue?.ratio_pct || 0;
+            valB = b.rights_issue?.ratio_pct || 0;
+        } else {
+            valA = a[col];
+            valB = b[col];
+        }
+
+        if (valA === null || valA === undefined) valA = isDesc ? -1e12 : 1e12;
+        if (valB === null || valB === undefined) valB = isDesc ? -1e12 : 1e12;
+
+        return isDesc ? (valB - valA) : (valA - valB);
+    });
+}
+
+function onDividendHeaderSort(colKey) {
+    if (dividendSortState.col === colKey) {
+        dividendSortState.order = (dividendSortState.order === "desc") ? "asc" : "desc";
+    } else {
+        dividendSortState.col = colKey;
+        dividendSortState.order = "desc";
+    }
+    sortFilteredDividendData();
+    renderDividendTable();
+}
+
+function renderDividendTable() {
+    const thead = document.getElementById("dividend-screener-thead");
+    const tbody = document.getElementById("dividend-screener-tbody");
+    const emptyEl = document.getElementById("dividend-screener-empty");
+    if (!thead || !tbody) return;
+
+    if (dividendFilteredData.length === 0) {
+        tbody.innerHTML = "";
+        if (emptyEl) emptyEl.classList.remove("hidden");
+        return;
+    } else {
+        if (emptyEl) emptyEl.classList.add("hidden");
+    }
+
+    const activeCols = DIVIDEND_COLUMNS_DEF.filter(c => dividendVisibleCols.has(c.key));
+
+    // Render THEAD
+    let headHtml = "<tr><th class=\"py-2.5 px-3 text-center text-slate-500 w-12 div-sticky-col-1\">#</th>";
+    activeCols.forEach(col => {
+        const isCurrentSort = (dividendSortState.col === col.key);
+        const sortIcon = isCurrentSort
+            ? (dividendSortState.order === "desc" ? " ↓" : " ↑")
+            : "";
+        const alignCls = col.align === "right" ? "text-right" : (col.align === "center" ? "text-center" : "text-left");
+        const activeCls = isCurrentSort ? "text-cyan-400 font-bold" : "text-slate-400 hover:text-slate-200";
+        const stickyCls = col.key === "ticker" ? "div-sticky-col-2" : "";
+
+        headHtml += `
+            <th onclick="onDividendHeaderSort('${col.key}')" class="py-2.5 px-3 cursor-pointer whitespace-nowrap transition-colors ${alignCls} ${activeCls} ${stickyCls}" title="Nhấp để sắp xếp theo ${col.label}">
+                ${col.label}${sortIcon}
+            </th>
+        `;
+    });
+    headHtml += "</tr>";
+    thead.innerHTML = headHtml;
+
+    // Render TBODY (Giới hạn hiển thị 250 dòng đầu để DOM siêu mượt, có thể xem hết hoặc xuất Excel/PDF đầy đủ)
+    const displayLimit = Math.min(250, dividendFilteredData.length);
+    let rowsHtml = "";
+
+    for (let i = 0; i < displayLimit; i++) {
+        const it = dividendFilteredData[i];
+        const rowParityCls = i % 2 === 0 ? "div-row-even" : "div-row-odd";
+        const rowBg = i % 2 === 0 ? "bg-slate-900/40" : "bg-slate-900/10";
+        rowsHtml += `<tr class="${rowBg} ${rowParityCls} div-table-row hover:bg-cyan-950/30 transition-colors border-b border-slate-800/40">`;
+        rowsHtml += `<td class="py-2 px-3 text-center text-slate-500 font-mono text-[11px] div-sticky-col-1">${i + 1}</td>`;
+
+        activeCols.forEach(col => {
+            const alignCls = col.align === "right" ? "text-right" : (col.align === "center" ? "text-center" : "text-left");
+            const stickyCls = col.key === "ticker" ? "div-sticky-col-2" : "";
+            let cellContent = "-";
+
+            switch (col.key) {
+                case "ticker":
+                    cellContent = `
+                        <div class="flex items-center gap-1.5">
+                            <a href="javascript:void(0)" onclick="loadTickerIntoWorkspace('${it.ticker}'); switchTab('tab-overview');" class="font-bold text-cyan-400 hover:text-cyan-300 hover:underline font-mono" title="${it.name || it.ticker}">
+                                ${it.ticker}
+                            </a>
+                        </div>
+                    `;
+                    break;
+
+                case "exchange":
+                    const exColor = it.exchange === "HOSE" ? "bg-blue-950/80 text-blue-300 border-blue-800" : (it.exchange === "HNX" ? "bg-amber-950/80 text-amber-300 border-amber-800" : "bg-slate-800 text-slate-300 border-slate-700");
+                    cellContent = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${exColor}">${it.exchange}</span>`;
+                    break;
+
+                case "industry":
+                    cellContent = `<span class="text-slate-300 truncate max-w-[150px] inline-block" title="${it.industry || ''}">${it.industry || '-'}</span>`;
+                    break;
+
+                case "shares_outstanding":
+                    cellContent = it.shares_outstanding ? `<span class="text-slate-200">${it.shares_outstanding.toLocaleString('vi-VN')}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "market_cap":
+                    cellContent = it.market_cap ? `<span class="text-slate-200 font-semibold">${it.market_cap.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "eps":
+                    cellContent = it.eps ? `<span class="text-slate-200">${it.eps.toLocaleString('vi-VN', { maximumFractionDigits: 0 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "pe":
+                    cellContent = it.pe ? `<span class="text-slate-200 font-semibold">${it.pe.toFixed(1)}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "pb":
+                    cellContent = it.pb ? `<span class="text-slate-200 font-semibold">${it.pb.toFixed(2)}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "price":
+                    cellContent = it.price ? `<span class="text-white font-bold">${it.price.toLocaleString('vi-VN')}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "avg_volume_10d":
+                    cellContent = it.avg_volume_10d ? `<span class="text-slate-300">${it.avg_volume_10d.toLocaleString('vi-VN')}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "cash_dividend":
+                    if (it.cash_dividend && it.cash_dividend.amount > 0) {
+                        cellContent = `<span class="text-emerald-400 font-bold" title="${it.cash_dividend.display}">${it.cash_dividend.display}</span>`;
+                    } else {
+                        cellContent = `<span class="text-slate-600">0 đ</span>`;
+                    }
+                    break;
+
+                case "stock_dividend":
+                    if (it.stock_dividend && it.stock_dividend.total_pct > 0) {
+                        cellContent = `<span class="text-cyan-400 font-bold" title="${it.stock_dividend.display}">${it.stock_dividend.display}</span>`;
+                    } else {
+                        cellContent = `<span class="text-slate-600">0%</span>`;
+                    }
+                    break;
+
+                case "rights_issue":
+                    if (it.rights_issue && it.rights_issue.ratio_pct > 0) {
+                        cellContent = `<span class="text-amber-400 font-bold" title="${it.rights_issue.display}">${it.rights_issue.display}</span>`;
+                    } else {
+                        cellContent = `<span class="text-slate-600">-</span>`;
+                    }
+                    break;
+
+                case "roe":
+                    if (it.roe !== null && it.roe !== undefined) {
+                        const roeCls = it.roe >= 15 ? "text-emerald-400 font-bold" : (it.roe > 0 ? "text-slate-200" : "text-rose-400");
+                        cellContent = `<span class="${roeCls}">${it.roe.toFixed(1)}%</span>`;
+                    } else {
+                        cellContent = `<span class="text-slate-600">-</span>`;
+                    }
+                    break;
+
+                case "roa":
+                    if (it.roa !== null && it.roa !== undefined) {
+                        const roaCls = it.roa >= 7 ? "text-emerald-400 font-bold" : (it.roa > 0 ? "text-slate-200" : "text-rose-400");
+                        cellContent = `<span class="${roaCls}">${it.roa.toFixed(1)}%</span>`;
+                    } else {
+                        cellContent = `<span class="text-slate-600">-</span>`;
+                    }
+                    break;
+
+                case "revenue_quarter":
+                    cellContent = it.revenue_quarter ? `<span class="text-slate-200">${it.revenue_quarter.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "net_profit_quarter":
+                    cellContent = it.net_profit_quarter ? `<span class="text-slate-200 font-semibold">${it.net_profit_quarter.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "revenue_year":
+                    cellContent = it.revenue_year ? `<span class="text-slate-200">${it.revenue_year.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+
+                case "net_profit_year":
+                    cellContent = it.net_profit_year ? `<span class="text-slate-200 font-semibold">${it.net_profit_year.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>` : `<span class="text-slate-600">-</span>`;
+                    break;
+            }
+
+            rowsHtml += `<td class="py-2 px-3 ${alignCls} whitespace-nowrap text-xs ${stickyCls}">${cellContent}</td>`;
+        });
+
+        rowsHtml += "</tr>";
+    }
+
+    if (dividendFilteredData.length > displayLimit) {
+        const extraCount = dividendFilteredData.length - displayLimit;
+        rowsHtml += `
+            <tr class="bg-slate-950/60 text-center text-xs text-slate-400">
+                <td colspan="${activeCols.length + 1}" class="py-3">
+                    ... Đang hiển thị <strong>${displayLimit}</strong> / <strong>${dividendFilteredData.length}</strong> kết quả. 
+                    <span class="text-cyan-400">Xuất Excel / PDF để xem trọn vẹn toàn bộ ${dividendFilteredData.length} mã.</span>
+                </td>
+            </tr>
+        `;
+    }
+
+    tbody.innerHTML = rowsHtml;
+    initDividendTableDragToScroll();
+}
+
+/**
+ * Khởi tạo tính năng giữ chuột kéo 4 hướng (trái/phải, lên/xuống) cho bảng Bộ Lọc Cổ Tức
+ */
+function initDividendTableDragToScroll() {
+    const container = document.getElementById("dividend-screener-container");
+    if (!container || container.dataset.dragInit === "true") return;
+    container.dataset.dragInit = "true";
+
+    let isDown = false;
+    let startX = 0;
+    let startY = 0;
+    let scrollLeft = 0;
+    let scrollTop = 0;
+    let hasMoved = false;
+
+    container.addEventListener("mousedown", (e) => {
+        // Chỉ kéo khi bấm chuột trái (e.button === 0)
+        if (e.button !== 0) return;
+        // Bỏ qua nếu click trực tiếp vào nút hoặc input nếu có
+        if (e.target.closest("button, input, select, textarea")) return;
+
+        isDown = true;
+        hasMoved = false;
+        container.classList.add("is-dragging");
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+    });
+
+    window.addEventListener("mouseup", () => {
+        if (isDown) {
+            isDown = false;
+            if (container) {
+                container.classList.remove("is-dragging");
+            }
+        }
+    });
+
+    container.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX);
+        const walkY = (y - startY);
+
+        if (Math.abs(walkX) > 4 || Math.abs(walkY) > 4) {
+            hasMoved = true;
+            e.preventDefault(); // Tránh bôi đen text khi kéo
+        }
+
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+    });
+
+    // Chặn click nhầm vào ticker link nếu người dùng vừa giữ chuột kéo xem bảng
+    container.addEventListener("click", (e) => {
+        if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            hasMoved = false;
+        }
+    }, true);
+
+    // Hỗ trợ cảm ứng vuốt chạm (Mobile / Tablet / Touchscreen)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchScrollLeft = 0;
+    let touchScrollTop = 0;
+
+    container.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+            touchStartX = e.touches[0].pageX - container.offsetLeft;
+            touchStartY = e.touches[0].pageY - container.offsetTop;
+            touchScrollLeft = container.scrollLeft;
+            touchScrollTop = container.scrollTop;
+        }
+    }, { passive: true });
+
+    container.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 1) {
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const y = e.touches[0].pageY - container.offsetTop;
+            container.scrollLeft = touchScrollLeft - (x - touchStartX);
+            container.scrollTop = touchScrollTop - (y - touchStartY);
+        }
+    }, { passive: true });
+}
+
+
+// ---------------------------------------------------------------------------
+// XUẤT FILE EXCEL / CSV CHUẨN FONT TIẾNG VIỆT UTF-8 CÓ BOM
+// ---------------------------------------------------------------------------
+function exportDividendToExcel() {
+    if (!dividendFilteredData || dividendFilteredData.length === 0) {
+        showToast("⚠️ Không có dữ liệu để xuất file Excel!");
+        return;
+    }
+
+    const activeCols = DIVIDEND_COLUMNS_DEF.filter(c => dividendVisibleCols.has(c.key));
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const fileDate = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const filename = `ZStock_BoLoc_CoTuc_${fileDate}.csv`;
+
+    const headers = ["STT", ...activeCols.map(c => `"${c.label}"`)];
+    const csvLines = [headers.join(",")];
+
+    dividendFilteredData.forEach((it, idx) => {
+        const row = [idx + 1];
+        activeCols.forEach(col => {
+            let val = "";
+            switch (col.key) {
+                case "ticker": val = it.ticker; break;
+                case "exchange": val = it.exchange; break;
+                case "industry": val = it.industry || ""; break;
+                case "shares_outstanding": val = it.shares_outstanding || ""; break;
+                case "market_cap": val = it.market_cap || ""; break;
+                case "eps": val = it.eps || ""; break;
+                case "pe": val = it.pe || ""; break;
+                case "pb": val = it.pb || ""; break;
+                case "price": val = it.price || ""; break;
+                case "avg_volume_10d": val = it.avg_volume_10d || ""; break;
+                case "cash_dividend": val = it.cash_dividend?.display || "0 đ"; break;
+                case "stock_dividend": val = it.stock_dividend?.display || "0%"; break;
+                case "rights_issue": val = it.rights_issue?.display || "-"; break;
+                case "roe": val = it.roe !== null && it.roe !== undefined ? `${it.roe}%` : ""; break;
+                case "roa": val = it.roa !== null && it.roa !== undefined ? `${it.roa}%` : ""; break;
+                case "revenue_quarter": val = it.revenue_quarter || ""; break;
+                case "net_profit_quarter": val = it.net_profit_quarter || ""; break;
+                case "revenue_year": val = it.revenue_year || ""; break;
+                case "net_profit_year": val = it.net_profit_year || ""; break;
+            }
+            const cleanStr = String(val).replace(/"/g, '""');
+            row.push(`"${cleanStr}"`);
+        });
+        csvLines.push(row.join(","));
+    });
+
+    // Thêm ký tự BOM \uFEFF để Excel mở trực tiếp với encoding UTF-8 tiếng Việt
+    const blob = new Blob(["\uFEFF" + csvLines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast(`✅ Đã xuất thành công ${dividendFilteredData.length} mã sang Excel: ${filename}`);
+}
+
+
+// ---------------------------------------------------------------------------
+// XUẤT BÁO CÁO PDF ĐA TRANG KÈM WATERMARK ZSTOCK.PRO.VN TỪNG TRANG
+// ---------------------------------------------------------------------------
+async function exportDividendToPdf() {
+    if (!dividendFilteredData || dividendFilteredData.length === 0) {
+        showToast("⚠️ Không có dữ liệu để xuất file PDF!");
+        return;
+    }
+
+    showToast("⏳ Đang chuẩn bị xuất báo cáo PDF...");
+
+    const activeCols = DIVIDEND_COLUMNS_DEF.filter(c => dividendVisibleCols.has(c.key));
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const fileDate = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const filename = `ZStock_BoLoc_CoTuc_${fileDate}.pdf`;
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "-99999px";
+    wrapper.style.left = "-99999px";
+    wrapper.style.width = "1120px";
+    wrapper.style.zIndex = "-1000";
+
+    const container = document.createElement("div");
+    container.style.width = "1080px";
+    container.style.padding = "24px 28px";
+    container.style.backgroundColor = "#ffffff";
+    container.style.color = "#0f172a";
+    container.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    container.style.boxSizing = "border-box";
+    container.style.position = "relative";
+    container.style.overflow = "hidden";
+
+    // Header HTML
+    let tableHeadCols = `<th style="padding: 7px 6px; text-align: center; border: 1px solid #cbd5e1; background: #0f172a; color: #ffffff;">#</th>`;
+    activeCols.forEach(c => {
+        const align = c.align === "right" ? "right" : (c.align === "center" ? "center" : "left");
+        tableHeadCols += `<th style="padding: 7px 6px; text-align: ${align}; border: 1px solid #cbd5e1; background: #0f172a; color: #ffffff; white-space: nowrap;">${c.label}</th>`;
+    });
+
+    let rowsHtml = "";
+    dividendFilteredData.forEach((it, idx) => {
+        const rowBg = idx % 2 === 0 ? "rgba(255, 255, 255, 0.85)" : "rgba(248, 250, 252, 0.85)";
+        let rowCells = `<td style="padding: 6px; text-align: center; border: 1px solid #e2e8f0; color: #64748b; font-weight: 600;">${idx + 1}</td>`;
+
+        activeCols.forEach(c => {
+            const align = c.align === "right" ? "right" : (c.align === "center" ? "center" : "left");
+            let val = "-";
+            switch (c.key) {
+                case "ticker": val = `<strong style="color: #0284c7; font-size: 11px;">${it.ticker}</strong>`; break;
+                case "exchange": val = `<span style="padding: 1px 4px; border-radius: 3px; font-size: 9px; background: #e2e8f0; font-weight: 700;">${it.exchange}</span>`; break;
+                case "industry": val = it.industry || "-"; break;
+                case "shares_outstanding": val = it.shares_outstanding ? it.shares_outstanding.toLocaleString('vi-VN') : "-"; break;
+                case "market_cap": val = it.market_cap ? it.market_cap.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-"; break;
+                case "eps": val = it.eps ? it.eps.toLocaleString('vi-VN') : "-"; break;
+                case "pe": val = it.pe ? it.pe.toFixed(1) : "-"; break;
+                case "pb": val = it.pb ? it.pb.toFixed(2) : "-"; break;
+                case "price": val = it.price ? `<strong>${it.price.toLocaleString('vi-VN')}</strong>` : "-"; break;
+                case "avg_volume_10d": val = it.avg_volume_10d ? it.avg_volume_10d.toLocaleString('vi-VN') : "-"; break;
+                case "cash_dividend": val = it.cash_dividend?.amount > 0 ? `<span style="color: #16a34a; font-weight: 700;">${it.cash_dividend.display}</span>` : `<span style="color: #94a3b8;">0 đ</span>`; break;
+                case "stock_dividend": val = it.stock_dividend?.total_pct > 0 ? `<span style="color: #0284c7; font-weight: 700;">${it.stock_dividend.display}</span>` : `<span style="color: #94a3b8;">0%</span>`; break;
+                case "rights_issue": val = it.rights_issue?.ratio_pct > 0 ? `<span style="color: #d97706; font-weight: 700;">${it.rights_issue.display}</span>` : `<span style="color: #94a3b8;">-</span>`; break;
+                case "roe": val = it.roe !== null && it.roe !== undefined ? `${it.roe.toFixed(1)}%` : "-"; break;
+                case "roa": val = it.roa !== null && it.roa !== undefined ? `${it.roa.toFixed(1)}%` : "-"; break;
+                case "revenue_quarter": val = it.revenue_quarter ? it.revenue_quarter.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-"; break;
+                case "net_profit_quarter": val = it.net_profit_quarter ? it.net_profit_quarter.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-"; break;
+                case "revenue_year": val = it.revenue_year ? it.revenue_year.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-"; break;
+                case "net_profit_year": val = it.net_profit_year ? it.net_profit_year.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : "-"; break;
+            }
+            rowCells += `<td style="padding: 6px; text-align: ${align}; border: 1px solid #e2e8f0; white-space: nowrap;">${val}</td>`;
+        });
+
+        rowsHtml += `<tr style="background-color: ${rowBg}; page-break-inside: avoid;">${rowCells}</tr>`;
+    });
+
+    container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 16px; position: relative; z-index: 2;">
+            <div>
+                <h1 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">
+                    BÁO CÁO BỘ LỌC CỔ TỨC &amp; DỮ LIỆU TÀI CHÍNH
+                </h1>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">
+                    Nguồn: Dữ liệu giao dịch &amp; BCTC chính thức Sở GDCK (HOSE / HNX / UPCOM) &amp; Lịch sự kiện quyền
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 14px; font-weight: 800; color: #0284c7; letter-spacing: 0.5px;">zstock.pro.vn</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Ngày xuất: ${dateStr}</div>
+                <div style="font-size: 10px; color: #0369a1; font-weight: 600; margin-top: 2px;">Số lượng: ${dividendFilteredData.length} mã cổ phiếu</div>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; position: relative; z-index: 2;">
+            <thead><tr>${tableHeadCols}</tr></thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+
+        <div style="margin-top: 16px; padding-top: 8px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; position: relative; z-index: 2;">
+            <span>Hệ thống Định giá Chuyên sâu &amp; Phân tích Dữ liệu Chứng khoán Việt Nam - zstock.pro.vn</span>
+            <span>Trang tổng hợp tự động • Dữ liệu đã đối soát</span>
+        </div>
+    `;
+
+    wrapper.appendChild(container);
+    document.body.appendChild(wrapper);
+
+    try {
+        const printWin = window.open("", "_blank");
+        if (!printWin) {
+            showToast("⚠️ Trình duyệt đã chặn popup. Vui lòng cho phép popup để in/lưu PDF.");
+        } else {
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${filename}</title>
+                    <style>
+                        @page {
+                            size: A4 landscape;
+                            margin: 8mm;
+                        }
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            margin: 0;
+                            padding: 8px;
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                            background: #fff;
+                            position: relative;
+                        }
+                        table {
+                            page-break-inside: auto;
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        tr {
+                            page-break-inside: avoid;
+                            page-break-after: auto;
+                        }
+                        .print-watermark {
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%) rotate(-25deg);
+                            font-size: 82px;
+                            font-weight: 900;
+                            letter-spacing: 6px;
+                            color: rgba(2, 132, 199, 0.10) !important;
+                            text-transform: lowercase;
+                            pointer-events: none;
+                            user-select: none;
+                            white-space: nowrap;
+                            z-index: 9999;
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-watermark">zstock.pro.vn</div>
+                    ${container.innerHTML}
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                            }, 300);
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            showToast(`✅ Đã mở trang in PDF: ${filename}`);
+        }
+    } catch (e) {
+        console.error("exportDividendToPdf error:", e);
+        showToast(`❌ Lỗi xuất PDF: ${e.message}`);
+    } finally {
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
+    }
+}
+
+
+// ===========================================================================
+// FLOATING VISITOR STATS TRACKER (ONLINE / TODAY / TOTAL ALL-TIME)
+// ===========================================================================
+function getOrCreateVisitorSessionId() {
+    try {
+        let sid = sessionStorage.getItem("ierm_visitor_sid");
+        if (!sid) {
+            sid = "v_" + Math.random().toString(36).substring(2, 12) + "_" + Date.now();
+            sessionStorage.setItem("ierm_visitor_sid", sid);
+        }
+        return sid;
+    } catch (e) {
+        return "v_fallback_" + Date.now();
+    }
+}
+
+async function fetchAndRenderVisitorStats() {
+    try {
+        const sid = getOrCreateVisitorSessionId();
+        const resp = await fetch(`/api/visitor-stats?sid=${encodeURIComponent(sid)}`);
+        if (!resp.ok) return;
+        const data = await resp.json();
+
+        const onlineEl = document.getElementById("visitor-online-count");
+        const todayEl = document.getElementById("visitor-today-count");
+        const totalEl = document.getElementById("visitor-total-count");
+
+        if (onlineEl && data.online !== undefined) {
+            onlineEl.textContent = Number(data.online).toLocaleString("vi-VN");
+        }
+        if (todayEl && data.today !== undefined) {
+            todayEl.textContent = Number(data.today).toLocaleString("vi-VN");
+        }
+        if (totalEl && data.total !== undefined) {
+            totalEl.textContent = Number(data.total).toLocaleString("vi-VN");
+        }
+        if (window.lucide) lucide.createIcons();
+    } catch (e) {
+        // Silent catch for background analytics
+    }
+}
+
+// Khởi chạy thống kê lượt truy cập ngay khi trang sẵn sàng và heartbeat mỗi 35 giây
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchAndRenderVisitorStats();
+        setInterval(fetchAndRenderVisitorStats, 35000);
+    });
+} else {
+    fetchAndRenderVisitorStats();
+    setInterval(fetchAndRenderVisitorStats, 35000);
+}
+
 
 
 

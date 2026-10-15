@@ -1380,3 +1380,113 @@ html:not(.dark) #master-tabs-nav {
     scrollbar-width: thin;
     scrollbar-color: #06b6d4 #090d14;
 }
+
+/* =============================================================
+   DIVIDEND SCREENER: 4-WAY DRAG-TO-SCROLL & 2 STICKY FIRST COLUMNS
+   ============================================================= */
+#dividend-screener-container {
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: #0284c7 #0c1017;
+}
+
+#dividend-screener-container.is-dragging {
+    cursor: grabbing !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+#dividend-screener-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#dividend-screener-container::-webkit-scrollbar-track {
+    background: #090d14;
+    border-radius: 4px;
+}
+
+#dividend-screener-container::-webkit-scrollbar-thumb {
+    background: #1f293d;
+    border-radius: 4px;
+}
+
+#dividend-screener-container::-webkit-scrollbar-thumb:hover {
+    background: #0284c7;
+}
+
+/* 2 Sticky First Columns: # (STT) and Mã CP (Ticker) */
+.div-sticky-col-1 {
+    position: sticky !important;
+    left: 0px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    width: 48px !important;
+    box-sizing: border-box !important;
+}
+
+.div-sticky-col-2 {
+    position: sticky !important;
+    left: 48px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    width: 88px !important;
+    box-sizing: border-box !important;
+    border-right: 1px solid rgba(51, 65, 85, 0.8) !important;
+    box-shadow: 3px 0 8px -2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Z-Index: Header sticky cells on top */
+thead th.div-sticky-col-1,
+thead th.div-sticky-col-2 {
+    z-index: 35 !important;
+    background-color: #020617 !important;
+}
+
+/* Body sticky cells */
+tbody td.div-sticky-col-1,
+tbody td.div-sticky-col-2 {
+    z-index: 20 !important;
+}
+
+.div-row-even td.div-sticky-col-1,
+.div-row-even td.div-sticky-col-2 {
+    background-color: #0f172a !important;
+}
+
+.div-row-odd td.div-sticky-col-1,
+.div-row-odd td.div-sticky-col-2 {
+    background-color: #090e1a !important;
+}
+
+tr.div-table-row:hover td.div-sticky-col-1,
+tr.div-table-row:hover td.div-sticky-col-2 {
+    background-color: #082f49 !important;
+}
+
+/* Light Mode Overrides */
+html:not(.dark) thead th.div-sticky-col-1,
+html:not(.dark) thead th.div-sticky-col-2 {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .div-row-even td.div-sticky-col-1,
+html:not(.dark) .div-row-even td.div-sticky-col-2 {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .div-row-odd td.div-sticky-col-1,
+html:not(.dark) .div-row-odd td.div-sticky-col-2 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) tr.div-table-row:hover td.div-sticky-col-1,
+html:not(.dark) tr.div-table-row:hover td.div-sticky-col-2 {
+    background-color: #e0f2fe !important;
+}
+
+html:not(.dark) .div-sticky-col-2 {
+    border-right: 1px solid rgba(203, 213, 225, 0.9) !important;
+    box-shadow: 3px 0 8px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
